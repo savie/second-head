@@ -77,7 +77,21 @@ export default function App() {
       if (currentInput.startsWith('/image ')) {
         const prompt = currentInput.replace('/image ', '').trim();
         setLoadingText('Generate gambar...');
-        const imageUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=512&height=512&nologo=true';
+        const hfRes = await fetch('https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer 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',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ inputs: prompt }),
+});
+if (!hfRes.ok) throw new Error('HF Error: ' + await hfRes.text());
+const arrayBuffer = await hfRes.arrayBuffer();
+const bytes = new Uint8Array(arrayBuffer);
+let binary = '';
+for (let i = 0; i < bytes.byteLength; i++) { binary += String.fromCharCode(bytes[i]); }
+const base64 = btoa(binary);
+const imageUrl = 'data:image/png;base64,' + base64;
         setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: '', image: imageUrl }]);
       } else {
         setLoadingText('Lagi mikir...');
