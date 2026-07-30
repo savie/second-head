@@ -77,7 +77,7 @@ export default function App() {
       if (currentInput.startsWith('/image ')) {
         const prompt = currentInput.replace('/image ', '').trim();
         setLoadingText('Generate gambar...');
-        const hfRes = await fetch('https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev', {
+        const hfRes = await fetch('https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-dev', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer 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',
