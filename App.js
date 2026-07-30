@@ -1,18 +1,10 @@
 import { useState, useEffect } from 'react';
-import {
-  StyleSheet, Text, View, TextInput,
-  TouchableOpacity, FlatList, KeyboardAvoidingView,
-  Platform, ActivityIndicator, Image
-} from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SUPABASE_URL = 'https://fbiazqbrkwovzrirnzpb.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiaWF6cWJya3dvdnpyaXJuenBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMzgxNjUsImV4cCI6MjEwMDgxNDE2NX0.SZcO6PwXblTWReg_C7h5is45i9av63xxkeP3taSK0io';
-const HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': ANON_KEY,
-  'Authorization': \`Bearer \${ANON_KEY}\`,
-};
+const HEADERS = { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY };
 
 export default function App() {
   const [screen, setScreen] = useState('loading');
@@ -24,9 +16,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
 
-  useEffect(() => {
-    checkLogin();
-  }, []);
+  useEffect(() => { checkLogin(); }, []);
 
   const checkLogin = async () => {
     try {
@@ -34,11 +24,7 @@ export default function App() {
       if (saved) {
         const userData = JSON.parse(saved);
         setUser(userData);
-        setMessages([{
-          id: '1',
-          role: 'assistant',
-          content: \`Halo \${userData.name}! Gw Second Head. Ada yang bisa gw bantu?\`
-        }]);
+        setMessages([{ id: '1', role: 'assistant', content: 'Halo ' + userData.name + '! Gw Second Head. Ada yang bisa gw bantu?' }]);
         setScreen('chat');
       } else {
         setScreen('login');
@@ -52,7 +38,7 @@ export default function App() {
     if (!email.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch(\`\${SUPABASE_URL}/functions/v1/auth\`, {
+      const res = await fetch(SUPABASE_URL + '/functions/v1/auth', {
         method: 'POST',
         headers: HEADERS,
         body: JSON.stringify({ email: email.trim(), name: name.trim() }),
@@ -61,11 +47,7 @@ export default function App() {
       if (data.user) {
         await AsyncStorage.setItem('sh_user', JSON.stringify(data.user));
         setUser(data.user);
-        setMessages([{
-          id: '1',
-          role: 'assistant',
-          content: \`Halo \${data.user.name}! Gw Second Head. Ada yang bisa gw bantu?\`
-        }]);
+        setMessages([{ id: '1', role: 'assistant', content: 'Halo ' + data.user.name + '! Gw Second Head. Ada yang bisa gw bantu?' }]);
         setScreen('chat');
       } else {
         alert('Login gagal: ' + JSON.stringify(data));
@@ -86,48 +68,29 @@ export default function App() {
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
-    const userMsg = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input
-    };
+    const userMsg = { id: Date.now().toString(), role: 'user', content: input };
     setMessages(prev => [...prev, userMsg]);
     const currentInput = input;
     setInput('');
     setLoading(true);
-
     try {
       if (currentInput.startsWith('/image ')) {
         const prompt = currentInput.replace('/image ', '').trim();
         setLoadingText('Generate gambar...');
-        const encodedPrompt = encodeURIComponent(prompt);
-        const imageUrl = \`https://image.pollinations.ai/prompt/\${encodedPrompt}?width=512&height=512&nologo=true\`;
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: '',
-          image: imageUrl
-        }]);
+        const imageUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=512&height=512&nologo=true';
+        setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: '', image: imageUrl }]);
       } else {
         setLoadingText('Lagi mikir...');
-        const res = await fetch(\`\${SUPABASE_URL}/functions/v1/chat\`, {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/chat', {
           method: 'POST',
           headers: HEADERS,
           body: JSON.stringify({ user_id: user.id, message: currentInput }),
         });
         const data = await res.json();
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: data.reply || JSON.stringify(data)
-        }]);
+        setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: data.reply || JSON.stringify(data) }]);
       }
     } catch (e) {
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Error: ' + e.message
-      }]);
+      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: 'Error: ' + e.message }]);
     } finally {
       setLoading(false);
       setLoadingText('');
@@ -147,41 +110,17 @@ export default function App() {
       <View style={styles.loginScreen}>
         <Text style={styles.loginTitle}>Second Head</Text>
         <Text style={styles.loginSubtitle}>Personal AI Assistant</Text>
-        <TextInput
-          style={styles.loginInput}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Email lo"
-          placeholderTextColor="#555"
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.loginInput}
-          value={name}
-          onChangeText={setName}
-          placeholder="Nama lo (opsional)"
-          placeholderTextColor="#555"
-        />
-        <TouchableOpacity
-          style={styles.loginBtn}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading
-            ? <ActivityIndicator color="#000" />
-            : <Text style={styles.loginBtnText}>Masuk</Text>
-          }
+        <TextInput style={styles.loginInput} value={email} onChangeText={setEmail} placeholder="Email lo" placeholderTextColor="#555" keyboardType="email-address" autoCapitalize="none" />
+        <TextInput style={styles.loginInput} value={name} onChangeText={setName} placeholder="Nama lo (opsional)" placeholderTextColor="#555" />
+        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
+          {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.loginBtnText}>Masuk</Text>}
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Second Head</Text>
         <TouchableOpacity onPress={handleLogout}>
@@ -194,24 +133,11 @@ export default function App() {
         style={styles.chatArea}
         contentContainerStyle={{ padding: 12 }}
         renderItem={({ item }) => (
-          <View style={[
-            styles.bubble,
-            item.role === 'user' ? styles.userBubble : styles.aiBubble
-          ]}>
-            {item.image ? (
-              <Image
-                source={{ uri: item.image }}
-                style={styles.generatedImage}
-                resizeMode="contain"
-              />
-            ) : (
-              <Text style={[
-                styles.bubbleText,
-                item.role === 'user' && styles.userText
-              ]}>
-                {item.content}
-              </Text>
-            )}
+          <View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.aiBubble]}>
+            {item.image
+              ? <Image source={{ uri: item.image }} style={styles.generatedImage} resizeMode="contain" />
+              : <Text style={[styles.bubbleText, item.role === 'user' && styles.userText]}>{item.content}</Text>
+            }
           </View>
         )}
       />
@@ -222,14 +148,7 @@ export default function App() {
         </View>
       )}
       <View style={styles.inputArea}>
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Ketik pesan atau /image kucing..."
-          placeholderTextColor="#555"
-          multiline
-        />
+        <TextInput style={styles.input} value={input} onChangeText={setInput} placeholder="Ketik pesan atau /image kucing..." placeholderTextColor="#555" multiline />
         <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
           <Text style={styles.sendText}>➤</Text>
         </TouchableOpacity>
