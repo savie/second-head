@@ -66,7 +66,7 @@ export default function App() {
       }
     });
 
-    // Handle app resume dari background
+    // V2.0: Handle app resume dari background untuk memicu init_session
     const subscriptionAppState = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -83,6 +83,7 @@ export default function App() {
     };
   }, []);
 
+  // V2.0: Guarded init_session lifecycle
   const initSession = async (session) => {
     if (!session?.access_token) return;
     try {
@@ -98,6 +99,7 @@ export default function App() {
       const data = await res.json();
       if (data.opening) {
         setMessages(prev => {
+          // Prevent duplicate opening messages
           if (prev.some(m => m.id === 'session-opening')) return prev;
           return [...prev, {
             id: 'session-opening',
@@ -214,10 +216,11 @@ export default function App() {
         const prompt = currentInput.replace('/image ', '').trim();
         setLoadingText('Generate gambar...');
 
-        // Pollinations AI (Flux model for better stability)
+        // Fix Image Gen: Hapus model=flux (penyebab 500), hapus HEAD request, pakai default model
         const encodedPrompt = encodeURIComponent(prompt);
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&model=flux&seed=${Date.now()}`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${Date.now()}`;
 
+        // Langsung tampilkan gambar, biarkan Image component yang handle loading
         setMessages((prev) => [
           ...prev,
           {
@@ -245,6 +248,7 @@ export default function App() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Chat request failed');
 
+        // V2.0 compatibility
         const reply = data.response || data.reply;
         setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: reply || JSON.stringify(data) }]);
       }
@@ -302,6 +306,7 @@ export default function App() {
                   onLoad={() => console.log('Image loaded')}
                   onError={(e) => {
                     console.error('Image load error:', e.nativeEvent.error);
+                    // Fallback jika gambar gagal dimuat
                     setMessages(prev => prev.map(msg => msg.id === item.id ? { ...msg, content: 'Gagal memuat gambar. Coba prompt lain.', image: null } : msg));
                   }}
                 />
