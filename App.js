@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
   Image,
   AppState,
-  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
@@ -40,23 +39,18 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
   
-  // Ref untuk mencegah multiple init_session call saat mount
+  // Ref untuk mencegah multiple init_session call
   const hasInitializedSession = useRef(false);
 
   useEffect(() => {
     checkLogin();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         const userData = {
           id: session.user.id,
           email: session.user.email,
-          name:
-            session.user.user_metadata?.name ||
-            session.user.email?.split('@')[0] ||
-            'Owner',
+          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Owner',
         };
         setUser(userData);
         setScreen('chat');
@@ -72,7 +66,7 @@ export default function App() {
       }
     });
 
-    // Handle app state changes (resume dari background)
+    // Handle app resume dari background
     const subscriptionAppState = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -104,7 +98,6 @@ export default function App() {
       const data = await res.json();
       if (data.opening) {
         setMessages(prev => {
-          // Prevent duplicate opening messages
           if (prev.some(m => m.id === 'session-opening')) return prev;
           return [...prev, {
             id: 'session-opening',
@@ -121,34 +114,25 @@ export default function App() {
 
   const checkLogin = async () => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user) {
         const userData = {
           id: session.user.id,
           email: session.user.email,
-          name:
-            session.user.user_metadata?.name ||
-            session.user.email?.split('@')[0] ||
-            'Owner',
+          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Owner',
         };
         setUser(userData);
-        setMessages([
-          {
-            id: '1',
-            role: 'assistant',
-            content: 'Halo ' + userData.name + '! Gw Second Head. Ada yang bisa gw bantu?',
-          },
-        ]);
+        setMessages([{
+          id: '1',
+          role: 'assistant',
+          content: 'Halo ' + userData.name + '! Gw Second Head. Ada yang bisa gw bantu?',
+        }]);
         setScreen('chat');
-        
         hasInitializedSession.current = true;
         await initSession(session);
         return;
       }
-
       setScreen('login');
     } catch (e) {
       console.error('Session restore error:', e);
@@ -161,15 +145,9 @@ export default function App() {
       alert('Email dan password wajib diisi.');
       return;
     }
-
     setLoading(true);
-
     try {
-      let authResult = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password,
-      });
-
+      let authResult = await supabase.auth.signInWithPassword({ email: email.trim(), password: password });
       let { data, error } = authResult;
 
       if (error) {
@@ -177,23 +155,12 @@ export default function App() {
           const signUpResult = await supabase.auth.signUp({
             email: email.trim(),
             password: password,
-            options: {
-              data: {
-                name: name.trim() || email.trim().split('@')[0],
-              },
-            },
+            options: { data: { name: name.trim() || email.trim().split('@')[0] } },
           });
-
-          if (signUpResult.error) {
-            throw signUpResult.error;
-          }
-
+          if (signUpResult.error) throw signUpResult.error;
           data = signUpResult.data;
-
           if (!data.session) {
-            alert(
-              'Akun berhasil dibuat. Jika email confirmation aktif, silakan konfirmasi email terlebih dahulu.'
-            );
+            alert('Akun berhasil dibuat. Silakan konfirmasi email jika diminta.');
             return;
           }
         } else {
@@ -201,36 +168,20 @@ export default function App() {
         }
       }
 
-      if (!data?.user || !data?.session) {
-        throw new Error('Authentication session tidak tersedia.');
-      }
+      if (!data?.user || !data?.session) throw new Error('Authentication session tidak tersedia.');
 
       const authenticatedUser = data.user;
-
       setUser({
         id: authenticatedUser.id,
         email: authenticatedUser.email,
-        name:
-          authenticatedUser.user_metadata?.name ||
-          authenticatedUser.email?.split('@')[0] ||
-          'Owner',
+        name: authenticatedUser.user_metadata?.name || authenticatedUser.email?.split('@')[0] || 'Owner',
       });
-
-      setMessages([
-        {
-          id: '1',
-          role: 'assistant',
-          content:
-            'Halo ' +
-            (authenticatedUser.user_metadata?.name ||
-              authenticatedUser.email?.split('@')[0] ||
-              'Owner') +
-            '! Gw Second Head. Ada yang bisa gw bantu?',
-        },
-      ]);
-
+      setMessages([{
+        id: '1',
+        role: 'assistant',
+        content: 'Halo ' + (authenticatedUser.user_metadata?.name || authenticatedUser.email?.split('@')[0] || 'Owner') + '! Gw Second Head. Ada yang bisa gw bantu?',
+      }]);
       setScreen('chat');
-      
       hasInitializedSession.current = true;
       await initSession(data.session);
     } catch (error) {
@@ -251,11 +202,7 @@ export default function App() {
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
-    const userMsg = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input,
-    };
+    const userMsg = { id: Date.now().toString(), role: 'user', content: input };
     setMessages((prev) => [...prev, userMsg]);
 
     const currentInput = input;
@@ -265,53 +212,25 @@ export default function App() {
     try {
       if (currentInput.startsWith('/image ')) {
         const prompt = currentInput.replace('/image ', '').trim();
-        setLoadingText('Sedang generate gambar...');
+        setLoadingText('Generate gambar...');
 
-        // Encode prompt agar aman untuk URL (menggunakan encodeURIComponent standar)
+        // Pollinations AI (Flux model for better stability)
         const encodedPrompt = encodeURIComponent(prompt);
-        
-        // Menggunakan Pollinations AI dengan model Flux (lebih stabil untuk RN)
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${Date.now()}&model=flux`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&model=flux&seed=${Date.now()}`;
 
-        // Tambahkan pesan placeholder dulu
-        const imageMsgId = (Date.now() + 1).toString();
         setMessages((prev) => [
           ...prev,
           {
-            id: imageMsgId,
+            id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content: `Sedang memproses gambar untuk: "${prompt}"...`,
+            content: `Gambar "${prompt}" sedang diproses...`,
             image: imageUrl,
-            isImageLoading: true,
           },
         ]);
-
-        // Pre-fetch image untuk memastikan URL valid sebelum ditampilkan penuh
-        const response = await fetch(imageUrl, { method: 'HEAD' });
-        
-        if (!response.ok) {
-          throw new Error('Gagal menghubungi server gambar');
-        }
-
-        // Update pesan menjadi sukses (hilangkan status loading)
-        setMessages((prev) => 
-          prev.map(msg => 
-            msg.id === imageMsgId 
-              ? { ...msg, content: `Gambar "${prompt}" berhasil dibuat!`, isImageLoading: false } 
-              : msg
-          )
-        );
-
       } else {
         setLoadingText('Lagi mikir...');
-
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session) {
-          throw new Error('Session expired. Silakan login kembali.');
-        }
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('Session expired. Silakan login kembali.');
 
         const res = await fetch(SUPABASE_URL + '/functions/v1/chat', {
           method: 'POST',
@@ -320,40 +239,17 @@ export default function App() {
             apikey: ANON_KEY,
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({
-            action: 'chat',
-            message: currentInput,
-          }),
+          body: JSON.stringify({ action: 'chat', message: currentInput }),
         });
 
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Chat request failed');
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Chat request failed');
-        }
-
-        // V2 compatibility: backend mengembalikan 'response' atau 'reply'
         const reply = data.response || data.reply;
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: reply || JSON.stringify(data),
-          },
-        ]);
+        setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: reply || JSON.stringify(data) }]);
       }
     } catch (e) {
-      console.error('Error:', e);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'Error: ' + e.message,
-        },
-      ]);
+      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: 'Error: ' + e.message }]);
     } finally {
       setLoading(false);
       setLoadingText('');
@@ -373,59 +269,21 @@ export default function App() {
       <View style={styles.loginScreen}>
         <Text style={styles.loginTitle}>Second Head</Text>
         <Text style={styles.loginSubtitle}>Personal AI Assistant</Text>
-
-        <TextInput
-          style={styles.loginInput}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Email lo"
-          placeholderTextColor="#555"
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        <TextInput
-          style={styles.loginInput}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          placeholderTextColor="#555"
-          secureTextEntry
-        />
-
-        <TextInput
-          style={styles.loginInput}
-          value={name}
-          onChangeText={setName}
-          placeholder="Nama lo (opsional, untuk signup)"
-          placeholderTextColor="#555"
-        />
-
-        <TouchableOpacity
-          style={styles.loginBtn}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#000" />
-          ) : (
-            <Text style={styles.loginBtnText}>Masuk / Daftar</Text>
-          )}
+        <TextInput style={styles.loginInput} value={email} onChangeText={setEmail} placeholder="Email lo" placeholderTextColor="#555" keyboardType="email-address" autoCapitalize="none" />
+        <TextInput style={styles.loginInput} value={password} onChangeText={setPassword} placeholder="Password" placeholderTextColor="#555" secureTextEntry />
+        <TextInput style={styles.loginInput} value={name} onChangeText={setName} placeholder="Nama lo (opsional, untuk signup)" placeholderTextColor="#555" />
+        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
+          {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.loginBtnText}>Masuk / Daftar</Text>}
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Second Head</Text>
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logoutText}>Keluar</Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout}><Text style={styles.logoutText}>Keluar</Text></TouchableOpacity>
       </View>
 
       <FlatList
@@ -434,49 +292,28 @@ export default function App() {
         style={styles.chatArea}
         contentContainerStyle={{ padding: 12 }}
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.bubble,
-              item.role === 'user' ? styles.userBubble : styles.aiBubble,
-            ]}
-          >
+          <View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.aiBubble]}>
             {item.image ? (
               <View style={styles.imageContainer}>
-                {item.isImageLoading && (
-                  <View style={styles.imageLoadingOverlay}>
-                    <ActivityIndicator color="#00ff88" />
-                    <Text style={styles.imageLoadingText}>Memuat...</Text>
-                  </View>
-                )}
                 <Image
                   source={{ uri: item.image }}
                   style={styles.generatedImage}
                   resizeMode="contain"
+                  onLoad={() => console.log('Image loaded')}
                   onError={(e) => {
                     console.error('Image load error:', e.nativeEvent.error);
-                    // Jika gambar gagal dimuat, tampilkan teks error di dalam bubble
-                    item.content = 'Gagal memuat gambar. Coba prompt lain atau cek koneksi internet.';
-                    item.image = null; 
-                    // Force re-render (simple hack)
-                    setMessages(prev => [...prev]); 
+                    setMessages(prev => prev.map(msg => msg.id === item.id ? { ...msg, content: 'Gagal memuat gambar. Coba prompt lain.', image: null } : msg));
                   }}
                 />
               </View>
             ) : (
-              <Text
-                style={[
-                  styles.bubbleText,
-                  item.role === 'user' && styles.userText,
-                ]}
-              >
-                {item.content}
-              </Text>
+              <Text style={[styles.bubbleText, item.role === 'user' && styles.userText]}>{item.content}</Text>
             )}
           </View>
         )}
       />
 
-      {loading && !messages[messages.length - 1]?.isImageLoading && (
+      {loading && (
         <View style={styles.loadingRow}>
           <ActivityIndicator color="#00ff88" />
           <Text style={styles.loadingText}>{loadingText}</Text>
@@ -484,14 +321,7 @@ export default function App() {
       )}
 
       <View style={styles.inputArea}>
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Ketik pesan atau /image kucing..."
-          placeholderTextColor="#555"
-          multiline
-        />
+        <TextInput style={styles.input} value={input} onChangeText={setInput} placeholder="Ketik pesan atau /image kucing..." placeholderTextColor="#555" multiline />
         <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
           <Text style={styles.sendText}>➤</Text>
         </TouchableOpacity>
@@ -502,139 +332,28 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a' },
-  centerScreen: {
-    flex: 1,
-    backgroundColor: '#0a0a0a',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loginScreen: {
-    flex: 1,
-    backgroundColor: '#0a0a0a',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loginTitle: {
-    color: '#00ff88',
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  loginSubtitle: {
-    color: '#555',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  loginInput: {
-    backgroundColor: '#1a1a1a',
-    color: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  loginBtn: {
-    backgroundColor: '#00ff88',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
+  centerScreen: { flex: 1, backgroundColor: '#0a0a0a', justifyContent: 'center', alignItems: 'center' },
+  loginScreen: { flex: 1, backgroundColor: '#0a0a0a', justifyContent: 'center', padding: 24 },
+  loginTitle: { color: '#00ff88', fontSize: 32, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
+  loginSubtitle: { color: '#555', fontSize: 16, textAlign: 'center', marginBottom: 40 },
+  loginInput: { backgroundColor: '#1a1a1a', color: '#fff', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, marginBottom: 12, borderWidth: 1, borderColor: '#333' },
+  loginBtn: { backgroundColor: '#00ff88', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
   loginBtnText: { color: '#000', fontSize: 16, fontWeight: 'bold' },
-  header: {
-    backgroundColor: '#111',
-    padding: 16,
-    paddingTop: 48,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#00ff88',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
+  header: { backgroundColor: '#111', padding: 16, paddingTop: 48, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#00ff88', flexDirection: 'row', justifyContent: 'space-between' },
   headerText: { color: '#00ff88', fontSize: 20, fontWeight: 'bold' },
   logoutText: { color: '#555', fontSize: 13 },
   chatArea: { flex: 1 },
-  bubble: {
-    maxWidth: '85%',
-    padding: 12,
-    borderRadius: 16,
-    marginBottom: 8,
-  },
+  bubble: { maxWidth: '85%', padding: 12, borderRadius: 16, marginBottom: 8 },
   userBubble: { backgroundColor: '#00ff88', alignSelf: 'flex-end' },
-  aiBubble: {
-    backgroundColor: '#1a1a1a',
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#222',
-  },
+  aiBubble: { backgroundColor: '#1a1a1a', alignSelf: 'flex-start', borderWidth: 1, borderColor: '#222' },
   bubbleText: { color: '#eee', fontSize: 15, lineHeight: 22 },
   userText: { color: '#000' },
-  imageContainer: {
-    position: 'relative',
-    width: 250,
-    height: 250,
-    backgroundColor: '#222', // Warna background saat loading
-    borderRadius: 12,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imageLoadingOverlay: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  imageLoadingText: {
-    color: '#00ff88',
-    marginTop: 8,
-    fontSize: 12,
-  },
-  generatedImage: { 
-    width: '100%', 
-    height: '100%', 
-  },
-  loadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-    gap: 8,
-  },
+  imageContainer: { width: 250, height: 250, backgroundColor: '#222', borderRadius: 12, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
+  generatedImage: { width: '100%', height: '100%' },
+  loadingRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 8, gap: 8 },
   loadingText: { color: '#555', fontSize: 13 },
-  inputArea: {
-    flexDirection: 'row',
-    padding: 8,
-    backgroundColor: '#111',
-    alignItems: 'flex-end',
-    borderTopWidth: 1,
-    borderTopColor: '#222',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#1a1a1a',
-    color: '#fff',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 15,
-    maxHeight: 100,
-  },
-  sendBtn: {
-    backgroundColor: '#00ff88',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
+  inputArea: { flexDirection: 'row', padding: 8, backgroundColor: '#111', alignItems: 'flex-end', borderTopWidth: 1, borderTopColor: '#222' },
+  input: { flex: 1, backgroundColor: '#1a1a1a', color: '#fff', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, maxHeight: 100 },
+  sendBtn: { backgroundColor: '#00ff88', width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginLeft: 8 },
   sendText: { fontSize: 18 },
 });
