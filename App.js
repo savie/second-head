@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Image,
   AppState,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
@@ -264,21 +265,43 @@ export default function App() {
     try {
       if (currentInput.startsWith('/image ')) {
         const prompt = currentInput.replace('/image ', '').trim();
-        setLoadingText('Generate gambar...');
+        setLoadingText('Sedang generate gambar...');
 
-        // V2.0: Menggunakan Pollinations AI (mengatasi technical debt Hugging Face yang error)
-        const encodedPrompt = encodeURIComponent(prompt).replace(/'/g, '%27').replace(/"/g, '%22');
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${Date.now()}`;
+        // Encode prompt agar aman untuk URL (menggunakan encodeURIComponent standar)
+        const encodedPrompt = encodeURIComponent(prompt);
+        
+        // Menggunakan Pollinations AI dengan model Flux (lebih stabil untuk RN)
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${Date.now()}&model=flux`;
 
+        // Tambahkan pesan placeholder dulu
+        const imageMsgId = (Date.now() + 1).toString();
         setMessages((prev) => [
           ...prev,
           {
-            id: (Date.now() + 1).toString(),
+            id: imageMsgId,
             role: 'assistant',
-            content: 'Gambar berhasil dibuat!',
+            content: `Sedang memproses gambar untuk: "${prompt}"...`,
             image: imageUrl,
+            isImageLoading: true,
           },
         ]);
+
+        // Pre-fetch image untuk memastikan URL valid sebelum ditampilkan penuh
+        const response = await fetch(imageUrl, { method: 'HEAD' });
+        
+        if (!response.ok) {
+          throw new Error('Gagal menghubungi server gambar');
+        }
+
+        // Update pesan menjadi sukses (hilangkan status loading)
+        setMessages((prev) => 
+          prev.map(msg => 
+            msg.id === imageMsgId 
+              ? { ...msg, content: `Gambar "${prompt}" berhasil dibuat!`, isImageLoading: false } 
+              : msg
+          )
+        );
+
       } else {
         setLoadingText('Lagi mikir...');
 
@@ -322,6 +345,7 @@ export default function App() {
         ]);
       }
     } catch (e) {
+      console.error('Error:', e);
       setMessages((prev) => [
         ...prev,
         {
@@ -417,11 +441,27 @@ export default function App() {
             ]}
           >
             {item.image ? (
-              <Image
-                source={{ uri: item.image }}
-                style={styles.generatedImage}
-                resizeMode="contain"
-              />
+              <View style={styles.imageContainer}>
+                {item.isImageLoading && (
+                  <View style={styles.imageLoadingOverlay}>
+                    <ActivityIndicator color="#00ff88" />
+                    <Text style={styles.imageLoadingText}>Memuat...</Text>
+                  </View>
+                )}
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.generatedImage}
+                  resizeMode="contain"
+                  onError={(e) => {
+                    console.error('Image load error:', e.nativeEvent.error);
+                    // Jika gambar gagal dimuat, tampilkan teks error di dalam bubble
+                    item.content = 'Gagal memuat gambar. Coba prompt lain atau cek koneksi internet.';
+                    item.image = null; 
+                    // Force re-render (simple hack)
+                    setMessages(prev => [...prev]); 
+                  }}
+                />
+              </View>
             ) : (
               <Text
                 style={[
@@ -436,7 +476,7 @@ export default function App() {
         )}
       />
 
-      {loading && (
+      {loading && !messages[messages.length - 1]?.isImageLoading && (
         <View style={styles.loadingRow}>
           <ActivityIndicator color="#00ff88" />
           <Text style={styles.loadingText}>{loadingText}</Text>
@@ -534,7 +574,33 @@ const styles = StyleSheet.create({
   },
   bubbleText: { color: '#eee', fontSize: 15, lineHeight: 22 },
   userText: { color: '#000' },
-  generatedImage: { width: 250, height: 250, borderRadius: 12 },
+  imageContainer: {
+    position: 'relative',
+    width: 250,
+    height: 250,
+    backgroundColor: '#222', // Warna background saat loading
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageLoadingOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  imageLoadingText: {
+    color: '#00ff88',
+    marginTop: 8,
+    fontSize: 12,
+  },
+  generatedImage: { 
+    width: '100%', 
+    height: '100%', 
+  },
   loadingRow: {
     flexDirection: 'row',
     alignItems: 'center',
