@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
   Image,
+  AppState,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
@@ -37,6 +38,9 @@ export default function App() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
+  
+  // Ref untuk mencegah multiple init_session call saat mount
+  const hasInitializedSession = useRef(false);
 
   useEffect(() => {
     checkLogin();
@@ -55,16 +59,64 @@ export default function App() {
         };
         setUser(userData);
         setScreen('chat');
+        
+        if (!hasInitializedSession.current) {
+          hasInitializedSession.current = true;
+          initSession(session);
+        }
       } else {
         setUser(null);
         setScreen('login');
+        hasInitializedSession.current = false;
+      }
+    });
+
+    // Handle app state changes (resume dari background)
+    const subscriptionAppState = AppState.addEventListener('change', nextAppState => {
+      if (nextAppState === 'active') {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user) {
+            initSession(session);
+          }
+        });
       }
     });
 
     return () => {
       subscription.unsubscribe();
+      subscriptionAppState.remove();
     };
   }, []);
+
+  const initSession = async (session) => {
+    if (!session?.access_token) return;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': ANON_KEY,
+        },
+        body: JSON.stringify({ action: 'init_session' }),
+      });
+      const data = await res.json();
+      if (data.opening) {
+        setMessages(prev => {
+          // Prevent duplicate opening messages
+          if (prev.some(m => m.id === 'session-opening')) return prev;
+          return [...prev, {
+            id: 'session-opening',
+            role: 'assistant',
+            content: data.opening,
+            transient: true,
+          }];
+        });
+      }
+    } catch (e) {
+      console.log('init_session error:', e.message);
+    }
+  };
 
   const checkLogin = async () => {
     try {
@@ -90,6 +142,9 @@ export default function App() {
           },
         ]);
         setScreen('chat');
+        
+        hasInitializedSession.current = true;
+        await initSession(session);
         return;
       }
 
@@ -174,6 +229,9 @@ export default function App() {
       ]);
 
       setScreen('chat');
+      
+      hasInitializedSession.current = true;
+      await initSession(data.session);
     } catch (error) {
       alert('Login error: ' + error.message);
     } finally {
@@ -186,6 +244,7 @@ export default function App() {
     setUser(null);
     setMessages([]);
     setScreen('login');
+    hasInitializedSession.current = false;
   };
 
   const sendMessage = async () => {
@@ -207,35 +266,16 @@ export default function App() {
         const prompt = currentInput.replace('/image ', '').trim();
         setLoadingText('Generate gambar...');
 
-        const hfRes = await fetch(
-          'https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0',
-          {
-            method: 'POST',
-            headers: {
-              Authorization: 'Bearer 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',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ inputs: prompt }),
-          }
-        );
-
-        if (!hfRes.ok) throw new Error('HF Error: ' + (await hfRes.text()));
-
-        const arrayBuffer = await hfRes.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        const base64 = btoa(binary);
-        const imageUrl = 'data:image/png;base64,' + base64;
+        // V2.0: Menggunakan Pollinations AI (mengatasi technical debt Hugging Face yang error)
+        const encodedPrompt = encodeURIComponent(prompt).replace(/'/g, '%27').replace(/"/g, '%22');
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${Date.now()}`;
 
         setMessages((prev) => [
           ...prev,
           {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content: '',
+            content: 'Gambar berhasil dibuat!',
             image: imageUrl,
           },
         ]);
@@ -269,12 +309,15 @@ export default function App() {
           throw new Error(data.error || 'Chat request failed');
         }
 
+        // V2 compatibility: backend mengembalikan 'response' atau 'reply'
+        const reply = data.response || data.reply;
+
         setMessages((prev) => [
           ...prev,
           {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content: data.reply || JSON.stringify(data),
+            content: reply || JSON.stringify(data),
           },
         ]);
       }
