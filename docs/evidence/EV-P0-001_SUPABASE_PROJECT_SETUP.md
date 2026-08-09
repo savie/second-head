@@ -1,9 +1,13 @@
-# BL-P0-001 — Supabase Project Setup — Evidence Record
+# EV-P0-001 — SUPABASE PROJECT SETUP (BL-P0-001)
 
 Project: SECOND HEAD — SYSTEM BUILD
+Evidence ID: EV-P0-001
 Backlog Item: BL-P0-001 (Supabase Project Setup)
 AC Ref: AC-INFRA-01
+Phase: Phase 0
 Status: DONE / PASS (Owner-verified)
+Date: 2026-08-08
+Supabase Project: second-head (ref: pkhkgvsrqeupvwoqjwmd, region: ap-northeast-2)
 Evidence Type: Archive / Traceability
 Version: v1.0
 
