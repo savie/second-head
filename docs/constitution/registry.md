@@ -156,7 +156,7 @@ These are Owner-approved build-scope decisions, not additional Canonical §20 Co
 | DR-01 | Full SH Core Realization | Evolvable-Through-Governance | EVOLVABLE | BuildScope §32 D-01 | DESIGNED | v1.0 | BL-P1-001 |
 | DR-02 | SH Full as continuation of the journey (not restart) | Evolvable-Through-Governance | EVOLVABLE | BuildScope §32 D-02 | DESIGNED | v1.0 | BL-P1-001 |
 | DR-03 | V2.1 Status: Implementation Complete + Owner Ratified | Instance-Specific | EVOLVABLE | BuildScope §32 D-03 | IMPLEMENTED | v1.0 | BL-P1-001 |
-| DR-04 | Account Identity: 1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | BuildScope §32 D-04; Canonical §6.3; Contract §3 | NOT_YET_STARTED | v1.0 | BL-P1-001 |
+| DR-04 | Account Identity: 1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | BuildScope §32 D-04; Canonical §6.3; Contract §3 | PARTIALLY_IMPLEMENTED | v1.0 | BL-P1-002 |
 | DR-05 | Creator Authority (≠ Private Data Access) | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | BuildScope §32 D-05; Canonical §7.3 | NOT_YET_STARTED | v1.0 | BL-P1-001 |
 | DR-06 | Creator Privacy Boundary | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | BuildScope §32 D-06; Canonical §7.3; §25.5 | NOT_YET_STARTED | v1.0 | BL-P1-001 |
 | DR-07 | SH-000 as Creator's SH with privileged Core Governance capability | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | BuildScope §32 D-07; Canonical §8 | NOT_YET_STARTED | v1.0 | BL-P1-001 |
@@ -172,7 +172,7 @@ These are Owner-approved build-scope decisions, not additional Canonical §20 Co
 | DR-17 | Scope Coverage (full capability inclusion) | Evolvable-Through-Governance | EVOLVABLE | BuildScope §32 D-17; BuildScope §7 | DESIGNED | v1.0 | BL-P1-001 |
 | DR-18 | Creator-Immutability Boundary | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | BuildScope §32 D-18; Canonical §7.3; §25.5 | NOT_YET_STARTED | v1.0 | BL-P1-001 |
 
-**Notes:** DR-01, DR-02 and DR-17 are APPROVED scope decisions; `DESIGNED` means scope/design is set, not that they are Canonical. DR-03 records the stated V2.1 implementation/ratification state; it is an Instance-Specific registry record, not a new Core invariant. DR-08..DR-12 and DR-16 are deferred by phase sequencing. DR-13..DR-15 are active constraints.
+**Notes:** DR-01, DR-02 and DR-17 are APPROVED scope decisions; `DESIGNED` means scope/design is set, not that they are Canonical. DR-03 records the stated V2.1 implementation/ratification state; it is an Instance-Specific registry record, not a new Core invariant. DR-04 is `PARTIALLY_IMPLEMENTED` because BL-P1-002 implements the identity schema and its database-level 1:1:1 structural constraints, while identity creation flow, authorization/privacy enforcement, and identity resolution remain subsequent BL-P1 work. DR-08..DR-12 and DR-16 are deferred by phase sequencing. DR-13..DR-15 are active constraints.
 
 ## Category 4: Core Components (Canonical §6)
 
@@ -180,11 +180,11 @@ These are Owner-approved build-scope decisions, not additional Canonical §20 Co
 
 | element_id | element_name | constitution_class | immutability_class | authority_ref | implementation_status | version | change_ref |
 |---|---|---|---|---|---|---|---|
-| CC-01 | Fundamental Identity | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.1 | NOT_YET_STARTED | v1.0 | BL-P1-001 |
+| CC-01 | Fundamental Identity | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.1 | PARTIALLY_IMPLEMENTED | v1.0 | BL-P1-002 |
 | CC-02 | Core Philosophy | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.2 | CANONICAL | v1.0 | BL-P1-001 |
 | CC-03 | Core Principles and Invariants | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.3; §26 | CANONICAL | v1.0 | BL-P1-001 |
 | CC-04 | Governance | Evolvable-Through-Governance | EVOLVABLE | Canonical §6.4 | DEFERRED | v1.0 | BL-P1-001 |
-| CC-05 | Identity and Ownership | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.5 | NOT_YET_STARTED | v1.0 | BL-P1-001 |
+| CC-05 | Identity and Ownership | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.5 | PARTIALLY_IMPLEMENTED | v1.0 | BL-P1-002 |
 | CC-06 | Context | Evolvable-Through-Governance | EVOLVABLE | Canonical §6.6 | DEFERRED | v1.0 | BL-P1-001 |
 | CC-07 | Memory | Evolvable-Through-Governance | EVOLVABLE | Canonical §6.7 | DEFERRED | v1.0 | BL-P1-001 |
 | CC-08 | Knowledge | Evolvable-Through-Governance | EVOLVABLE | Canonical §6.8 | DEFERRED | v1.0 | BL-P1-001 |
@@ -193,7 +193,7 @@ These are Owner-approved build-scope decisions, not additional Canonical §20 Co
 | CC-11 | Continuity | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.11 | DEFERRED | v1.0 | BL-P1-001 |
 | CC-12 | Security and Persistence | Protected/Fundamental | UNRESOLVED_PENDING_OQ-02 | Canonical §6.12 | PARTIALLY_IMPLEMENTED | v1.0 | BL-P1-001 |
 
-**Notes:** Category 4 consists of canonical Core components. The §20 classification is an engineering mapping from the nature of each component to the four-class model; where the canonical text does not explicitly label the component's class, this registry must not be treated as having added canonical semantics.
+**Notes:** Category 4 consists of canonical Core components. The §20 classification is an engineering mapping from the nature of each component to the four-class model; where the canonical text does not explicitly label the component's class, this registry must not be treated as having added canonical semantics. CC-01 and CC-05 are marked `PARTIALLY_IMPLEMENTED` by BL-P1-002 because the identity/account/ownership schema has been implemented, while identity creation, privacy enforcement, resolution, and later continuity mechanisms remain outside BL-P1-002.
 
 ## Registry Summary
 
@@ -226,10 +226,10 @@ The zero `IMMUTABLE` count is deliberate and conservative. It does not mean Cano
 | IMPLEMENTED | 1 |
 | HARDENED | 0 |
 | IN_DEVELOPMENT | 0 |
-| PARTIALLY_IMPLEMENTED | 2 |
+| PARTIALLY_IMPLEMENTED | 5 |
 | DESIGNED | 3 |
 | DEFERRED | 13 |
-| NOT_YET_STARTED | 21 |
+| NOT_YET_STARTED | 18 |
 | OPEN | 10 |
 | ACTIVE_CONSTRAINT | 3 |
 | **Total** | **58** |
@@ -267,3 +267,4 @@ This file is the repository representation required by Execution Strategy §6.4.
 - OQ-02 remains OPEN.
 - `UNRESOLVED_PENDING_OQ-02` is an engineering/derived state only.
 - Canonical changes must be made through the Canonical governance process.
+- BL-P1-002 updates only the implementation realization state of the identity-related registry entries; it does not resolve OQ-02 or change canonical classifications.
