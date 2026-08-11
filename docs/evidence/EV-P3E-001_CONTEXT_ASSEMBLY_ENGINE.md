@@ -10,7 +10,7 @@ Domain: Phase 3E — Context
 
 ## Audit / Reconciliation
 
-Phase -1 mendefinisikan `BL-P3E-001` sebagai Context Assembly Engine dengan dependency Phase 3D DONE. filecite tidak digunakan di repository evidence. Source traceability: Phase -1 backlog.
+Phase -1 mendefinisikan `BL-P3E-001` sebagai Context Assembly Engine dengan dependency Phase 3D DONE. Source traceability: Phase -1 backlog.
 
 Audit actual DEV menunjukkan primitive yang dibutuhkan sudah tersedia:
 
