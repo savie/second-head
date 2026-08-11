@@ -141,7 +141,7 @@ The function does not use `SECURITY DEFINER` and does not weaken the existing ow
 Applied development migrations include:
 
 - `20260811170220_bounded_memory_retrieval`
-- `20260811170221_harden_bounded_memory_retrieval_grants`
+- `20260811170253_harden_bounded_memory_retrieval_grants`
 
 These migrations are also committed to the repository under:
 
