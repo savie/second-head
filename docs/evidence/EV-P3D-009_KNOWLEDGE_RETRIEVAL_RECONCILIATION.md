@@ -92,15 +92,17 @@ Final persistent synthetic residue:
 
 Migration:
 
-`database/migrations/20260812020000_p3d_009_knowledge_retrieval.sql`
+`database/migrations/20260811181519_p3d_009_knowledge_retrieval.sql`
+
+Supabase migration history version: `20260811181519` (`p3d_009_knowledge_retrieval`).
 
 Design:
 
 `docs/design/P3D_KNOWLEDGE_RETRIEVAL_v1.0.md`
 
-Commits:
+Relevant commits:
 
-- `0a8c9affb400843b11c2fb0ef80217acd8c2a981` — retrieval migration
+- `adb01dcb7f12400568ba628dfddc6f489fd21c24` — migration filename aligned with live Supabase migration history
 - `67feaba8d6c4237e604fa2d4b1184d95081f16ae` — retrieval design
 
 Evidence:
