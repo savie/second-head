@@ -1,12 +1,14 @@
 /**
- * P4E-001 — Tool Registry & DEFAULT DENY Enforcement
+ * P4E-001 / P4E-002 / P4E-003 — Tool execution boundary
  * Phase 4 — Runtime & Orchestration
  *
  * Minimal realization:
  * - available tools are explicitly registered;
  * - access is denied unless the caller supplies explicit authorization;
+ * - tool inputs are validated before invocation;
+ * - tool outputs are validated before downstream use;
  * - a tool is a capability, not an authority;
- * - registry lookup does not create or mutate SH identity/ownership.
+ * - validation does not create or mutate SH identity/ownership.
  */
 
 export type ToolRequest = Readonly<{
@@ -15,8 +17,14 @@ export type ToolRequest = Readonly<{
   input: unknown;
 }>;
 
+export type ToolSchema<T = unknown> = Readonly<{
+  validate: (value: unknown) => value is T;
+}>;
+
 export type ToolDefinition<TInput = unknown, TOutput = unknown> = Readonly<{
   id: string;
+  input_schema: ToolSchema<TInput>;
+  output_schema: ToolSchema<TOutput>;
   execute: (input: TInput) => Promise<TOutput>;
 }>;
 
@@ -65,7 +73,16 @@ export class ToolRegistry {
       throw new Error('TOOL_DENIED: explicit authorization is required');
     }
 
+    if (!tool.input_schema.validate(request.input)) {
+      throw new Error('TOOL_REJECTED: input schema validation failed');
+    }
+
     const output = await tool.execute(request.input);
+
+    if (!tool.output_schema.validate(output)) {
+      throw new Error('TOOL_REJECTED: output schema validation failed');
+    }
+
     return Object.freeze({
       tool_id: request.tool_id,
       output: output as TOutput,
