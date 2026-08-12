@@ -38,6 +38,8 @@ Primary invariant preserved:
 
 Continuity gaps are explicit and are not represented as perfect continuity.
 
+**Evidence:** `docs/evidence/EV-P5A-001_JOURNEY_CONTINUITY_GAP.md`
+
 ### P5B — Clone Boundary & Agreement
 
 Implemented:
@@ -56,6 +58,8 @@ Primary invariant preserved:
 `CLONE_SH != SOURCE_SH`
 
 The existing `sh_instances` uniqueness rule was respected: a clone is non-primary and is created for a distinct target account rather than silently replacing the source SH.
+
+**Evidence:** `docs/evidence/EV-P5B-001_CLONE_BOUNDARY_AGREEMENT.md`
 
 ### P5C — Inheritance, Legacy & Succession
 
@@ -81,6 +85,8 @@ Primary invariants preserved:
 
 Legacy does not imply automatic full private-memory access.
 
+**Evidence:** `docs/evidence/EV-P5C-001_INHERITANCE_LEGACY_SUCCESSION.md`
+
 ### P5D — Recovery, Backup & Portability
 
 Implemented:
@@ -103,6 +109,8 @@ Primary invariant preserved:
 
 Recovery validates the original `SH_ID` before restoration and records continuity outcome rather than silently replacing identity.
 
+**Evidence:** `docs/evidence/EV-P5D-001_RECOVERY_BACKUP_PORTABILITY.md`
+
 ### P5E — Invariant & Evidence Verification
 
 Implemented:
@@ -112,13 +120,15 @@ Implemented:
 - Phase 5 evidence/closure artifact;
 - final DEV and Supabase reconciliation.
 
+**Evidence Gate:** `docs/evidence/EV-P5E-001_PHASE5_INVARIANT_EVIDENCE_GATE.md`
+
 ## 3. Supabase Verification
 
 Verified on actual project `second-head`, branch `dev`:
 
 - all ten Phase 5 tables exist;
 - RLS is enabled on all ten Phase 5 public tables;
-- all seven Phase 5 runtime SQL functions exist;
+- Phase 5 runtime SQL functions are present;
 - persistent rows in all newly introduced Phase 5 tables = `0` at closure checkpoint.
 
 The zero-row state is expected: no persistent test residue was left in the DEV database.
@@ -135,11 +145,7 @@ Branch:
 
 `dev`
 
-Phase 5 closure artifact was committed at:
-
-`fb231ee5c1c7b4e48b1ca82faa53c2c286680994`
-
-A subsequent metadata correction to this closure artifact was performed without changing implementation scope.
+Phase 5 closure artifact and per-slice evidence artifacts are committed on `dev`.
 
 Phase 5 implementation artifacts are present under:
 
@@ -150,6 +156,7 @@ Phase 5 implementation artifacts are present under:
 - `runtime/p5d/`
 - `runtime/p5e/`
 - `docs/phase5/`
+- `docs/evidence/`
 
 ## 5. Verification Level
 
@@ -164,6 +171,12 @@ The five vertical slices have implementation artifacts and contract-level tests.
 **PASS**
 
 Phase 5 schema, RLS state, functions, and zero persistent test residue were directly verified on Supabase DEV.
+
+### Evidence Artifact Coverage
+
+**PASS**
+
+Each Phase 5 slice now has a dedicated evidence artifact, and P5E records the cross-slice evidence gate.
 
 ### Application / API / UI E2E
 
@@ -194,6 +207,8 @@ P5B  COMPLETE / DEV
 P5C  COMPLETE / DEV
 P5D  COMPLETE / DEV
 P5E  COMPLETE / DEV
+
+EVIDENCE COVERAGE = COMPLETE FOR IMPLEMENTATION/DEV BOUNDARY
 
 PHASE 5 = CLOSED WITH DEFERRED ASSURANCE
 ```
