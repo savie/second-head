@@ -1,12 +1,16 @@
 /**
- * P4B-001 — Reasoning Context Integration & Isolation
+ * P4B-001 / P4B-002 — Reasoning Context Boundary + Evidence Logging
+ * Phase 4 — Runtime & Orchestration
  *
  * Minimal realization:
  * - reasoning consumes the assembled RuntimeContext;
  * - reasoning has no Memory/Knowledge write dependency;
  * - reasoning does not mutate the supplied context;
- * - model remains an injected execution dependency and is not SH identity.
+ * - model remains an injected execution dependency and is not SH identity;
+ * - each reasoning cycle can emit bounded audit evidence without persisting raw context.
  */
+
+import type { RuntimeAuditEvent, RuntimeAuditSink } from '../p4a/runtime_audit_persistence.ts';
 
 export type ReasoningContext = Readonly<{
   identity: Readonly<{ sh_id: string }>;
@@ -26,6 +30,10 @@ export interface ReasoningModelExecutor {
   generate(context: ReasoningContext): Promise<ReasoningResult>;
 }
 
+export interface ReasoningEvidenceSink {
+  append(event: RuntimeAuditEvent): Promise<void>;
+}
+
 export interface ReasoningEngine {
   process(request: ReasoningRequest): Promise<ReasoningResult>;
 }
@@ -42,14 +50,73 @@ function isolateContext(context: ReasoningContext): ReasoningContext {
   });
 }
 
+function boundedHash(input: unknown): string {
+  const serialized = JSON.stringify(input) ?? 'null';
+  let hash = 2166136261;
+  for (let index = 0; index < serialized.length; index += 1) {
+    hash ^= serialized.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
 /**
  * Reasoning boundary. No memory/knowledge mutation capability is exposed here.
+ * Evidence records bounded hashes/metadata rather than raw context or model output.
  */
-export function createReasoningEngine(model: ReasoningModelExecutor): ReasoningEngine {
+export function createReasoningEngine(
+  model: ReasoningModelExecutor,
+  evidence?: ReasoningEvidenceSink,
+): ReasoningEngine {
   return {
     async process(request) {
       const isolated = isolateContext(request.context);
-      return model.generate(isolated);
+      const evidenceBase = {
+        sh_id: isolated.identity.sh_id,
+        account_id: isolated.identity.sh_id,
+        event_type: 'RUNTIME_RESPONSE' as const,
+        metadata: {
+          stage: 'reasoning',
+          evidence_version: 'P4B-002.v1',
+          context_hash: boundedHash(isolated),
+          context_entry_count: isolated.entries.length,
+        },
+      };
+
+      await evidence?.append({
+        ...evidenceBase,
+        status: 'SUCCESS',
+        metadata: { ...evidenceBase.metadata, phase: 'MODEL_INPUT' },
+      });
+
+      try {
+        const result = await model.generate(isolated);
+        await evidence?.append({
+          ...evidenceBase,
+          status: 'SUCCESS',
+          metadata: {
+            ...evidenceBase.metadata,
+            phase: 'MODEL_OUTPUT',
+            output_hash: boundedHash(result.output),
+          },
+        });
+        return result;
+      } catch (error) {
+        await evidence?.append({
+          ...evidenceBase,
+          status: 'FAILED',
+          metadata: {
+            ...evidenceBase.metadata,
+            phase: 'MODEL_OUTPUT',
+            error_type: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+          },
+        });
+        throw error;
+      }
     },
   };
+}
+
+export function createReasoningEvidenceSink(sink: RuntimeAuditSink): ReasoningEvidenceSink {
+  return sink;
 }
