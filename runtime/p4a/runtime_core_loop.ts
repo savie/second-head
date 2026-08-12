@@ -1,5 +1,5 @@
 /**
- * BL-P4A-001 / BL-P4A-002 — Runtime Core Loop + SH Identity & State Resolution
+ * BL-P4A-001 / BL-P4A-002 / P4B-001 — Runtime Core Loop + SH Identity & Reasoning Context Boundary
  * Phase 4 — Runtime & Orchestration
  *
  * Minimal realization only.
@@ -9,11 +9,13 @@
  * - identity is resolved, never created by runtime
  * - request-scoped runtime state is resolved from the existing identity
  * - context assembly is read-only from the runtime's perspective
- * - model provider is an adapter, not SH identity
- * - memory decision is post-response and outside context assembly
+ * - reasoning consumes isolated context and has no memory/knowledge mutation capability
+ * - model provider is an adapter/execution dependency, not SH identity
+ * - memory decision is post-response and outside context assembly/reasoning context
  */
 
 import { resolveRuntimeIdentityAndState, type RuntimeIdentity } from './identity_state_resolution.ts';
+import type { ReasoningEngine } from '../p4b/reasoning_context.ts';
 
 export type RuntimeInput = {
   user_message: string;
@@ -60,6 +62,7 @@ export type RuntimeDependencies = {
   contextAssembler: ContextAssembler;
   modelAdapter: ModelAdapter;
   memoryDecision: MemoryDecisionSink;
+  reasoningEngine?: ReasoningEngine;
 };
 
 export type RuntimeResult = {
@@ -70,7 +73,11 @@ export type RuntimeResult = {
 /**
  * Executes the smallest valid SH runtime path:
  * auth.uid -> resolve existing identity/state -> read-only context assembly
- * -> model adapter -> response -> post-response memory decision.
+ * -> reasoning boundary -> model execution -> response -> post-response memory decision.
+ *
+ * `modelAdapter` remains the compatibility/default execution dependency until P4D.
+ * When `reasoningEngine` is supplied, the model call is routed through P4B's
+ * isolated reasoning-context boundary.
  */
 export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
   return async function run(input: RuntimeInput): Promise<RuntimeResult> {
@@ -92,10 +99,13 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
       user_message: input.user_message,
     });
 
-    // The model is replaceable infrastructure. It does not own SH identity.
-    const modelResponse = await deps.modelAdapter.generate(context);
+    // Reasoning is a separate boundary. It receives isolated context and does not
+    // receive memory/knowledge mutation capabilities.
+    const modelResponse = deps.reasoningEngine
+      ? await deps.reasoningEngine.process({ context })
+      : await deps.modelAdapter.generate(context);
 
-    // Memory decision is post-response; it is not part of context assembly.
+    // Memory decision is post-response; it is not part of context assembly/reasoning.
     await deps.memoryDecision.decide({
       identity,
       user_message: input.user_message,
