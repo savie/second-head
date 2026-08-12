@@ -10,8 +10,6 @@
  * - each reasoning cycle can emit bounded audit evidence without persisting raw context.
  */
 
-import type { RuntimeAuditEvent, RuntimeAuditSink } from '../p4a/runtime_audit_persistence.ts';
-
 export type ReasoningContext = Readonly<{
   identity: Readonly<{ sh_id: string }>;
   user_message: string;
@@ -26,12 +24,19 @@ export type ReasoningResult = Readonly<{
   output: unknown;
 }>;
 
+export type ReasoningEvidence = Readonly<{
+  sh_id: string;
+  event_type: 'RUNTIME_RESPONSE';
+  status: 'SUCCESS' | 'FAILED';
+  metadata: Readonly<Record<string, unknown>>;
+}>;
+
 export interface ReasoningModelExecutor {
   generate(context: ReasoningContext): Promise<ReasoningResult>;
 }
 
 export interface ReasoningEvidenceSink {
-  append(event: RuntimeAuditEvent): Promise<void>;
+  append(event: ReasoningEvidence): Promise<void>;
 }
 
 export interface ReasoningEngine {
@@ -73,7 +78,6 @@ export function createReasoningEngine(
       const isolated = isolateContext(request.context);
       const evidenceBase = {
         sh_id: isolated.identity.sh_id,
-        account_id: isolated.identity.sh_id,
         event_type: 'RUNTIME_RESPONSE' as const,
         metadata: {
           stage: 'reasoning',
@@ -115,8 +119,4 @@ export function createReasoningEngine(
       }
     },
   };
-}
-
-export function createReasoningEvidenceSink(sink: RuntimeAuditSink): ReasoningEvidenceSink {
-  return sink;
 }
