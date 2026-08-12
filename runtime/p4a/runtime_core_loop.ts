@@ -18,6 +18,7 @@
 import { resolveRuntimeIdentityAndState, type RuntimeIdentity } from './identity_state_resolution.ts';
 import type { ReasoningEngine } from '../p4b/reasoning_context.ts';
 import { createReasoningSecurityBoundary, type ReasoningSecurityEventSink } from '../p4b/reasoning_security.ts';
+import { createModelExecutor, type ModelAdapter } from '../p4d/model_abstraction.ts';
 
 export type RuntimeInput = {
   user_message: string;
@@ -32,10 +33,6 @@ export type RuntimeContext = {
   entries: readonly unknown[];
 };
 
-export type ModelResponse = {
-  output: unknown;
-};
-
 export interface IdentityResolver {
   resolve(authUid: string): Promise<ResolvedIdentity | null>;
 }
@@ -45,10 +42,6 @@ export interface ContextAssembler {
     identity: ResolvedIdentity;
     user_message: string;
   }): Promise<RuntimeContext>;
-}
-
-export interface ModelAdapter {
-  generate(context: RuntimeContext): Promise<ModelResponse>;
 }
 
 export interface MemoryDecisionSink {
@@ -76,17 +69,18 @@ export type RuntimeResult = {
 /**
  * Executes the smallest valid SH runtime path:
  * auth.uid -> resolve existing identity/state -> read-only context assembly
- * -> reasoning security boundary -> isolated reasoning -> model execution
+ * -> reasoning security boundary -> model execution
  * -> response -> post-response memory decision.
  *
- * `modelAdapter` remains the compatibility/default execution dependency until P4D.
- * When `reasoningEngine` is supplied, it is automatically wrapped by the P4B-003
- * security boundary before it receives contextual data.
+ * The model dependency crosses the P4D abstraction boundary. Runtime does not
+ * know which provider/SDK implements the adapter, and no model operation can
+ * mutate or create SH identity.
  */
 export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
   const secureReasoning = deps.reasoningEngine
     ? createReasoningSecurityBoundary(deps.reasoningEngine, deps.reasoningSecurityEvents)
     : undefined;
+  const model = createModelExecutor(deps.modelAdapter);
 
   return async function run(input: RuntimeInput): Promise<RuntimeResult> {
     if (!input.user_message.trim()) {
@@ -98,23 +92,17 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
       input.auth_uid,
     );
 
-    // Runtime state is request-scoped resolution state. It is not persisted here.
     const identity = resolved.identity;
 
-    // Context assembly is deliberately a read-only dependency from runtime.
     const context = await deps.contextAssembler.assemble({
       identity,
       user_message: input.user_message,
     });
 
-    // Reasoning is a separate boundary. It receives isolated context and does not
-    // receive memory/knowledge mutation capabilities. P4B-003 additionally
-    // prevents contextual/external content from becoming authority.
     const modelResponse = secureReasoning
       ? await secureReasoning.process({ context })
-      : await deps.modelAdapter.generate(context);
+      : await model.execute({ capability: 'text', context });
 
-    // Memory decision is post-response; it is not part of context assembly/reasoning.
     await deps.memoryDecision.decide({
       identity,
       user_message: input.user_message,
