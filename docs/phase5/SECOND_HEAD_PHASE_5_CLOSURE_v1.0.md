@@ -5,8 +5,6 @@
 **Canonical status:** NON-CANONICAL  
 **Execution branch:** `dev`
 
----
-
 ## 1. Closure Basis
 
 Phase 5 was executed as the reconciled five-slice sequence:
@@ -18,8 +16,6 @@ P5A → verify → P5B → verify → P5C → verify → P5D → verify → P5E
 The execution used the existing Second Head identity, ownership, governance, memory, knowledge, conversation, and audit foundations rather than recreating them.
 
 No canonical, Frozen Baseline, or fundamental architecture mutation was made.
-
----
 
 ## 2. Implemented Slices
 
@@ -116,8 +112,6 @@ Implemented:
 - Phase 5 evidence/closure artifact;
 - final DEV and Supabase reconciliation.
 
----
-
 ## 3. Supabase Verification
 
 Verified on actual project `second-head`, branch `dev`:
@@ -131,8 +125,6 @@ The zero-row state is expected: no persistent test residue was left in the DEV d
 
 `private.authority_assignments` RLS OFF remains the previously reconciled intentional internal governance condition and was not modified by Phase 5.
 
----
-
 ## 4. GitHub Verification
 
 Actual repository:
@@ -143,9 +135,11 @@ Branch:
 
 `dev`
 
-Closure HEAD at this checkpoint:
+Phase 5 closure artifact was committed at:
 
-`80665efed705a91443e1c0523b1c61c6f8fcedd3`
+`fb231ee5c1c7b4e48b1ca82faa53c2c286680994`
+
+A subsequent metadata correction to this closure artifact was performed without changing implementation scope.
 
 Phase 5 implementation artifacts are present under:
 
@@ -156,8 +150,6 @@ Phase 5 implementation artifacts are present under:
 - `runtime/p5d/`
 - `runtime/p5e/`
 - `docs/phase5/`
-
----
 
 ## 5. Verification Level
 
@@ -181,8 +173,6 @@ This execution environment did not establish full application/API/UI end-to-end 
 
 Therefore this closure does **not** claim full product E2E PASS.
 
----
-
 ## 6. Deferred Assurance
 
 The following remain assurance items rather than Phase 5 implementation failures:
@@ -195,8 +185,6 @@ The following remain assurance items rather than Phase 5 implementation failures
 - broader external-action integration.
 
 These items do not reopen the completed implementation slices unless later verification finds regression, security/privacy violation, identity/ownership invariant violation, or invalid evidence.
-
----
 
 ## 7. Final Phase 5 Result
 
@@ -212,8 +200,6 @@ PHASE 5 = CLOSED WITH DEFERRED ASSURANCE
 
 No Phase 5 backlog remains active for the implementation boundary covered by this closure.
 
----
-
 ## 8. Non-Changes
 
 The following were intentionally not changed:
@@ -228,8 +214,6 @@ The following were intentionally not changed:
 - Phase 4 implementation.
 
 Historical repository terminology may still contain older `SH Full` / `SH Lite` wording. Current working terminology remains **Second Head / SH**.
-
----
 
 ## 9. Closure Rule
 
