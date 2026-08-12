@@ -1,6 +1,6 @@
 import { executeWorkflow } from "./workflow_execution";
 
-describe("P4C-002 workflow execution", () => {
+describe("P4C workflow execution", () => {
   it("executes a finite workflow and records step/completion events", async () => {
     const result = await executeWorkflow(
       "wf-001",
@@ -52,5 +52,64 @@ describe("P4C-002 workflow execution", () => {
     expect(result.completedSteps).toEqual(["step-1"]);
     expect(executed).toEqual(["step-1", "step-2"]);
     expect(result.error).toBe("step failure");
+  });
+
+  it("cancels before a subsequent step starts", async () => {
+    const controller = new AbortController();
+    const executed: string[] = [];
+    const result = await executeWorkflow("wf-003", [
+      {
+        id: "step-1",
+        run: async () => {
+          executed.push("step-1");
+          controller.abort(new Error("user cancelled"));
+          return "ok";
+        },
+      },
+      {
+        id: "step-2",
+        run: async () => {
+          executed.push("step-2");
+          return "must-not-run";
+        },
+      },
+    ], undefined, { signal: controller.signal });
+
+    expect(result.status).toBe("CANCELLED");
+    expect(result.completedSteps).toEqual([]);
+    expect(executed).toEqual(["step-1"]);
+    expect(result.events.at(-1)?.type).toBe("WORKFLOW_CANCELLED");
+  });
+
+  it("cancels on timeout and does not start later steps", async () => {
+    const executed: string[] = [];
+    const result = await executeWorkflow("wf-004", [
+      {
+        id: "step-1",
+        run: async (signal) => {
+          executed.push("step-1");
+          await new Promise<void>((resolve) => {
+            const timer = setTimeout(resolve, 20);
+            signal?.addEventListener("abort", () => {
+              clearTimeout(timer);
+              resolve();
+            }, { once: true });
+          });
+          return "ok";
+        },
+      },
+      {
+        id: "step-2",
+        run: async () => {
+          executed.push("step-2");
+          return "must-not-run";
+        },
+      },
+    ], undefined, { timeoutMs: 1 });
+
+    expect(result.status).toBe("CANCELLED");
+    expect(executed).toEqual(["step-1"]);
+    expect(result.events.at(-1)?.type).toBe("WORKFLOW_CANCELLED");
+    expect(result.error).toBe("workflow timeout");
   });
 });
