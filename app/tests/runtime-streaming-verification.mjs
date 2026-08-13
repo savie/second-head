@@ -42,5 +42,23 @@ while (true) {
 
 if (!raw.includes('event: token')) throw new Error('Missing token event');
 if (!raw.includes('event: complete')) throw new Error('Missing complete event');
-if (!raw.includes('streaming verification')) throw new Error('Missing streamed response content');
-console.log(JSON.stringify({ status: 'PASS', content_type: contentType, token_event: true, complete_event: true }, null, 2));
+
+const tokenPayloads = raw
+  .split('\n\n')
+  .filter((block) => block.includes('event: token'))
+  .map((block) => block.split('\n').find((line) => line.startsWith('data: '))?.slice(6))
+  .filter(Boolean)
+  .map((data) => JSON.parse(data));
+
+if (tokenPayloads.length === 0) throw new Error('Missing token payload');
+if (!tokenPayloads.some((payload) => typeof payload.text === 'string' && payload.text.length > 0)) {
+  throw new Error('Missing non-empty streamed token content');
+}
+
+console.log(JSON.stringify({
+  status: 'PASS',
+  content_type: contentType,
+  token_event: true,
+  token_payloads: tokenPayloads.length,
+  complete_event: true,
+}, null, 2));
