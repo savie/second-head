@@ -39,8 +39,8 @@ jobs:
 
       - name: Verify authenticated runtime response
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SH_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SH_SUPABASE_ANON_KEY }}
           SH_TEST_EMAIL: ${{ secrets.SH_TEST_EMAIL }}
           SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
         run: node tests/runtime-invocation-verification.mjs
