@@ -12,6 +12,7 @@ type RuntimeStreamEvent =
 export async function streamSHRuntime(
   userMessage: string,
   onEvent: (event: RuntimeStreamEvent) => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   const message = userMessage.trim();
   if (!message) throw new Error('Runtime request requires a non-empty user message');
@@ -29,6 +30,7 @@ export async function streamSHRuntime(
       Accept: 'text/event-stream',
     },
     body: JSON.stringify({ user_message: message, stream: true }),
+    signal,
   });
 
   if (!response.ok) {
