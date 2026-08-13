@@ -7,6 +7,7 @@ on:
     paths:
       - 'app/**'
       - '.github/workflows/sh-app-chat-verification.yml'
+      - 'docs/evidence/EV-APP-005_CHAT_REQUEST_RESPONSE_VERTICAL_SLICE.md'
 
 jobs:
   app-chat-verification:
@@ -35,3 +36,11 @@ jobs:
 
       - name: Verify chat request response contract
         run: node tests/chat-request-response-contract.mjs
+
+      - name: Verify authenticated runtime response
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SH_TEST_EMAIL: ${{ secrets.SH_TEST_EMAIL }}
+          SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
+        run: node tests/runtime-invocation-verification.mjs
