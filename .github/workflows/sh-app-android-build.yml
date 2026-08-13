@@ -41,11 +41,18 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Expo prebuild
+      - name: Generate Android native project
         run: npx expo prebuild --platform android --non-interactive
 
+      - name: Verify generated Gradle project
+        run: |
+          test -f android/settings.gradle || test -f android/settings.gradle.kts
+          test -x android/gradlew
+
       - name: Build Android debug APK
-        run: ./android/gradlew assembleDebug --no-daemon
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
