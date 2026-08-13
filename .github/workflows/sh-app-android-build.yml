@@ -45,10 +45,12 @@ jobs:
         run: npm run typecheck
 
       - name: Generate clean Android native project
-        run: npx expo prebuild --clean --platform android --non-interactive
+        env:
+          CI: 1
+        run: npx expo prebuild --clean --platform android
 
       - name: Verify Expo autolinking
-        run: npx expo-modules-autolinking verify 
+        run: npx expo-modules-autolinking verify
 
       - name: Verify generated Gradle project
         run: |
