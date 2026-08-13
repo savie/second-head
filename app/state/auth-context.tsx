@@ -54,8 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
       });
 
-    const { data } = onAuthStateChange((_event, nextSession) => {
-      void bootstrap(nextSession);
+    const { data } = onAuthStateChange(async (_event, nextSession) => {
+      await bootstrap(nextSession);
     });
 
     return () => {
