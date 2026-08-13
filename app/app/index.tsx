@@ -1,5 +1,5 @@
 import { ActivityIndicator, Button, Text, View } from 'react-native';
-import { Redirect } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useAuth } from '../state/auth-context';
 
 export default function HomeScreen() {
@@ -27,6 +27,7 @@ export default function HomeScreen() {
       <Text>Authenticated.</Text>
       <Text>Account: {context.account.account_id}</Text>
       <Text>SH instances: {context.shInstances.length}</Text>
+      <Button title="Runtime verification" onPress={() => router.push('/runtime-test')} />
       <Button title="Sign out" onPress={() => void logout()} />
     </View>
   );
