@@ -44,3 +44,11 @@ jobs:
           SH_TEST_EMAIL: ${{ secrets.SH_TEST_EMAIL }}
           SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
         run: node tests/runtime-invocation-verification.mjs
+
+      - name: Verify authenticated runtime streaming
+        env:
+          SH_SUPABASE_URL: ${{ secrets.SH_SUPABASE_URL }}
+          SH_SUPABASE_ANON_KEY: ${{ secrets.SH_SUPABASE_ANON_KEY }}
+          SH_TEST_EMAIL: ${{ secrets.SH_TEST_EMAIL }}
+          SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
+        run: node tests/runtime-streaming-verification.mjs
