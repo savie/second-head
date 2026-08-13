@@ -142,13 +142,10 @@ export default function ChatScreen() {
       }
 
       if (mountedRef.current) {
-        setSending(false);
-
-        if (lifecycleState !== 'background') {
-          setLifecycleState((current) =>
-            current === 'streaming' ? 'idle' : current,
-          );
-        }
+      setSending(false);
+      setLifecycleState((current) =>
+        current === 'streaming' ? 'idle' : current,
+        );
       }
     }
   }
