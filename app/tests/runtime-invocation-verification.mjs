@@ -18,46 +18,43 @@ const headers = {
 const signIn = await fetch(`${base}/auth/v1/token?grant_type=password`, {
   method: 'POST',
   headers,
-  body: JSON.stringify({
-    email: process.env.SH_TEST_EMAIL,
-    password: process.env.SH_TEST_PASSWORD,
-  }),
+  body: JSON.stringify({ email: process.env.SH_TEST_EMAIL, password: process.env.SH_TEST_PASSWORD }),
 });
-
 if (!signIn.ok) throw new Error(`AUTH_SIGN_IN_FAILED ${signIn.status}: ${await signIn.text()}`);
 const auth = await signIn.json();
 if (!auth.access_token || !auth.user?.id) throw new Error('AUTH_SESSION_INVALID');
 
 const runtimeResponse = await fetch(`${base}/functions/v1/runtime-p4a-001`, {
   method: 'POST',
-  headers: {
-    ...headers,
-    Authorization: `Bearer ${auth.access_token}`,
-  },
+  headers: { ...headers, Authorization: `Bearer ${auth.access_token}` },
   body: JSON.stringify({ user_message: 'SH runtime controlled verification' }),
 });
-
-if (!runtimeResponse.ok) {
-  throw new Error(`RUNTIME_INVOCATION_FAILED ${runtimeResponse.status}: ${await runtimeResponse.text()}`);
-}
-
+if (!runtimeResponse.ok) throw new Error(`RUNTIME_INVOCATION_FAILED ${runtimeResponse.status}: ${await runtimeResponse.text()}`);
 const payload = await runtimeResponse.json();
-if (typeof payload.sh_id !== 'string' || typeof payload.response !== 'string') {
-  throw new Error(`RUNTIME_RESPONSE_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
-}
-if (payload.response !== 'SH runtime controlled verification') {
-  throw new Error(`RUNTIME_ECHO_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
-}
-if (payload.meta?.phase !== 'P4A-001' || payload.meta?.model_provider !== 'mock') {
-  throw new Error(`RUNTIME_META_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
-}
+if (typeof payload.sh_id !== 'string' || typeof payload.response !== 'string') throw new Error(`RUNTIME_RESPONSE_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+if (payload.response !== 'SH runtime controlled verification') throw new Error(`RUNTIME_ECHO_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+if (payload.meta?.phase !== 'P4A-001' || payload.meta?.model_provider !== 'mock') throw new Error(`RUNTIME_META_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+
+const { data: context, error: contextError } = await (await import('@supabase/supabase-js')).createClient(base, process.env.SUPABASE_ANON_KEY, {
+  global: { headers: { Authorization: `Bearer ${auth.access_token}` } },
+}).rpc('assemble_context', { p_sh_id: payload.sh_id, p_query_text: 'context verification', p_memory_limit: 5, p_knowledge_limit: 5 });
+if (contextError) throw new Error(`CONTEXT_ASSEMBLY_FAILED: ${contextError.message}`);
+if (!context || !Array.isArray(context.memory) || !Array.isArray(context.knowledge)) throw new Error(`CONTEXT_RESPONSE_ASSERTION_FAILED: ${JSON.stringify(context)}`);
+
+const contextClient = (await import('@supabase/supabase-js')).createClient(base, process.env.SUPABASE_ANON_KEY, {
+  global: { headers: { Authorization: `Bearer ${auth.access_token}` } },
+});
+const { data: journey, error: journeyError } = await contextClient
+  .from('journey_events')
+  .select('event_id,sh_id,event_type,continuity_status')
+  .eq('sh_id', payload.sh_id)
+  .limit(10);
+if (journeyError) throw new Error(`JOURNEY_RETRIEVAL_FAILED: ${journeyError.message}`);
+if (!Array.isArray(journey)) throw new Error('JOURNEY_RESPONSE_ASSERTION_FAILED');
 
 const signOut = await fetch(`${base}/auth/v1/logout`, {
   method: 'POST',
-  headers: {
-    ...headers,
-    Authorization: `Bearer ${auth.access_token}`,
-  },
+  headers: { ...headers, Authorization: `Bearer ${auth.access_token}` },
 });
 if (!signOut.ok) throw new Error(`AUTH_SIGN_OUT_FAILED ${signOut.status}: ${await signOut.text()}`);
 
@@ -68,9 +65,11 @@ console.log(JSON.stringify({
     'runtime-p4a-001 accepts authenticated request',
     'runtime resolves and returns SH identity',
     'runtime response contract is valid',
-    'runtime P4A-001 mock response is provider-agnostic',
+    'bounded context assembly returns memory and knowledge arrays',
+    'journey retrieval is bounded to the authenticated SH and RLS',
     'logout succeeds',
   ],
   sh_id: payload.sh_id,
   phase: payload.meta.phase,
+  context_counts: { memory: context.memory.length, knowledge: context.knowledge.length, journey: journey.length },
 }, null, 2));
