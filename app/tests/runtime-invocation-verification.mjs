@@ -1,0 +1,76 @@
+const required = [
+  'SUPABASE_URL',
+  'SUPABASE_ANON_KEY',
+  'SH_TEST_EMAIL',
+  'SH_TEST_PASSWORD',
+];
+
+for (const name of required) {
+  if (!process.env[name]) throw new Error(`Missing ${name}`);
+}
+
+const base = process.env.SUPABASE_URL.replace(/\/$/, '');
+const headers = {
+  apikey: process.env.SUPABASE_ANON_KEY,
+  'Content-Type': 'application/json',
+};
+
+const signIn = await fetch(`${base}/auth/v1/token?grant_type=password`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({
+    email: process.env.SH_TEST_EMAIL,
+    password: process.env.SH_TEST_PASSWORD,
+  }),
+});
+
+if (!signIn.ok) throw new Error(`AUTH_SIGN_IN_FAILED ${signIn.status}: ${await signIn.text()}`);
+const auth = await signIn.json();
+if (!auth.access_token || !auth.user?.id) throw new Error('AUTH_SESSION_INVALID');
+
+const runtimeResponse = await fetch(`${base}/functions/v1/runtime-p4a-001`, {
+  method: 'POST',
+  headers: {
+    ...headers,
+    Authorization: `Bearer ${auth.access_token}`,
+  },
+  body: JSON.stringify({ user_message: 'SH runtime controlled verification' }),
+});
+
+if (!runtimeResponse.ok) {
+  throw new Error(`RUNTIME_INVOCATION_FAILED ${runtimeResponse.status}: ${await runtimeResponse.text()}`);
+}
+
+const payload = await runtimeResponse.json();
+if (typeof payload.sh_id !== 'string' || typeof payload.response !== 'string') {
+  throw new Error(`RUNTIME_RESPONSE_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+}
+if (payload.response !== 'SH runtime controlled verification') {
+  throw new Error(`RUNTIME_ECHO_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+}
+if (payload.meta?.phase !== 'P4A-001' || payload.meta?.model_provider !== 'mock') {
+  throw new Error(`RUNTIME_META_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+}
+
+const signOut = await fetch(`${base}/auth/v1/logout`, {
+  method: 'POST',
+  headers: {
+    ...headers,
+    Authorization: `Bearer ${auth.access_token}`,
+  },
+});
+if (!signOut.ok) throw new Error(`AUTH_SIGN_OUT_FAILED ${signOut.status}: ${await signOut.text()}`);
+
+console.log(JSON.stringify({
+  status: 'PASS',
+  checks: [
+    'authenticated session obtained',
+    'runtime-p4a-001 accepts authenticated request',
+    'runtime resolves and returns SH identity',
+    'runtime response contract is valid',
+    'runtime P4A-001 mock response is provider-agnostic',
+    'logout succeeds',
+  ],
+  sh_id: payload.sh_id,
+  phase: payload.meta.phase,
+}, null, 2));
