@@ -1,0 +1,24 @@
+name: SH Runtime Controlled Verification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  runtime-verification:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://pkhkgvsrqeupvwoqjwmd.supabase.co
+      SUPABASE_ANON_KEY: ${{ secrets.SH_SUPABASE_ANON_KEY }}
+      SH_TEST_EMAIL: sh-dev-test@banned.idn
+      SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+
+      - name: Verify required secrets are present
+        run: |
+          test -n "$SUPABASE_ANON_KEY" || { echo "Missing SH_SUPABASE_ANON_KEY"; exit 1; }
+          test -n "$SH_TEST_PASSWORD" || { echo "Missing SH_TEST_PASSWORD"; exit 1; }
+
+      - name: Run controlled Auth → Runtime verification
+        run: node app/tests/runtime-invocation-verification.mjs
