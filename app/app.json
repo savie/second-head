@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Second Head",
+    "slug": "second-head",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "secondhead",
+    "userInterfaceStyle": "automatic",
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "android": {
+      "package": "com.secondhead.app"
+    }
+  }
+}
