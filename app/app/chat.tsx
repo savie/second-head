@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, ScrollView, Text, TextInput, View } from 'react-native';
-import { sendChatMessage } from '../features/chat/chat-service';
+import { streamSHRuntime } from '../services/runtime-stream';
 
 export default function ChatScreen() {
   const [draft, setDraft] = useState('');
@@ -12,12 +12,20 @@ export default function ChatScreen() {
     if (!message || sending) return;
     setDraft('');
     setSending(true);
-    setMessages((current) => [...current, `You: ${message}`]);
+    setMessages((current) => [...current, `You: ${message}`, 'SH: ']);
     try {
-      const result = await sendChatMessage(message);
-      setMessages((current) => [...current, `SH: ${result.response}`]);
+      await streamSHRuntime(message, (event) => {
+        if (event.type === 'token') {
+          setMessages((current) => {
+            if (current.length === 0) return current;
+            const next = [...current];
+            next[next.length - 1] = `${next[next.length - 1]}${event.text}`;
+            return next;
+          });
+        }
+      });
     } catch (error) {
-      const text = error instanceof Error ? error.message : 'Chat request failed';
+      const text = error instanceof Error ? error.message : 'Chat streaming failed';
       setMessages((current) => [...current, `Error: ${text}`]);
     } finally {
       setSending(false);
@@ -27,9 +35,9 @@ export default function ChatScreen() {
   return (
     <View style={{ flex: 1, padding: 20, gap: 12 }}>
       <Text style={{ fontSize: 28, fontWeight: '700' }}>SH Chat</Text>
-      <Text>App → Runtime → response</Text>
+      <Text>App → authenticated Runtime → streaming events</Text>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ gap: 12, paddingVertical: 12 }}>
-        {messages.length === 0 ? <Text>Tulis pesan untuk menguji chat SH.</Text> : null}
+        {messages.length === 0 ? <Text>Tulis pesan untuk menguji streaming SH.</Text> : null}
         {messages.map((item, index) => <Text key={`${index}-${item}`}>{item}</Text>)}
       </ScrollView>
       <TextInput
@@ -39,7 +47,7 @@ export default function ChatScreen() {
         multiline
         style={{ minHeight: 54, borderWidth: 1, borderRadius: 10, padding: 12 }}
       />
-      <Button title={sending ? 'Mengirim...' : 'Kirim'} onPress={() => void onSend()} disabled={sending || !draft.trim()} />
+      <Button title={sending ? 'Streaming...' : 'Kirim'} onPress={() => void onSend()} disabled={sending || !draft.trim()} />
     </View>
   );
 }
