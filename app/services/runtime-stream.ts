@@ -5,6 +5,7 @@ const RUNTIME_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtim
 type RuntimeStreamEvent =
   | { type: 'response'; sh_id: string; text: string }
   | { type: 'token'; text: string }
+  | { type: 'confirmation'; confirmation_id: string; action_id: string; title: string; description: string }
   | { type: 'complete'; sh_id: string }
   | { type: 'error'; message: string };
 
@@ -50,6 +51,14 @@ export async function streamSHRuntime(
       onEvent({ type: 'response', sh_id: String(payload.sh_id ?? ''), text: String(payload.text ?? '') });
     } else if (eventName === 'token') {
       onEvent({ type: 'token', text: String(payload.text ?? '') });
+    } else if (eventName === 'confirmation') {
+      onEvent({
+        type: 'confirmation',
+        confirmation_id: String(payload.confirmation_id ?? ''),
+        action_id: String(payload.action_id ?? ''),
+        title: String(payload.title ?? 'Confirmation required'),
+        description: String(payload.description ?? 'This action requires your explicit confirmation.'),
+      });
     } else if (eventName === 'complete') {
       onEvent({ type: 'complete', sh_id: String(payload.sh_id ?? '') });
     }
