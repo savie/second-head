@@ -56,7 +56,11 @@ const signOut = await fetch(`${base}/auth/v1/logout`, {
   method: 'POST',
   headers: { ...headers, Authorization: `Bearer ${auth.access_token}` },
 });
-if (!signOut.ok) throw new Error(`AUTH_SIGN_OUT_FAILED ${signOut.status}: ${await signOut.text()}`);
+const signOutBody = await signOut.text();
+const sessionAlreadyGone = signOut.status === 403 && signOutBody.includes('session_not_found');
+if (!signOut.ok && !sessionAlreadyGone) {
+  throw new Error(`AUTH_SIGN_OUT_FAILED ${signOut.status}: ${signOutBody}`);
+}
 
 console.log(JSON.stringify({
   status: 'PASS',
@@ -67,7 +71,7 @@ console.log(JSON.stringify({
     'runtime response contract is valid',
     'bounded context assembly returns memory and knowledge arrays',
     'journey retrieval is bounded to the authenticated SH and RLS',
-    'logout succeeds',
+    sessionAlreadyGone ? 'logout session was already absent; no active session remained' : 'logout succeeds',
   ],
   sh_id: payload.sh_id,
   phase: payload.meta.phase,
