@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { invokeSHRuntime } from './runtime';
 
 const RUNTIME_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtime-p4a-001`;
 
@@ -36,7 +37,17 @@ export async function streamSHRuntime(
   if (!response.ok) {
     throw new Error(`SH_RUNTIME_STREAM_FAILED: ${await response.text()}`);
   }
-  if (!response.body) throw new Error('SH_RUNTIME_STREAM_UNAVAILABLE');
+
+  // React Native's fetch implementation on some Android releases does not
+  // expose response.body as a ReadableStream. Keep the authenticated runtime
+  // usable on those clients by falling back to the canonical non-streaming
+  // invocation instead of reporting a false runtime outage.
+  if (!response.body) {
+    const fallback = await invokeSHRuntime({ userMessage: message });
+    onEvent({ type: 'response', sh_id: fallback.sh_id, text: fallback.response });
+    onEvent({ type: 'complete', sh_id: fallback.sh_id });
+    return;
+  }
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
