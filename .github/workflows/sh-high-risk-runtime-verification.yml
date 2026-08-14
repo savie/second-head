@@ -1,0 +1,36 @@
+name: SH High-Risk Runtime Round-Trip Verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [dev]
+    paths:
+      - 'supabase/functions/runtime-p4f-006/**'
+      - 'supabase/migrations/20260814103000_p4f_006_high_risk_runtime_confirmation.sql'
+      - 'app/tests/high-risk-runtime-roundtrip.mjs'
+      - '.github/workflows/sh-high-risk-runtime-verification.yml'
+
+jobs:
+  high-risk-runtime-verification:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://pkhkgvsrqeupvwoqjwmd.supabase.co
+      SUPABASE_ANON_KEY: ${{ secrets.SH_SUPABASE_ANON_KEY }}
+      SH_TEST_EMAIL: sh-dev-test@banned.idn
+      SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify required secrets
+        run: |
+          test -n "$SUPABASE_ANON_KEY"
+          test -n "$SH_TEST_PASSWORD"
+
+      - name: Run confirmation → re-validation → execution → audit verification
+        run: node app/tests/high-risk-runtime-roundtrip.mjs
