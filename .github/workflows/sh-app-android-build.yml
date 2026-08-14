@@ -12,6 +12,10 @@ jobs:
   android-build:
     runs-on: ubuntu-latest
 
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SH_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SH_SUPABASE_ANON_KEY }}
+
     defaults:
       run:
         working-directory: app
@@ -34,6 +38,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Verify public Expo configuration
+        run: |
+          test -n "$EXPO_PUBLIC_SUPABASE_URL"
+          test -n "$EXPO_PUBLIC_SUPABASE_ANON_KEY"
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
