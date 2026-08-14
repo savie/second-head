@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Button, ScrollView, Text, TextInput, View } from 'react-native';
-import { streamSHRuntime } from '../services/runtime-stream';
+import { loadConversationHistory, streamSHRuntime } from '../services/runtime-stream';
 
 type PendingConfirmation = {
   confirmation_id: string;
@@ -35,6 +35,16 @@ export default function ChatScreen() {
   useEffect(() => {
     mountedRef.current = true;
 
+    void loadConversationHistory()
+      .then((history) => {
+        if (mountedRef.current && history.length > 0) {
+          setMessages(history);
+        }
+      })
+      .catch(() => {
+        // History loading must not block the chat UI from opening.
+      });
+
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (!mountedRef.current) return;
 
@@ -45,8 +55,6 @@ export default function ChatScreen() {
 
       setLifecycleState('background');
 
-      // A streaming request must not remain active while the App
-      // leaves the foreground.
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
@@ -113,7 +121,7 @@ export default function ChatScreen() {
               if (current.length === 0) return current;
 
               const next = [...current];
-              next[next.length - 1] = `SH: ${event.text}`;
+              if (event.text) next[next.length - 1] = `SH: ${event.text}`;
               return next;
             });
           }
@@ -179,9 +187,6 @@ export default function ChatScreen() {
   }
 
   function confirmConfirmation() {
-    // This button records explicit user intent only.
-    // It does NOT authorize or execute the action.
-    // Runtime remains responsible for authorization and execution.
     setPendingConfirmation(null);
     setConfirmationState('confirmed');
     setMessages((current) => [
