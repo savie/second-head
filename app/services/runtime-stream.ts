@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import { invokeSHRuntime } from './runtime';
 
 const RUNTIME_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtime-p4a-001`;
+const CONVERSATION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtime-p4a-005`;
 
 type RuntimeStreamEvent =
   | { type: 'response'; sh_id: string; text: string }
@@ -9,6 +10,32 @@ type RuntimeStreamEvent =
   | { type: 'confirmation'; confirmation_id: string; action_id: string; title: string; description: string }
   | { type: 'complete'; sh_id: string }
   | { type: 'error'; message: string };
+
+export async function loadConversationHistory(limit = 50): Promise<string[]> {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Authenticated session required for conversation history');
+
+  const response = await fetch(`${CONVERSATION_URL}?limit=${encodeURIComponent(String(limit))}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+  });
+
+  if (!response.ok) {
+    throw new Error(`SH_CONVERSATION_HISTORY_FAILED: ${await response.text()}`);
+  }
+
+  const payload = (await response.json()) as {
+    conversations?: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+  };
+
+  return (payload.conversations ?? []).map((row) => {
+    if (row.role === 'user') return `You: ${row.content}`;
+    if (row.role === 'assistant') return `SH: ${row.content}`;
+    return `System: ${row.content}`;
+  });
+}
 
 export async function streamSHRuntime(
   userMessage: string,
@@ -38,10 +65,6 @@ export async function streamSHRuntime(
     throw new Error(`SH_RUNTIME_STREAM_FAILED: ${await response.text()}`);
   }
 
-  // React Native's fetch implementation on some Android releases does not
-  // expose response.body as a ReadableStream. Keep the authenticated runtime
-  // usable on those clients by falling back to the canonical non-streaming
-  // invocation instead of reporting a false runtime outage.
   if (!response.body) {
     const fallback = await invokeSHRuntime({ userMessage: message });
     onEvent({ type: 'response', sh_id: fallback.sh_id, text: fallback.response });
