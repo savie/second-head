@@ -20,7 +20,7 @@ const checks = [
   ['chat screen stores pending confirmation', screen.includes('pendingConfirmation')],
   ['chat screen provides Cancel control', screen.includes('title="Cancel"')],
   ['chat screen provides Confirm control', screen.includes('title="Confirm"')],
-  ['confirm does not authorize or execute in App', screen.includes('does NOT authorize or execute')],
+  ['confirm records confirmation without App-side authorization or execution', screen.includes('Runtime authorization is still required') && screen.includes('no App-side authorization or execution occurred')],
   ['runtime gate has confirmation-pending state', runtimeGate.includes("status: 'CONFIRMATION_PENDING'")],
   ['runtime gate reaches authorized only after confirm', runtimeGate.includes("status: 'AUTHORIZED'")],
 ];
