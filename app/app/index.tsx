@@ -29,6 +29,7 @@ export default function HomeScreen() {
       <Text>SH instances: {context.shInstances.length}</Text>
       <Button title="Open SH Chat" onPress={() => router.push('/chat')} />
       <Button title="Open Journey" onPress={() => router.push('/journey')} />
+      <Button title="Open Clone" onPress={() => router.push('/clone')} />
       <Button title="Runtime verification" onPress={() => router.push('/runtime-test')} />
       <Button title="Sign out" onPress={() => void logout()} />
     </View>
