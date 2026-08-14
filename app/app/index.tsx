@@ -31,6 +31,7 @@ export default function HomeScreen() {
       <Button title="Open Journey" onPress={() => router.push('/journey')} />
       <Button title="Open Clone" onPress={() => router.push('/clone')} />
       <Button title="Open Recovery" onPress={() => router.push('/recovery')} />
+      <Button title="Open Inheritance / Legacy / Succession" onPress={() => router.push('/inheritance')} />
       <Button title="Runtime verification" onPress={() => router.push('/runtime-test')} />
       <Button title="Sign out" onPress={() => void logout()} />
     </View>
