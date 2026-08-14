@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import { invokeSHRuntime } from './runtime';
 
 const RUNTIME_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtime-p4a-001`;
 const CONVERSATION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtime-p4a-005`;
@@ -37,6 +36,35 @@ export async function loadConversationHistory(limit = 50): Promise<string[]> {
   });
 }
 
+function parseSseText(text: string, onEvent: (event: RuntimeStreamEvent) => void) {
+  const frames = text.split(/\r?\n\r?\n/);
+
+  for (const frame of frames) {
+    const lines = frame.split(/\r?\n/);
+    const eventName = lines.find((line) => line.startsWith('event: '))?.slice(7).trim();
+    const dataLine = lines.find((line) => line.startsWith('data: '))?.slice(6);
+    if (!eventName || dataLine === undefined) continue;
+
+    const payload = JSON.parse(dataLine) as Record<string, unknown>;
+
+    if (eventName === 'response') {
+      onEvent({ type: 'response', sh_id: String(payload.sh_id ?? ''), text: String(payload.text ?? '') });
+    } else if (eventName === 'token') {
+      onEvent({ type: 'token', text: String(payload.text ?? '') });
+    } else if (eventName === 'confirmation') {
+      onEvent({
+        type: 'confirmation',
+        confirmation_id: String(payload.confirmation_id ?? ''),
+        action_id: String(payload.action_id ?? ''),
+        title: String(payload.title ?? 'Confirmation required'),
+        description: String(payload.description ?? 'This action requires your explicit confirmation.'),
+      });
+    } else if (eventName === 'complete') {
+      onEvent({ type: 'complete', sh_id: String(payload.sh_id ?? '') });
+    }
+  }
+}
+
 export async function streamSHRuntime(
   userMessage: string,
   onEvent: (event: RuntimeStreamEvent) => void,
@@ -65,10 +93,12 @@ export async function streamSHRuntime(
     throw new Error(`SH_RUNTIME_STREAM_FAILED: ${await response.text()}`);
   }
 
+  // Some React Native Android fetch implementations expose no response.body
+  // even though the request succeeded. Do not issue a second Runtime request:
+  // the first request already persisted the turn. Instead, consume the same
+  // response as text and parse the buffered SSE frames.
   if (!response.body) {
-    const fallback = await invokeSHRuntime({ userMessage: message });
-    onEvent({ type: 'response', sh_id: fallback.sh_id, text: fallback.response });
-    onEvent({ type: 'complete', sh_id: fallback.sh_id });
+    parseSseText(await response.text(), onEvent);
     return;
   }
 
@@ -77,33 +107,13 @@ export async function streamSHRuntime(
   let buffer = '';
 
   const handleFrame = (frame: string) => {
-    const lines = frame.split('\n');
-    const eventName = lines.find((line) => line.startsWith('event: '))?.slice(7).trim();
-    const dataLine = lines.find((line) => line.startsWith('data: '))?.slice(6);
-    if (!eventName || dataLine === undefined) return;
-    const payload = JSON.parse(dataLine) as Record<string, unknown>;
-
-    if (eventName === 'response') {
-      onEvent({ type: 'response', sh_id: String(payload.sh_id ?? ''), text: String(payload.text ?? '') });
-    } else if (eventName === 'token') {
-      onEvent({ type: 'token', text: String(payload.text ?? '') });
-    } else if (eventName === 'confirmation') {
-      onEvent({
-        type: 'confirmation',
-        confirmation_id: String(payload.confirmation_id ?? ''),
-        action_id: String(payload.action_id ?? ''),
-        title: String(payload.title ?? 'Confirmation required'),
-        description: String(payload.description ?? 'This action requires your explicit confirmation.'),
-      });
-    } else if (eventName === 'complete') {
-      onEvent({ type: 'complete', sh_id: String(payload.sh_id ?? '') });
-    }
+    parseSseText(frame, onEvent);
   };
 
   while (true) {
     const { value, done } = await reader.read();
     buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
-    const frames = buffer.split('\n\n');
+    const frames = buffer.split(/\r?\n\r?\n/);
     buffer = frames.pop() ?? '';
     for (const frame of frames) handleFrame(frame);
     if (done) break;
