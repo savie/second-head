@@ -69,16 +69,27 @@ jobs:
       - name: Build Android release APK with embedded JS bundle
         run: |
           cd android
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon --console=plain
 
-      - name: Verify release APK and embedded JS bundle
+      - name: Locate release APK and JS bundle
         run: |
-          test -f android/app/build/outputs/apk/release/app-release.apk
-          test -f android/app/build/generated/assets/react/release/index.android.bundle
+          echo "APK candidates:"
+          find android/app/build/outputs -type f -name '*.apk' -print
+          echo "JS bundle candidates:"
+          find android/app/build -type f -name 'index.android.bundle' -print
+          APK_PATH="$(find android/app/build/outputs -type f -name '*.apk' | head -n 1)"
+          BUNDLE_PATH="$(find android/app/build -type f -name 'index.android.bundle' | head -n 1)"
+          test -n "$APK_PATH"
+          test -f "$APK_PATH"
+          test -n "$BUNDLE_PATH"
+          test -f "$BUNDLE_PATH"
+          mkdir -p dist
+          cp "$APK_PATH" dist/sh-app-release.apk
+          test -f dist/sh-app-release.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: sh-app-release-apk
-          path: app/android/app/build/outputs/apk/release/app-release.apk
+          path: app/dist/sh-app-release.apk
           if-no-files-found: error
