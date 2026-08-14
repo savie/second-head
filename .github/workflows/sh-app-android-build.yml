@@ -58,21 +58,6 @@ jobs:
           CI: 1
         run: npx expo prebuild --clean --platform android
 
-      - name: Configure standalone debug bundle
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path("android/app/build.gradle")
-          text = path.read_text()
-          marker = "react {"
-          if marker not in text:
-              raise SystemExit("React Native Gradle configuration block not found")
-          if "debuggableVariants" not in text:
-              text = text.replace(marker, marker + '\n    debuggableVariants = []', 1)
-          path.write_text(text)
-          PY
-          grep -n "debuggableVariants" android/app/build.gradle
-
       - name: Verify Expo autolinking
         run: npx expo-modules-autolinking verify
 
@@ -81,18 +66,19 @@ jobs:
           test -f android/settings.gradle || test -f android/settings.gradle.kts
           test -x android/gradlew
 
-      - name: Build standalone Android debug APK
+      - name: Build Android release APK with embedded JS bundle
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
-      - name: Verify embedded JavaScript bundle
+      - name: Verify release APK and embedded JS bundle
         run: |
-          test -f android/app/build/generated/assets/react/debug/index.android.bundle
+          test -f android/app/build/outputs/apk/release/app-release.apk
+          test -f android/app/build/generated/assets/react/release/index.android.bundle
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: sh-app-debug-apk
-          path: app/android/app/build/outputs/apk/debug/app-debug.apk
+          name: sh-app-release-apk
+          path: app/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
