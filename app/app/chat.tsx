@@ -108,6 +108,16 @@ export default function ChatScreen() {
             });
           }
 
+          if (event.type === 'response') {
+            setMessages((current) => {
+              if (current.length === 0) return current;
+
+              const next = [...current];
+              next[next.length - 1] = `SH: ${event.text}`;
+              return next;
+            });
+          }
+
           if (event.type === 'confirmation') {
             setPendingConfirmation(event);
             setConfirmationState('idle');
@@ -142,9 +152,9 @@ export default function ChatScreen() {
       }
 
       if (mountedRef.current) {
-      setSending(false);
-      setLifecycleState((current) =>
-        current === 'streaming' ? 'idle' : current,
+        setSending(false);
+        setLifecycleState((current) =>
+          current === 'streaming' ? 'idle' : current,
         );
       }
     }
