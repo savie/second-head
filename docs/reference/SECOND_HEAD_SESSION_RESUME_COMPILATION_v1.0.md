@@ -14267,8 +14267,7 @@ BUILD / IMPLEMENTATION EXECUTION
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 1
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 12
 ## Status: PRE-BUILD DISCUSSION / DEFINITION STAGE
 ## Purpose: Shared reminder and continuity reference for SH Lite
 
@@ -14870,8 +14869,7 @@ FOCUS:
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 2
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 13
 ## Scope: SH Full → Transition Discussion → SH Lite
 ## Status: SH Lite Pre-Build Discussion / Definition Stage
 
@@ -15688,8 +15686,7 @@ END OF SESSION RESUME
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 3
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 14
 Checkpoint: SH Core Lite Conceptual Baseline
 Tanggal: 31 Juli 2026
 
@@ -16396,8 +16393,7 @@ END OF SESSION RESUME
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 4
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 15
 ## Checkpoint Proyek: Setelah SH Lite V2.0 Implementation Contract Draft / Finalisasi Arah Implementasi
 
 Tanggal checkpoint: 2026-07-31
@@ -17331,8 +17327,7 @@ Setelah itu baru:
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 5
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 16
 ## Checkpoint: FINAL IMPLEMENTATION EXECUTION LOCK → SOURCE-TO-V2.0
 
 Tanggal checkpoint: 31 Juli 2026
@@ -18176,8 +18171,7 @@ Checkpoint ini hanya menandai bahwa arah kerja sudah final dan execution harus d
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 6
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 17
 # SESSION RESUME — SECOND HEAD PROJECT
 
 Tanggal Resume: 2026-08-01
@@ -18664,8 +18658,8 @@ Prinsip utama:
 `JANGAN DESAIN ULANG YANG SUDAH FROZEN. JANGAN MENAMBAH FITUR DEFERRED. IMPLEMENTASIKAN KONTRAK V2.0 SECARA KONKRET DAN VALIDASI DENGAN EVIDENCE.`
 
 ---
-# SECOND HEAD — SH LITE SESSION RESUME 7
-# SECOND HEAD — SESSION RESUME
+
+# SECOND HEAD — SESSION RESUME 18
 
 ## 1. POSISI / PROGRES PROYEK SAAT INI
 
@@ -20363,8 +20357,7 @@ Jika belum dapat mengatakan itu, tampilkan dengan jujur bagian mana yang belum.
 
 ---
 
-#SECOND HEAD — SH LITE SESSION RESUME 8
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 19
 ## Checkpoint: Setelah Step C / Runtime Evidence Review
 ## Tanggal: 2026-08-02
 ## Status: V2.0 Implementation — GREEN, dengan beberapa hal yang masih perlu dirapikan/divalidasi
@@ -21374,8 +21367,7 @@ Tidak ada keputusan baru yang dibuat dalam Session Resume ini selain mencatat da
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 9
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 20
 ## Checkpoint: SH Lite V2.0 — Final Evidence Audit & Image Generation Correction
 
 Tanggal checkpoint: 2026-08-02
@@ -21956,8 +21948,7 @@ Owner telah memberikan evidence bahwa App.js terbaru berhasil menjalankan Image 
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 10
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 21
 # SESSION RESUME — SECOND HEAD / SH LITE V2.0.0
 Tanggal checkpoint: 2026-08-02
 
@@ -22472,8 +22463,7 @@ Owner masih memegang keputusan untuk menentukan:
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 11
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 22
 # SESSION RESUME — SECOND HEAD SYSTEM BUILD
 ## Checkpoint: Pasca V2.0 Closure → Persiapan Implementasi SH Lite V2.1.0
 
@@ -23150,8 +23140,7 @@ Keyword/context untuk melanjutkan:
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 12
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 23
 # SESSION RESUME — SECOND HEAD / SH LITE
 ## Checkpoint: Setelah V2.1.0 Final Closure Disetujui Owner
 
@@ -23723,8 +23712,7 @@ Jika melanjutkan di chat baru, konteks minimalnya:
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 13
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 24
 ## Checkpoint: SH Core Canonical v1.0 Sahkan Creator
 
 **Tanggal checkpoint:** 3 Agustus 2026  
@@ -24852,8 +24840,7 @@ Checkpoint ini berhenti tepat di titik pengesahan Canonical SH Core v1.0.
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 14
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 25
 # SESSION RESUME — SECOND HEAD SYSTEM BUILD
 
 **Session:** Setelah finalisasi SH Full Implementation Contract dan penyusunan Draft SH Full Compiled Implementation Guide  
@@ -25307,8 +25294,7 @@ IMPLEMENTATION : NOT STARTED
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 15
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 26
 # SESSION RESUME
 ## SECOND HEAD — SYSTEM BUILD
 ### Checkpoint Session
@@ -25654,8 +25640,7 @@ Dokumen yang menjadi acuan utama hingga titik ini:
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 16
-# SECOND HEAD — SESSION RESUME
+# SECOND HEAD — SESSION RESUME 27
 
 Tanggal: 2026-08
 Status Session: Checkpoint
@@ -25957,8 +25942,8 @@ Execution Strategy telah selesai, di-lock, dan diposisikan sebagai kerangka oper
 Ke depan, pengembangan akan dilakukan melalui dokumen-dokumen pendamping per phase atau per kebutuhan, dengan syarat seluruh dokumen tersebut tetap konsisten terhadap hierarchy authority yang telah dibekukan dan tidak mengubah desain maupun canonical yang sudah final.
 
 ---
-# SECOND HEAD — SH LITE SESSION RESUME 17
-# SECOND HEAD — SESSION RESUME
+
+# SECOND HEAD — SESSION RESUME 28
 ## Session Resume — Phase -1 Closure → Phase 0 Transition
 
 Project: SECOND HEAD — SYSTEM BUILD
@@ -26792,4 +26777,12925 @@ END OF SESSION RESUME
 
 ---
 
-# SECOND HEAD — SH LITE SESSION RESUME 18
+
+# SECOND HEAD — SESSION RESUME 29
+
+## Current Project State
+
+Project: SECOND HEAD — SYSTEM BUILD
+
+Current state:
+- Phase 0 telah selesai dan ditutup.
+- Seluruh BL-P0-001 s/d BL-P0-020 telah ditutup sebagai DONE / PASS (Owner-verified).
+- Repository sekarang public dan dapat diverifikasi secara langsung melalui GitHub.
+- Setelah Phase 0 selesai, proyek berada pada HOLD / READ-ONLY untuk menentukan arah Phase 1.
+- Belum ada implementasi Phase 1 yang diotorisasi.
+- Keputusan arsitektur Phase 1 masih OPEN dan sedang menjadi bahan diskusi Owner.
+
+Tidak ada keputusan arsitektur Phase 1 yang boleh dianggap final hanya karena tercantum dalam readiness audit agen.
+
+---
+
+## Current Phase / Execution Mode
+
+PREVIOUS PHASE:
+- Phase 0 — Infrastructure & Development Foundation
+- STATUS: COMPLETE / CLOSED
+
+CURRENT PHASE:
+- Phase 1 — Core Identity, Data Model & First Vertical Slice
+- STATUS: READINESS / DISCUSSION ONLY
+- Belum dianggap aktif sebagai implementation phase.
+
+NEXT PHASE:
+- Phase 1 implementation
+- STATUS: NEXT CANDIDATE / READY FOR DISCUSSION
+- Belum mendapat Owner GO untuk implementasi.
+
+CURRENT MODE:
+- HOLD / READ-ONLY
+- Owner sedang mendiskusikan desain dan keputusan arsitektur sebelum membuka implementasi.
+
+IMPLEMENTATION AUTHORIZED:
+- NO
+
+OWNER DECISION REQUIRED:
+- Ya, khususnya keputusan arsitektur Phase 1 sebelum backlog dan implementasi dibuka.
+
+---
+
+## Completed / Final / Owner-Approved
+
+### Phase 0
+
+STATUS:
+- COMPLETE / CLOSED
+- 100% selesai untuk scope BL-P0-001 s/d BL-P0-020.
+
+OWNER DECISION:
+- Seluruh closure Phase 0 diterima melalui workflow Owner review → GO → evidence → local commit.
+- Evidence kemudian telah dipush ke repository public.
+
+RATIONALE:
+- Tidak ada blocker yang ditemukan pada final milestone gate.
+- Deferred tooling tidak dianggap sebagai missing requirement karena belum memiliki legitimate consumer.
+- Tidak ada canonical authority yang diubah.
+
+AUTHORITY:
+- SH Core Canonical v1.0
+- Frozen Baseline / Temporary Baseline
+- Build Scope
+- Canonical Artifact Map
+- Implementation / Validation documentation
+- SH Lite V2.0 / V2.1 hanya sebagai inherited/reference knowledge, bukan blueprint mutlak SH Full.
+
+CONSTRAINT:
+- Phase 0 tidak boleh dibuka kembali hanya karena diskusi Phase 1 berlangsung.
+- Deferred items Phase 0 tetap deferred sampai trigger legitimate muncul.
+
+### Phase 0 Evidence
+
+EV-P0-001 s/d EV-P0-020 telah dibuat dan diverifikasi.
+
+Status keseluruhan:
+- DONE / PASS
+- Owner-verified
+- Evidence telah masuk ke repository public.
+
+Evidence terakhir:
+- EV-P0-018 — Testing Framework
+- EV-P0-019 — Code Review
+- EV-P0-020 — Documentation Standard
+
+Closure modes pada beberapa item menggunakan:
+- VERIFICATION-ONLY / DEFERRED-STRUCTURE
+- VERIFICATION-ONLY / ADVISORY CONVENTION
+
+Ini bukan berarti tooling fisik telah dibuat.
+
+---
+
+## Verified Repository & Supabase State
+
+### GitHub Repository
+
+Repository:
+- `savie/second-head`
+- Public
+
+URL:
+- https://github.com/savie/second-head
+
+Branch:
+- `dev` = active/default branch menurut audit terakhir.
+
+HEAD terakhir yang diverifikasi:
+- `9851228`
+- `docs: add EV-P0-020 documentation standard verification (verified)`
+
+Repository state menurut audit terakhir:
+- `dev` clean.
+- Public `dev` telah memuat EV-P0-001 s/d EV-P0-020.
+- Tidak ada source code aplikasi yang masuk secara prematur.
+- Tidak ada `package.json`, `deno.json`, application source, atau CI workflow yang dibuat secara prematur.
+
+Struktur utama yang terverifikasi:
+- `docs/final/`
+- `docs/reference/`
+- `docs/evidence/`
+- `database/migrations/.gitkeep`
+- `database/MIGRATION_FRAMEWORK.md`
+- `.env.example`
+- `.gitignore`
+- `README.md`
+
+`docs/evidence/`:
+- EV-P0-001 sampai EV-P0-020.
+
+Main:
+- Masih tertinggal dari `dev` menurut audit terakhir.
+- Belum ada keputusan bahwa `main` harus menjadi branch aktif Phase 1.
+
+### Supabase
+
+Project:
+- `second-head`
+- ref: `pkhkgvsrqeupvwoqjwmd`
+- region: `ap-northeast-2`
+
+Kondisi terakhir yang diverifikasi:
+- Belum ada application schema inti Phase 1.
+- `public` belum memiliki tabel aplikasi inti.
+- Platform artifacts/default Supabase tetap ada.
+- Auth platform tersedia.
+- RLS foundation/default posture telah diverifikasi pada Phase 0.
+
+Catatan:
+- Detail konfigurasi Supabase tidak boleh diasumsikan lebih jauh dari evidence/audit yang telah diverifikasi.
+
+---
+
+## Canonical Principles Currently Binding
+
+Prinsip berikut tetap mengikat dan tidak berubah:
+
+1. `ACCOUNT` dan `SH` adalah konsep berbeda.
+2. `ACCOUNT_ID` ≠ `SH_ID`.
+3. Account merupakan boundary autentikasi/ownership.
+4. SH merupakan persistent identity anchor.
+5. Baseline ownership:
+   `1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH`
+   dengan catatan bahwa ini bukan larangan absolut terhadap SH/clone/authorized SH lain di masa depan sesuai aturan canonical.
+6. Privacy by boundary.
+7. DEFAULT DENY / isolation sebagai prinsip keamanan.
+8. NO SILENT CHANGE.
+9. Perubahan harus traceable, validated, dan authorized sesuai klasifikasinya.
+10. Evidence-based acceptance.
+11. `UNVERIFIED ≠ PASS`.
+12. Canonical authority tidak boleh digantikan oleh implementation convenience.
+13. SH Lite V2.0/V2.1 adalah reference/inherited knowledge, bukan blueprint mutlak untuk SH Full.
+
+---
+
+## Decisions Still Open
+
+### Phase 1 Architecture
+
+Belum ada keputusan Owner final mengenai:
+
+- Nama tabel SH:
+  - `sh_instances`
+  - `sh`
+  - atau alternatif lain.
+
+- Bentuk penyimpanan konfigurasi/profile SH:
+  - JSONB dalam entitas SH
+  - tabel relasional terpisah
+  - atau desain lain.
+
+- Strategi otomatisasi pembuatan Account + Primary SH:
+  - Supabase Auth Hook/Trigger
+  - `handle_new_user`
+  - RPC / Edge Function
+  - atau mekanisme lain.
+
+Readiness audit agen menyebut tiga hal tersebut sebagai FLAG-P1-01 s/d FLAG-P1-03.
+
+STATUS:
+- OPEN / UNRESOLVED
+
+PENTING:
+- Rekomendasi agen bukan keputusan Owner.
+- Belum ada naming, schema, trigger strategy, atau physical migration yang disahkan.
+
+### Other Open Questions
+
+OQ-01 s/d OQ-09 dari canonical artifact map tetap perlu dianggap berdasarkan status aktual masing-masing.
+
+Tidak boleh menganggap seluruh OQ sudah resolved hanya karena readiness audit menyatakan demikian tanpa cross-check terhadap authority.
+
+Khusus:
+- Technology Stack pernah dinyatakan oleh agen sebagai resolved (`Supabase Postgres + Deno + Expo`), tetapi status tersebut harus diperlakukan sebagai keputusan hanya jika memang ada Owner/canonical authority yang mendukungnya.
+- Jika statusnya tidak dapat dibuktikan dari authority yang tersedia, perlakukan sebagai UNKNOWN / OPEN.
+
+---
+
+## Current Discussions / Explorations
+
+Phase 1 readiness audit terakhir mengusulkan arah:
+
+1. A1 Data Model.
+2. A3 System Architecture.
+3. A5 Identity Specification.
+4. Core identity schema.
+5. First physical migration.
+6. Core RLS policies.
+7. Identity resolution dari JWT → Account → Primary SH → SH_ID.
+
+Audit juga menyarankan agar Phase 1 tidak langsung menyentuh:
+- Memory / Context Engine.
+- AI provider/model orchestration.
+- Clone agreement / lifecycle.
+- UI/frontend.
+- Migrasi langsung dari SH Lite V2.1.
+
+STATUS:
+- PROVISIONAL / WORKING CONCLUSION
+- Belum menjadi scope final Phase 1.
+
+---
+
+## Deferred Items
+
+### Phase 0 Deferred / Trigger-Based
+
+Beberapa item ditutup tanpa physical implementation karena belum memiliki legitimate consumer:
+
+- Linting tooling
+- Formatting tooling
+- CI
+- Testing framework
+- Migration tooling
+- Formal GitHub review enforcement
+- Documentation tooling/enforcement
+
+Physical implementation dapat dibuka kembali jika legitimate trigger muncul.
+
+Contoh trigger:
+- application source code masuk;
+- migration fisik mulai digunakan;
+- CI memiliki consumer;
+- testing consumer tersedia;
+- multi-contributor workflow;
+- production merge gate diperlukan.
+
+Closure Phase 0 tidak berarti semua tooling tersebut dibatalkan.
+
+Status:
+- DEFERRED / NOT REJECTED.
+
+---
+
+## Conflicts / Discrepancies
+
+Tidak ada konflik canonical yang telah terbukti antara Phase 0 evidence dan frozen authority pada final milestone audit terakhir.
+
+Namun terdapat beberapa hal yang harus tetap diawasi:
+
+### 1. "Phase 1" Naming
+
+Readiness audit menggunakan istilah:
+- "Phase 1 Project Execution"
+- "Phase 1 Core Identity & Data Model"
+
+Ini belum otomatis berarti bahwa istilah tersebut identik dengan `Phase 01` pada Master Development Roadmap canonical.
+
+STATUS:
+- POTENTIAL TERMINOLOGY DISCREPANCY
+- Jangan menyamakan keduanya tanpa verifikasi authority.
+
+### 2. Phase 1 Scope
+
+Audit agen telah mengusulkan scope konkret dan beberapa keputusan desain.
+
+STATUS:
+- PROVISIONAL
+- Bukan Owner-approved.
+
+### 3. OQ Status
+
+Jika audit agen menyatakan suatu OQ "RESOLVED", tetapi tidak ada keputusan Owner atau authority yang mendukungnya, status tersebut harus dianggap:
+- OPEN / UNKNOWN
+
+Jangan mengubah OPEN menjadi CLOSED hanya berdasarkan rekomendasi audit.
+
+### 4. Repository Main vs Dev
+
+`dev` adalah branch aktif/default yang digunakan sekarang.
+`main` belum menjadi target merge/production gate Phase 1.
+
+Tidak ada keputusan baru untuk mengubah workflow branch saat ini.
+
+---
+
+## Superseded Decisions
+
+Tidak ada keputusan arsitektur Phase 1 yang secara eksplisit telah disupersede pada checkpoint ini.
+
+Yang berubah adalah STATUS, bukan canonical design:
+
+- Phase 0 local-only → sekarang repository public/pushed.
+- Phase 0 active execution → COMPLETE / CLOSED.
+- Phase 1 implementation → belum dibuka.
+- Readiness audit Phase 1 → sudah dilakukan, tetapi hasilnya masih provisional sampai Owner memutuskan.
+
+---
+
+## Important Boundaries / Do-Not-Do
+
+### BOLEH
+
+Dalam mode sekarang:
+- membaca canonical documents;
+- membaca repository public;
+- melakukan audit/cross-check;
+- membandingkan canonical authority dengan proposed Phase 1 design;
+- mendiskusikan pilihan arsitektur;
+- mengidentifikasi konflik/dependency;
+- menyusun analisis untuk membantu Owner mengambil keputusan.
+
+### BELUM DIOTORISASI
+
+Jangan:
+- membuat backlog Phase 1;
+- membuat migration SQL;
+- membuat tabel `accounts` / `sh_instances` / `sh`;
+- membuat RLS policy;
+- membuat Edge Function;
+- membuat source code;
+- membuat evidence Phase 1;
+- commit;
+- push;
+- mengubah Supabase;
+- mengubah GitHub settings;
+- mengunci FLAG-P1-01 s/d P1-03.
+
+Semua membutuhkan Owner GO yang sesuai.
+
+### DEFERRED
+
+Jangan membawa pekerjaan berikut ke Phase 1 tanpa keputusan eksplisit:
+- Memory/Context Engine.
+- AI orchestration.
+- Clone lifecycle.
+- UI/frontend.
+- tooling yang belum memiliki legitimate consumer.
+
+---
+
+## Reference Documents & Their Authority Status
+
+Dokumen utama yang tersedia/menjadi acuan:
+
+1. `SECOND_HEAD_CORE_CANONICAL_v1.0_BILINGUAL.md`
+   - Canonical authority.
+   - Mengikat prinsip/invariants SH Core.
+
+2. `SECOND_HEAD_COMPILED_DOCUMENTATION_BASELINE_v1.0.md.txt`
+   - Frozen/baseline reference sesuai status project.
+
+3. `SECOND_HEAD_SH_LITE_V2.0_COMPILED_DOCUMENTATION_v1.0.md`
+   - Reference/inherited knowledge.
+   - Bukan blueprint mutlak SH Full.
+
+4. `SECOND_HEAD_SH_LITE_V2.1_COMPILED_DOCUMENTATION_v1.0.md`
+   - Reference/inherited knowledge.
+   - Bukan blueprint mutlak SH Full.
+
+5. `SECOND_HEAD_SESSION_RESUME_COMPILATION_v1.0.md`
+   - Historical/session continuity reference.
+   - Tidak otomatis mengalahkan current state atau canonical authority.
+
+6. Repository public:
+   - `https://github.com/savie/second-head`
+   - Menjadi sumber verifikasi aktual repository setelah push.
+
+7. `docs/evidence/EV-P0-001...EV-P0-020`
+   - Evidence records.
+   - Bukan pengganti canonical authority.
+   - Mendokumentasikan kondisi/closure masing-masing backlog item.
+
+Jika terdapat konflik antara evidence dan canonical authority:
+- canonical authority harus diperiksa terlebih dahulu;
+- evidence tidak boleh digunakan untuk mengubah canonical design secara diam-diam.
+
+---
+
+## Current Next-Step Candidate
+
+NEXT CANDIDATE:
+- Diskusi Owner mengenai desain Phase 1 sebelum backlog atau implementasi dibuka.
+
+Urutan yang paling tepat untuk dipertimbangkan:
+
+1. Verifikasi ulang canonical requirement A1/A3/A5.
+2. Bedah FLAG-P1-01 s/d FLAG-P1-03.
+3. Pastikan apakah rekomendasi readiness audit benar-benar kompatibel dengan canonical identity model.
+4. Identifikasi dependency dan konsekuensi jangka panjang.
+5. Owner mengambil keputusan arsitektur.
+6. Baru setelah keputusan cukup stabil, Owner dapat memberikan GO untuk menyusun Phase 1 backlog.
+7. Implementasi fisik hanya setelah mendapat GO yang memang mengotorisasi implementasi.
+
+STATUS:
+- NEXT CANDIDATE
+- BELUM DISETUJUI sebagai execution plan final.
+
+---
+
+## Exact STOP / HOLD Condition
+
+CURRENT STATUS:
+- HOLD / READ-ONLY
+
+STOP jika:
+- belum ada Owner GO;
+- masih ada keputusan arsitektur Phase 1 yang belum dipahami;
+- terdapat konflik canonical-vs-proposed design;
+- agen mencoba mengubah rekomendasi menjadi keputusan;
+- scope Phase 1 belum disepakati.
+
+Agen tidak boleh:
+- membuat file;
+- membuat backlog;
+- membuat migration;
+- mengubah Supabase;
+- mengubah GitHub;
+- commit;
+- push;
+
+selama hanya berada pada tahap diskusi/readiness.
+
+---
+
+## Checkpoint Summary
+
+Phase 0:
+- COMPLETE / CLOSED.
+- BL-P0-001 s/d BL-P0-020 = DONE / PASS (Owner-verified).
+- EV-P0-001 s/d EV-P0-020 telah dibuat dan dipush.
+- Repository public dan dapat diverifikasi.
+- Tidak ada kebutuhan untuk membuka kembali Phase 0.
+
+Phase 1:
+- Baru pada tahap READINESS / DISCUSSION.
+- Belum ada implementation authorization.
+- Belum ada Phase 1 backlog final.
+- Belum ada schema final.
+- Belum ada keputusan final untuk FLAG-P1-01 s/d P1-03.
+
+Owner:
+- Belum perlu terburu-buru memberikan GO implementasi.
+- Titik checkpoint sekarang memang merupakan tempat untuk mendiskusikan desain Phase 1 secara sadar sebelum menyentuh database/source.
+
+CURRENT PROJECT MODE:
+**PHASE 0 CLOSED → PHASE 1 DISCUSSION / READINESS → HOLD**
+
+Tidak ada keputusan arsitektur Phase 1 baru yang dibuat oleh resume ini.
+
+---
+
+# SECOND HEAD — SESSION RESUME 30
+
+## Current Project State
+
+SECOND HEAD adalah proyek pembangunan sistem **Second Head (SH)** dengan pemisahan tegas antara:
+- Account identity (`ACCOUNT_ID`)
+- SH identity (`SH_ID`)
+- Authentication identity / platform subject (`auth.uid()`)
+- Runtime / Model / Memory / Context / Database identity
+
+Prinsip utama yang tetap mengikat adalah bahwa hubungan antar-domain tersebut merupakan **explicit implementation mapping**, bukan penyamaan identitas secara konseptual.
+
+Workflow implementasi yang sedang digunakan:
+
+Qwen / agen
+↓
+PRE-MUTATION PACKAGE
+↓
+OWNER / ChatGPT AUDIT
+↓
+ACTUAL GITHUB + SUPABASE VERIFICATION
+↓
+jika tidak ada masalah → revisi engineering bila perlu → execute → verify → evidence → commit + push `dev`
+↓
+jika ditemukan masalah canonical/baseline/contract → STOP → laporkan kepada Owner untuk keputusan.
+
+Tidak ada keputusan arsitektur baru dibuat oleh resume ini.
+
+---
+
+## Current Phase / Execution Mode
+
+### Transisi Phase
+
+**PREVIOUS PHASE:**  
+Phase 0 — Infrastructure
+
+**STATUS:**  
+**COMPLETE / CLOSED**
+
+Phase 0 mencakup infrastruktur dasar termasuk Supabase, authentication configuration, migration framework, dan fondasi deployment yang diperlukan.
+
+---
+
+**CURRENT PHASE:**  
+Phase 1 — Identity / Ownership / Privacy
+
+**STATUS:**  
+**READINESS / IMPLEMENTATION DISCUSSION**
+
+Phase 1 belum dinyatakan CLOSED pada checkpoint ini.
+
+BL-P1-001 sampai BL-P1-005 telah menjadi rangkaian backlog implementasi yang dibahas melalui pre-mutation packages, tetapi status Phase 1 secara keseluruhan tetap harus mengikuti hasil actual verification dan keputusan Owner.
+
+---
+
+**NEXT PHASE:**  
+Phase 2
+
+**STATUS:**  
+**NEXT CANDIDATE / NOT AUTHORIZED**
+
+Belum dibuka atau dianggap aktif hanya karena roadmap mengarah ke sana.
+
+---
+
+**CURRENT MODE:**  
+**PRE-MUTATION / AUDIT & READINESS**
+
+**IMPLEMENTATION AUTHORIZED:**  
+Belum ada GO baru yang dapat disimpulkan dari resume ini.
+
+**OWNER DECISION REQUIRED:**  
+Approval terhadap paket implementasi berikutnya setelah actual GitHub + Supabase audit selesai, serta keputusan apabila ditemukan konflik yang bukan sekadar masalah engineering realization.
+
+---
+
+## Completed / Final / Owner-Approved
+
+### Phase 0
+**STATUS: COMPLETE / CLOSED**
+
+Tidak boleh dianggap aktif kembali hanya karena diskusi Phase 1 atau Phase 2.
+
+### Canonical / Baseline Authority
+Dokumen canonical dan baseline yang telah menjadi dasar kerja tetap binding. Tidak ada perubahan canonical authority yang dibuat pada checkpoint ini.
+
+### BL-P1-001 — Constitution Registry
+**STATUS: CLOSED / EXECUTED**
+
+OQ-02 tetap dicatat sebagai OPEN pada rangkaian pekerjaan Phase 1.
+
+### BL-P1-002 — Identity Schema
+**STATUS: CLOSED / EXECUTED / PASS**
+
+Fondasi identity schema yang dilaporkan dan diverifikasi sebelumnya mencakup:
+- `accounts`
+- `sh_instances`
+- `sh_ownership`
+- `account_auth_links`
+
+Koreksi penting yang sudah diterima:
+`ACCOUNT_ID ≠ SH_ID` adalah **pemisahan identity domain**, bukan database-level `CHECK` yang memaksa dua UUID berbeda.
+
+### BL-P1-003 — Identity Creation & Auth Linkage
+Paket revisi v2 telah membatasi klaim atomicity secara tepat:
+- atomicity yang diklaim hanya untuk empat record SECOND HEAD dalam transaksi database;
+- tidak mengklaim mengontrol lifecycle internal GoTrue;
+- conflict/idempotency menggunakan database constraints;
+- email conflict / auth conflict / no-email → escalation;
+- backfill tidak boleh auto-execute tanpa gating;
+- tidak membuat logging/governance surface baru.
+
+**Residual:** fresh GoTrue signup end-to-end tetap **NOT YET VERIFIED** bila belum ada bukti genuine Auth API/client lifecycle.
+
+### BL-P1-004 — Ownership & Privacy / Core RLS
+Paket menetapkan:
+- RLS pada empat identity tables;
+- `current_account_id()`;
+- owner-only SELECT;
+- default-deny writes;
+- cross-SH isolation;
+- tidak menggunakan `FORCE ROW LEVEL SECURITY` agar service/table-owner paths yang memang diperlukan tetap dapat bekerja;
+- security review terhadap SECURITY DEFINER BL-P1-003.
+
+Namun status actual repository/Supabase harus tetap mengikuti **latest independently verified state**, bukan sekadar klaim package.
+
+### BL-P1-005 — Identity Resolution & Verification Foundation
+Paket terakhir yang diterima:
+
+**STATUS: PRE-MUTATION PACKAGE**
+
+Usulan utamanya adalah `public.resolve_identity()`:
+
+`auth.uid()`
+→ `account_auth_links`
+→ `ACCOUNT_ID`
+→ PRIMARY `SH_ID`
+→ `sh_ownership`
+
+Dengan prinsip:
+- fail-closed;
+- tidak membuat identity baru;
+- tidak auto-merge;
+- tidak auto-select;
+- ambiguity → deterministic exception / escalation;
+- tidak menerima parameter account/SH yang dapat digunakan untuk spoofing;
+- bukan authorization engine;
+- bukan governance evaluator;
+- bukan runtime identity-resolution service.
+
+BL-P1-005 **belum boleh dianggap executed/verified/closed hanya karena package telah diterima.**
+
+---
+
+## Verified Repository & Supabase State
+
+### Evidence discipline
+
+Gunakan empat label berikut secara ketat:
+
+- **ACTUAL VERIFIED** — diverifikasi langsung melalui tool/query/repository.
+- **OWNER-PROVIDED STATE** — dilaporkan Owner, tetapi belum diverifikasi independen pada langkah tersebut.
+- **INFERENCE** — kesimpulan teknis berdasarkan evidence/known platform behavior.
+- **NOT YET VERIFIED** — belum ada evidence yang cukup.
+
+### Supabase
+
+Paket terakhir melaporkan migration/state berikut:
+
+20260810070725 create_identity_schema
+20260810080127 create_identity_creation_flow
+20260810080214 backfill_existing_auth_users
+20260810083325 enable_identity_rls
+
+GitHub artifacts yang dilaporkan:
+
+database/migrations/20260810090000_create_identity_creation_flow.sql
+database/migrations/20260810091000_backfill_existing_auth_users.sql
+database/migrations/20260810100000_enable_identity_rls.sql
+docs/evidence/EV-P1-003_IDENTITY_CREATION.md
+docs/evidence/EV-P1-004_OWNERSHIP_PRIVACY_RLS.md
+
+Catatan penting: migration timestamps di Supabase dan nama file migration di GitHub dilaporkan berbeda. Jangan menganggap keduanya ekuivalen tanpa actual verification.
+
+Current live repository state
+
+BRANCH: dev — dilaporkan, latest independent verification pada checkpoint ini NOT VERIFIED.
+
+HEAD COMMIT: UNKNOWN / NOT VERIFIED pada checkpoint ini.
+
+WORKTREE CLEAN/DIRTY: UNKNOWN / NOT VERIFIED pada checkpoint ini.
+
+REMOTE SYNCHRONIZATION: UNKNOWN / NOT VERIFIED pada checkpoint ini.
+
+Karena aturan checkpoint melarang asumsi, status tersebut tidak boleh diisi berdasarkan klaim package lama.
+
+Current live Supabase state
+
+Existence/condition aktual seluruh:
+
+tables
+
+constraints
+
+indexes
+
+RLS
+
+policies
+
+functions
+
+triggers
+
+identity rows
+
+auth links
+
+
+harus dianggap NOT VERIFIED kecuali terdapat evidence actual query terbaru.
+
+
+---
+
+Canonical Principles Currently Binding
+
+1. ACCOUNT_ID adalah identity Account.
+
+
+2. SH_ID adalah persistent SH identity anchor.
+
+
+3. auth.uid() adalah authentication/platform subject, bukan ACCOUNT_ID dan bukan SH_ID.
+
+
+4. Account ≠ SH.
+
+
+5. ACCOUNT_ID ≠ SH_ID sebagai pemisahan domain identity.
+
+
+6. Ownership harus explicit, verifiable, dan auditable.
+
+
+7. EVOLUTION ≠ OWNERSHIP TRANSFER.
+
+
+8. Default access = DENY.
+
+
+9. Private SH/User data isolated by default.
+
+
+10. Creator / SH-000 authority tidak otomatis berarti akses terhadap private data SH lain.
+
+
+11. Cross-SH access memerlukan authorization/scope yang sesuai.
+
+
+12. Identity resolution harus fail-closed dan tidak boleh menciptakan identity secara diam-diam.
+
+
+13. Conflict identity harus escalate, bukan auto-merge.
+
+
+14. Implementation mapping tidak boleh diperlakukan sebagai canonical identity equivalence.
+
+
+15. OQ-02 tetap OPEN sampai Owner secara eksplisit memutuskan sebaliknya.
+
+
+
+
+---
+
+Decisions Still Open
+
+OQ-02
+
+STATUS: OPEN / UNRESOLVED
+
+Tidak diselesaikan oleh BL-P1-001 sampai BL-P1-005.
+
+
+---
+
+ADR-003 — Auth-to-Account Linkage
+
+Package BL-P1-003 v2 menetapkan:
+
+STATUS: PROPOSED
+
+Option A — database trigger pada auth.users AFTER INSERT — adalah mekanisme yang direncanakan dalam migration package.
+
+Ini bukan otomatis berarti Owner telah memberikan architectural approval hanya karena package merekomendasikannya.
+
+Status final harus mengikuti keputusan Owner/evidence yang eksplisit.
+
+
+---
+
+Fresh GoTrue Signup E2E
+
+STATUS: OPEN / NOT YET VERIFIED
+
+Tidak boleh menyebut:
+
+manual INSERT ke auth.users
+
+trigger test
+
+backfill test
+
+
+sebagai bukti fresh Supabase Auth signup lifecycle.
+
+Jika diperlukan, genuine Auth API/client-level lifecycle test harus digunakan.
+
+
+---
+
+Current Discussions / Explorations
+
+Tooling / Agent Capability
+
+Telah dibahas bahwa agen tertentu tidak mempunyai live read/write access terhadap Supabase sehingga tidak dapat secara independen melakukan actual Supabase verification.
+
+Kondisi ini bukan alasan untuk memalsukan verification.
+
+Tooling yang tersedia untuk ChatGPT dapat digunakan bila relevan, termasuk:
+
+GitHub access
+
+Supabase access
+
+tooling lain yang nantinya memang diperlukan untuk Auth/API/client lifecycle atau platform-specific testing.
+
+
+Tool policy belum dianggap final secara permanen. Pemilihan tool harus mengikuti kebutuhan actual verification dan batas otorisasi Owner.
+
+Fresh Auth Lifecycle Testing
+
+Ini merupakan capability/testing gap yang berbeda dari:
+
+PostgreSQL trigger correctness;
+
+database backfill;
+
+RLS verification.
+
+
+Belum ada keputusan baru bahwa tool tertentu wajib ditambahkan.
+
+
+---
+
+Deferred Items
+
+Fresh GoTrue signup E2E bila belum tersedia evidence genuine.
+
+Identity resolution service/runtime integration.
+
+Authorization engine.
+
+Governance evaluator / permission matrix.
+
+Memory / Context / Knowledge RLS.
+
+Ownership transfer.
+
+CLONE_SH.
+
+Account recovery.
+
+Creator / SH-000 implementation.
+
+Journey / inheritance / legacy.
+
+Stale auth-link maintenance.
+
+Phase 2 implementation.
+
+Phase 3 implementation.
+
+Phase 4 runtime integration.
+
+Phase 5 clone/evolution/continuity work.
+
+OQ-02 resolution.
+
+
+Roadmap item di atas bukan authorization untuk mulai mengerjakannya.
+
+
+---
+
+Conflicts / Discrepancies
+
+1. Migration filename timestamp vs Supabase applied migration timestamp
+
+STATUS: DISCREPANCY / NOT YET RESOLVED
+
+Contoh yang dilaporkan:
+
+Supabase:
+20260810080127 create_identity_creation_flow
+
+GitHub:
+20260810090000_create_identity_creation_flow.sql
+
+Tidak boleh diasumsikan sama sebelum actual verification.
+
+
+---
+
+2. Package claims vs independent live state
+
+Beberapa package menyatakan:
+
+BL-P1-003 implemented/verified;
+
+BL-P1-004 implemented/verified;
+
+migrations applied;
+
+evidence files present.
+
+
+Namun bila evidence actual repository/Supabase terbaru belum tersedia pada checkpoint, status tersebut harus dipertahankan sebagai OWNER-PROVIDED STATE, bukan dinaikkan menjadi ACTUAL VERIFIED.
+
+
+---
+
+3. Phase 1 status vs backlog status
+
+Tidak boleh menyamakan:
+
+package BL-P1-005 sudah selesai dibuat
+
+
+dengan:
+
+BL-P1-005 sudah executed;
+
+Phase 1 sudah CLOSED.
+
+
+Phase status dan backlog status adalah dua hal berbeda.
+
+
+---
+
+Superseded Decisions
+
+Tidak ada keputusan canonical yang dinyatakan superseded pada checkpoint ini.
+
+Beberapa formulasi package lama telah direvisi secara engineering dan harus dibaca menggunakan versi terakhirnya, khususnya:
+
+BL-P1-003 v2 memperbaiki overclaim atomicity;
+
+idempotency/race handling menggunakan constraints;
+
+tidak membuat conflict logging surface;
+
+backfill execution digate;
+
+ADR-003 dinyatakan PROPOSED, bukan final;
+
+fresh GoTrue E2E tidak boleh diklaim dari manual auth.users insertion.
+
+
+Versi lama yang bertentangan dengan koreksi tersebut dianggap SUPERSEDED secara engineering wording, bukan sebagai perubahan canonical authority.
+
+
+---
+
+Important Boundaries / Do-Not-Do
+
+BOLEH
+
+Audit actual GitHub.
+
+Audit actual Supabase.
+
+Membandingkan implementation dengan frozen baseline/canonical/contract.
+
+Memperbaiki masalah engineering realization yang tidak mengubah canonical semantics.
+
+Membuat revised pre-mutation package.
+
+Menjalankan verification yang memang sudah diotorisasi.
+
+Menggunakan tool tambahan bila diperlukan untuk actual testing dan masih dalam scope/otorisasi.
+
+
+BELUM DIOTORISASI
+
+Mutation Phase 1 berikutnya tanpa approval gate yang sesuai.
+
+Mengubah canonical authority.
+
+Menyelesaikan OQ-02 secara sepihak.
+
+Menganggap recommendation agen sebagai Owner decision.
+
+Menganggap readiness audit sebagai GO.
+
+Menganggap package sebagai implementation.
+
+Menganggap migration existence sebagai behavioral verification.
+
+Menganggap trigger test sebagai fresh GoTrue signup E2E.
+
+Commit/push perubahan yang belum melewati workflow approval.
+
+
+DEFERRED
+
+Phase 2+ implementation.
+
+Runtime integration.
+
+Authorization/governance.
+
+Memory/context/knowledge.
+
+Clone/transfer/recovery/Creator-superuser.
+
+Fresh Auth lifecycle bila tooling/evidence belum tersedia.
+
+
+
+---
+
+Reference Documents & Their Authority Status
+
+Dokumen yang tersedia dalam project/session antara lain:
+
+SECOND_HEAD_COMPILED_DOCUMENTATION_BASELINE_v1.0.md.txt
+SECOND_HEAD_SH_LITE_V2.0_COMPILED_DOCUMENTATION_v1.0.md
+SECOND_HEAD_SH_LITE_V2.1_COMPILED_DOCUMENTATION_v1.0.md
+SECOND_HEAD_SH_CORE_CANONICAL_v1.0_BILINGUAL.md
+SECOND_HEAD_SESSION_RESUME_COMPILATION_v1.0.md
+
+Authority hierarchy
+
+Canonical / frozen authority
+
+Frozen Baseline
+
+SH Core Canonical
+
+Implementation Contract
+
+Build Scope
+
+Constitution / applicable authority documents
+
+
+Execution / engineering references
+
+Execution Strategy
+
+Implementation Guide
+
+BL pre-mutation packages
+
+Evidence documents
+
+
+Pre-mutation package tidak dapat mengubah canonical authority hanya melalui isi package.
+
+Session Resume ini juga bukan authority baru; ia hanya snapshot keadaan terkini.
+
+
+---
+
+Current Next-Step Candidate
+
+NEXT CANDIDATE: ACTUAL AUDIT BL-P1-005
+
+Urutan yang harus dipertahankan:
+
+1. Actual read GitHub dev.
+
+
+2. Actual inspect:
+
+HEAD
+
+worktree status
+
+remote synchronization
+
+existing migrations
+
+evidence
+
+registry
+
+duplicate/unexpected artifacts.
+
+
+
+3. Actual inspect Supabase:
+
+identity tables
+
+constraints
+
+indexes
+
+RLS
+
+policies
+
+functions
+
+triggers
+
+existing identity rows
+
+auth links
+
+relevant migration state.
+
+
+
+4. Compare actual state dengan BL-P1-005 package dan canonical authority.
+
+
+5. Jika hanya engineering issue:
+
+revisi package/implementation plan.
+
+
+
+6. Jika tidak ada issue:
+
+lanjut ke approval/mutation gate sesuai Owner decision.
+
+
+
+7. Setelah mutation:
+
+actual verify;
+
+evidence;
+
+commit;
+
+push dev.
+
+
+
+8. Jika ditemukan canonical/baseline/contract contradiction:
+
+STOP;
+
+laporkan kepada Owner;
+
+jangan resolve sepihak.
+
+
+
+
+Phase 2
+
+STATUS: NEXT CANDIDATE / NOT OPENED
+
+Tidak dimulai hanya karena BL-P1-005 disebut sebagai final Phase 1 backlog item.
+
+
+---
+
+Exact STOP / HOLD Condition
+
+STOP dan kembali ke Owner apabila:
+
+ditemukan contradiction antara Canonical / Frozen Baseline / Contract / Build Scope;
+
+implementasi memerlukan perubahan canonical semantics;
+
+terdapat konflik authority yang tidak dapat diselesaikan sebagai engineering realization;
+
+state GitHub/Supabase aktual berbeda secara material dari package;
+
+diperlukan architectural decision yang belum diputuskan Owner;
+
+ada uncertainty mengenai authorization scope;
+
+mutation ternyata akan memengaruhi domain di luar scope BL;
+
+fresh Auth lifecycle evidence diperlukan tetapi capability/tool belum tersedia;
+
+repository/Supabase state tidak dapat diverifikasi dengan cukup kuat.
+
+
+Jangan mengubah NOT VERIFIED menjadi VERIFIED hanya karena expected behavior sesuai desain.
+
+
+---
+
+Checkpoint Summary
+
+PHASE 0
+COMPLETE / CLOSED
+
+PHASE 1
+READINESS / IMPLEMENTATION DISCUSSION
+NOT YET CLOSED
+
+BL-P1-001
+CLOSED / EXECUTED
+
+BL-P1-002
+CLOSED / EXECUTED / PASS
+
+BL-P1-003
+PRE-MUTATION PACKAGE v2 completed;
+implementation/verification status mengikuti actual evidence,
+fresh GoTrue E2E tetap NOT YET VERIFIED
+
+BL-P1-004
+PRE-MUTATION PACKAGE completed;
+RLS/ownership/privacy claims harus dibedakan dari actual live verification
+
+BL-P1-005
+CURRENT PACKAGE:
+PRE-MUTATION / MUTATION NOT EXECUTED
+
+OQ-02
+OPEN / UNRESOLVED
+
+ADR-003
+PROPOSED unless explicit Owner approval exists elsewhere
+
+PHASE 2
+NEXT CANDIDATE / NOT AUTHORIZED
+
+CURRENT MODE
+AUDIT / READINESS / PRE-MUTATION
+
+CURRENT IMPLEMENTATION AUTHORIZATION
+NOT ESTABLISHED BY THIS RESUME
+
+NEXT ACTION
+ACTUAL GITHUB + SUPABASE AUDIT OF BL-P1-005
+
+CRITICAL RULE
+PACKAGE ≠ IMPLEMENTATION
+IMPLEMENTATION ≠ VERIFIED
+VERIFIED ≠ OWNER APPROVAL
+ROADMAP ≠ GO
+
+Checkpoint ini menggantikan Session Resume sebelumnya sebagai CURRENT STATE SNAPSHOT.
+
+
+---
+
+Siap. Gue bikin Session Resume baru yang benar-benar mencerminkan posisi sekarang, bukan sekadar copy resume lama. Gue juga sengaja memisahkan resume = continuity, sementara Phase -1 + canonical/build docs + GitHub + Supabase tetap jadi sumber audit.
+
+# SECOND HEAD — SESSION RESUME 31
+## P3B COMPLETE → READY FOR P3C
+### Project: SECOND HEAD — SYSTEM BUILD
+### Resume Type: Execution / Cross-Session Checkpoint
+### Status: P3B IMPLEMENTATION + DATABASE VERIFICATION COMPLETE
+
+---
+
+# 1. CURRENT POSITION
+
+SECOND HEAD sudah melewati baseline/freeze documentation stage dan sekarang berada pada
+ACTUAL IMPLEMENTATION / BUILD EXECUTION.
+
+Current execution stream:
+
+PHASE 3
+└── P3B — Memory Lifecycle
+    ├── BL-P3B-001  DONE
+    ├── BL-P3B-002  DONE
+    ├── BL-P3B-003  DONE
+    ├── BL-P3B-004  DONE
+    ├── BL-P3B-005  DONE
+    └── BL-P3B-006  DONE
+
+NEXT:
+
+P3C — Retrieval / berikutnya sesuai Phase -1 backlog.
+
+---
+
+# 2. IMPORTANT SOURCE HIERARCHY
+
+Session Resume BUKAN source-of-truth.
+
+Saat mengerjakan backlog berikutnya, WAJIB kembali ke source aktual.
+
+Urutan kerja:
+
+1. PHASE -1
+   → execution-control / backlog / acceptance gate awal
+
+2. DM / OWNER DECISIONS
+   → keputusan eksplisit terbaru dari Owner
+
+3. CANONICAL / FROZEN AUTHORITY
+   → canonical semantics dan invariants
+
+4. BUILD SCOPE
+   → scope dan backlog contract
+
+5. IMPLEMENTATION CONTRACT
+   → implementation constraints
+
+6. IMPLEMENTATION GUIDE
+   → implementation guidance
+
+7. EXECUTION STRATEGY
+   → execution strategy
+
+8. GITHUB DEV
+   → actual repository state / implementation / evidence / migrations
+
+9. SUPABASE DEV
+   → actual database/runtime state
+
+10. EVIDENCE
+   → hasil verification yang benar-benar dilakukan
+
+IMPORTANT:
+
+Session Resume hanya membantu continuity.
+Jangan menggunakan Resume sebagai pengganti membaca Phase -1 atau
+authoritative project documents saat memulai backlog item baru.
+
+---
+
+# 3. CURRENT EXECUTION PROTOCOL
+
+Untuk setiap backlog item:
+
+GO BL-Pxx-xxx
+
+        ↓
+
+PHASE -1 CHECK
+
+        ↓
+
+DM / OWNER DECISIONS
+
+        ↓
+
+GITHUB AUDIT
+  ├─ Phase -1
+  ├─ Canonical
+  ├─ Build Scope
+  ├─ Implementation Contract
+  ├─ Implementation Guide
+  ├─ Execution Strategy
+  ├─ existing phase artifacts
+  └─ current dev state
+
+        ↓
+
+SUPABASE LIVE
+  ├─ actual schema
+  ├─ migrations
+  ├─ functions / views
+  ├─ RLS / policies
+  └─ relevant runtime state
+
+        ↓
+
+RECONCILE
+
+        ↓
+
+PASS?
+ ├─ YES
+ │    ↓
+ │  evidence
+ │    ↓
+ │  DEV
+ │
+ └─ NO
+      ↓
+   IDENTIFY ACTUAL GAP
+      ↓
+   OWNER DECISION REQUIRED?
+      ├─ YES
+      │    ↓
+      │  STOP
+      │    ↓
+      │  OWNER DECISION
+      │
+      └─ NO
+           ↓
+       MINIMAL REALIZATION
+           ↓
+       VERIFY GitHub + Supabase
+           ↓
+       PASS
+           ↓
+       EVIDENCE
+           ↓
+       DEV
+
+---
+
+# 4. PHASE -1 EXECUTION RULE
+
+Phase -1 adalah execution-control layer.
+
+Phase -1 harus menjadi titik awal audit backlog.
+
+Phase -1 mencegah:
+
+- silent architectural decisions
+- silent canonical changes
+- unsupported inference
+- treating UNVERIFIED as PASS
+- mutation tanpa evidence
+- implementation drift
+
+STOP hanya apabila ditemukan kondisi material seperti:
+
+- Canonical / Frozen Baseline contradiction
+- Governance contradiction
+- Privacy / ownership violation
+- Authorization uncertainty
+- architectural decision baru yang belum diputuskan Owner
+- mutation di luar scope
+- actual state conflict yang material
+- verification capability yang benar-benar diperlukan tetapi tidak tersedia
+
+Masalah tooling/transient error tidak otomatis menjadi architectural blocker.
+
+---
+
+# 5. OWNER / DM DECISIONS — MEMORY / KNOWLEDGE
+
+Keputusan hasil diskusi terbaru yang harus dipertahankan:
+
+## 5.1 Information Classification
+
+Informasi tidak semuanya sama.
+
+Secara konseptual terdapat:
+
+- PRIVATE / SPECIAL / PERSONAL information
+- GENERAL information
+
+SH harus mempertimbangkan konteks untuk menentukan classification.
+
+Contoh yang jelas private:
+
+- curhat
+- rahasia
+- identitas/personal detail
+- informasi khusus mengenai seseorang
+
+Informasi umum dapat diperlakukan berbeda.
+
+---
+
+## 5.2 Knowledge Candidate Rule
+
+Rule v1 yang disepakati:
+
+
+if occurrence_count >= 5
+then knowledge_candidate = true
+
+Angka 5 adalah threshold praktis v1, bukan klaim filosofis bahwa "lima kali" adalah definisi universal Knowledge.
+
+Knowledge tetap harus dipahami dalam konteks dan tidak otomatis berarti "selalu benar".
+
+
+---
+
+5.3 Knowledge Is Not Absolute Truth
+
+Knowledge dapat berkembang.
+
+Model pemahaman:
+
+EXPERIENCE ↓ UNDERSTANDING ↓ HYPOTHESIS ↓ BELIEVED KNOWLEDGE
+
+Knowledge dapat:
+
+dikoreksi
+
+diperbarui
+
+diperluas
+
+digantikan oleh pemahaman baru
+
+
+Teknik yang benar untuk satu user/kondisi tidak otomatis benar untuk semua user/kondisi.
+
+"Technique" ≠ "guaranteed implementation result".
+
+
+---
+
+6. GENERAL / SHARED KNOWLEDGE
+
+Prinsip yang disepakati:
+
+Jika suatu knowledge bermanfaat bagi user lain, SH dapat membagikannya sebagai general/shared knowledge tanpa harus meminta konfirmasi berbeda setiap kali, selama privacy dan ownership boundary tetap dipenuhi.
+
+Contoh:
+
+"Eh, gue dapat teknik baru dari teman gue."
+
+Tidak perlu mengungkap identitas teman tersebut.
+
+Analogi:
+
+Seseorang dapat menerima ilmu dari komunitas, kemudian membagikan ilmu tersebut kepada anggota komunitas lain tanpa membuka identitas sumber pribadi.
+
+
+---
+
+7. PROVENANCE / LINEAGE
+
+Sharing knowledge tidak berarti menghilangkan provenance.
+
+Konsep provenance yang disepakati:
+
+sumber dapat dirunut
+
+identitas pribadi sumber tidak harus dibuka
+
+knowledge dapat memiliki lineage/nasab
+
+jika knowledge berpindah melalui banyak SH/user, lineage dapat tetap dirunut ke atas jika data provenance tersedia
+
+
+Jadi:
+
+SOURCE IDENTITY PRIVACY ≠ LOSS OF PROVENANCE
+
+
+---
+
+8. SUPERSEDED / VERSIONING
+
+Knowledge tidak harus diedit secara destructive.
+
+Jika knowledge lama dikoreksi:
+
+OLD VERSION ↓ SUPERSEDED ↓ NEW VERSION
+
+Analogi Git:
+
+commit A
+   ↓
+commit B
+   ↓
+commit C
+
+Versi lama tetap dapat memiliki histori/lineage.
+
+Prinsip:
+
+DELETE + RECREATE dapat digunakan bila sesuai lifecycle, sementara perubahan knowledge yang perlu histori harus dapat ditrace melalui supersession/version lineage.
+
+
+---
+
+9. SHARING / OWNERSHIP
+
+Sharing adalah bagian dari ownership/governance.
+
+Owner dapat menentukan apakah suatu informasi/knowledge tertentu dibagikan dan kepada siapa ketika scope memang private/specific.
+
+Model sharing yang lebih kompleks nantinya berkaitan dengan:
+
+Clone
+
+inheritance
+
+permission scope
+
+read-only
+
+read-write
+
+ownership boundaries
+
+
+Jangan membuat keputusan baru mengenai model sharing/clone saat mengerjakan backlog yang tidak membutuhkan keputusan tersebut.
+
+
+---
+
+10. MEMORY LIFECYCLE — IMPLEMENTED
+
+Memory lifecycle actual yang sudah tersedia:
+
+CANDIDATE
+ACTIVE
+UPDATED
+SUPERSEDED
+ARCHIVED
+DEACTIVATED
+DELETED
+
+Memory memiliki antara lain:
+
+sh_id
+
+memory_type
+
+content
+
+source
+
+confidence
+
+scope
+
+visibility
+
+lifecycle
+
+occurrence_count
+
+superseded_by
+
+timestamps
+
+
+
+---
+
+11. P3B COMPLETION
+
+BL-P3B-001
+
+Memory Lifecycle / Design
+
+Status: DONE / PASS
+
+Evidence: EV-P3B-001
+
+
+---
+
+BL-P3B-002
+
+Memory Storage / Schema Implementation
+
+Status: DONE / PASS
+
+Evidence: EV-P3B-002
+
+
+---
+
+BL-P3B-003
+
+Knowledge Eligibility / Decision Layer
+
+Status: DONE / PASS
+
+Evidence: EV-P3B-003
+
+Important verified realization:
+
+scope = GENERAL
+AND
+occurrence_count >= 5
+
+menghasilkan knowledge candidate sesuai rule v1.
+
+
+---
+
+BL-P3B-004
+
+Memory Isolation
+
+Status: DONE
+
+Implementation/security boundary: PASS
+
+RLS owner policies verified.
+
+Policy family:
+
+memories_owner_select
+
+memories_owner_insert
+
+memories_owner_update
+
+memories_owner_delete
+
+
+Boundary:
+
+memory.sh_id ↓ sh_instances.account_id ↓ current_account_id()
+
+Cross-account runtime/application assurance: DEFERRED
+
+Important:
+
+Implementation PASS tidak boleh diperlakukan sebagai application-level adversarial runtime PASS.
+
+Evidence: EV-P3B-004
+
+
+---
+
+BL-P3B-005
+
+Memory Deletion
+
+Status: DONE
+
+Implementation/policy: PASS
+
+Existing owner-scoped DELETE policy verified.
+
+Lifecycle: DELETED
+
+Runtime destructive application-level verification: DEFERRED
+
+No additional schema/policy realization required.
+
+Evidence: EV-P3B-005
+
+
+---
+
+BL-P3B-006
+
+Memory Lifecycle Testing
+
+Status: DONE
+
+Database lifecycle sequence was actually exercised using synthetic test rows and cleaned afterward.
+
+Tested sequence:
+
+CANDIDATE → ACTIVE → UPDATED → ARCHIVED → SUPERSEDED → DELETE
+
+Knowledge eligibility was also exercised:
+
+GENERAL + occurrence_count = 5 → knowledge_candidate = true
+
+Superseded predecessor correctly referenced replacement via superseded_by.
+
+Final database residue:
+
+memory_count = 0 test_residue = 0
+
+Current live database state also confirmed:
+
+accounts = 2 SH instances = 2 persistent memories = 0
+
+Evidence: EV-P3B-006
+
+Application/API-level lifecycle assurance: DEFERRED
+
+
+---
+
+12. CURRENT GITHUB DEV STATE
+
+Repository:
+
+savie/second-head
+
+Branch:
+
+dev
+
+P3B evidence currently committed to DEV includes:
+
+EV-P3B-001
+
+EV-P3B-002
+
+EV-P3B-003
+
+EV-P3B-004
+
+EV-P3B-005
+
+EV-P3B-006
+
+
+P3B implementation also includes the memory storage / lifecycle / knowledge eligibility migration and RLS ownership reconciliation.
+
+
+---
+
+13. CURRENT SUPABASE DEV STATE
+
+Project:
+
+second-head
+
+Branch:
+
+dev
+
+Relevant live state verified during P3B:
+
+public.memories exists
+
+RLS enabled
+
+owner-scoped SELECT policy exists
+
+owner-scoped INSERT policy exists
+
+owner-scoped UPDATE policy exists
+
+owner-scoped DELETE policy exists
+
+memory lifecycle CHECK includes: CANDIDATE ACTIVE UPDATED SUPERSEDED ARCHIVED DEACTIVATED DELETED
+
+memory knowledge eligibility view exists
+
+knowledge threshold is implemented
+
+2 accounts exist
+
+2 SH instances exist
+
+no persistent synthetic test residue remains
+
+
+
+---
+
+14. VERIFICATION LIMITATION POLICY
+
+Do NOT confuse:
+
+IMPLEMENTATION VERIFIED with RUNTIME E2E VERIFIED.
+
+Jika implementation/policy sudah sesuai tetapi application-level behavior belum dapat diuji:
+
+mark:
+
+IMPLEMENTATION = PASS RUNTIME ASSURANCE = DEFERRED
+
+dan dokumentasikan limitation tersebut di evidence.
+
+Jangan:
+
+mengarang test result
+
+mengubah UNVERIFIED menjadi PASS
+
+membuat architectural change hanya untuk menutupi limitation
+
+menghambat seluruh build jika limitation bukan blocker material
+
+
+Deferred assurance tetap harus dapat dirunut dan dapat ditutup pada assurance/security/runtime stage yang sesuai.
+
+
+---
+
+15. CURRENT OPEN ISSUES
+
+Known higher-level open decisions/issues tetap harus dipisahkan dari P3B implementation.
+
+Jika OQ/Owner Decision belum selesai dan backlog berikutnya memang bergantung padanya:
+
+STOP pada item tersebut.
+
+Jangan membuat keputusan pengganti secara diam-diam.
+
+Jika backlog berikutnya tidak bergantung pada OQ tersebut:
+
+lanjutkan dengan risk/minimal-change discipline.
+
+
+---
+
+16. IMPORTANT WORKING STYLE
+
+Owner biasanya memberikan instruksi:
+
+GO Lanjut Gas Audit → ... → DEV
+
+Interpretasi:
+
+TERUSKAN DARI POSISI TERAKHIR.
+
+Jangan:
+
+mengulang project dari nol
+
+meminta Owner memutuskan hal yang sudah pernah diputuskan
+
+mencari backlog item yang memang sedang baru akan dibuat seolah-olah item tersebut harus sudah ada
+
+membuat keputusan arsitektur baru tanpa kebutuhan
+
+berhenti hanya karena detail non-critical belum sempurna
+
+
+Gunakan:
+
+KEEP MOVING FORWARD + REVIEW BACKWARD ONLY WHEN NECESSARY
+
+
+---
+
+17. IMPORTANT LESSON FROM P3B
+
+Kesalahan yang harus dihindari pada sesi berikutnya:
+
+JANGAN memperlakukan Session Resume sebagai source utama.
+
+Untuk backlog baru:
+
+1. buka Phase -1 dulu;
+
+
+2. baca exact backlog item + AC;
+
+
+3. cek DM / Owner decisions terbaru;
+
+
+4. baru telusuri canonical/build documents;
+
+
+5. cek GitHub actual;
+
+
+6. cek Supabase actual;
+
+
+7. reconcile;
+
+
+8. realization minimal bila perlu;
+
+
+9. verify;
+
+
+10. evidence;
+
+
+11. DEV.
+
+
+
+GitHub adalah source aktual repository. Supabase adalah source aktual database/runtime state.
+
+Session Resume hanya checkpoint continuity.
+
+
+---
+
+18. NEXT TARGET
+
+NEXT:
+
+P3C-001
+
+Sebelum mengerjakan:
+
+PHASE -1 CHECK → exact P3C backlog + AC → DM / Owner decisions → authoritative docs → GitHub → Supabase → reconcile
+
+Jangan mengasumsikan definisi P3C-001 hanya dari nama atau Execution Strategy jika Phase -1 memiliki definition yang lebih spesifik.
+
+
+---
+
+19. RESUME COMMAND
+
+Untuk melanjutkan di chat baru:
+
+"Continue SECOND HEAD from this Session Resume.
+
+P3B-001..006 sudah selesai implementation/database verification dan evidence sudah committed ke GitHub dev.
+
+Jangan gunakan resume sebagai pengganti source audit.
+
+Mulai backlog berikutnya dari Phase -1 sebagai titik awal, ikuti:
+
+PHASE -1 → DM / Owner Decisions → GitHub authoritative docs + actual dev → Supabase live dev → reconcile → PASS / gap → Owner Decision jika diperlukan → minimal realization jika diperlukan → verify → evidence → DEV.
+
+Jika ada non-critical verification/tool limitation, dokumentasikan sebagai gap/deferred assurance dan terus maju. STOP hanya untuk contradiction, privacy/ownership/security material issue, authorization uncertainty, atau Owner Decision yang memang dibutuhkan."
+
+
+---
+
+FINAL CHECKPOINT
+
+PROJECT: SECOND HEAD — SYSTEM BUILD
+
+CURRENT: ACTUAL BUILD / IMPLEMENTATION
+
+P3B: 🟢 COMPLETE
+
+P3B-001: 🟢 DONE
+
+P3B-002: 🟢 DONE
+
+P3B-003: 🟢 DONE
+
+P3B-004: 🟢 DONE Runtime assurance deferred
+
+P3B-005: 🟢 DONE Runtime assurance deferred
+
+P3B-006: 🟢 DONE Application/API assurance deferred
+
+NEXT: 🟡 P3C-001
+
+BUILD MODE: 🟢 KEEP MOVING FORWARD
+
+END SESSION RESUME
+
+Ini yang gue maksud **resume baru**: dia menyimpan hasil keputusan dan posisi kerja P3B, tapi tidak mengambil alih authority dokumen. Untuk sesi berikutnya, gue harus mulai dari **Phase -1**, lalu baru turun ke source lain dan actual GitHub/Supabase.
+
+---
+
+# SECOND HEAD — SESSION RESUME 32
+## Checkpoint: P3C-001 Complete → P3C-002 Next
+### Project: SECOND HEAD — SYSTEM BUILD
+### Language: Bahasa Indonesia
+### Purpose: Cross-session continuity checkpoint
+
+---
+
+# 0. IMPORTANT — CARA MEMBACA RESUME INI
+
+Resume ini BUKAN canonical source dan BUKAN pengganti dokumen proyek.
+
+Resume hanya checkpoint agar konteks tidak hilang.
+
+Untuk melanjutkan implementation:
+
+PHASE -1
+→ DM / OWNER DECISIONS
+→ CANONICAL
+→ BUILD SCOPE
+→ IMPLEMENTATION CONTRACT
+→ IMPLEMENTATION GUIDE
+→ EXECUTION STRATEGY
+→ GITHUB ACTUAL DEV
+→ SUPABASE ACTUAL DEV
+→ RECONCILE
+→ REALIZATION bila perlu
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+Khusus Phase -1 harus selalu dicek terlebih dahulu karena Phase -1
+adalah milestone mapping / backlog / execution-control layer yang
+menerjemahkan roadmap menjadi backlog, dependency, AC, DoD, dan gate.
+
+Phase -1 sendiri menyatakan bahwa ia bukan canonical source baru dan
+tidak boleh menggantikan Canonical, Build Scope, Contract, Guide,
+atau Execution Strategy.
+
+Authority hierarchy di Phase -1:
+
+1. SH Core Canonical v1.0
+2. Frozen Baseline Phase 01–10
+3. SH Full Build Scope v1.0
+4. SH Full Implementation Contract v1.0
+5. SH Full Implementation Guide v1.0
+6. Canonical Architecture Diagram
+7. Execution Strategy v1.0
+8. Phase -1 derived operational documents
+9. Source Code / Repository
+
+0
+1
+
+---
+
+# 1. POSISI PROYEK SAAT INI
+
+Proyek sudah berada pada ACTUAL BUILD / IMPLEMENTATION.
+
+Urutan besar:
+
+Phase -1
+↓
+Phase 0
+↓
+Phase 1
+↓
+Phase 2
+↓
+Phase 3
+  ├─ P3A Memory Storage
+  ├─ P3B Memory Lifecycle
+  ├─ P3C Memory Retrieval
+  ├─ P3D Knowledge
+  └─ P3E Context
+↓
+Phase 4 Runtime
+↓
+Phase 5 Advanced Capabilities
+↓
+Phase 6 Assurance / Release
+
+Current position:
+
+PHASE 3
+└── P3C — Memory Retrieval
+    ├── BL-P3C-001  → ditangani dan dinyatakan PASS / DEV
+    ├── BL-P3C-002  → CURRENT NEXT TARGET
+    ├── BL-P3C-003  → belum dikerjakan
+    ├── BL-P3C-004  → belum dikerjakan
+    ├── BL-P3C-005  → belum dikerjakan
+    ├── BL-P3C-006  → belum dikerjakan
+    └── BL-P3C-007  → belum dikerjakan
+
+Phase 3 BELUM DONE.
+
+Phase -1 sendiri mensyaratkan seluruh P3A, P3B, P3C, P3D, dan P3E
+selesai serta evidence tersedia sebelum Phase 3 dapat dianggap DONE.
+
+2
+3
+
+---
+
+# 2. STATUS P3A
+
+P3A — Memory Storage:
+
+BL-P3A-001  DONE
+BL-P3A-002  DONE
+BL-P3A-003  DONE
+BL-P3A-004  DONE
+BL-P3A-005  DONE
+BL-P3A-006  DONE
+
+Backlog Phase -1 memang mendefinisikan P3A sebagai:
+
+- Memory Table Design
+- Memory Schema Implementation
+- Memory Persistence Layer
+- Memory Isolation per SH
+- Memory Ownership Boundary
+- Memory Storage Testing
+
+4
+
+---
+
+# 3. STATUS P3B
+
+P3B — Memory Lifecycle:
+
+BL-P3B-001  DONE
+BL-P3B-002  DONE
+BL-P3B-003  DONE
+BL-P3B-004  DONE
+BL-P3B-005  DONE
+BL-P3B-006  DONE
+
+Phase -1 mendefinisikan:
+
+BL-P3B-001 = Memory Creation Pipeline
+BL-P3B-002 = Memory Validation
+BL-P3B-003 = Memory Update Pipeline
+BL-P3B-004 = Memory Archival
+BL-P3B-005 = Memory Deletion
+BL-P3B-006 = Memory Lifecycle Testing
+
+5
+
+Dalam percakapan implementation, P3B telah diaudit terhadap GitHub
+dan Supabase dan masing-masing ditutup melalui pola:
+
+audit
+→ gap bila ada
+→ minimal realization bila diperlukan
+→ live verification
+→ evidence
+→ DEV
+
+Beberapa assurance application-level masih dicatat sebagai
+DEFERRED ASSURANCE, bukan dipalsukan menjadi runtime E2E PASS.
+
+---
+
+# 4. MEMORY / KNOWLEDGE DECISION LAYER YANG SUDAH DISEPAKATI DALAM DISKUSI
+
+## 4.1 Classification
+
+Pemahaman Owner:
+
+Informasi harus dibaca berdasarkan konteks.
+
+Contoh yang jelas private/personal:
+
+- curhat
+- rahasia
+- informasi personal
+- identitas/detail personal
+- informasi khusus mengenai seseorang
+
+Informasi umum seperti ilmu pengetahuan dapat menjadi general knowledge.
+
+Hobi dapat merupakan informasi umum sebagai kategori, tetapi
+"hobi saya" belum otomatis berarti boleh dibagikan kepada pihak lain.
+
+---
+
+## 4.2 Occurrence / Knowledge Threshold
+
+Keputusan praktis v1 yang disepakati:
+
+if occurrence_count >= 5
+then knowledge_candidate = true
+
+Catatan:
+
+angka 5 dipilih sebagai threshold praktis agar tidak melebar menjadi diskusi tanpa batas;
+
+angka tersebut bukan klaim bahwa lima kali secara filosofis merupakan definisi universal "Knowledge";
+
+konteks dan validasi tetap relevan.
+
+
+
+---
+
+4.3 Memory ≠ Knowledge ≠ Context
+
+Invariant yang harus dipertahankan:
+
+MEMORY ≠ KNOWLEDGE ≠ CONTEXT
+
+Phase -1 juga menjadikan invariant tersebut sebagai constraint check Phase 3.
+
+
+
+
+---
+
+4.4 General Knowledge
+
+General knowledge tidak harus membawa identitas sumber pribadi.
+
+Contoh pemahaman:
+
+"gue dapat informasi dari teman"
+
+dapat menjadi general knowledge tanpa otomatis membuka identitas teman.
+
+Namun provenance tidak hilang hanya karena identity privacy dijaga.
+
+
+---
+
+4.5 Provenance / Lineage
+
+Knowledge dapat memiliki "nasab".
+
+Jika knowledge berpindah:
+
+User A → User B → User C → User D
+
+provenance dapat tetap dirunut ke sumber sebelumnya jika lineage tersimpan.
+
+Privacy sumber tidak sama dengan kehilangan provenance.
+
+
+---
+
+4.6 Superseded
+
+Perubahan knowledge/memory tidak harus destructive edit.
+
+Konsep yang disepakati:
+
+OLD MEMORY / KNOWLEDGE
+        ↓
+SUPERSEDED
+        ↓
+NEW VERSION
+
+Analogi Git:
+
+commit A
+   ↓
+commit B
+   ↓
+commit C
+
+Lifecycle storage memang memiliki status:
+
+CANDIDATE ACTIVE UPDATED SUPERSEDED ARCHIVED DEACTIVATED DELETED
+
+Namun lifecycle implementation tidak otomatis berarti seluruh semantics knowledge/versioning sudah final untuk Phase 3D. Detail Phase 3D tetap harus mengikuti exact AC dan authority-nya.
+
+
+---
+
+5. SHARING / OWNERSHIP
+
+Sharing merupakan bagian dari governance/ownership.
+
+Pemahaman Owner:
+
+owner sadar ketika informasi private dibagikan;
+
+sharing dapat bersifat read-only / read-write dan bentuk lainnya;
+
+model sharing yang lebih kompleks berkaitan dengan Clone, Inheritance, dan mekanisme terkait lainnya.
+
+
+Jangan mengarang ulang model sharing ketika backlog yang sedang dikerjakan tidak membutuhkannya.
+
+
+---
+
+6. PROVENANCE vs SHARING vs CLONE / INHERITANCE
+
+Konsep-konsep berikut sudah muncul dalam diskusi:
+
+sharing
+
+provenance
+
+clone
+
+inheritance
+
+permission
+
+read-only
+
+read-write
+
+
+Tetapi tidak semuanya sudah menjadi keputusan implementation detail untuk setiap phase.
+
+Phase 5 memang secara resmi memuat:
+
+Clone mechanism
+
+Inheritance mechanism
+
+Recovery mechanism
+
+
+dan constraint Phase 5 menyatakan:
+
+CLONE_SH ≠ SOURCE_SH
+
+serta Creator SH non-clonable harus terverifikasi.
+
+
+
+Karena itu jangan membawa detail Phase 5 ke Phase 3 tanpa dependency yang jelas.
+
+
+---
+
+7. OFFICIAL OPEN QUESTIONS
+
+Dokumen yang ada mendefinisikan official OQ-01 sampai OQ-09.
+
+Yang relevan langsung dengan Phase 3:
+
+OQ-02 — Memory Decision Implementation
+
+Mencakup:
+
+relevance scoring
+
+confidence determination
+
+memory policy mechanism
+
+rule-based vs model-assisted
+
+
+OQ-03 — Knowledge Ingestion
+
+Mencakup:
+
+supported sources
+
+provenance
+
+versioning
+
+validation
+
+
+OQ-04 — Reference Material Trust Promotion
+
+Mencakup:
+
+validation
+
+manual vs automated
+
+provenance attachment
+
+trust state
+
+
+
+
+
+---
+
+8. KONFLIK / PERBEDAAN STATUS PENTING — JANGAN DISEMBUNYIKAN
+
+Ada discrepancy penting antara dokumen Phase -1 dan jalur implementation yang sudah kita jalankan.
+
+Phase -1 saat ini secara eksplisit menyatakan:
+
+Phase 3 memerlukan OQ-02, OQ-03, OQ-04 resolved.
+
+
+
+Namun dalam percakapan Owner + implementation sebelumnya, kita telah membuat keputusan praktis mengenai:
+
+Memory → Knowledge
+
+occurrence threshold >= 5
+
+general knowledge
+
+provenance
+
+superseded
+
+sharing boundary
+
+
+dan kemudian tetap menjalankan P3A/P3B/P3C.
+
+Jadi status sebenarnya adalah:
+
+DOCUMENT STATUS:
+OQ-02/OQ-03/OQ-04 masih tercatat OPEN di source Phase -1.
+
+DISCUSSION STATUS:
+Sebagian semantics terkait sudah diputuskan / dipakai dalam
+implementation discussion.
+
+IMPLEMENTATION STATUS:
+P3A dan P3B sudah dikerjakan.
+P3C-001 sudah dikerjakan.
+
+RECONCILIATION STATUS:
+Belum boleh mengklaim bahwa OQ-02/OQ-03/OQ-04 secara formal
+sudah CLOSED di canonical/project governance hanya karena
+implementation sudah berjalan.
+
+Ini adalah konflik traceability/governance, bukan otomatis bukti bahwa implementation P3A/P3B/P3C salah.
+
+Resume ini sengaja TIDAK menyelesaikan konflik tersebut sepihak.
+
+Jika nantinya Phase -1 / Build Scope / Decision Record menunjukkan bahwa formal resolution memang wajib sebelum P3, status OQ harus ditangani sebagai governance reconciliation.
+
+
+---
+
+9. P3C — CURRENT BACKLOG
+
+Phase -1 mendefinisikan:
+
+ID	Item	Priority	Dependency	AC
+
+BL-P3C-001	Retrieval Strategy Design	P0	Phase 3B DONE	AC-MEM-13
+BL-P3C-002	Relevance Scoring	P0	BL-P3C-001	AC-MEM-14
+BL-P3C-003	Ranking Mechanism	P0	BL-P3C-002	AC-MEM-15
+BL-P3C-004	Filtering Logic	P0	BL-P3C-003	AC-MEM-16
+BL-P3C-005	Context Injection	P0	BL-P3C-004	AC-MEM-17
+BL-P3C-006	Bounded Retrieval	P0	BL-P3C-005	AC-MEM-18
+BL-P3C-007	Retrieval Testing	P0	BL-P3C-006	AC-MEM-19
+
+
+
+
+
+---
+
+10. BL-P3C-001 STATUS
+
+Dalam session ini BL-P3C-001 telah diaudit dan dinyatakan:
+
+PASS / DEV
+
+Strategy yang digunakan:
+
+QUERY
+  ↓
+RETRIEVE
+  ↓
+FILTER
+  ↓
+RANK
+  ↓
+VALIDATE
+  ↓
+CONTEXT
+
+Artifact design yang dibuat dalam session:
+
+docs/design/P3C_RETRIEVAL_STRATEGY_v1.0.md
+
+Evidence:
+
+docs/evidence/EV-P3C-001_RETRIEVAL_STRATEGY_DESIGN.md
+
+Commit yang dilaporkan:
+
+f60fe5e187413d9abe53a499767a297caf00aaa3
+
+Catatan penting:
+
+BL-P3C-001 hanya mengunci retrieval strategy.
+
+Tidak boleh menganggap scoring/ranking/filtering/context injection/ bounded retrieval sudah selesai hanya karena pipeline strategy sudah didefinisikan.
+
+
+---
+
+11. BL-P3C-002 STATUS
+
+CURRENT TARGET:
+
+BL-P3C-002
+Relevance Scoring
+AC-MEM-14
+Dependency: BL-P3C-001
+
+Status pada titik resume:
+
+NOT COMPLETED.
+
+Audit terhadap P3C-002 sempat dimulai, tetapi belum mencapai final PASS / evidence / DEV.
+
+Jadi jangan menyatakan P3C-002 DONE.
+
+
+---
+
+12. P3C-002 — HAL YANG HARUS DIAUDIT
+
+Saat melanjutkan P3C-002, mulai dari Phase -1 dan exact AC-MEM-14.
+
+Kemudian:
+
+DM / Owner decisions → Canonical → Build Scope → Contract → Guide → Execution Strategy → existing P3C artifacts → current GitHub dev → current Supabase dev
+
+Baru reconcile.
+
+Jika scoring sudah ada: PASS → evidence → DEV.
+
+Jika belum: identify gap.
+
+Jika gap bersifat technical: minimal realization → verify → evidence → DEV.
+
+Jika gap ternyata membutuhkan keputusan architectural/canonical/scope: STOP dan Owner menjadi decision-maker.
+
+Jangan menganggap OQ-02 sudah formal resolved hanya karena relevance scoring sedang menjadi item P3C-002.
+
+
+---
+
+13. CURRENT GITHUB STATE
+
+Repository yang digunakan:
+
+savie/second-head
+
+Branch kerja:
+
+dev
+
+Repository adalah actual source untuk:
+
+current implementation
+
+migration files
+
+design artifacts
+
+evidence
+
+commit history
+
+current DEV state
+
+
+GitHub harus dibaca langsung saat audit.
+
+Dokumen yang menjadi acuan utama antara lain:
+
+SECOND_HEAD_SH_CORE_CANONICAL_v1.0_BILINGUAL.md
+
+SECOND_HEAD_SH_FULL_BUILD_SCOPE_v1.0.md
+
+SECOND_HEAD_SH_FULL_IMPLEMENTATION_CONTRACT_v1.0.md
+
+SECOND_HEAD_SH_FULL_IMPLEMENTATION_GUIDE_v1.0.md
+
+SECOND_HEAD_SH_FULL_EXECUTION_STRATEGY_v1.0.md
+
+SECOND_HEAD_PHASE_MINUS_1_v1.0.md
+
+relevant Phase 3 artifacts
+
+current evidence
+
+
+
+---
+
+14. CURRENT SUPABASE STATE
+
+Supabase digunakan sebagai actual live database/runtime state.
+
+Project yang digunakan:
+
+second-head
+
+Branch:
+
+dev
+
+Dalam audit P3A/P3B yang sudah dilakukan, memory foundation telah diverifikasi mencakup:
+
+public.memories
+
+sh_id
+
+memory lifecycle
+
+scope
+
+visibility
+
+occurrence_count
+
+superseded_by
+
+owner-scoped RLS
+
+relevant migrations
+
+
+Terdapat dua account dan dua SH aktif yang digunakan sebagai basis isolation verification.
+
+Beberapa runtime/application-level tests belum selalu dapat dilakukan penuh; jika demikian status harus ditulis sebagai DEFERRED ASSURANCE dan tidak boleh dipalsukan menjadi E2E PASS.
+
+
+---
+
+15. P3B IMPLEMENTATION STATE YANG SUDAH DIGUNAKAN
+
+Memory schema saat ini secara konseptual mendukung:
+
+memory_id
+sh_id
+memory_type
+content
+source
+confidence
+scope
+visibility
+lifecycle
+occurrence_count
+created_at
+updated_at
+superseded_by
+
+Lifecycle:
+
+CANDIDATE
+ACTIVE
+UPDATED
+SUPERSEDED
+ARCHIVED
+DEACTIVATED
+DELETED
+
+RLS owner boundary:
+
+memory
+ ↓
+sh_id
+ ↓
+SH ownership/account
+ ↓
+current authenticated account
+
+P3B lifecycle testing telah dilakukan dengan synthetic data dan test residue dibersihkan.
+
+
+---
+
+16. STATUS VERIFICATION / EVIDENCE
+
+Prinsip penting yang digunakan selama implementation:
+
+IMPLEMENTATION VERIFIED
+≠
+APPLICATION E2E VERIFIED
+
+Jika implementation/database policy terbukti tetapi application-level runtime test belum dilakukan:
+
+IMPLEMENTATION = PASS
+RUNTIME ASSURANCE = DEFERRED
+
+Ini bukan failure.
+
+Tetapi juga bukan alasan untuk mengklaim E2E PASS.
+
+
+---
+
+17. DOKUMEN ACUAN YANG TERSEDIA
+
+Dalam project context tersedia:
+
+1. SECOND_HEAD_SH_CORE_CANONICAL_v1.0_BILINGUAL.md
+
+canonical authority.
+
+
+
+2. SECOND_HEAD_SH_FULL_BUILD_SCOPE_v1.0.md
+
+build requirements / build entry point.
+
+
+
+3. SECOND_HEAD_SH_FULL_IMPLEMENTATION_CONTRACT_v1.0.md
+
+implementation constraints / acceptance contract.
+
+
+
+4. SECOND_HEAD_SH_FULL_IMPLEMENTATION_GUIDE_v1.0.md
+
+implementation guidance.
+
+
+
+5. SECOND_HEAD_SH_FULL_EXECUTION_STRATEGY_v1.0.md
+
+seven-phase execution strategy.
+
+
+
+6. SECOND_HEAD_PHASE_MINUS_1_v1.0.md
+
+milestone mapping, backlog, AC mapping, DoD, gates, dependencies, risk and execution control.
+
+
+
+7. SECOND_HEAD_SESSION_RESUME_COMPILATION_v1.0.md
+
+historical/session checkpoint material.
+
+
+
+
+Catatan: Dokumen Phase -1 yang tersedia sekarang adalah yang harus dibaca terlebih dahulu ketika memulai backlog item.
+
+
+---
+
+18. PERAN SESSION RESUME
+
+Resume digunakan untuk:
+
+mengetahui posisi terakhir;
+
+mengetahui keputusan yang pernah dibahas;
+
+mengetahui item yang sudah dikerjakan;
+
+mengetahui evidence/commit terakhir;
+
+mengetahui unresolved issue;
+
+mencegah pengulangan diskusi.
+
+
+Resume TIDAK boleh digunakan untuk:
+
+mengganti canonical;
+
+mengganti Phase -1;
+
+mengubah AC;
+
+menyelesaikan OQ;
+
+menyatakan implementation PASS tanpa audit actual source;
+
+mengubah governance status.
+
+
+
+---
+
+19. KATEGORI STATUS
+
+A. FAKTA / SUDAH DISEPAKATI
+
+SECOND HEAD sedang berada pada actual build.
+
+P3A selesai dalam execution history.
+
+P3B selesai dalam execution history.
+
+P3C-001 telah dinyatakan PASS / DEV dalam session.
+
+P3C-002 adalah target berikutnya.
+
+Memory ≠ Knowledge ≠ Context.
+
+occurrence_count >= 5 digunakan sebagai knowledge_candidate threshold praktis v1.
+
+Memory lifecycle memiliki SUPERSEDED dan DELETED.
+
+Provenance harus dapat dipertahankan tanpa harus membuka identity sumber private.
+
+Sharing tunduk pada ownership/privacy/governance.
+
+Phase -1 harus menjadi titik awal audit backlog.
+
+GitHub adalah actual repository state.
+
+Supabase adalah actual database/runtime state.
+
+Evidence diperlukan sebelum item dianggap selesai.
+
+Deferred assurance harus dibedakan dari PASS.
+
+
+
+---
+
+20. KESIMPULAN SEMENTARA
+
+Retrieval strategy P3C-001 telah diwujudkan sebagai artifact.
+
+Retrieval pipeline memiliki enam tahap: QUERY → RETRIEVE → FILTER → RANK → VALIDATE → CONTEXT.
+
+Detail scoring, ranking, filtering, context injection, bounded retrieval tetap dipisahkan ke backlog P3C berikutnya.
+
+P3C-002 belum selesai.
+
+Sebagian semantics Memory/Knowledge sudah digunakan dalam implementation, tetapi formal OQ governance status belum otomatis berubah.
+
+
+
+---
+
+21. IDE / EKSPLORASI — BUKAN KEPUTUSAN FINAL
+
+Hal-hal yang pernah muncul sebagai ide atau kemungkinan:
+
+rule-based vs model-assisted scoring;
+
+cara confidence ditentukan;
+
+cara retrieval menggunakan similarity / metadata / kombinasi;
+
+ranking formula;
+
+filtering berdasarkan lifecycle/scope/visibility;
+
+bounded retrieval;
+
+knowledge provenance graph yang lebih kompleks;
+
+sharing permission yang lebih kompleks;
+
+clone/inheritance propagation;
+
+runtime/API-level assurance;
+
+observability dan performance measurement.
+
+
+Tidak ada item di atas yang boleh dianggap final hanya karena pernah dibahas.
+
+
+---
+
+22. OPEN / UNRESOLVED
+
+OQ-01
+
+Technology Stack
+
+Masih tercatat OPEN dalam source.
+
+OQ-02
+
+Memory Decision Implementation
+
+Masih tercatat OPEN dalam Phase -1 / historical compiled documentation, meskipun sebagian keputusan praktis Memory telah digunakan dalam implementation.
+
+OQ-03
+
+Knowledge Ingestion
+
+Masih tercatat OPEN.
+
+OQ-04
+
+Reference Material Trust Promotion
+
+Masih tercatat OPEN.
+
+OQ-05
+
+Clone Agreement Enforcement
+
+Masih OPEN, dependency Phase 5.
+
+OQ-06
+
+Model Selection Policy
+
+Masih OPEN, dependency Phase 4.
+
+OQ-07
+
+Backup / Restore
+
+Masih OPEN.
+
+OQ-08
+
+Data Portability
+
+Masih OPEN.
+
+OQ-09
+
+Decision Record Format
+
+Masih tercatat OPEN dalam source dan tidak boleh dianggap resolved tanpa reconciliation formal.
+
+
+
+
+---
+
+23. PERUBAHAN / PERBEDAAN DARI SESSION RESUME SEBELUMNYA
+
+PERUBAHAN 1 — Phase -1 menjadi lebih penting secara eksplisit
+
+Sebelumnya workflow percakapan sering dimulai dari resume atau execution context.
+
+Sekarang aturan yang dipertegas:
+
+PHASE -1 CHECK
+
+harus menjadi titik awal setiap backlog item.
+
+Resume hanya checkpoint.
+
+
+---
+
+PERUBAHAN 2 — P3C sudah dimulai
+
+Session sebelumnya checkpoint berada setelah P3B.
+
+Sekarang:
+
+P3A → DONE P3B → DONE P3C-001 → DONE / PASS / DEV P3C-002 → NEXT
+
+
+---
+
+PERUBAHAN 3 — OQ-02/03/04 memiliki discrepancy status
+
+Ini penting.
+
+Dalam diskusi implementation, Owner telah memberikan keputusan praktis yang memungkinkan Memory/Knowledge implementation bergerak.
+
+Namun Phase -1 yang aktual masih menuliskan:
+
+"Phase 3 memerlukan OQ-02, OQ-03, OQ-04 resolved."
+
+Jadi:
+
+PRACTICAL IMPLEMENTATION DECISIONS
+≠
+FORMAL OQ CLOSURE
+
+Status ini belum diselesaikan dalam resume.
+
+
+---
+
+PERUBAHAN 4 — P3C-001 tidak boleh dianggap sebagai P3C engine selesai
+
+P3C-001 hanya retrieval strategy.
+
+P3C-002 sampai P3C-007 tetap merupakan pekerjaan terpisah.
+
+
+---
+
+24. NEXT STEP
+
+Next step paling tepat berdasarkan kondisi terakhir:
+
+BL-P3C-002
+Relevance Scoring
+AC-MEM-14
+
+Execution protocol:
+
+PHASE -1 CHECK
+↓
+DM / OWNER DECISIONS
+↓
+GITHUB
+↓
+SUPABASE LIVE
+↓
+RECONCILE
+↓
+PASS?
+  YES → EVIDENCE → DEV
+  NO
+    ↓
+  GAP
+    ↓
+  OWNER DECISION?
+    YES → STOP
+    NO
+      ↓
+    MINIMAL REALIZATION
+      ↓
+    VERIFY
+      ↓
+    EVIDENCE
+      ↓
+    DEV
+
+Namun sebelum menganggap OQ-02 formal resolved, status discrepancy di atas tetap harus diingat.
+
+Resume ini TIDAK memutuskan apakah OQ-02/03/04 sudah boleh dianggap CLOSED secara governance.
+
+
+---
+
+25. CONTINUATION COMMAND
+
+Untuk melanjutkan:
+
+"Continue SECOND HEAD from this Session Resume.
+
+Current target: GO BL-P3C-002
+
+Mulai dari PHASE -1 CHECK. Jangan gunakan resume sebagai pengganti source.
+
+Audit: Phase -1 → DM / Owner Decisions → Canonical → Build Scope → Contract → Guide → Execution Strategy → existing Phase 3 artifacts → current GitHub dev → current Supabase dev
+
+Lalu: reconcile → PASS / gap → Owner Decision jika memang diperlukan → minimal realization jika technical dan non-blocking → verify → evidence → DEV.
+
+Jangan berhenti hanya untuk gap technical/non-critical. Jangan membuat keputusan arsitektur baru secara diam-diam. Jangan menyembunyikan discrepancy OQ-02/OQ-03/OQ-04. "
+
+
+---
+
+FINAL CHECKPOINT
+
+PROJECT: SECOND HEAD — SYSTEM BUILD
+
+CURRENT MODE: ACTUAL BUILD / CONTROLLED IMPLEMENTATION
+
+P3A: 🟢 COMPLETE
+
+P3B: 🟢 COMPLETE
+
+P3C-001: 🟢 PASS / DEV (berdasarkan execution history session)
+
+P3C-002: 🟡 NEXT / NOT COMPLETED
+
+P3C-003: ⚪ NOT STARTED
+
+P3C-004: ⚪ NOT STARTED
+
+P3C-005: ⚪ NOT STARTED
+
+P3C-006: ⚪ NOT STARTED
+
+P3C-007: ⚪ NOT STARTED
+
+PHASE 3: 🟡 NOT COMPLETE
+
+OQ-02 / OQ-03 / OQ-04: 🟠 FORMAL STATUS DISCREPANCY (practical decisions exist, source still records them as OPEN)
+
+OQ-01 / OQ-05 / OQ-06 / OQ-07 / OQ-08 / OQ-09: 🟡 OPEN according to source unless formally reconciled later
+
+PRIMARY EXECUTION CONTROL: PHASE -1
+
+ACTUAL REPOSITORY SOURCE: GITHUB DEV
+
+ACTUAL DATABASE/RUNTIME SOURCE: SUPABASE DEV
+
+SESSION RESUME ROLE: CONTINUITY ONLY
+
+NEXT TARGET: BL-P3C-002 — Relevance Scoring
+
+END OF SESSION RESUME
+
+---
+
+SECOND HEAD — SESSION RESUME 33
+
+Execution Checkpoint
+
+Project: SECOND HEAD — SYSTEM BUILD
+
+Resume Type: Cross-Session Execution Checkpoint
+Purpose: Menyimpan posisi kerja, keputusan terbaru, hasil reconcile, dan jalur audit aktual agar pekerjaan dapat dilanjutkan tanpa mengulang dari nol.
+
+---
+
+0. CARA MEMBACA RESUME INI
+
+Resume ini bukan canonical authority dan bukan pengganti dokumen proyek.
+
+Resume berfungsi sebagai checkpoint kerja.
+
+Untuk backlog berikutnya, gunakan:
+
+Resume → Phase -1 → keputusan Owner/DM terbaru → dokumen authority → GitHub DEV → Supabase DEV → reconcile → realization minimal bila diperlukan → verify → evidence → DEV
+
+Resume boleh membawa hasil keputusan dan hasil kerja sesi sebelumnya agar tidak perlu mengulang diskusi yang sudah selesai.
+
+Jika terdapat perbedaan antara dokumen lama dengan keputusan Owner yang lebih baru, jangan otomatis menganggap keputusan Owner tidak berlaku hanya karena dokumen lama masih mencatat status sebelumnya.
+
+Lakukan reconcile terlebih dahulu.
+
+Keputusan Owner terbaru adalah input aktual untuk menentukan apakah practical implementation masih dapat dilanjutkan.
+
+Dokumen lama yang belum diperbarui tidak otomatis menjadi execution blocker apabila keputusan terbaru:
+
+- sudah jelas;
+- sudah dipertimbangkan;
+- tidak mengubah Canonical;
+- tidak merusak invariant;
+- tidak mengubah ownership/privacy/security boundary;
+- tidak mengubah fundamental architecture;
+- dan cukup untuk menentukan implementation yang sedang dikerjakan.
+
+Jika kondisi tersebut terpenuhi, keputusan dapat digunakan untuk minimal reconciliation / minimal realization, lalu traceability-nya didokumentasikan.
+
+---
+
+1. SUMBER AKTUAL PROJECT
+
+GitHub
+
+Repository:
+
+"https://github.com/savie/second-head"
+
+Branch kerja:
+
+"dev"
+
+GitHub digunakan untuk memeriksa:
+
+- authority documents;
+- Phase -1;
+- backlog;
+- design artifacts;
+- implementation;
+- migrations;
+- evidence;
+- commit history;
+- current DEV state.
+
+GitHub adalah actual repository state.
+
+---
+
+Supabase
+
+Project:
+
+"second-head"
+
+Dashboard:
+
+"https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd"
+
+Branch:
+
+"dev"
+
+Supabase digunakan untuk memeriksa actual/live state:
+
+- schema;
+- tables;
+- migrations;
+- functions;
+- views;
+- RLS;
+- policies;
+- relevant runtime/database state;
+- data/residue yang relevan.
+
+Supabase adalah actual database/runtime state.
+
+Jika informasi tersedia di kedua tempat, lakukan cross-check.
+
+---
+
+2. AUTHORITY YANG DIGUNAKAN
+
+Saat memulai backlog baru, jangan hanya membaca Resume.
+
+Mulai dari:
+
+1. Phase -1
+2. DM / Owner Decisions terbaru
+3. SH Core Canonical
+4. Frozen Baseline
+5. Build Scope
+6. Implementation Contract
+7. Implementation Guide
+8. Execution Strategy
+9. Existing phase artifacts
+10. GitHub DEV
+11. Supabase DEV
+
+Resume digunakan untuk mengetahui:
+
+- apa yang sudah terjadi;
+- keputusan apa yang sudah dibuat;
+- apa yang sudah diverifikasi;
+- apa yang sudah di-DEV;
+- apa yang masih terbuka;
+- dan apa yang tidak perlu diulang.
+
+Resume tidak menggantikan source authority.
+
+---
+
+3. CURRENT PROJECT POSITION
+
+Project berada pada:
+
+"ACTUAL BUILD / CONTROLLED IMPLEMENTATION"
+
+Current phase:
+
+"PHASE 3"
+
+Current stream:
+
+"P3C — Memory Retrieval"
+
+Status:
+
+- P3A — COMPLETE
+- P3B — COMPLETE
+- P3C-001 — COMPLETE / PASS / DEV
+- P3C-002 — CURRENT TARGET / NOT COMPLETED
+- P3C-003..007 — belum dikerjakan
+- Phase 3 — BELUM COMPLETE
+
+Current execution:
+
+PHASE 3
+├── P3A — COMPLETE
+├── P3B — COMPLETE
+├── P3C-001 — COMPLETE / PASS / DEV
+├── P3C-002 — CURRENT
+├── P3C-003 — NEXT
+├── P3C-004 — NEXT
+├── P3C-005 — NEXT
+├── P3C-006 — NEXT
+└── P3C-007 — NEXT
+
+---
+
+4. OWNER / DM DECISIONS TERBARU
+
+Bagian ini menyimpan keputusan Owner yang sudah benar-benar diputuskan dalam percakapan/DM.
+
+Keputusan tersebut harus dibawa ke audit dan reconcile berikutnya.
+
+Decision — Practical Resolution of Memory / Knowledge Open Questions
+
+Topik:
+
+OQ-02 / OQ-03 / OQ-04 dan keputusan praktis yang sudah digunakan dalam implementation.
+
+Keputusan Owner:
+
+Keputusan yang sudah dibahas dan dipertimbangkan dalam DM tidak perlu diulang hanya karena dokumen lama masih mencatat OQ sebagai OPEN.
+
+Jika keputusan tersebut tidak mengubah pondasi sistem yang sudah dibuat, maka keputusan tersebut dapat digunakan untuk melanjutkan implementation.
+
+Keputusan Owner bukan berarti otomatis mengubah Canonical.
+
+Yang harus dilakukan adalah reconcile antara:
+
+DOKUMEN LAMA
+      ↓
+KEPUTUSAN OWNER TERBARU
+      ↓
+IMPLEMENTATION YANG SUDAH ADA
+      ↓
+CANONICAL / INVARIANT
+      ↓
+HASIL RECONCILE
+
+Implikasi teknis yang disepakati:
+
+- jangan redesign;
+- jangan mengubah pondasi;
+- jangan mengulang keputusan yang sudah diputuskan;
+- jangan menjadikan status "OPEN" pada dokumen lama sebagai blocker otomatis;
+- gunakan keputusan Owner terbaru sebagai input practical implementation;
+- lakukan perubahan sekecil mungkin jika implementation masih membutuhkan realization;
+- dokumentasikan hubungan antara keputusan Owner dan implementation;
+- tetap pertahankan authority Canonical;
+- tetap pertahankan ownership/privacy/security boundary.
+
+Yang TIDAK berubah:
+
+- Canonical invariant;
+- ownership boundary;
+- privacy boundary;
+- security boundary;
+- fundamental architecture;
+- flow yang sudah dibangun;
+- implementation yang sudah PASS;
+- prinsip bahwa Memory ≠ Knowledge ≠ Context.
+
+Status:
+
+"DECIDED — READY FOR RECONCILIATION"
+
+---
+
+5. DECISION vs DOKUMEN LAMA
+
+Jika terdapat keputusan Owner terbaru yang belum tercermin dalam dokumen lama, jangan langsung menyimpulkan bahwa implementation harus berhenti.
+
+Gunakan tiga kategori:
+
+A. Sudah konsisten
+
+Keputusan Owner sudah didukung oleh authority.
+
+→ lanjut normal.
+
+B. Dokumen belum diperbarui, tetapi keputusan tidak mengubah pondasi
+
+Contoh:
+
+- keputusan memperjelas behavior;
+- keputusan memperjelas policy;
+- keputusan memperjelas threshold;
+- keputusan memperjelas implementation detail;
+- keputusan tidak mengubah Canonical invariant;
+- tidak mengubah ownership/privacy/security boundary;
+- tidak membuat arsitektur baru.
+
+→ reconcile sebagai keputusan terbaru, dokumentasikan traceability-nya, dan lanjutkan implementation bila AC dapat dipenuhi.
+
+Dokumen lama tidak harus langsung diganti hanya untuk membuat implementation bergerak.
+
+C. Keputusan benar-benar bertentangan dengan authority
+
+Contoh:
+
+- mengubah Canonical invariant;
+- mengubah fundamental architecture;
+- mengubah ownership/security boundary;
+- mengubah scope secara material;
+- membutuhkan keputusan baru yang belum diputuskan.
+
+→ STOP dan Owner menjadi decision-maker.
+
+---
+
+6. RECONCILE PRINCIPLE
+
+Tujuan reconcile adalah:
+
+mendapatkan implementation yang paling kecil dan paling aman yang memenuhi keputusan terbaru tanpa menciptakan arsitektur baru atau merusak pondasi yang sudah dibangun.
+
+Prinsip:
+
+- jangan redesign jika tidak perlu;
+- jangan membuat layer baru hanya untuk memenuhi wording;
+- jangan mengubah schema fundamental jika existing schema sudah cukup;
+- jangan mengubah Canonical;
+- jangan mengubah ownership/privacy/security boundary;
+- jangan mengulang pekerjaan yang sudah PASS;
+- manfaatkan implementation yang sudah ada;
+- lakukan perubahan sekecil mungkin;
+- setiap perubahan harus dapat diverifikasi;
+- jika tidak ada gap nyata, jangan melakukan mutation.
+
+Nama pendek:
+
+MINIMAL RECONCILIATION / MINIMAL REALIZATION
+
+Prinsip ini digunakan agar perbedaan antara dokumen lama dan keputusan terbaru tidak otomatis menghentikan build apabila secara teknis keputusan tersebut sudah dapat direalisasikan dengan aman.
+
+---
+
+7. OQ / OPEN DECISION RECONCILIATION
+
+Status OQ di dokumen lama tidak otomatis berarti keputusan Owner terbaru tidak berlaku.
+
+Untuk setiap OQ yang muncul:
+
+DOCUMENT STATUS
+      ↓
+LATEST OWNER / DM DECISION
+      ↓
+DOES DECISION RESOLVE THE PRACTICAL QUESTION?
+      ↓
+YES
+      ↓
+RECONCILE
+      ↓
+DOCUMENT TRACEABILITY
+      ↓
+CONTINUE IF SAFE
+
+NO
+      ↓
+ACTUAL BLOCKER
+      ↓
+OWNER DECISION REQUIRED
+
+Jika keputusan Owner sudah cukup untuk menjalankan backlog tanpa mengubah pondasi:
+
+jangan mengulang pertanyaan yang sudah dijawab Owner.
+
+Tetap catat jika formal document status belum diperbarui.
+
+Contoh:
+
+OQ-02
+Document status: OPEN
+
+Latest Owner decision:
+[keputusan terbaru]
+
+Reconciliation:
+Decision provides sufficient implementation direction for the
+current backlog and does not alter Canonical architecture,
+invariants, ownership, privacy, or security boundaries.
+
+Formal document status:
+OPEN / NOT YET REWRITTEN
+
+Execution status:
+UNBLOCKED FOR CURRENT BACKLOG
+
+Hal yang sama berlaku untuk OQ-03 dan OQ-04 jika hasil reconcile menunjukkan bahwa keputusan Owner sudah cukup untuk practical implementation.
+
+Artinya:
+
+formal documentation status ≠ practical execution blocker
+
+kecuali memang ditemukan contradiction material.
+
+---
+
+8. VERIFICATION DISCIPLINE
+
+Bedakan:
+
+IMPLEMENTATION VERIFIED
+
+dengan:
+
+APPLICATION / E2E VERIFIED
+
+Jika database/schema/policy sudah benar tetapi runtime application test belum tersedia:
+
+IMPLEMENTATION = PASS
+RUNTIME ASSURANCE = DEFERRED
+
+Jangan:
+
+- mengarang hasil test;
+- menyebut E2E PASS tanpa test;
+- mengubah deferred menjadi PASS;
+- membuat architecture baru hanya karena test tooling belum tersedia.
+
+Jika limitation bukan material blocker:
+
+document → continue.
+
+---
+
+9. BACKLOG EXECUTION FLOW
+
+Untuk setiap backlog:
+
+GO BL-Pxx-xxx
+        ↓
+PHASE -1 CHECK
+        ↓
+LATEST DM / OWNER DECISIONS
+        ↓
+AUTHORITY DOCUMENT CHECK
+        ↓
+GITHUB DEV AUDIT
+        ↓
+SUPABASE DEV AUDIT
+        ↓
+RECONCILE
+        ↓
+GAP?
+ ├─ NO
+ │   ↓
+ │ PASS
+ │   ↓
+ │ EVIDENCE
+ │   ↓
+ │ DEV
+ │
+ └─ YES
+      ↓
+   IS OWNER DECISION NEEDED?
+      ├─ NO
+      │   ↓
+      │ MINIMAL RECONCILIATION
+      │ / MINIMAL REALIZATION
+      │   ↓
+      │ VERIFY
+      │   ↓
+      │ EVIDENCE
+      │   ↓
+      │ DEV
+      │
+      └─ YES
+          ↓
+       STOP ONLY THAT DEPENDENCY
+          ↓
+       OWNER DECISION
+
+Jangan menghentikan seluruh build karena gap teknis yang bisa diselesaikan dengan perubahan minimal.
+
+STOP hanya jika benar-benar ditemukan:
+
+- contradiction material;
+- perubahan Canonical;
+- perubahan fundamental architecture;
+- ownership/privacy/security violation;
+- authorization uncertainty yang material;
+- scope change material;
+- atau keputusan baru yang memang belum pernah dibuat.
+
+---
+
+10. CURRENT IMPLEMENTATION HISTORY
+
+Phase 3A — Memory Storage
+
+Status:
+
+"COMPLETE"
+
+Backlog:
+
+- BL-P3A-001 — DONE
+- BL-P3A-002 — DONE
+- BL-P3A-003 — DONE
+- BL-P3A-004 — DONE
+- BL-P3A-005 — DONE
+- BL-P3A-006 — DONE
+
+Foundation memory storage dan ownership boundary telah direalisasikan dan diverifikasi pada execution history sebelumnya.
+
+---
+
+Phase 3B — Memory Lifecycle
+
+Status:
+
+"COMPLETE"
+
+Backlog:
+
+- BL-P3B-001 — DONE
+- BL-P3B-002 — DONE
+- BL-P3B-003 — DONE
+- BL-P3B-004 — DONE
+- BL-P3B-005 — DONE
+- BL-P3B-006 — DONE
+
+Lifecycle yang telah digunakan:
+
+CANDIDATE
+ACTIVE
+UPDATED
+SUPERSEDED
+ARCHIVED
+DEACTIVATED
+DELETED
+
+Knowledge candidate rule v1 yang telah digunakan:
+
+scope = GENERAL
+AND
+occurrence_count >= 5
+→ knowledge_candidate = true
+
+P3B lifecycle testing telah dilakukan menggunakan synthetic data dan test residue telah dibersihkan.
+
+Beberapa application/runtime assurance tetap dicatat sebagai:
+
+"DEFERRED ASSURANCE"
+
+bukan sebagai E2E PASS.
+
+Evidence P3B:
+
+- EV-P3B-001
+- EV-P3B-002
+- EV-P3B-003
+- EV-P3B-004
+- EV-P3B-005
+- EV-P3B-006
+
+---
+
+Phase 3C — Memory Retrieval
+
+BL-P3C-001
+
+Status:
+
+"PASS / DEV"
+
+Retrieval strategy:
+
+QUERY
+  ↓
+RETRIEVE
+  ↓
+FILTER
+  ↓
+RANK
+  ↓
+VALIDATE
+  ↓
+CONTEXT
+
+Artifact:
+
+"docs/design/P3C_RETRIEVAL_STRATEGY_v1.0.md"
+
+Evidence:
+
+"docs/evidence/EV-P3C-001_RETRIEVAL_STRATEGY_DESIGN.md"
+
+Commit yang dilaporkan:
+
+"f60fe5e187413d9abe53a499767a297caf00aaa3"
+
+Catatan:
+
+BL-P3C-001 hanya mengunci retrieval strategy.
+
+Scoring, ranking, filtering, context injection, dan bounded retrieval tetap merupakan backlog terpisah.
+
+---
+
+BL-P3C-002
+
+Status:
+
+"CURRENT / NOT COMPLETED"
+
+Nama:
+
+"Relevance Scoring"
+
+AC:
+
+"AC-MEM-14"
+
+Dependency:
+
+"BL-P3C-001"
+
+Belum boleh dinyatakan PASS sebelum audit, reconcile, implementation/verification, evidence, dan DEV selesai.
+
+---
+
+11. CURRENT DATABASE STATE
+
+Supabase:
+
+"second-head"
+
+Dashboard:
+
+"https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd"
+
+Branch:
+
+"dev"
+
+State relevan yang sudah diverifikasi dari execution sebelumnya:
+
+- "public.memories" tersedia;
+- RLS enabled;
+- owner-scoped SELECT policy tersedia;
+- owner-scoped INSERT policy tersedia;
+- owner-scoped UPDATE policy tersedia;
+- owner-scoped DELETE policy tersedia;
+- memory lifecycle mendukung status yang telah ditetapkan;
+- knowledge eligibility mechanism tersedia;
+- memory ownership boundary menggunakan hubungan SH/account;
+- synthetic lifecycle test telah dilakukan;
+- test residue telah dibersihkan.
+
+Current known database baseline dari P3B:
+
+accounts = 2
+SH instances = 2
+persistent synthetic memory residue = 0
+
+Known deferred assurance:
+
+- application/API-level runtime assurance;
+- adversarial cross-account runtime assurance bila belum dilakukan pada application layer.
+
+Status tersebut tidak boleh diubah menjadi E2E PASS tanpa verification aktual.
+
+---
+
+12. CURRENT GITHUB STATE
+
+Repository:
+
+"https://github.com/savie/second-head"
+
+Branch:
+
+"dev"
+
+Relevant implementation history:
+
+- P3A memory foundation;
+- P3B lifecycle/storage/knowledge eligibility;
+- P3B RLS ownership reconciliation;
+- P3B evidence;
+- P3C retrieval strategy;
+- P3C-001 evidence.
+
+Relevant P3C artifacts:
+
+"docs/design/P3C_RETRIEVAL_STRATEGY_v1.0.md"
+
+"docs/evidence/EV-P3C-001_RETRIEVAL_STRATEGY_DESIGN.md"
+
+Latest known P3C-001 commit:
+
+"f60fe5e187413d9abe53a499767a297caf00aaa3"
+
+Saat backlog baru dimulai, audit ulang GitHub DEV aktual. Jangan menganggap resume sebagai pengganti repository state saat ini.
+
+---
+
+13. KNOWN OPEN ITEMS
+
+Pisahkan antara:
+
+TRUE BLOCKER
+
+Tidak ada blocker baru yang otomatis muncul hanya karena OQ-02/OQ-03/OQ-04 masih tertulis "OPEN" pada dokumen lama.
+
+Status tersebut harus direconcile terhadap keputusan Owner terbaru sebelum dianggap blocker.
+
+Jika hasil reconcile menunjukkan keputusan sudah cukup dan tidak mengubah pondasi:
+
+"UNBLOCKED FOR CURRENT BACKLOG"
+
+Jika ternyata ditemukan contradiction material:
+
+"TRUE BLOCKER"
+
+---
+
+DOCUMENTATION GAP
+
+- OQ-02 masih dapat tercatat "OPEN" pada dokumen lama meskipun keputusan praktis Owner sudah memberikan arah implementation.
+- OQ-03 masih dapat tercatat "OPEN" pada dokumen lama meskipun keputusan praktis Owner sudah memberikan arah implementation.
+- OQ-04 masih dapat tercatat "OPEN" pada dokumen lama meskipun keputusan praktis Owner sudah memberikan arah implementation.
+- Formal document status belum otomatis berubah hanya karena keputusan DM telah dibuat.
+
+Documentation gap tidak otomatis menjadi execution blocker.
+
+Traceability harus dicatat ketika keputusan tersebut digunakan.
+
+---
+
+DEFERRED ASSURANCE
+
+Beberapa assurance application/runtime belum otomatis tersedia:
+
+- application/API-level lifecycle assurance;
+- adversarial runtime isolation assurance;
+- runtime E2E assurance yang belum benar-benar diuji.
+
+Jika backlog dapat dilanjutkan tanpa menutup assurance tersebut:
+
+"DOCUMENT → CONTINUE"
+
+Assurance ditutup pada stage yang sesuai.
+
+---
+
+FUTURE SCOPE
+
+Hal-hal seperti:
+
+- Clone;
+- Inheritance;
+- Recovery;
+- advanced sharing;
+- model selection;
+- advanced runtime assurance;
+- portability;
+- backup/restore;
+
+tidak boleh dibawa masuk ke backlog Phase 3 kecuali dependency-nya memang diperlukan.
+
+---
+
+14. THINGS NOT TO REOPEN
+
+Jangan mengulang keputusan/implementation berikut kecuali audit menemukan contradiction nyata:
+
+- Phase 3A memory foundation yang sudah PASS;
+- Phase 3B lifecycle implementation yang sudah PASS;
+- owner-scoped memory isolation boundary;
+- lifecycle state yang sudah direalisasikan;
+- "occurrence_count >= 5" sebagai practical knowledge candidate threshold v1;
+- Memory ≠ Knowledge ≠ Context;
+- provenance tidak harus membuka identity sumber private;
+- superseded/version lineage;
+- P3C retrieval strategy yang sudah dibuat;
+- keputusan Owner yang sudah jelas dan tidak mengubah pondasi.
+
+Tujuannya agar sesi berikutnya tidak kembali membuat keputusan yang sudah pernah dibuat.
+
+---
+
+15. CURRENT NEXT TARGET
+
+CURRENT:
+
+BL-P3C-002 — Relevance Scoring
+
+AC:
+
+AC-MEM-14
+
+DEPENDENCY:
+
+BL-P3C-001 — COMPLETE
+
+NEXT ACTION:
+
+PHASE -1 CHECK
+→ LATEST OWNER DECISIONS
+→ AUTHORITY
+→ GITHUB DEV
+→ SUPABASE DEV
+→ RECONCILE
+→ IMPLEMENT / PASS
+→ EVIDENCE
+→ DEV
+
+Dalam mengerjakan P3C-002, OQ-02 jangan diperlakukan sebagai blocker otomatis hanya karena historical/document status masih "OPEN".
+
+Audit harus menentukan apakah keputusan Owner terbaru sudah cukup untuk practical relevance scoring implementation.
+
+---
+
+16. WORKING STYLE
+
+Owner menggunakan instruksi seperti:
+
+"GO ... → audit → reconcile → lanjut sampai DEV."
+
+Artinya:
+
+teruskan pekerjaan dari posisi terakhir sampai backlog item selesai, bukan berhenti di setiap ketidaksempurnaan.
+
+Gunakan:
+
+KEEP MOVING FORWARD + REVIEW BACKWARD ONLY WHEN NECESSARY
+
+Jangan:
+
+- mulai project dari nol;
+- meminta Owner mengulang keputusan yang sudah dibuat;
+- menganggap dokumen lama selalu lebih baru daripada keputusan Owner;
+- menjadikan status "OPEN" historis sebagai blocker otomatis;
+- membuat arsitektur baru untuk menyelesaikan gap kecil;
+- menghentikan implementation hanya karena wording dokumentasi belum diperbarui;
+- menganggap keputusan Owner sebagai Canonical change jika memang bukan itu maksudnya;
+- mengarang keputusan ketika benar-benar belum ada;
+- mengklaim verification yang belum dilakukan.
+
+Jika ada gap:
+
+audit → pahami → reconcile → minimal realization → verify → evidence → DEV
+
+bukan:
+
+audit → bingung → STOP
+
+---
+
+17. FINAL CHECKPOINT
+
+PROJECT:
+
+"SECOND HEAD — SYSTEM BUILD"
+
+MODE:
+
+"ACTUAL BUILD / CONTROLLED IMPLEMENTATION"
+
+CURRENT PHASE:
+
+"PHASE 3"
+
+COMPLETED:
+
+- P3A — COMPLETE
+- P3B — COMPLETE
+- P3C-001 — PASS / DEV
+
+CURRENT:
+
+"BL-P3C-002 — Relevance Scoring"
+
+NEXT:
+
+"P3C-003 — Ranking Mechanism"
+
+TRUE BLOCKERS:
+
+"Belum ada blocker baru yang terverifikasi."
+
+DOCUMENTATION GAPS:
+
+- OQ-02 / OQ-03 / OQ-04 masih dapat tercatat OPEN pada historical/Phase -1 documentation.
+- Keputusan Owner terbaru sudah memberikan practical direction yang harus direconcile, bukan otomatis diabaikan.
+- Formal documentation belum otomatis dianggap berubah sebelum traceability/reconciliation dilakukan.
+
+DEFERRED ASSURANCE:
+
+- Application/API runtime assurance yang belum benar-benar diuji.
+- Adversarial runtime assurance yang belum tersedia.
+
+LATEST OWNER DECISIONS:
+
+- Keputusan Owner terbaru digunakan sebagai input reconcile.
+- Dokumen lama yang belum diperbarui tidak otomatis menjadi blocker.
+- Selama keputusan tidak mengubah Canonical, invariant, ownership, privacy, security boundary, atau fundamental architecture, implementation dapat dilanjutkan melalui minimal reconciliation/minimal realization.
+- Jangan mengulang pertanyaan yang sudah dijawab Owner.
+
+GITHUB:
+
+"https://github.com/savie/second-head"
+
+SUPABASE:
+
+"https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd"
+
+PRIMARY EXECUTION CONTROL:
+
+"PHASE -1"
+
+ACTUAL REPOSITORY:
+
+"GITHUB DEV"
+
+ACTUAL DATABASE:
+
+"SUPABASE DEV"
+
+RESUME ROLE:
+
+"CONTINUITY + EXECUTION CONTEXT"
+
+---
+
+18. CONTINUATION COMMAND
+
+Untuk melanjutkan di chat berikutnya:
+
+Continue SECOND HEAD from this Session Resume.
+
+Jangan mulai dari nol.
+
+Gunakan Resume ini untuk continuity, lalu audit actual source.
+
+Mulai dari Phase -1 untuk backlog current target.
+
+Gunakan keputusan Owner/DM terbaru sebagai input reconcile.
+
+Jika keputusan Owner sudah cukup untuk menyelesaikan practical implementation
+dan tidak mengubah Canonical, ownership, privacy, security boundary,
+invariant, atau fundamental architecture, jangan berhenti hanya karena
+dokumen lama belum diperbarui.
+
+Lakukan minimal reconciliation / minimal realization.
+
+Audit:
+
+Phase -1
+→ Owner / DM Decisions
+→ Canonical / Frozen Authority
+→ Build Scope
+→ Implementation Contract
+→ Implementation Guide
+→ Execution Strategy
+→ existing artifacts
+→ GitHub DEV
+→ Supabase DEV
+
+Lalu:
+
+RECONCILE
+→ PASS / GAP
+→ MINIMAL REALIZATION bila diperlukan
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+Jika dokumen lama mengatakan OPEN tetapi Owner Decision terbaru sudah
+memberikan practical resolution, tentukan apakah itu:
+
+A. masih true blocker,
+B. documentation gap,
+atau
+C. sudah cukup untuk execution.
+
+Jangan mengulang pertanyaan yang sudah dijawab Owner.
+
+STOP hanya jika:
+
+- benar-benar membutuhkan keputusan Owner baru;
+- ada contradiction material;
+- ada risiko Canonical/privacy/ownership/security yang tidak dapat
+  diselesaikan secara aman;
+- atau implementation membutuhkan perubahan fundamental yang belum diputuskan.
+
+Jangan berhenti hanya karena documentation gap atau technical gap
+yang dapat diselesaikan dengan minimal reconciliation.
+
+GitHub:
+https://github.com/savie/second-head
+
+Supabase:
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+END SESSION RESUME
+
+---
+
+Siap. Ini Session Resume baru berdasarkan posisi terakhir setelah P3E-009 PASS / DEV, dengan seluruh pola kerja yang sudah kita sepakati dimasukkan. Gue juga ubah bagian status supaya keputusan Owner terbaru tidak kembali dianggap mentok hanya karena dokumen lama belum ditulis ulang, tetapi tetap tidak mengklaimnya sebagai perubahan Canonical.
+
+# SECOND HEAD — SESSION RESUME 34
+
+## Execution Checkpoint
+
+### Project: SECOND HEAD — SYSTEM BUILD
+
+**Resume Type:** Cross-Session Execution Checkpoint  
+**Purpose:** Menyimpan posisi kerja, keputusan terbaru, hasil reconcile, dan jalur audit aktual agar pekerjaan dapat dilanjutkan tanpa mengulang dari nol.
+
+---
+
+# 0. CARA MEMBACA RESUME INI
+
+Resume ini bukan canonical authority dan bukan pengganti dokumen proyek.
+
+Resume berfungsi sebagai checkpoint kerja.
+
+Untuk backlog berikutnya, gunakan:
+
+**Resume → Phase -1 → keputusan Owner/DM terbaru → dokumen authority → GitHub DEV → Supabase DEV → reconcile → realization minimal bila diperlukan → verify → evidence → DEV**
+
+Resume boleh membawa hasil keputusan dan hasil kerja sesi sebelumnya agar tidak perlu mengulang diskusi yang sudah selesai.
+
+Jika terdapat perbedaan antara dokumen lama dengan keputusan Owner yang lebih baru:
+
+**jangan otomatis menganggap keputusan Owner tidak berlaku hanya karena dokumen lama masih mencatat status sebelumnya.**
+
+Lakukan reconcile terlebih dahulu.
+
+Jika keputusan terbaru:
+
+- tidak mengubah Canonical;
+- tidak mengubah invariant;
+- tidak mengubah ownership;
+- tidak mengubah privacy/security boundary;
+- tidak mengubah fundamental architecture;
+- dan cukup untuk menjawab kebutuhan implementation;
+
+maka keputusan tersebut dapat digunakan sebagai **latest Owner/DM decision input** untuk implementation.
+
+Formal document status yang belum diperbarui dicatat sebagai **DOCUMENTATION GAP**, bukan otomatis sebagai implementation blocker.
+
+---
+
+# 1. SUMBER AKTUAL PROJECT
+
+## GitHub
+
+Repository:
+
+`https://github.com/savie/second-head`
+
+Branch kerja:
+
+`dev`
+
+GitHub digunakan untuk memeriksa:
+
+- authority documents;
+- Phase -1;
+- backlog;
+- design artifacts;
+- implementation;
+- migrations;
+- evidence;
+- commit history;
+- current DEV state.
+
+## Supabase
+
+Project:
+
+`second-head`
+
+Dashboard:
+
+`https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd`
+
+Branch:
+
+`dev`
+
+Supabase digunakan untuk memeriksa actual/live state:
+
+- schema;
+- tables;
+- migrations;
+- functions;
+- views;
+- RLS;
+- policies;
+- relevant runtime/database state;
+- data/residue yang relevan.
+
+**GitHub = actual repository state.**
+
+**Supabase = actual database/runtime state.**
+
+Jika informasi tersedia di kedua tempat, lakukan cross-check.
+
+Jangan berhenti dengan alasan "tidak punya dokumen" sebelum actual source yang tersedia diperiksa.
+
+Jika suatu dokumen memang tidak tersedia di project/repository, baru catat sebagai missing source.
+
+---
+
+# 2. AUTHORITY YANG DIGUNAKAN
+
+Saat memulai backlog baru, jangan hanya membaca Resume.
+
+Mulai dari:
+
+1. Phase -1
+2. DM / Owner Decisions terbaru
+3. SH Core Canonical
+4. Frozen Baseline
+5. Build Scope
+6. Implementation Contract
+7. Implementation Guide
+8. Execution Strategy
+9. Existing phase artifacts
+10. GitHub DEV
+11. Supabase DEV
+
+Resume digunakan untuk mengetahui:
+
+- apa yang sudah terjadi;
+- apa yang sudah selesai;
+- keputusan apa yang sudah dibuat;
+- apa yang masih deferred;
+- apa yang tidak perlu dibuka kembali.
+
+Resume bukan pengganti source authority.
+
+---
+
+# 3. CURRENT PROJECT POSITION
+
+Project sudah berada pada:
+
+**ACTUAL BUILD / CONTROLLED IMPLEMENTATION**
+
+Phase 3 execution stream:
+
+PHASE 3
+├── P3A — COMPLETE
+├── P3B — COMPLETE
+├── P3C — COMPLETE
+├── P3D — COMPLETE
+└── P3E — COMPLETE
+
+P3E:
+
+P3E
+├── BL-P3E-001 — PASS / DEV
+├── BL-P3E-002 — PASS / DEV
+├── BL-P3E-003 — PASS / DEV
+├── BL-P3E-004 — PASS / DEV
+├── BL-P3E-005 — PASS / DEV
+├── BL-P3E-006 — PASS / DEV
+├── BL-P3E-007 — PASS / DEV
+├── BL-P3E-008 — PASS / DEV
+└── BL-P3E-009 — PASS / DEV
+
+Current position:
+
+Phase 3 implementation stream telah mencapai P3E-009 — Context Testing.
+
+BL-P3E-009 telah dinyatakan:
+
+PASS / DEV
+
+Dengan demikian P3E-009 merupakan checkpoint terakhir Phase 3E yang telah dikerjakan dalam execution history sesi ini.
+
+Next work: lanjut ke backlog setelah Phase 3 sesuai Phase -1 / actual DEV state.
+
+Jangan mengasumsikan item berikutnya hanya dari Resume jika Phase -1 mendefinisikan urutan berbeda.
+
+---
+
+4. OWNER / DM DECISIONS TERBARU
+
+4.1 Memory ≠ Knowledge ≠ Context
+
+Keputusan konseptual yang sudah digunakan:
+
+MEMORY ≠ KNOWLEDGE ≠ CONTEXT
+
+Memory digunakan untuk kontinuitas pengalaman/pemahaman.
+
+Memory tidak otomatis berarti Knowledge.
+
+Knowledge tidak otomatis berarti Context.
+
+---
+
+4.2 Information → Memory → Understanding → Knowledge
+
+Model konseptual yang telah disepakati:
+
+Experience / Information
+          ↓
+        Memory
+          ↓
+     Understanding
+          ↓
+      Hypothesis
+          ↓
+Trusted Knowledge
+
+Model ini adalah decision intent / discussion record.
+
+Bukan perubahan Canonical otomatis.
+
+---
+
+4.3 Dua Jalur Menuju Knowledge
+
+Dua jalur yang telah disepakati:
+
+Jalur A — SH Recognition
+
+SH dapat mengenali bahwa sesuatu yang dipelajari memiliki karakteristik sebagai ilmu/pengetahuan.
+
+Jalur B — Explicit Owner/User Teaching
+
+Owner/user dapat secara eksplisit menyatakan bahwa dirinya sedang mengajarkan sesuatu kepada SH.
+
+Contoh:
+
+«"Gw mau ngajarin lu teknik fotografi ini."»
+
+Ini merupakan sinyal eksplisit pembelajaran/knowledge.
+
+---
+
+4.4 Occurrence Threshold
+
+Rule praktis v1 yang telah dipakai:
+
+if occurrence >= 5:
+    knowledge_candidate = true
+
+Interpretasi:
+
+- occurrence rendah → belum otomatis Knowledge;
+- occurrence yang meningkat → sinyal penguatan;
+- ">= 5" → memenuhi threshold awal Knowledge Candidate.
+
+Penting:
+
+occurrence >= 5 bukan bukti kebenaran absolut.
+
+Threshold tersebut adalah mekanisme praktis v1.
+
+---
+
+4.5 Knowledge Tidak Absolut
+
+Knowledge dapat:
+
+- benar pada kondisi tertentu;
+- gagal pada kondisi lain;
+- cocok untuk satu user tetapi tidak cocok untuk user lain;
+- dikoreksi;
+- diperbarui;
+- diperluas;
+- digantikan oleh pemahaman baru.
+
+Prinsip:
+
+«Knowledge ≠ guaranteed result.»
+
+Dan:
+
+«Technique ≠ guaranteed implementation result.»
+
+---
+
+4.6 Privacy / Generalization Boundary
+
+SH harus membedakan:
+
+GENERAL INFORMATION
+vs
+PRIVATE / PERSONAL / SPECIAL INFORMATION
+
+Informasi pribadi tidak boleh otomatis digeneralisasikan menjadi Knowledge yang dapat digunakan user lain.
+
+Contoh:
+
+- curhat;
+- rahasia;
+- identitas;
+- detail personal;
+- pengalaman pribadi tertentu;
+
+tetap berada dalam privacy/ownership boundary.
+
+---
+
+4.7 General Knowledge Sharing
+
+Jika suatu ilmu/knowledge memang bermanfaat sebagai general/shared knowledge, SH dapat menggunakannya untuk membantu user lain tanpa membuka identitas sumber private.
+
+Prinsip:
+
+Knowledge
+   ↓
+General / Shared Knowledge
+   ↓
+dapat membantu user lain
+
+tanpa:
+
+Knowledge
+   ↓
+membocorkan identity / private information
+
+---
+
+4.8 Provenance / Lineage
+
+Knowledge tetap idealnya memiliki provenance.
+
+Identitas private sumber tidak harus dibuka kepada user lain.
+
+Namun lineage dapat dipertahankan secara internal apabila data provenance tersedia.
+
+Prinsip:
+
+SOURCE IDENTITY PRIVACY ≠ LOSS OF PROVENANCE
+
+External/web knowledge juga harus mempertahankan source/reference apabila memang berasal dari sumber eksternal.
+
+---
+
+4.9 Knowledge Correction / Superseded
+
+Knowledge dapat berkembang.
+
+Model:
+
+Knowledge v1
+      ↓
+Correction / New Evidence
+      ↓
+Knowledge v2
+
+Versi lama dapat menjadi:
+
+"SUPERSEDED"
+
+History/lineage tidak perlu dihancurkan secara destructive.
+
+Analogi:
+
+commit A
+   ↓
+commit B
+   ↓
+commit C
+
+---
+
+4.10 Sharing / Ownership
+
+Sharing tetap berada di dalam:
+
+- ownership;
+- privacy;
+- permission;
+- governance boundary.
+
+Detail Clone / Inheritance / permission kompleks tidak dibuat ulang dalam Phase 3 jika tidak dibutuhkan backlog.
+
+---
+
+4.11 Core Control
+
+Knowledge tidak otomatis mengubah Core.
+
+Tetap berlaku:
+
+Learning ≠ Automatic Core Modification
+
+Core memiliki governance dan authority boundary tersendiri.
+
+---
+
+4.12 Status Keputusan Owner terhadap Dokumen Lama
+
+Keputusan Owner/DM terbaru merupakan input aktual untuk reconcile.
+
+Jika dokumen lama masih mencatat OQ sebagai OPEN tetapi diskusi Owner telah memberikan keputusan praktis yang:
+
+- menjawab pertanyaan implementation;
+- tidak mengubah Canonical;
+- tidak merusak architecture;
+- tidak mengubah ownership/privacy/security boundary;
+- dan tidak membutuhkan keputusan baru;
+
+maka:
+
+FORMAL DOCUMENT STATUS
+        ≠
+PRACTICAL EXECUTION BLOCKER
+
+Dokumen lama dapat tetap menunjukkan:
+
+"OPEN / NOT YET REWRITTEN"
+
+sementara execution dapat menunjukkan:
+
+"UNBLOCKED FOR CURRENT BACKLOG"
+
+Status tersebut harus didokumentasikan sebagai traceability/documentation gap.
+
+---
+
+5. DECISION vs DOKUMEN LAMA
+
+Gunakan tiga kategori.
+
+A. SUDAH KONSISTEN
+
+Keputusan Owner sudah didukung authority.
+
+→ lanjut normal.
+
+B. DOKUMEN BELUM DIPERBARUI, TETAPI PONDASI TIDAK BERUBAH
+
+Contoh:
+
+- memperjelas behavior;
+- memperjelas policy;
+- memperjelas threshold;
+- memperjelas implementation detail;
+- tidak mengubah Canonical invariant;
+- tidak mengubah ownership/privacy/security;
+- tidak membuat fundamental architecture baru.
+
+→ lakukan:
+
+MINIMAL RECONCILIATION
+
+Kemudian:
+
+DOCUMENT TRACEABILITY → IMPLEMENTATION → VERIFY → EVIDENCE → DEV
+
+Dokumen lama tidak harus dimutasi terlebih dahulu hanya agar implementation dapat bergerak.
+
+C. KONTRADIKSI MATERIAL
+
+Jika keputusan ternyata:
+
+- mengubah Canonical invariant;
+- mengubah fundamental architecture;
+- mengubah ownership/security boundary;
+- mengubah privacy model;
+- mengubah scope secara material;
+- membutuhkan keputusan baru;
+
+→ STOP hanya pada dependency tersebut.
+
+Owner menjadi decision-maker.
+
+---
+
+6. RECONCILE PRINCIPLE
+
+Tujuan reconcile:
+
+«mendapatkan implementasi paling kecil dan paling aman yang memenuhi keputusan terbaru tanpa menciptakan arsitektur baru atau merusak pondasi yang sudah dibangun.»
+
+Prinsip:
+
+- jangan redesign jika tidak perlu;
+- jangan membuat layer baru hanya untuk wording;
+- jangan mengubah schema fundamental jika existing schema cukup;
+- jangan mengubah Canonical tanpa keputusan formal;
+- jangan mengubah ownership/privacy/security boundary;
+- jangan mengulang pekerjaan yang sudah PASS;
+- manfaatkan implementation yang sudah ada;
+- lakukan perubahan sekecil mungkin;
+- setiap perubahan harus dapat diverifikasi;
+- jika tidak ada gap nyata, jangan melakukan mutation.
+
+Nama pendek:
+
+MINIMAL RECONCILIATION / MINIMAL REALIZATION
+
+---
+
+7. OQ / OPEN DECISION RECONCILIATION
+
+Jika OQ muncul:
+
+DOCUMENT STATUS
+      ↓
+LATEST OWNER / DM DECISION
+      ↓
+PRACTICAL QUESTION ANSWERED?
+      ↓
+YES ───────────────→ RECONCILE
+                         ↓
+                  DOCUMENT TRACEABILITY
+                         ↓
+                  CONTINUE IF SAFE
+
+NO
+ ↓
+REAL BLOCKER
+ ↓
+OWNER DECISION REQUIRED
+
+Khusus OQ yang sebelumnya muncul terkait Phase 3:
+
+OQ-02 — Memory Decision Implementation
+
+Decision intent sudah tersedia dari diskusi Owner mengenai:
+
+- memory/knowledge distinction;
+- relevance/decision behavior;
+- occurrence threshold;
+- knowledge candidate;
+- contextual correctness.
+
+OQ-03 — Knowledge Ingestion
+
+Decision intent sudah tersedia mengenai:
+
+- knowledge source;
+- explicit teaching;
+- generalization;
+- provenance;
+- versioning/superseded;
+- privacy boundary.
+
+OQ-04 — Reference Material Trust Promotion
+
+Decision intent terkait:
+
+- provenance;
+- source/reference;
+- trust/validation;
+- knowledge tidak sama dengan absolute truth.
+
+Catatan:
+
+Formal document status OQ tidak boleh dipalsukan menjadi CLOSED hanya karena decision intent telah digunakan.
+
+Namun formal OPEN juga tidak boleh diperlakukan sebagai blocker otomatis jika kebutuhan practical backlog telah terjawab dan reconcile membuktikan tidak ada contradiction material.
+
+---
+
+8. VERIFICATION DISCIPLINE
+
+Bedakan:
+
+IMPLEMENTATION VERIFIED
+
+dengan:
+
+APPLICATION / E2E VERIFIED
+
+Jika database/schema/policy/function sudah diverifikasi tetapi application-level runtime assurance belum tersedia:
+
+IMPLEMENTATION = PASS
+RUNTIME ASSURANCE = DEFERRED
+
+Jangan:
+
+- mengarang test result;
+- menyebut E2E PASS tanpa test;
+- mengubah deferred menjadi PASS;
+- membuat architecture baru hanya karena tooling belum tersedia.
+
+Jika limitation bukan material blocker:
+
+document → continue.
+
+---
+
+9. BACKLOG EXECUTION FLOW
+
+Untuk setiap backlog:
+
+GO BL-Pxx-xxx
+        ↓
+PHASE -1 CHECK
+        ↓
+LATEST DM / OWNER DECISIONS
+        ↓
+AUTHORITY DOCUMENT CHECK
+        ↓
+GITHUB DEV AUDIT
+        ↓
+SUPABASE DEV AUDIT
+        ↓
+RECONCILE
+        ↓
+GAP?
+ ├─ NO
+ │   ↓
+ │ PASS
+ │   ↓
+ │ EVIDENCE
+ │   ↓
+ │ DEV
+ │
+ └─ YES
+      ↓
+   OWNER DECISION NEEDED?
+      ├─ NO
+      │   ↓
+      │ MINIMAL RECONCILIATION
+      │ / MINIMAL REALIZATION
+      │   ↓
+      │ VERIFY
+      │   ↓
+      │ EVIDENCE
+      │   ↓
+      │ DEV
+      │
+      └─ YES
+          ↓
+       STOP ONLY THAT DEPENDENCY
+          ↓
+       OWNER DECISION
+
+Jangan menghentikan seluruh build karena gap teknis yang dapat diselesaikan dengan perubahan minimal.
+
+---
+
+10. CURRENT IMPLEMENTATION HISTORY
+
+Phase 3A — Memory Storage
+
+Status:
+
+COMPLETE
+
+P3A telah selesai dalam execution history.
+
+Foundation memory storage, ownership/isolation, persistence, dan testing telah direalisasikan dan diverifikasi sesuai backlog yang dikerjakan.
+
+---
+
+Phase 3B — Memory Lifecycle
+
+Status:
+
+COMPLETE
+
+Backlog P3B telah selesai.
+
+Lifecycle yang telah digunakan:
+
+CANDIDATE
+ACTIVE
+UPDATED
+SUPERSEDED
+ARCHIVED
+DEACTIVATED
+DELETED
+
+Knowledge eligibility menggunakan threshold praktis:
+
+scope = GENERAL
+AND
+occurrence_count >= 5
+
+Memory ownership boundary dan lifecycle database telah diverifikasi.
+
+Synthetic lifecycle testing telah dilakukan dan residue dibersihkan.
+
+Application/runtime assurance yang belum dilakukan tetap dicatat sebagai deferred assurance, bukan dipalsukan menjadi E2E PASS.
+
+---
+
+Phase 3C — Memory Retrieval
+
+Status:
+
+COMPLETE
+
+P3C telah dikerjakan sampai retrieval testing.
+
+Retrieval strategy:
+
+QUERY
+  ↓
+RETRIEVE
+  ↓
+FILTER
+  ↓
+RANK
+  ↓
+VALIDATE
+  ↓
+CONTEXT
+
+Backlog P3C-001 sampai P3C-007 telah melalui execution history:
+
+PASS / DEV
+
+---
+
+Phase 3D — Knowledge
+
+Status:
+
+COMPLETE
+
+Backlog P3D-001 sampai P3D-010 telah melalui execution history:
+
+PASS / DEV
+
+Semantics knowledge tetap mengikuti decision intent yang sudah disepakati:
+
+- Memory ≠ Knowledge;
+- knowledge candidate threshold;
+- generalization boundary;
+- provenance;
+- superseded/version lineage;
+- privacy/ownership;
+- knowledge ≠ guaranteed result.
+
+---
+
+Phase 3E — Context
+
+Status:
+
+COMPLETE
+
+Backlog P3E-001 sampai P3E-009 telah dikerjakan.
+
+BL-P3E-001
+
+Context Assembly Engine
+
+Status:
+
+PASS / DEV
+
+---
+
+BL-P3E-002
+
+Context Retrieval / Assembly dependency
+
+Status:
+
+PASS / DEV
+
+---
+
+BL-P3E-003
+
+Status:
+
+PASS / DEV
+
+---
+
+BL-P3E-004
+
+Status:
+
+PASS / DEV
+
+---
+
+BL-P3E-005
+
+Status:
+
+PASS / DEV
+
+---
+
+BL-P3E-006 — Context Validation
+
+Status:
+
+PASS / DEV
+
+---
+
+BL-P3E-007 — Context Disposal
+
+Status:
+
+PASS / DEV
+
+---
+
+BL-P3E-008 — Context Budget & Truncation
+
+Status:
+
+PASS / DEV
+
+Bounded context behavior telah direalisasikan dan diverifikasi.
+
+---
+
+BL-P3E-009 — Context Testing
+
+Status:
+
+PASS / DEV
+
+Testing terakhir mencakup verifikasi terhadap:
+
+- explicit limits;
+- isolation/visibility;
+- bounded combined context;
+- null-query behavior;
+- test residue cleanup.
+
+Implementation/database integration:
+
+PASS
+
+Application/API/UI E2E:
+
+DEFERRED
+
+Model/token-budget runtime assurance:
+
+DEFERRED
+
+Tidak ada synthetic test residue yang sengaja ditinggalkan.
+
+---
+
+11. CURRENT DATABASE STATE
+
+Supabase DEV:
+
+Project:
+
+"second-head"
+
+Dashboard:
+
+"https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd"
+
+State yang telah menjadi foundation Phase 3:
+
+- memory storage tersedia;
+- memory lifecycle tersedia;
+- knowledge eligibility tersedia;
+- retrieval functions tersedia;
+- context assembly/retrieval tersedia;
+- filtering/visibility/ownership boundaries tetap diterapkan;
+- bounded retrieval/context behavior telah diuji;
+- synthetic testing dilakukan dengan cleanup/rollback discipline.
+
+Persistent synthetic test residue:
+
+NONE
+
+Known assurance limitation:
+
+- application/API/UI E2E belum seluruhnya diverifikasi;
+- runtime/model-level assurance tertentu masih deferred.
+
+Deferred assurance tidak dianggap sebagai implementation failure apabila acceptance contract item yang bersangkutan sudah terpenuhi pada level yang dapat diverifikasi.
+
+---
+
+12. CURRENT GITHUB STATE
+
+Repository:
+
+"https://github.com/savie/second-head"
+
+Branch:
+
+"dev"
+
+Relevant project state:
+
+- Phase 3 implementation;
+- P3A artifacts;
+- P3B artifacts;
+- P3C artifacts;
+- P3D artifacts;
+- P3E artifacts;
+- design documents;
+- evidence documents;
+- migrations;
+- current DEV implementation.
+
+Evidence untuk P3E-009 telah dibuat/ditambahkan sebagai bagian dari completion item Context Testing.
+
+Commit/evidence exact terbaru:
+
+Audit ulang GitHub harus dilakukan pada sesi berikutnya sebelum menjadikan commit hash sebagai source resume.
+
+Resume ini sengaja tidak mengarang commit hash yang tidak tersedia secara eksplisit pada checkpoint ini.
+
+---
+
+13. KNOWN OPEN ITEMS
+
+TRUE BLOCKER
+
+Tidak ada blocker material yang diketahui dari completion Phase 3 terakhir yang memaksa implementation berhenti.
+
+Jika backlog berikutnya menemukan:
+
+- Canonical contradiction;
+- ownership/privacy/security contradiction;
+- authorization uncertainty material;
+- fundamental architectural conflict;
+
+maka hanya dependency tersebut yang dihentikan untuk Owner Decision.
+
+---
+
+DOCUMENTATION GAP
+
+Beberapa formal OQ/document status dapat masih menunjukkan:
+
+- OPEN;
+- NOT YET REWRITTEN;
+- atau status historis lain.
+
+Hal tersebut tidak otomatis membatalkan decision intent Owner yang lebih baru.
+
+Jika practical implementation sudah cukup terjawab dan tidak ada contradiction material:
+
+DOCUMENTATION GAP ≠ EXECUTION BLOCKER
+
+Traceability tetap harus dicatat.
+
+---
+
+DEFERRED ASSURANCE
+
+Beberapa hal masih membutuhkan assurance lanjutan:
+
+- application/API-level runtime behavior;
+- E2E assurance;
+- model/token-budget runtime assurance;
+- assurance/security testing yang memang dijadwalkan pada stage berikutnya.
+
+Deferred assurance tidak boleh dipalsukan menjadi PASS.
+
+---
+
+FUTURE SCOPE
+
+Hal-hal yang tidak perlu dibawa kembali ke Phase 3 kecuali dependency baru muncul:
+
+- Clone;
+- Inheritance;
+- advanced runtime;
+- model selection policy;
+- backup/restore;
+- data portability;
+- advanced assurance/release controls.
+
+---
+
+14. THINGS NOT TO REOPEN
+
+Jangan membuka kembali keputusan berikut tanpa contradiction nyata:
+
+1. Memory ≠ Knowledge ≠ Context.
+2. Memory boleh digunakan untuk continuity.
+3. Memory tidak otomatis dibacakan mentah kepada user.
+4. Occurrence ">= 5" adalah threshold praktis v1 untuk knowledge candidate.
+5. Threshold bukan bukti absolute truth.
+6. Knowledge dapat berkembang dan dikoreksi.
+7. Knowledge dapat menjadi SUPERSEDED.
+8. Provenance penting.
+9. Privacy sumber ≠ kehilangan provenance.
+10. Private information tidak otomatis boleh digeneralisasikan.
+11. General knowledge dapat digunakan lintas user selama privacy/ownership boundary tetap dipenuhi.
+12. Knowledge ≠ guaranteed implementation result.
+13. Learning ≠ Automatic Core Modification.
+14. Implementation PASS ≠ automatic E2E PASS.
+15. Deferred assurance tetap harus dicatat dan dapat ditutup pada assurance stage yang sesuai.
+16. P3A, P3B, P3C, P3D, dan P3E yang sudah PASS tidak perlu dikerjakan ulang kecuali audit menemukan contradiction atau evidence failure.
+
+---
+
+15. CURRENT NEXT TARGET
+
+Current Phase 3 stream:
+
+P3E-009 — PASS / DEV
+
+Phase 3 implementation:
+
+COMPLETE berdasarkan execution history sampai P3E-009.
+
+Next target:
+
+BACKLOG SETELAH PHASE 3
+
+Exact next backlog ID/name harus ditentukan dari:
+
+Phase -1 → actual DEV state → dependency/gate
+
+Jangan mengarang ID berikutnya hanya berdasarkan urutan resume.
+
+Next action:
+
+PHASE -1 CHECK
+→ LATEST OWNER DECISIONS
+→ AUTHORITY
+→ GITHUB
+→ SUPABASE
+→ RECONCILE
+→ IMPLEMENT / PASS
+→ EVIDENCE
+→ DEV
+
+---
+
+16. WORKING STYLE
+
+Owner menggunakan instruksi seperti:
+
+"GO ... → audit → reconcile → lanjut sampai DEV."
+
+Artinya:
+
+teruskan pekerjaan dari posisi terakhir sampai backlog item selesai, bukan berhenti di setiap ketidaksempurnaan dokumentasi.
+
+Gunakan:
+
+KEEP MOVING FORWARD + REVIEW BACKWARD ONLY WHEN NECESSARY
+
+Jangan:
+
+- mulai project dari nol;
+- meminta Owner mengulang keputusan yang sudah dibuat;
+- menganggap dokumen lama selalu lebih baru daripada keputusan Owner;
+- membuat arsitektur baru untuk menyelesaikan gap kecil;
+- menghentikan implementation hanya karena wording dokumentasi belum diperbarui;
+- menganggap keputusan Owner sebagai canonical change jika memang bukan itu maksudnya;
+- mengarang keputusan ketika benar-benar belum ada;
+- mengubah implementation yang sudah PASS tanpa alasan audit yang nyata.
+
+Jika source lama dan keputusan terbaru terlihat berbeda:
+
+RECONCILE DULU.
+
+Jangan langsung STOP.
+
+---
+
+17. FINAL CHECKPOINT
+
+PROJECT:
+
+"SECOND HEAD — SYSTEM BUILD"
+
+MODE:
+
+"ACTUAL BUILD / CONTROLLED IMPLEMENTATION"
+
+CURRENT PHASE:
+
+"PHASE 3 — COMPLETE / READY FOR NEXT PHASE GATE"
+
+COMPLETED:
+
+- P3A — COMPLETE
+- P3B — COMPLETE
+- P3C — COMPLETE
+- P3D — COMPLETE
+- P3E-001..009 — PASS / DEV
+
+CURRENT:
+
+"P3E-009 — Context Testing — PASS / DEV"
+
+NEXT:
+
+"NEXT PHASE / BACKLOG SESUAI PHASE -1"
+
+TRUE BLOCKERS:
+
+- Tidak ada blocker material yang diketahui pada checkpoint ini.
+
+DOCUMENTATION GAPS:
+
+- Formal OQ/document status tertentu mungkin masih membawa status historis OPEN / NOT YET REWRITTEN.
+- Gunakan latest Owner/DM decision sebagai input reconcile.
+- Jangan menyamakan documentation gap dengan execution blocker tanpa contradiction material.
+
+DEFERRED ASSURANCE:
+
+- Application/API/UI E2E
+- Runtime/model-level assurance yang belum diverifikasi
+- Assurance/security stage yang memang belum masuk pada current execution layer
+
+LATEST OWNER DECISIONS:
+
+- Memory ≠ Knowledge ≠ Context.
+- Memory digunakan untuk continuity.
+- Knowledge dapat berkembang dari experience/information → understanding → hypothesis → trusted knowledge.
+- Ada jalur SH recognition dan explicit Owner/user teaching.
+- Occurrence ">= 5" adalah threshold praktis v1.
+- Threshold bukan absolute truth.
+- Private information tidak otomatis digeneralisasikan.
+- General/shared knowledge dapat digunakan lintas user dengan privacy/ownership boundary.
+- Provenance/lineage tetap dipertahankan.
+- Knowledge dapat dikoreksi dan disupersede.
+- Knowledge bukan jaminan implementation result.
+- Learning tidak otomatis mengubah Core.
+- Keputusan Owner terbaru harus direconcile terhadap dokumen lama, bukan otomatis diblokir oleh status historis dokumen.
+
+GITHUB:
+
+"https://github.com/savie/second-head"
+
+SUPABASE:
+
+"https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd"
+
+PRIMARY EXECUTION CONTROL:
+
+"PHASE -1"
+
+ACTUAL REPOSITORY:
+
+"GITHUB DEV"
+
+ACTUAL DATABASE:
+
+"SUPABASE DEV"
+
+RESUME ROLE:
+
+"CONTINUITY + EXECUTION CONTEXT"
+
+---
+
+18. CONTINUATION COMMAND
+
+Untuk melanjutkan di chat berikutnya:
+
+Continue SECOND HEAD from this Session Resume.
+
+Jangan mulai dari nol.
+
+Gunakan Resume ini untuk continuity, lalu audit actual source.
+
+Phase 3 sudah dikerjakan sampai:
+P3A COMPLETE
+P3B COMPLETE
+P3C COMPLETE
+P3D COMPLETE
+P3E-001..009 PASS / DEV
+
+Mulai dari Phase -1 untuk menentukan backlog/current target berikutnya.
+
+Gunakan keputusan Owner/DM terbaru sebagai input reconcile.
+
+Jika keputusan Owner sudah cukup untuk menyelesaikan practical implementation
+dan tidak mengubah canonical, ownership, privacy, security boundary,
+atau fundamental architecture, jangan berhenti hanya karena dokumen lama
+belum diperbarui.
+
+Lakukan minimal reconciliation / minimal realization.
+
+Audit:
+
+Phase -1
+→ Owner / DM Decisions
+→ Canonical / Frozen Authority
+→ Build Scope
+→ Implementation Contract
+→ Implementation Guide
+→ Execution Strategy
+→ existing artifacts
+→ GitHub DEV
+→ Supabase DEV
+
+Lalu:
+
+RECONCILE
+→ PASS / GAP
+→ MINIMAL REALIZATION bila diperlukan
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+STOP hanya jika benar-benar membutuhkan keputusan Owner baru,
+ada contradiction material, atau ada risiko canonical/privacy/
+ownership/security yang tidak dapat diselesaikan secara aman.
+
+Jangan mengulang item yang sudah PASS.
+
+Jangan menganggap documentation gap sebagai blocker tanpa
+reconcile terlebih dahulu.
+
+GitHub:
+https://github.com/savie/second-head
+
+Supabase:
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+END SESSION RESUME
+Catatan penting: gue sengaja tidak mengarang commit hash terakhir dan tidak mengarang ID backlog setelah P3E-009. Resume ini membawa fakta execution yang sudah kita punya; exact next target dan commit terakhir harus diambil dari Phase -1 + GitHub DEV aktual pada sesi berikutnya. Itu justru menjaga resume ini tetap aman sebagai checkpoint dan nggak berubah jadi source of truth palsu.
+
+---
+
+SECOND HEAD — SESSION RESUME 35
+
+Execution Checkpoint
+
+Project: SECOND HEAD — SYSTEM BUILD
+
+Resume Type: Cross-Session Execution Checkpoint
+Purpose: Menyimpan posisi kerja, keputusan terbaru, hasil reconcile, dan jalur audit aktual agar pekerjaan dapat dilanjutkan tanpa mengulang dari nol.
+
+---
+
+0. CARA MEMBACA RESUME INI
+
+Resume ini bukan canonical authority dan bukan pengganti dokumen proyek.
+
+Resume berfungsi sebagai checkpoint kerja.
+
+Untuk backlog berikutnya, gunakan:
+
+Resume → Phase -1 → keputusan Owner/DM terbaru → dokumen authority → GitHub DEV → Supabase DEV → reconcile → realization minimal bila diperlukan → verify → evidence → DEV
+
+Resume boleh membawa hasil keputusan dan hasil kerja sesi sebelumnya agar tidak perlu mengulang diskusi yang sudah selesai.
+
+Jika terdapat perbedaan antara dokumen lama dengan keputusan Owner yang lebih baru, jangan otomatis menganggap keputusan Owner tidak berlaku hanya karena dokumen lama masih mencatat status sebelumnya.
+
+Lakukan reconcile terlebih dahulu.
+
+---
+
+1. SUMBER AKTUAL PROJECT
+
+GitHub
+
+Repository:
+
+"https://github.com/savie/second-head"
+
+Branch kerja:
+
+"dev"
+
+GitHub digunakan untuk memeriksa:
+
+- authority documents;
+- Phase -1;
+- backlog;
+- design artifacts;
+- implementation;
+- migrations;
+- evidence;
+- commit history;
+- current DEV state.
+
+Supabase
+
+Project:
+
+"second-head"
+
+Dashboard:
+
+"https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd"
+
+Branch:
+
+"dev"
+
+Supabase digunakan untuk memeriksa actual/live state:
+
+- schema;
+- tables;
+- migrations;
+- functions;
+- views;
+- RLS;
+- policies;
+- relevant runtime/database state;
+- data/residue yang relevan.
+
+GitHub = actual repository state.
+
+Supabase = actual database/runtime state.
+
+Jika informasi tersedia di kedua tempat, lakukan cross-check.
+
+---
+
+2. AUTHORITY YANG DIGUNAKAN
+
+Saat memulai backlog baru, jangan hanya membaca Resume.
+
+Mulai dari:
+
+1. Phase -1
+2. DM / Owner Decisions terbaru
+3. SH Core Canonical
+4. Frozen Baseline
+5. Build Scope
+6. Implementation Contract
+7. Implementation Guide
+8. Execution Strategy
+9. Existing phase artifacts
+10. GitHub DEV
+11. Supabase DEV
+
+Resume digunakan untuk mengetahui apa yang sudah terjadi dan keputusan apa yang sudah dibuat, bukan untuk menggantikan source authority.
+
+Catatan sesi:
+
+Untuk rekonsiliasi Phase 4, audit authority telah dilakukan terhadap folder final di GitHub sampai:
+
+- Phase -1;
+- Execution Strategy;
+- Implementation Guide;
+- Implementation Contract;
+- Build Scope;
+- SH Core Canonical.
+
+Baseline tidak digunakan sebagai syarat audit tersebut karena Owner secara eksplisit meminta audit cukup sampai authority final tersebut.
+
+---
+
+3. CURRENT PROJECT POSITION
+
+Phase:
+
+"PHASE 4 — RUNTIME & ORCHESTRATION"
+
+Current stream:
+
+"P4B → P4F"
+
+Status:
+
+- Phase 3 implementation: COMPLETE
+- Phase 3 formal milestone closure: masih membutuhkan Cognitive Engine Gate evidence
+- Phase 3 decision reconciliation: LEGALIZED / RECORDED
+- P4A-001 → P4A-010: COMPLETE / DEV
+- P4B–P4F decomposition: RECONCILED / LEGALIZED
+- Material contradiction P4B–P4F: NONE
+- Owner DM baru untuk P4B–P4F: TIDAK DIPERLUKAN
+- berikutnya: P4B-001
+
+Current map:
+
+PHASE 3
+├── P3A — COMPLETE
+├── P3B — COMPLETE
+├── P3C — COMPLETE
+├── P3D — COMPLETE
+├── P3E-001..009 — PASS / DEV
+└── Formal MS-04 closure — PENDING COGNITIVE ENGINE GATE evidence
+
+PHASE 4
+├── P4A-001..010 — COMPLETE / DEV
+├── P4B-001 — NEXT
+├── P4B-002..003 — NEXT
+├── P4C-001..003 — NEXT
+├── P4D-001..003 — NEXT
+├── P4E-001..004 — NEXT
+└── P4F-001..005 — NEXT
+
+Jumlah decomposition P4B–P4F:
+18 execution slices.
+
+Jumlah tersebut tidak dianggap sebagai kewajiban untuk menambah padding.
+Jika audit implementation menemukan domain cukup direpresentasikan dengan lebih sedikit item, jangan membuat item tambahan tanpa kebutuhan nyata.
+
+---
+
+4. OWNER / DM DECISIONS TERBARU
+
+Decision 1
+
+Topik:
+Model AI / Model Abstraction
+
+Keputusan Owner:
+
+"Untuk versi awal, kita nggak perlu bikin sistem yang bisa loncat-loncat banyak AI. Pakai satu dulu, tapi dari awal bikin sambungannya supaya nanti gampang diganti."
+
+Implikasi teknis yang disepakati:
+
+- v1 menggunakan satu model/provider;
+- model dipanggil melalui abstraction/adapter;
+- provider tidak boleh menjadi identitas SH;
+- arsitektur tetap memungkinkan provider/model tambahan di masa depan;
+- multi-model bukan kebutuhan v1 untuk dipaksakan sekarang.
+
+Yang TIDAK berubah:
+
+- SH ≠ Model;
+- MODEL ≠ SH IDENTITY;
+- MODEL ≠ AUTHORITY;
+- pergantian model tidak boleh membuat SH baru;
+- Core/Identity/Ownership boundary tetap.
+
+Status:
+
+"DECIDED — RECONCILED / UNBLOCKED"
+
+---
+
+Decision 2
+
+Topik:
+Phase 3 Memory → Understanding → Knowledge
+
+Keputusan Owner yang sudah direkam:
+
+- Memory boleh menjaga kontinuitas pengalaman/interaksi;
+- Memory tidak otomatis dibacakan kepada user;
+- Memory ≠ Knowledge;
+- Information ≠ Memory ≠ Knowledge;
+- Experience/Information dapat berkembang menjadi Understanding → Hypothesis → Knowledge Candidate → Knowledge;
+- terdapat jalur SH Recognition dan Explicit Owner/User Teaching menuju Knowledge Candidate;
+- rule praktis v1:
+  scope = GENERAL
+  dan occurrence_count >= 5
+  → knowledge_candidate = true;
+- occurrence threshold bukan bukti kebenaran absolut;
+- Knowledge dapat contextual, corrected, versioned, dan superseded;
+- private/personal information tidak otomatis digeneralisasikan;
+- general knowledge dapat digunakan untuk membantu user lain tanpa membocorkan identitas source;
+- provenance/lineage tetap dipertahankan;
+- Knowledge ≠ guaranteed implementation result;
+- Knowledge tidak otomatis mengubah Core;
+- sharing/ownership/access tetap tunduk pada governance boundary.
+
+Keputusan tersebut juga menetapkan:
+
+Formal document status ≠ practical execution status.
+
+Jika dokumen lama masih OPEN tetapi keputusan Owner terbaru sudah cukup jelas dan tidak mengubah canonical invariant, fundamental architecture, ownership, privacy, atau security boundary:
+
+→ reconcile;
+→ dokumentasikan traceability;
+→ implementation dapat UNBLOCKED.
+
+Jika material contradiction ditemukan:
+
+→ STOP dependency tersebut;
+→ Owner menjadi decision-maker.
+
+Status:
+
+"DECIDED — RECONCILED / LEGALIZED AS NON-CANONICAL EXECUTION DECISION RECORD"
+
+Artifact:
+
+"SECOND_HEAD_PHASE_3_EXECUTION_RECONCILIATION_v1.0.md"
+
+---
+
+Decision 3
+
+Topik:
+Phase 4 decomposition / execution slices
+
+Keputusan Owner:
+
+Hasil audit agen tidak otomatis diterima mentah.
+
+P4B–P4F harus diaudit terhadap authority terlebih dahulu.
+
+Jika penambahan slice tidak melanggar authority/invariant/boundary:
+
+→ boleh direconcile dan dilegalkan sebagai execution decomposition.
+
+Jika melanggar:
+
+→ tidak boleh dipaksakan;
+→ bila perlu dirangkum menjadi satu dokumen reconciliation;
+→ Owner menjadi decision-maker bila contradiction material.
+
+Hasil audit aktual:
+
+Tidak ditemukan material violation.
+
+P4B–P4F decomposition dapat digunakan.
+
+Namun detail teknis yang belum ditentukan tidak boleh dibekukan secara diam-diam.
+
+Contoh:
+- Redis bukan requirement;
+- storage workflow belum dipaksa;
+- rollback tidak diasumsikan selalu tersedia untuk external side effect;
+- algoritma prompt-injection detection tidak dibekukan;
+- multi-provider fallback tetap dapat deferred sampai provider kedua benar-benar ada.
+
+Status:
+
+"RECONCILED — READY FOR EXECUTION"
+
+---
+
+5. DECISION vs DOKUMEN LAMA
+
+Jika terdapat keputusan Owner terbaru yang belum tercermin dalam dokumen lama, jangan langsung menyimpulkan bahwa implementation harus berhenti.
+
+Gunakan tiga kategori:
+
+A. Sudah konsisten
+
+Keputusan Owner sudah didukung oleh authority.
+
+→ lanjut normal.
+
+B. Dokumen belum diperbarui, tetapi keputusan tidak mengubah pondasi
+
+Contoh:
+
+- keputusan memperjelas behavior;
+- keputusan memperjelas policy;
+- keputusan memperjelas threshold;
+- keputusan memperjelas implementation detail;
+- keputusan tidak mengubah canonical invariant;
+- tidak mengubah ownership/privacy boundary;
+- tidak membuat arsitektur baru.
+
+→ reconcile sebagai keputusan terbaru, dokumentasikan traceability-nya, dan lanjutkan implementation bila AC dapat dipenuhi.
+
+Dokumen lama tidak harus langsung diganti hanya untuk membuat implementation bergerak.
+
+C. Keputusan benar-benar bertentangan dengan authority
+
+Contoh:
+
+- mengubah canonical invariant;
+- mengubah fundamental architecture;
+- mengubah ownership/security boundary;
+- mengubah scope secara material;
+- membutuhkan keputusan baru yang belum diputuskan.
+
+→ STOP dan Owner menjadi decision-maker.
+
+---
+
+6. RECONCILE PRINCIPLE
+
+Tujuan reconcile adalah:
+
+mendapatkan implementasi yang paling kecil dan paling aman yang memenuhi keputusan terbaru tanpa menciptakan arsitektur baru atau merusak pondasi yang sudah dibangun.
+
+Prinsip:
+
+- jangan redesign jika tidak perlu;
+- jangan membuat layer baru hanya untuk memenuhi wording;
+- jangan mengubah schema fundamental jika existing schema sudah cukup;
+- jangan mengubah canonical;
+- jangan mengubah ownership/privacy/security boundary;
+- jangan mengulang pekerjaan yang sudah PASS;
+- manfaatkan implementation yang sudah ada;
+- lakukan perubahan sekecil mungkin;
+- setiap perubahan harus dapat diverifikasi;
+- jika tidak ada gap nyata, jangan melakukan mutation.
+
+Nama pendek:
+
+MINIMAL RECONCILIATION / MINIMAL REALIZATION
+
+---
+
+7. OQ / OPEN DECISION RECONCILIATION
+
+Status OQ di dokumen lama tidak otomatis berarti keputusan Owner terbaru tidak berlaku.
+
+Untuk setiap OQ yang muncul:
+
+DOCUMENT STATUS
+      ↓
+OWNER / DM LATEST DECISION
+      ↓
+DOES DECISION RESOLVE THE PRACTICAL QUESTION?
+      ↓
+YES ───────────────→ reconcile + document traceability
+                         ↓
+                    continue if safe
+
+NO
+ ↓
+real blocker
+ ↓
+Owner decision required
+
+Jika keputusan Owner sudah cukup untuk menjalankan backlog tanpa mengubah pondasi:
+
+jangan mengulang pertanyaan yang sudah dijawab Owner.
+
+Tetap catat jika formal document status belum diperbarui.
+
+Contoh:
+
+OQ-02
+Document status: OPEN
+
+Latest Owner decision:
+Decision intent sufficient for current implementation
+
+Reconciliation:
+No canonical / architecture / ownership / privacy contradiction.
+
+Formal document status:
+OPEN / NOT YET REWRITTEN
+
+Execution status:
+UNBLOCKED FOR CURRENT BACKLOG
+
+Ini berarti:
+
+formal documentation status ≠ practical execution blocker
+
+kecuali memang ada contradiction material.
+
+Phase 3:
+OQ-02/OQ-03/OQ-04 decision intent sudah direkam dalam Phase 3 reconciliation document.
+
+Formal closure OQ tetap tidak diklaim.
+
+---
+
+8. VERIFICATION DISCIPLINE
+
+Bedakan:
+
+IMPLEMENTATION VERIFIED
+
+dengan:
+
+APPLICATION / E2E VERIFIED
+
+Untuk Phase 3:
+
+P3E-009:
+IMPLEMENTATION / DATABASE INTEGRATION = PASS / DEV
+
+Application / API / UI E2E:
+DEFERRED
+
+Untuk Phase 4:
+
+Known assurance limitation:
+
+- application/API/UI E2E belum seluruhnya diverifikasi;
+- runtime/model-level assurance tertentu masih deferred.
+
+Deferred assurance tidak dianggap implementation failure apabila acceptance contract item yang bersangkutan sudah terpenuhi pada level yang dapat diverifikasi.
+
+Jangan:
+
+- mengarang hasil test;
+- menyebut E2E PASS tanpa test;
+- mengubah deferred menjadi PASS;
+- membuat architecture baru hanya karena test tooling belum tersedia.
+
+Jika limitation bukan material blocker:
+
+document → continue.
+
+---
+
+9. BACKLOG EXECUTION FLOW
+
+Untuk setiap backlog:
+
+GO BL-Pxx-xxx
+        ↓
+PHASE -1 CHECK
+        ↓
+LATEST DM / OWNER DECISIONS
+        ↓
+AUTHORITY DOCUMENT CHECK
+        ↓
+GITHUB DEV AUDIT
+        ↓
+SUPABASE DEV AUDIT
+        ↓
+RECONCILE
+        ↓
+GAP?
+ ├─ NO
+ │   ↓
+ │ PASS
+ │   ↓
+ │ EVIDENCE
+ │   ↓
+ │ DEV
+ │
+ └─ YES
+      ↓
+   IS OWNER DECISION NEEDED?
+      ├─ NO
+      │   ↓
+      │ MINIMAL RECONCILIATION
+      │ / MINIMAL REALIZATION
+      │   ↓
+      │ VERIFY
+      │   ↓
+      │ EVIDENCE
+      │   ↓
+      │ DEV
+      │
+      └─ YES
+          ↓
+       STOP ONLY THAT DEPENDENCY
+          ↓
+       OWNER DECISION
+
+Jangan menghentikan seluruh build karena gap teknis yang bisa diselesaikan dengan perubahan minimal.
+
+---
+
+10. CURRENT IMPLEMENTATION HISTORY
+
+PHASE 3
+
+Status:
+
+"IMPLEMENTATION COMPLETE"
+
+Formal milestone closure:
+
+"PENDING COGNITIVE ENGINE GATE EVIDENCE"
+
+Phase 3A
+
+Status:
+
+"COMPLETE"
+
+Ringkasan:
+
+Memory Foundation telah direalisasikan, termasuk storage, schema, persistence, isolation per SH, ownership boundary, dan storage testing.
+
+Evidence:
+
+P3A-001 sampai P3A-006 telah selesai/evidenced.
+
+---
+
+Phase 3B
+
+Status:
+
+"COMPLETE"
+
+Ringkasan:
+
+Memory lifecycle, knowledge eligibility, provenance/sharing/superseded, isolation/RLS, dan memory deletion telah direalisasikan.
+
+Evidence:
+
+P3B-001 sampai P3B-005.
+
+Catatan assurance:
+
+Knowledge provenance dan privacy/ownership boundary telah menjadi bagian implementation.
+
+---
+
+Phase 3C
+
+Status:
+
+"COMPLETE"
+
+Evidence:
+
+- P3C-001 Retrieval Strategy
+- P3C-002 Relevance Scoring
+- P3C-003 Ranking
+- P3C-004 Filtering
+- P3C-005 Context Injection
+- P3C-006 Bounded Retrieval
+- P3C-007 Retrieval Testing
+
+---
+
+Phase 3D
+
+Status:
+
+"COMPLETE"
+
+Evidence:
+
+P3D-001 sampai P3D-010, termasuk knowledge testing.
+
+---
+
+Phase 3E
+
+Status:
+
+"COMPLETE / PASS / DEV"
+
+Evidence:
+
+- P3E-001 Context Assembly
+- P3E-002 Context Composition
+- P3E-003 Context Prioritization
+- P3E-004 Context Layering
+- P3E-005 Context Isolation
+- P3E-006 Context Validation
+- P3E-007 Context Disposal
+- P3E-008 Context Budget & Truncation
+- P3E-009 Context Testing
+
+P3E-009:
+
+PASS / DEV
+
+Live verification mencakup limits, isolation, budget, null query, dan residue = 0.
+
+Known assurance limitation:
+
+Application/API/UI E2E masih deferred.
+
+---
+
+PHASE 4A
+
+Status:
+
+"COMPLETE / DEV"
+
+Completed:
+
+P4A-001 → P4A-010
+
+P4A-001 sampai P4A-010 telah diselesaikan di DEV.
+
+Phase 4A tidak dibuka ulang hanya karena assurance application/E2E tertentu masih deferred.
+
+---
+
+PHASE 4B–4F
+
+Status:
+
+"RECONCILED / READY FOR EXECUTION"
+
+P4B — Reasoning:
+
+1. P4B-001 Reasoning Context Integration & Isolation
+2. P4B-002 Reasoning Process Evidence Logging
+3. P4B-003 Reasoning Validation & Prompt-Injection Boundary
+
+P4C — Planning / Workflow:
+
+1. P4C-001 Workflow State Machine & Definition
+2. P4C-002 Workflow Execution & Monitoring
+3. P4C-003 Workflow Cancellation & Timeout
+
+P4D — Model Routing:
+
+1. P4D-001 Model Abstraction Layer
+2. P4D-002 Model Selection Policy & Zero-Budget Path
+3. P4D-003 Model Fallback & Error Handling
+
+P4E — Tool Execution:
+
+1. P4E-001 Tool Registry & DEFAULT DENY
+2. P4E-002 Tool Invocation & Untrusted Data Boundary
+3. P4E-003 Tool Schema Validation
+4. P4E-004 Tool Audit Trail
+
+P4F — Action Execution:
+
+1. P4F-001 Action Creation & Risk Classification
+2. P4F-002 High-Risk Action Authorization Gate
+3. P4F-003 Action Execution & State Mutation
+4. P4F-004 Action Failure Handling & Compensation
+5. P4F-005 Action Logging & Observability
+
+Catatan:
+
+18 item tersebut adalah execution decomposition hasil reconcile.
+
+Tidak berarti setiap detail teknis di dalam item telah dibekukan sebagai requirement baru.
+
+---
+
+11. CURRENT DATABASE STATE
+
+Supabase DEV terakhir diverifikasi:
+
+Tanggal:
+
+"EXACT DATE NOT CARRIED INTO THIS RESUME"
+
+State relevan:
+
+- Phase 3 database/runtime foundation telah diverifikasi selama execution;
+- P3E-009 memiliki live verification terhadap limits, isolation, budget, null query, dan residue;
+- Phase 4A telah mencapai DEV berdasarkan execution checkpoint;
+- exact current schema/function/policy state harus tetap diaudit langsung dari Supabase sebelum backlog baru.
+
+Persistent test residue:
+
+"NONE pada evidence P3E-009"
+
+Known deferred assurance:
+
+- application/API/UI E2E belum seluruhnya diverifikasi;
+- runtime/model-level assurance tertentu masih deferred.
+
+Catatan:
+
+Jangan menganggap isi bagian ini sebagai pengganti audit Supabase aktual.
+
+---
+
+12. CURRENT GITHUB STATE
+
+Repository:
+
+"https://github.com/savie/second-head"
+
+Branch:
+
+"dev"
+
+Latest explicitly known relevant reconciliation commit:
+
+"bc76f4ba9427b881804d604619b1bec494d5a28a"
+
+Artifact:
+
+"SECOND_HEAD_PHASE_3_EXECUTION_RECONCILIATION_v1.0.md"
+
+Phase 4 reconciliation sebelumnya juga telah dibuat dan direkam:
+
+"SECOND_HEAD_PHASE_4_EXECUTION_RECONCILIATION_v1.0.md"
+
+Commit Phase 4 reconciliation yang diketahui dari checkpoint:
+
+"46020e850dea123fb9dc84bf4464e5f7e2a77817"
+
+Catatan:
+
+Jangan menganggap salah satu hash di atas sebagai latest repository commit secara keseluruhan.
+
+Latest exact GitHub HEAD harus diperiksa langsung saat melanjutkan.
+
+Relevant artifacts:
+
+- Phase -1
+- SH Core Canonical
+- Build Scope
+- Implementation Contract
+- Implementation Guide
+- Execution Strategy
+- Phase 3 Execution Reconciliation
+- Phase 4 Execution Reconciliation
+- Phase 3 implementation artifacts
+- Phase 4A implementation artifacts
+- evidence dan migrations terkait
+
+Evidence terakhir:
+
+- P3E-009 PASS / DEV
+- P4A-001..010 COMPLETE / DEV
+
+Migration terakhir:
+
+"Harus diverifikasi langsung dari GitHub DEV saat continuation."
+
+---
+
+13. KNOWN OPEN ITEMS
+
+TRUE BLOCKER
+
+Saat ini:
+
+- tidak ada material blocker untuk memulai P4B;
+- tidak ada Owner DM baru yang diperlukan untuk P4B-001 berdasarkan reconciliation terakhir.
+
+Phase 3 formal closure masih memiliki:
+
+- Cognitive Engine Gate evidence.
+
+Ini merupakan closure gate, bukan alasan untuk mengulang implementation Phase 3.
+
+DOCUMENTATION GAP
+
+- beberapa formal OQ/document status mungkin belum berubah menjadi CLOSED;
+- Phase 3 decision record merupakan non-canonical reconciliation/decision record;
+- exact latest repository state harus selalu diaudit ulang sebelum backlog berikutnya.
+
+DEFERRED ASSURANCE
+
+- application/API/UI E2E belum seluruhnya diverifikasi;
+- runtime/model-level assurance tertentu masih deferred;
+- multi-model fallback testing ditunda sampai provider kedua tersedia;
+- high-risk action UI/UX confirmation ditunda sampai frontend integration.
+
+FUTURE SCOPE
+
+- multi-model routing/fallback yang lebih advanced;
+- autonomous agent loops di luar defined workflows;
+- frontend/UI implementation;
+- advanced action confirmation UX;
+- capability/provider expansion.
+
+---
+
+14. THINGS NOT TO REOPEN
+
+Kecuali audit menemukan contradiction nyata:
+
+- SH ≠ Model;
+- MODEL ≠ SH IDENTITY;
+- MODEL ≠ AUTHORITY;
+- RUNTIME ≠ SH IDENTITY;
+- Tool ≠ Authority;
+- Context ≠ Memory;
+- Memory ≠ Knowledge;
+- Knowledge tidak otomatis mengubah Core;
+- privacy/ownership/security boundary tetap;
+- Phase 3 implementation P3A–P3E tidak diulang;
+- P4A-001..010 tidak diulang;
+- keputusan Owner untuk v1 menggunakan satu model/provider;
+- adapter/model abstraction tetap disiapkan agar model/provider mudah diganti;
+- Phase 3 decision note sudah direconcile dan dilegalkan sebagai non-canonical execution decision record;
+- Phase 4 P4B–P4F decomposition sudah direconcile;
+- tidak perlu membuat backlog tambahan hanya demi padding.
+
+---
+
+15. CURRENT NEXT TARGET
+
+CURRENT:
+
+P4B-001 — Reasoning Context Integration & Isolation
+
+AC:
+
+Reasoning mengonsumsi Context Assembly dari runtime secara bounded/read-only dan tidak mengambil alih Memory/Knowledge storage responsibility.
+
+Invariant utama:
+
+- Reasoning ≠ Model
+- Context ≠ Memory
+- reasoning tidak menulis Memory secara langsung
+
+DEPENDENCY:
+
+- P4A Runtime Pipeline
+- Phase 3 Context Assembly
+- existing Memory/Knowledge boundaries
+- current authority dan reconciliation documents
+
+NEXT ACTION:
+
+PHASE -1 CHECK
+→ LATEST OWNER DECISIONS
+→ AUTHORITY
+→ GITHUB
+→ SUPABASE
+→ RECONCILE
+→ IMPLEMENT / PASS
+→ EVIDENCE
+→ DEV
+
+---
+
+16. WORKING STYLE
+
+Owner menggunakan instruksi seperti:
+
+"GO ... → audit → reconcile → lanjut sampai DEV."
+
+Artinya:
+
+teruskan pekerjaan dari posisi terakhir sampai backlog item selesai, bukan berhenti di setiap ketidaksempurnaan dokumentasi.
+
+Gunakan:
+
+KEEP MOVING FORWARD + REVIEW BACKWARD ONLY WHEN NECESSARY
+
+Jangan:
+
+- mulai project dari nol;
+- meminta Owner mengulang keputusan yang sudah dibuat;
+- menganggap dokumen lama selalu lebih baru daripada keputusan Owner;
+- membuat arsitektur baru untuk menyelesaikan gap kecil;
+- menghentikan implementation hanya karena wording dokumentasi belum diperbarui;
+- menganggap keputusan Owner sebagai canonical change jika memang bukan itu maksudnya;
+- mengarang keputusan ketika benar-benar belum ada;
+- menganggap laporan agen sebagai authority;
+- memaksakan jumlah backlog tertentu jika audit menunjukkan jumlah yang lebih kecil sudah cukup.
+
+Untuk Phase 4:
+
+Audit agen adalah input analisis, bukan authority.
+
+Authority tetap:
+
+Phase -1 → Owner/DM → Canonical/authority documents → actual GitHub/Supabase → reconcile.
+
+---
+
+17. FINAL CHECKPOINT
+
+PROJECT:
+
+"SECOND HEAD — SYSTEM BUILD"
+
+MODE:
+
+"ACTUAL BUILD / CONTROLLED IMPLEMENTATION"
+
+CURRENT PHASE:
+
+"PHASE 4 — RUNTIME & ORCHESTRATION"
+
+COMPLETED:
+
+- Phase 3A — COMPLETE
+- Phase 3B — COMPLETE
+- Phase 3C — COMPLETE
+- Phase 3D — COMPLETE
+- Phase 3E — P3E-001..009 PASS / DEV
+- Phase 3 implementation — COMPLETE
+- Phase 4A — P4A-001..010 COMPLETE / DEV
+- Phase 3 decision reconciliation — LEGALIZED
+- Phase 4 execution reconciliation — LEGALIZED
+
+CURRENT:
+
+"P4B-001 — Reasoning Context Integration & Isolation"
+
+NEXT:
+
+Audit → Reconcile → DEV
+
+TRUE BLOCKERS:
+
+- None currently identified for P4B-001.
+
+DOCUMENTATION GAPS:
+
+- Formal closure OQ/Phase 3 gate documentation masih membutuhkan closure evidence/traceability.
+- Exact latest GitHub/Supabase state harus diverifikasi saat continuation.
+
+DEFERRED ASSURANCE:
+
+- Application/API/UI E2E;
+- runtime/model-level assurance tertentu;
+- multi-model fallback testing;
+- high-risk action UI/UX confirmation.
+
+LATEST OWNER DECISIONS:
+
+- v1 menggunakan satu model/provider;
+- model abstraction harus memungkinkan provider/model diganti;
+- SH ≠ Model;
+- Memory ≠ Knowledge;
+- information/private/generalization boundary;
+- occurrence_count >= 5 untuk GENERAL sebagai initial Knowledge Candidate signal;
+- Knowledge tidak absolute truth;
+- provenance/lineage tetap;
+- Knowledge tidak otomatis mengubah Core;
+- keputusan Owner terbaru yang tidak mengubah pondasi dapat menjadi execution input melalui reconcile tanpa memaksa dokumen lama langsung ditulis ulang.
+
+GITHUB:
+
+"https://github.com/savie/second-head"
+
+SUPABASE:
+
+"https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd"
+
+PRIMARY EXECUTION CONTROL:
+
+"PHASE -1"
+
+ACTUAL REPOSITORY:
+
+"GITHUB DEV"
+
+ACTUAL DATABASE:
+
+"SUPABASE DEV"
+
+RESUME ROLE:
+
+"CONTINUITY + EXECUTION CONTEXT"
+
+---
+
+18. CONTINUATION COMMAND
+
+Untuk melanjutkan di chat berikutnya:
+
+Continue SECOND HEAD from this Session Resume.
+
+Jangan mulai dari nol.
+
+Gunakan Resume ini untuk continuity, lalu audit actual source.
+
+Mulai dari Phase -1 untuk backlog current target.
+
+Gunakan keputusan Owner/DM terbaru sebagai input reconcile.
+
+Jika keputusan Owner sudah cukup untuk menyelesaikan practical implementation
+dan tidak mengubah canonical, ownership, privacy, security boundary,
+atau fundamental architecture, jangan berhenti hanya karena dokumen lama
+belum diperbarui.
+
+Lakukan minimal reconciliation / minimal realization.
+
+Audit:
+
+Phase -1
+→ Owner / DM Decisions
+→ Canonical / Frozen Authority
+→ Build Scope
+→ Implementation Contract
+→ Implementation Guide
+→ Execution Strategy
+→ existing artifacts
+→ GitHub DEV
+→ Supabase DEV
+
+Lalu:
+
+RECONCILE
+→ PASS / GAP
+→ MINIMAL REALIZATION bila diperlukan
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+STOP hanya jika benar-benar membutuhkan keputusan Owner baru,
+ada contradiction material, atau ada risiko canonical/privacy/
+ownership/security yang tidak dapat diselesaikan secara aman.
+
+GitHub:
+https://github.com/savie/second-head
+
+Supabase:
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+END SESSION RESUME
+
+---
+
+SECOND HEAD — SESSION RESUME 36
+# SECOND HEAD — SESSION REVIEW CHECKPOINT
+
+## CURRENT PROJECT STATE SNAPSHOT
+
+Project:
+SECOND HEAD — SYSTEM BUILD
+
+Resume Type:
+CURRENT SESSION REVIEW / CROSS-SESSION CHECKPOINT
+
+Purpose:
+Menyimpan kondisi aktual proyek pada titik checkpoint agar sesi/chat/agen berikutnya dapat melanjutkan pekerjaan tanpa mengulang dari nol, tanpa membawa keputusan lama yang sudah tidak berlaku, dan tanpa menganggap rekomendasi sebagai keputusan Owner.
+
+---
+
+## 0. CARA MEMBACA CHECKPOINT
+
+Checkpoint ini BUKAN canonical authority.
+
+Checkpoint ini adalah:
+
+- continuity record;
+- execution context;
+- current-state snapshot;
+- audit/reconciliation checkpoint.
+
+Checkpoint tidak mengubah:
+
+- Frozen Baseline;
+- SH Core Canonical;
+- Build Scope;
+- Implementation Contract;
+- Implementation Guide;
+- Architecture;
+- Execution Strategy;
+- Phase -1.
+
+Status Phase 4 telah ditutup secara formal melalui:
+`docs/phase4/SECOND_HEAD_PHASE_4_CLOSURE_v1.0.md`
+
+Closure tersebut sendiri berstatus NON-CANONICAL dan tidak menggantikan authority di atas.
+
+Jika terdapat discrepancy antara checkpoint, authority, atau actual DEV:
+
+→ identifikasi discrepancy;
+→ reconcile;
+→ jangan mengarang penyelesaian.
+
+---
+
+# 1. HIERARKI SUMBER KERJA
+
+Working hierarchy yang digunakan untuk SH v1.0:
+
+FROZEN BASELINE
+        ↓
+SH-LITE v2.0 / v2.1 — REFERENCE ONLY
+        ↓
+SH CORE CANONICAL
+        ↓
+BUILD SCOPE
+        ↓
+IMPLEMENTATION CONTRACT
+        ↓
+IMPLEMENTATION GUIDE
+        ↓
+ARCHITECTURE
+        ↓
+EXECUTION STRATEGY
+        ↓
+PHASE -1 — EXECUTION CONTROL
+        ↓
+PHASE ARTIFACT / BACKLOG
+        ↓
+ACTUAL GITHUB DEV
+        ↓
+ACTUAL SUPABASE DEV
+
+Catatan penting:
+
+SH-Lite v2.0/v2.1 diperlakukan sebagai historical/reference material dan bukan pondasi identity atau scope SH v1.0.
+
+Jangan mengambil backlog Phase hanya dari historical/frozen material apabila Execution Strategy + Phase -1 + phase execution definition yang telah direkonsiliasi menetapkan jalur berbeda.
+
+Source code bukan authority.
+
+---
+
+# 2. SUMBER AKTUAL
+
+## GitHub
+
+Repository:
+
+https://github.com/savie/second-head
+
+Branch kerja:
+
+dev
+
+Repository default branch:
+dev
+
+Actual branch HEAD:
+
+3d4d6d57e5d09ee992b877814795d734be5b0f9c
+
+Latest commit message:
+
+docs(p4): close Phase 4 Runtime & Orchestration
+
+Commit timestamp:
+
+2026-08-12 08:52:40 UTC
+
+Working tree:
+
+UNKNOWN
+
+Reason:
+Connector memverifikasi remote GitHub branch state, tetapi tidak menyediakan local checkout working-tree status.
+
+Remote synchronization:
+
+UNKNOWN
+
+Reason:
+Remote branch HEAD terverifikasi, tetapi tidak ada local checkout comparison pada checkpoint ini.
+
+Relevant current artifacts include:
+
+- docs/phase4/SECOND_HEAD_PHASE_4_CLOSURE_v1.0.md
+- docs/phase4/SECOND_HEAD_PHASE_4_EXECUTION_RECONCILIATION_v1.0.md
+- Phase 4 evidence
+- Phase 4 runtime implementation
+- Phase -1
+- SH Core Canonical
+- Build Scope
+- Implementation Contract
+- Implementation Guide
+- Architecture
+- Execution Strategy
+
+---
+
+## Supabase
+
+Project:
+
+second-head
+
+Project ref:
+
+pkhkgvsrqeupvwoqjwmd
+
+Dashboard:
+
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+Branch:
+
+dev
+
+Last direct verification:
+
+2026-08-12 09:07 UTC
+
+Actual database:
+
+postgres
+
+Relevant schema:
+
+public
+
+Current relevant state verified:
+
+- public.audit_events exists;
+- public.audit_events is queryable;
+- current persistent row count = 0;
+- no persistent audit-event test residue detected at checkpoint.
+
+Current database inventory also contains the Phase 4-relevant runtime/data structures, including:
+
+- accounts
+- account_auth_links
+- sh_instances
+- sh_ownership
+- conversations
+- memories
+- knowledge
+- memory_knowledge_eligibility
+- permission_matrix
+- audit_events
+- private.authority_assignments
+
+Persistent test residue:
+
+NONE observed in public.audit_events at checkpoint.
+
+---
+
+# 3. STATUS PROJECT
+
+Overall Project Mode:
+
+ACTUAL BUILD / CONTROLLED IMPLEMENTATION
+
+Current Phase:
+
+PHASE 4 — Runtime & Orchestration
+
+Previous Phase:
+
+PHASE 3 — Cognitive Foundation
+
+Next Candidate:
+
+PHASE 5 — SH Advanced Capabilities
+
+---
+
+## PHASE TRANSITION
+
+PREVIOUS PHASE:
+PHASE 3
+
+STATUS:
+COMPLETE / previously closed before Phase 4 execution
+
+CURRENT PHASE:
+PHASE 4 — Runtime & Orchestration
+
+STATUS:
+CLOSED
+
+NEXT PHASE:
+PHASE 5 — SH Advanced Capabilities
+
+STATUS:
+READY FOR DISCUSSION / OWNER GO REQUIRED
+
+CURRENT MODE:
+Phase 4 closed; transition checkpoint toward Phase 5.
+
+IMPLEMENTATION AUTHORIZED:
+Phase 4 is closed.
+No new Phase 5 implementation is authorized merely by this checkpoint.
+
+OWNER DECISION REQUIRED:
+Owner authorization / GO for Phase 5 execution, unless already provided in a later decision not represented in this checkpoint.
+
+Important:
+
+"Next Phase: READY TO PROCEED" in the Phase 4 closure document is treated as a phase-readiness conclusion, NOT automatically as a new Owner GO.
+
+---
+
+# 4. PHASE CLOSURE STATUS
+
+Phase:
+
+PHASE 4 — Runtime & Orchestration
+
+### Implementation
+
+Status:
+
+COMPLETE / DEV
+
+Inventory:
+
+- P4A-001 → P4A-010 — DONE / DEV
+- P4B-001 → P4B-003 — DONE / DEV
+- P4C-001 → P4C-003 — DONE / DEV
+- P4D-001 → P4D-003 — DONE / DEV
+- P4E-001 → P4E-004 — DONE / DEV
+- P4F-001 → P4F-005 — DONE / DEV
+
+Evidence:
+
+Phase-specific evidence exists in GitHub DEV.
+
+### Formal Closure
+
+Status:
+
+CLOSED
+
+Closure artifact:
+
+docs/phase4/SECOND_HEAD_PHASE_4_CLOSURE_v1.0.md
+
+Closure status:
+
+CLOSED FOR PHASE-LEVEL EXECUTION
+
+Canonical status:
+
+NON-CANONICAL
+
+Canonical mutation:
+
+NONE
+
+### Runtime / E2E Assurance
+
+Implementation / DEV:
+
+PASS
+
+Database integration:
+
+PASS / VERIFIED WHERE APPLICABLE
+
+Application / API / UI E2E:
+
+DEFERRED ASSURANCE
+
+### Deferred Items
+
+- multi-provider fallback assurance until another provider exists;
+- frontend/UI high-risk confirmation UX;
+- full application/API/UI E2E;
+- real external-action integration assurance outside current verification boundary.
+
+### Carry-Forward Items
+
+Item:
+Deferred assurance from Phase 4.
+
+Reason:
+Assurance layer/dependency is not equivalent to failed Phase 4 implementation.
+
+Impact on next phase:
+
+LIMITED / TRACEABILITY
+
+These items must remain documented but do not automatically reopen Phase 4.
+
+### Closure Conclusion
+
+COMPLETE WITH DEFERRED ASSURANCE
+
+Operationally:
+
+PHASE 4 = CLOSED
+
+---
+
+# 5. COMPLETED WORK
+
+## Phase 4
+
+| Item | Status | Verification | Evidence | Notes |
+|---|---|---|---|---|
+| P4A-001 → P4A-010 | DONE / DEV | VERIFIED at implementation level | Phase 4 evidence | Runtime Pipeline |
+| P4B-001 → P4B-003 | DONE / DEV | VERIFIED at implementation level | Phase 4 evidence | Reasoning |
+| P4C-001 → P4C-003 | DONE / DEV | VERIFIED at implementation level | Phase 4 evidence | Planning / Workflow |
+| P4D-001 → P4D-003 | DONE / DEV | VERIFIED at implementation level | Phase 4 evidence | Model Orchestration |
+| P4E-001 → P4E-004 | DONE / DEV | VERIFIED at implementation level | Phase 4 evidence | Tool Execution |
+| P4F-001 → P4F-005 | DONE / DEV | VERIFIED at implementation level | Phase 4 evidence | Action Execution |
+
+Ringkasan:
+
+Phase 4 execution decomposition P4A–P4F telah direalisasikan pada DEV dan kemudian ditutup secara formal.
+
+Tidak ditemukan material contradiction yang mengharuskan Phase 4 implementation dihentikan.
+
+---
+
+# 6. CURRENT IMPLEMENTATION POSITION
+
+Current backlog:
+
+NONE ACTIVE IN PHASE 4
+
+Status:
+
+PHASE CLOSED
+
+Acceptance / closure condition:
+
+Phase 4 execution slices P4A–P4F selesai dan evidence tersedia.
+
+Dependency:
+
+Phase 4 menjadi prerequisite bagi Phase 5.
+
+Next action apabila Phase 5 mendapat authorization:
+
+PHASE -1
+→ OWNER / DM DECISION CHECK
+→ AUTHORITY CHECK
+→ PHASE 5 DEFINITION / BACKLOG
+→ GITHUB AUDIT
+→ SUPABASE AUDIT
+→ RECONCILE
+→ MINIMAL REALIZATION bila diperlukan
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+---
+
+# 7. OWNER / DM DECISIONS TERBARU
+
+### Decision — Phase 4 closure / execution direction
+
+STATUS:
+AGREED / CURRENT EXECUTION POSITION
+
+TOPIK:
+Penutupan Phase 4 dan kesiapan transisi.
+
+OWNER DECISION:
+Posisi kerja terakhir yang diberikan Owner adalah bahwa seluruh:
+
+- P4A-001 → P4A-010
+- P4B-001 → P4B-003
+- P4C-001 → P4C-003
+- P4D-001 → P4D-003
+- P4E-001 → P4E-004
+- P4F-001 → P4F-005
+
+telah DONE / DEV dan Phase 4 perlu ditutup melalui audit closure.
+
+RATIONALE:
+Owner meminta closure Phase 4 terhadap hierarchy/authority yang benar dan actual GitHub + Supabase, dengan deferred/documentation gaps tidak dianggap blocker otomatis.
+
+AUTHORITY:
+Phase 4 Closure + Phase 4 Execution Reconciliation + higher project authority.
+
+CONSTRAINT:
+
+- jangan menghidupkan kembali Phase 4 tanpa contradiction material;
+- jangan mengubah canonical;
+- jangan membuat architecture baru;
+- deferred assurance tetap terdokumentasi;
+- documentation gap tidak otomatis menjadi blocker.
+
+IMPLEMENTATION IMPACT:
+Phase 4 ditutup dan tidak ada Phase 4 backlog aktif.
+
+YANG TIDAK BERUBAH:
+
+- canonical invariant;
+- ownership boundary;
+- privacy boundary;
+- security boundary;
+- fundamental architecture.
+
+REMAINING OPEN:
+Authorization untuk pekerjaan Phase 5 belum dianggap diberikan hanya karena Phase 4 closure menyatakan "READY TO PROCEED".
+
+---
+
+# 8. DECISION vs DOKUMEN LAMA
+
+### A. CONSISTENT
+
+Phase 4 closure yang baru dibuat konsisten dengan execution reconciliation yang menyatakan P4B–P4F sebagai execution decomposition dan bukan canonical mutation.
+
+### B. DOCUMENTATION LAG / PRACTICAL DECISION
+
+Historical documents dapat masih menunjukkan status/struktur lama.
+
+Reconciliation rule:
+
+Historical status tidak boleh digunakan untuk menghidupkan kembali backlog yang telah ditutup apabila actual current execution state sudah berbeda dan telah direkonsiliasi.
+
+### C. MATERIAL CONTRADICTION
+
+Tidak ditemukan material contradiction pada Phase 4 closure checkpoint.
+
+Jika audit Phase 5 menemukan contradiction baru:
+
+→ stop dependency tersebut saja;
+→ jangan otomatis reopen seluruh Phase 4.
+
+---
+
+# 9. OQ / OPEN ITEM RECONCILIATION
+
+### Phase 4 deferred assurance
+
+Formal status:
+
+DEFERRED
+
+Latest practical resolution:
+
+Tidak menjadi blocker terhadap Phase 4 closure.
+
+Canonical impact:
+
+NONE
+
+Execution:
+
+UNBLOCKED
+
+Formal documentation:
+
+DOCUMENTED
+
+### Phase 5 authorization
+
+Formal status:
+
+OPEN / NOT YET AUTHORIZED
+
+Latest Owner decision:
+
+Tidak terdapat pada checkpoint ini keputusan eksplisit yang menyatakan Phase 5 implementation GO.
+
+Practical resolution:
+
+Phase 5 dapat dicatat sebagai NEXT CANDIDATE / READY FOR DISCUSSION, tetapi jangan melakukan mutation/implementation hanya berdasarkan roadmap.
+
+Canonical impact:
+
+UNKNOWN UNTIL PHASE 5 AUDIT
+
+Execution:
+
+BLOCKED ONLY FOR AUTHORIZATION
+
+Formal documentation:
+
+CURRENTLY NOT REPRESENTED AS PHASE 5 EXECUTION AUTHORIZATION
+
+---
+
+# 10. VERIFICATION DISCIPLINE
+
+### IMPLEMENTATION VERIFIED
+
+Phase 4:
+
+PASS
+
+P4A–P4F implementation/evidence tersedia pada DEV.
+
+### RUNTIME VERIFIED
+
+Phase 4:
+
+PARTIALLY VERIFIED / VERIFIED WHERE APPLICABLE
+
+Database/runtime boundaries yang relevan diverifikasi.
+
+### APPLICATION / E2E VERIFIED
+
+Phase 4:
+
+DEFERRED
+
+Tidak ada dasar untuk menyatakan seluruh application/API/UI E2E PASS.
+
+### DEFERRED ASSURANCE
+
+Implementation:
+
+PASS
+
+Runtime:
+
+PARTIAL / VERIFIED WHERE APPLICABLE
+
+E2E:
+
+DEFERRED
+
+Reason:
+
+Execution environment Phase 4 tidak membuktikan seluruh frontend/UI/external-world integration.
+
+---
+
+# 11. AUDIT RESULT
+
+Audit scope:
+
+Phase 4 closure terhadap execution hierarchy, Phase 4 reconciliation, actual GitHub DEV, dan actual Supabase DEV.
+
+Sources checked:
+
+- Phase 4 Closure
+- Phase 4 Execution Reconciliation
+- Phase -1 reference in repository
+- SH Full Execution Strategy
+- relevant Phase 4 evidence
+- actual GitHub DEV branch
+- actual Supabase DEV
+
+Audit result:
+
+CONSISTENT FOR PHASE 4 CLOSURE
+
+### Findings
+
+1. Phase 4 closure artifact exists on current dev branch.
+2. Current dev HEAD is the Phase 4 closure commit.
+3. Closure states P4A–P4F complete.
+4. Phase 4 reconciliation states P4B–P4F were execution decomposition, not canonical mutation.
+5. No canonical mutation is claimed.
+6. Current Supabase public.audit_events exists.
+7. Current public.audit_events row count is 0.
+8. Phase 4 closure correctly distinguishes implementation completion from E2E assurance.
+9. Deferred assurance is documented rather than treated as implementation failure.
+10. No active Phase 4 backlog remains.
+
+### Material Contradiction
+
+NONE FOUND FOR PHASE 4 CLOSURE
+
+### Canonical Risk
+
+NONE FOUND
+
+### Ownership Risk
+
+NONE FOUND
+
+### Privacy Risk
+
+NONE FOUND
+
+### Security Risk
+
+NONE FOUND
+
+### Architecture Risk
+
+NONE FOUND
+
+---
+
+# 12. RECONCILIATION RESULT
+
+Reconciliation target:
+
+PHASE 4 CLOSURE
+
+Existing implementation:
+
+P4A–P4F completed on DEV.
+
+Expected behavior:
+
+Phase 4 execution scope completed without violating higher authority or Phase 4 invariants.
+
+Gap:
+
+NONE MATERIAL FOR PHASE 4 CLOSURE
+
+Mutation required:
+
+NO MUTATION REQUIRED FOR PHASE 4 CLOSURE
+
+Closure artifact already exists.
+
+Verification:
+
+PASS at implementation/DEV level.
+
+Evidence:
+
+Phase 4 closure + Phase 4 execution evidence.
+
+---
+
+# 13. CURRENT GITHUB STATE
+
+Repository:
+
+https://github.com/savie/second-head
+
+Branch:
+
+dev
+
+HEAD:
+
+3d4d6d57e5d09ee992b877814795d734be5b0f9c
+
+Working tree:
+
+UNKNOWN
+
+Remote:
+
+UNKNOWN
+
+Latest commit:
+
+docs(p4): close Phase 4 Runtime & Orchestration
+
+Latest relevant previous implementation commit:
+
+a955cca2964552941cbc083cd494f6dcdb42cdb3
+
+Relevant current artifact:
+
+docs/phase4/SECOND_HEAD_PHASE_4_CLOSURE_v1.0.md
+
+Relevant reconciliation artifact:
+
+docs/phase4/SECOND_HEAD_PHASE_4_EXECUTION_RECONCILIATION_v1.0.md
+
+Latest evidence:
+
+P4F-005 Action Logging & Observability evidence
+
+Latest Phase 4 closure commit:
+
+3d4d6d57e5d09ee992b877814795d734be5b0f9c
+
+---
+
+# 14. CURRENT SUPABASE STATE
+
+Project:
+
+second-head
+
+Project ref:
+
+pkhkgvsrqeupvwoqjwmd
+
+Branch:
+
+dev
+
+Last verified:
+
+2026-08-12 09:07 UTC
+
+Relevant schema:
+
+public
+
+Relevant tables:
+
+- accounts
+- account_auth_links
+- sh_instances
+- sh_ownership
+- conversations
+- memories
+- knowledge
+- memory_knowledge_eligibility
+- permission_matrix
+- audit_events
+
+Relevant private table:
+
+- private.authority_assignments
+
+Relevant runtime/database state:
+
+- public.audit_events exists;
+- public.audit_events is queryable;
+- persistent audit_events row count = 0 at checkpoint.
+
+Persistent residue:
+
+NONE observed in audit_events.
+
+Known limitation:
+
+Supabase database verification does not constitute full application/API/UI E2E verification.
+
+---
+
+# 15. KNOWN OPEN ITEMS
+
+## TRUE BLOCKER
+
+For Phase 4:
+
+- NONE
+
+For Phase 5:
+
+- Owner authorization / GO is not established by this checkpoint.
+
+## DOCUMENTATION GAP
+
+- implementation-level details that were intentionally not frozen;
+- future phase documentation may still require reconciliation before execution.
+
+## DEFERRED ASSURANCE
+
+- multi-provider fallback testing;
+- frontend/UI high-risk confirmation UX;
+- full application/API/UI E2E;
+- real external-action integration assurance.
+
+## OPEN / UNRESOLVED
+
+- exact Phase 5 execution decomposition must be audited against current authority before implementation;
+- Phase 5 Owner authorization status is not established by this checkpoint.
+
+## FUTURE SCOPE
+
+- second model/provider;
+- broader external integrations;
+- frontend/UI confirmation;
+- full product-level E2E;
+- autonomous open-ended agent loops, unless separately authorized by higher authority.
+
+---
+
+# 16. THINGS NOT TO REOPEN
+
+Jangan membuka kembali Phase 4 hanya karena:
+
+- E2E masih deferred;
+- provider kedua belum tersedia;
+- UI belum tersedia;
+- external integration belum lengkap;
+- historical documentation masih berbeda;
+- implementation-level details masih fleksibel.
+
+Jangan reopen:
+
+- P4A-001 → P4A-010;
+- P4B-001 → P4B-003;
+- P4C-001 → P4C-003;
+- P4D-001 → P4D-003;
+- P4E-001 → P4E-004;
+- P4F-001 → P4F-005;
+
+kecuali audit baru menemukan:
+
+- material contradiction;
+- regression;
+- security/privacy/ownership violation;
+- canonical invariant violation;
+- failed verification;
+- atau evidence sebelumnya terbukti tidak valid.
+
+---
+
+# 17. SUPERSEDED DECISIONS
+
+Tidak ada superseded decision material yang perlu dicatat pada checkpoint ini.
+
+Historical Phase definitions/status yang berbeda dengan current execution state:
+
+STATUS:
+HISTORICAL / SUPERSEDED FOR CURRENT EXECUTION CONTEXT
+
+Effective implication:
+
+Gunakan current reconciled execution direction, bukan historical backlog hanya karena nama Phase/item terlihat sama.
+
+---
+
+# 18. CURRENT DISCUSSIONS / EXPLORATIONS
+
+STATUS:
+
+DISCUSSION / NEXT-PHASE PREPARATION
+
+Topik:
+
+PHASE 5 — SH Advanced Capabilities
+
+Execution Strategy roadmap menggambarkan Phase 5 sebagai:
+
+SH Advanced Capabilities
+(Journey, Clone, Inheritance, Recovery, Legacy)
+
+Current understanding:
+
+Phase 5 merupakan next roadmap candidate setelah Phase 4.
+
+Namun:
+
+Owner GO untuk implementasi Phase 5 belum dianggap ada hanya berdasarkan roadmap atau readiness statement Phase 4.
+
+Owner decision:
+
+NOT YET ESTABLISHED IN THIS CHECKPOINT
+
+Implementation authority:
+
+NOT AUTHORIZED YET
+
+Sebelum GO:
+
+Phase -1
+→ latest Owner decisions
+→ authority
+→ Phase 5 definition/backlog
+→ GitHub
+→ Supabase
+→ reconcile
+
+---
+
+# 19. IMPORTANT BOUNDARIES / DO-NOT-DO
+
+Hal yang tidak boleh dilakukan:
+
+- jangan mengubah Canonical tanpa authority;
+- jangan mengubah Frozen Baseline secara diam-diam;
+- jangan memperlakukan SH-Lite v2.0/v2.1 sebagai current SH v1.0 foundation;
+- jangan mengambil backlog Phase dari historical baseline jika current Execution Strategy/Phase -1 menetapkan jalur berbeda;
+- jangan menganggap roadmap sebagai Owner GO;
+- jangan menganggap rekomendasi agen sebagai keputusan Owner;
+- jangan membuka kembali Phase 4 tanpa material reason;
+- jangan membuat architecture baru untuk gap kecil;
+- jangan melakukan mutation tanpa gap nyata;
+- jangan menyebut deferred assurance sebagai PASS;
+- jangan menyebut E2E PASS tanpa E2E test;
+- jangan menganggap database PASS = application PASS;
+- jangan menganggap Phase 5 "READY TO PROCEED" sebagai authorization otomatis;
+- jangan mengulang keputusan Owner yang sudah final.
+
+---
+
+# 20. REFERENCE DOCUMENTS
+
+| Dokumen | Fungsi | Status |
+|---|---|---|
+| Frozen Baseline | Frozen project authority | BINDING / REFERENCE |
+| SH Core Canonical | Core canonical authority | BINDING |
+| SH-Lite v2.0 / v2.1 | Historical/reference | REFERENCE ONLY |
+| Build Scope | Scope authority | BINDING |
+| Implementation Contract | Acceptance/implementation contract | BINDING |
+| Implementation Guide | Implementation guidance | BINDING GUIDANCE |
+| Architecture | Architecture reference | BINDING ARCHITECTURAL REFERENCE |
+| Execution Strategy | Execution direction | FINAL / OPERATIONAL |
+| Phase -1 | Primary execution control | EXECUTION CONTROL |
+| Phase 4 Execution Reconciliation | Phase-specific reconciliation | NON-CANONICAL / ACCEPTED |
+| Phase 4 Closure | Phase closure record | NON-CANONICAL / CLOSED |
+| Phase 4 Evidence | Verification evidence | ACTUAL DEV EVIDENCE |
+| Session Resume / Session Review | Continuity | NOT AUTHORITY |
+| Reference-folder historical docs | Historical/reference | DO NOT TREAT AS CURRENT WITHOUT RECONCILIATION |
+
+---
+
+# 21. CURRENT NEXT-STEP CANDIDATE
+
+NEXT CANDIDATE:
+
+PHASE 5 — SH Advanced Capabilities
+
+Status:
+
+READY FOR DISCUSSION / OWNER GO REQUIRED
+
+Dasar:
+
+Execution Strategy roadmap menempatkan Phase 5 setelah Phase 4.
+
+Phase 4 closure menyatakan Phase 4 dapat menjadi prerequisite yang selesai untuk phase berikutnya.
+
+Namun checkpoint ini TIDAK mengubah readiness tersebut menjadi Owner authorization.
+
+Next audit flow:
+
+PHASE -1
+→ LATEST OWNER DECISIONS
+→ FROZEN BASELINE
+→ SH CORE CANONICAL
+→ BUILD SCOPE
+→ IMPLEMENTATION CONTRACT
+→ IMPLEMENTATION GUIDE
+→ ARCHITECTURE
+→ EXECUTION STRATEGY
+→ PHASE 5 DEFINITION / BACKLOG
+→ GITHUB DEV
+→ SUPABASE DEV
+→ RECONCILE
+→ GAP?
+→ MINIMAL REALIZATION bila diperlukan
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+---
+
+# 22. EXACT STOP / HOLD CONDITION
+
+Untuk Phase 4:
+
+Tidak ada active blocker.
+
+Untuk Phase 5:
+
+HOLD implementation sampai authorization/GO yang diperlukan tersedia.
+
+STOP hanya jika:
+
+1. ada material contradiction terhadap authority;
+2. ada perubahan canonical yang belum diputuskan;
+3. ada perubahan fundamental architecture yang membutuhkan Owner;
+4. ada perubahan ownership/privacy/security boundary yang belum diputuskan;
+5. current implementation membutuhkan keputusan Owner yang benar-benar belum ada;
+6. acceptance criteria tidak dapat dipenuhi tanpa keputusan baru;
+7. actual DEV state bertentangan secara material dengan expected authority dan tidak aman untuk direkonsiliasi secara minimal.
+
+Jangan STOP hanya karena:
+
+- documentation gap;
+- deferred E2E;
+- historical document berbeda;
+- implementation detail belum dibekukan;
+- atau open item yang practical question-nya sudah terjawab.
+
+---
+
+# 23. CHECKPOINT SUMMARY
+
+PROJECT:
+
+SECOND HEAD — SYSTEM BUILD
+
+PREVIOUS PHASE:
+
+PHASE 3 — Cognitive Foundation
+
+STATUS:
+
+COMPLETE / CLOSED
+
+CURRENT PHASE:
+
+PHASE 4 — Runtime & Orchestration
+
+STATUS:
+
+CLOSED
+
+NEXT PHASE:
+
+PHASE 5 — SH Advanced Capabilities
+
+STATUS:
+
+READY FOR DISCUSSION / OWNER GO REQUIRED
+
+CURRENT MODE:
+
+ACTUAL BUILD / CONTROLLED IMPLEMENTATION
+
+COMPLETED:
+
+- Phase 4 P4A-001 → P4A-010
+- Phase 4 P4B-001 → P4B-003
+- Phase 4 P4C-001 → P4C-003
+- Phase 4 P4D-001 → P4D-003
+- Phase 4 P4E-001 → P4E-004
+- Phase 4 P4F-001 → P4F-005
+- Phase 4 authority reconciliation
+- Phase 4 closure
+- GitHub DEV closure artifact
+- Supabase DEV verification
+
+CURRENT:
+
+Phase 4 CLOSED.
+No Phase 4 implementation backlog active.
+
+NEXT CANDIDATE:
+
+PHASE 5 — SH Advanced Capabilities
+
+TRUE BLOCKERS:
+
+- NONE for Phase 4.
+- Phase 5 implementation authorization not established in this checkpoint.
+
+DOCUMENTATION GAPS:
+
+- implementation-level details intentionally left flexible;
+- future phase documentation/reconciliation.
+
+DEFERRED ASSURANCE:
+
+- multi-provider fallback;
+- frontend/UI confirmation;
+- full application/API/UI E2E;
+- external-action integration assurance.
+
+OPEN DECISIONS:
+
+- Phase 5 implementation GO / authorization.
+
+LATEST OWNER DECISIONS:
+
+- Phase 4 execution has reached closure position.
+- Phase 4 should not be reopened merely because deferred/open items remain.
+- Current execution should preserve the corrected authority hierarchy and use actual DEV as implementation source.
+
+GITHUB:
+
+https://github.com/savie/second-head
+
+SUPABASE:
+
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+PRIMARY EXECUTION CONTROL:
+
+PHASE -1
+
+ACTUAL REPOSITORY:
+
+GITHUB DEV
+
+ACTUAL DATABASE:
+
+SUPABASE DEV
+
+RESUME ROLE:
+
+CONTINUITY + CURRENT EXECUTION CONTEXT
+
+---
+
+# 24. CONTINUATION COMMAND
+
+Untuk melanjutkan di chat/session berikutnya:
+
+Continue SECOND HEAD from this Session Review Checkpoint.
+
+Jangan mulai dari nol.
+
+Gunakan checkpoint ini sebagai continuity context,
+tetapi tetap audit actual source sebelum melakukan pekerjaan baru.
+
+Jika Owner memberikan GO Phase 5:
+
+PHASE -1
+→ LATEST OWNER / DM DECISIONS
+→ FROZEN BASELINE
+→ SH CORE CANONICAL
+→ BUILD SCOPE
+→ IMPLEMENTATION CONTRACT
+→ IMPLEMENTATION GUIDE
+→ ARCHITECTURE
+→ EXECUTION STRATEGY
+→ PHASE 5 ARTIFACT / BACKLOG
+→ GITHUB DEV
+→ SUPABASE DEV
+→ RECONCILE
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+Jika belum ada GO:
+
+→ jangan implement Phase 5;
+→ lakukan hanya readiness/audit/reconciliation yang memang authorized.
+
+Untuk pekerjaan yang telah diputuskan dan tidak mengubah:
+
+- canonical;
+- fundamental architecture;
+- ownership;
+- privacy;
+- security;
+- material scope;
+
+gunakan:
+
+MINIMAL RECONCILIATION / MINIMAL REALIZATION
+
+Jika benar-benar membutuhkan keputusan baru:
+
+STOP ONLY THAT DEPENDENCY
+→ Owner Decision.
+
+Jangan menghentikan seluruh project jika hanya satu dependency yang blocked.
+
+---
+
+# 25. FINAL INSTRUCTION TO NEXT AGENT / SESSION
+
+Jangan percaya checkpoint secara buta.
+
+Jangan percaya agen sebelumnya secara buta.
+
+Jangan percaya dokumen historical secara buta.
+
+Jangan percaya status "DONE" tanpa audit bila audit memang diperlukan.
+
+Gunakan checkpoint untuk mengetahui:
+
+"di mana kita berada."
+
+Gunakan authority untuk mengetahui:
+
+"apa yang seharusnya kita kerjakan."
+
+Gunakan GitHub DEV dan Supabase DEV untuk mengetahui:
+
+"apa yang benar-benar sudah ada."
+
+Gunakan reconcile untuk menentukan:
+
+"apakah keduanya konsisten."
+
+Gunakan minimal realization untuk menentukan:
+
+"apa perubahan paling kecil yang diperlukan."
+
+Gunakan Owner Decision hanya ketika memang ada keputusan yang belum tersedia.
+
+Khusus checkpoint ini:
+
+PHASE 4 SUDAH CLOSED.
+
+Jangan menghidupkan kembali Phase 4 hanya karena terdapat:
+
+- deferred assurance;
+- documentation gap;
+- future integration;
+- provider kedua yang belum tersedia;
+- UI yang belum tersedia;
+- atau historical documentation yang belum mencerminkan current state.
+
+Next workstream adalah Phase 5 hanya setelah authorization yang diperlukan tersedia.
+
+PRINSIP KERJA:
+
+KEEP MOVING FORWARD
++
+REVIEW BACKWARD ONLY WHEN NECESSARY
++
+DO NOT REOPEN SETTLED DECISIONS
++
+DO NOT INVENT MISSING DECISIONS
++
+DO NOT CONFUSE DOCUMENTATION STATUS WITH EXECUTION BLOCKER
++
+DO NOT CONFUSE READINESS WITH OWNER AUTHORIZATION
+
+---
+
+END OF SESSION REVIEW CHECKPOINT
+
+---
+
+SECOND HEAD — SESSION RESUME 37
+# SECOND HEAD — SESSION REVIEW CHECKPOINT
+
+## CURRENT PROJECT STATE SNAPSHOT
+
+Project:
+SECOND HEAD — SYSTEM BUILD
+
+Resume Type:
+CURRENT SESSION REVIEW / CROSS-SESSION CHECKPOINT
+
+Purpose:
+Menyimpan kondisi aktual proyek pada titik checkpoint agar sesi/chat/agen berikutnya dapat melanjutkan pekerjaan tanpa mengulang dari nol, tanpa membawa keputusan lama yang sudah tidak berlaku, dan tanpa menganggap rekomendasi sebagai keputusan Owner.
+
+---
+
+# 0. CARA MEMBACA CHECKPOINT
+
+Checkpoint ini BUKAN canonical authority.
+
+Checkpoint ini adalah:
+
+- continuity record;
+- execution context;
+- current-state snapshot;
+- audit/reconciliation checkpoint.
+
+Checkpoint tidak mengubah:
+
+- Frozen Baseline;
+- SH Core Canonical;
+- Build Scope;
+- Implementation Contract;
+- Implementation Guide;
+- Architecture;
+- Execution Strategy;
+- Phase -1.
+
+Jika terdapat discrepancy antara checkpoint, authority, atau actual DEV:
+
+→ identifikasi discrepancy;
+→ reconcile;
+→ jangan mengarang penyelesaian.
+
+---
+
+# 1. TERMINOLOGI KERJA
+
+Terminologi kerja saat ini:
+
+- **Second Head**
+- **SH**
+
+Keduanya valid dan dapat digunakan interchangeably dalam percakapan maupun execution context.
+
+JANGAN menggunakan:
+
+- "SH Full"
+- "SH Lite"
+
+sebagai terminology produk/current architecture.
+
+Catatan:
+
+Historical repository/documentation mungkin masih mengandung istilah:
+
+- SH Full
+- SH Lite
+
+Jika istilah tersebut ditemukan pada dokumen lama, perlakukan sebagai:
+
+HISTORICAL / LEGACY TERMINOLOGY
+
+dan jangan mengubah terminology current hanya karena nama artifact lama.
+
+SH-Lite v2.0/v2.1 tetap:
+
+REFERENCE ONLY / HISTORICAL
+
+dan bukan foundation identity/scope current Second Head v1.0.
+
+---
+
+# 2. HIERARCHI SUMBER KERJA
+
+Working hierarchy:
+
+FROZEN BASELINE
+        ↓
+SH-LITE v2.0 / v2.1 — REFERENCE ONLY
+        ↓
+SH CORE CANONICAL
+        ↓
+BUILD SCOPE
+        ↓
+IMPLEMENTATION CONTRACT
+        ↓
+IMPLEMENTATION GUIDE
+        ↓
+ARCHITECTURE
+        ↓
+EXECUTION STRATEGY
+        ↓
+PHASE -1 — EXECUTION CONTROL
+        ↓
+PHASE ARTIFACT / BACKLOG
+        ↓
+ACTUAL GITHUB DEV
+        ↓
+ACTUAL SUPABASE DEV
+
+Source code bukan authority.
+
+Checkpoint bukan authority.
+
+Rekomendasi agen bukan Owner Decision.
+
+---
+
+# 3. ACTUAL GITHUB STATE
+
+Repository:
+
+https://github.com/savie/second-head
+
+Branch:
+
+dev
+
+Current Phase 5 closure/evidence work has been committed to DEV.
+
+Latest known Phase 5 evidence/closure update:
+
+93ea64cfccb1932a006086ae3d930cea4d5b165c
+
+Relevant Phase 5 paths:
+
+docs/phase5/
+docs/evidence/
+
+Phase 5 implementation artifacts:
+
+- supabase/migrations/
+- runtime/p5a/
+- runtime/p5b/
+- runtime/p5c/
+- runtime/p5d/
+- runtime/p5e/
+- docs/phase5/
+- docs/evidence/
+
+Important:
+
+Phase 5 evidence artifacts were added after discovering that implementation/closure alone was insufficient as an audit evidence chain.
+
+---
+
+# 4. ACTUAL SUPABASE STATE
+
+Project:
+
+second-head
+
+Project ref:
+
+pkhkgvsrqeupvwoqjwmd
+
+Branch:
+
+dev
+
+Relevant existing foundation:
+
+- accounts
+- account_auth_links
+- sh_instances
+- sh_ownership
+- conversations
+- memories
+- knowledge
+- memory_knowledge_eligibility
+- permission_matrix
+- audit_events
+- private.authority_assignments
+
+Phase 5 introduced/verified:
+
+- journey_events
+- clone_agreements
+- sh_clones
+- succession_rules
+- inheritance_authorizations
+- inheritance_events
+- legacy_records
+- recovery_snapshots
+- recovery_events
+- portability_exports
+
+Phase 5 runtime SQL functions:
+
+7 runtime functions verified.
+
+Phase 5 persistent rows:
+
+0 in newly introduced Phase 5 tables at closure checkpoint.
+
+Interpretation:
+
+No persistent test residue was intentionally left in the DEV database.
+
+---
+
+# 5. PRIVATE.AUTHORITY_ASSIGNMENTS — IMPORTANT NOTE
+
+Security finding previously raised:
+
+CRITICAL:
+RLS disabled on private.authority_assignments
+
+Actual source/migration audit concluded this is an intentional internal governance condition rather than an accidental omission.
+
+Current position:
+
+RLS OFF remains unchanged.
+
+Phase 5 did NOT modify it.
+
+This condition must remain documented and remembered for future phases because it may be required by later governance/authority functionality.
+
+Do NOT reopen or mutate it merely because automated security tooling reports:
+
+RLS OFF
+
+unless a future authority/security audit establishes an actual violation.
+
+---
+
+# 6. PROJECT STATUS
+
+Previous Phase:
+
+PHASE 4 — Runtime & Orchestration
+
+Status:
+
+CLOSED
+
+Current Phase:
+
+PHASE 5 — Second Head Advanced Capabilities
+
+Status:
+
+CLOSED FOR PHASE-LEVEL IMPLEMENTATION BOUNDARY
+
+Next:
+
+PHASE 6 / future roadmap work
+
+Status:
+
+NOT AUTHORIZED / NOT DEFINED BY THIS CHECKPOINT
+
+---
+
+# 7. PHASE 4 STATUS
+
+Phase 4 remains CLOSED.
+
+Completed:
+
+- P4A-001 → P4A-010
+- P4B-001 → P4B-003
+- P4C-001 → P4C-003
+- P4D-001 → P4D-003
+- P4E-001 → P4E-004
+- P4F-001 → P4F-005
+
+Do NOT reopen Phase 4 merely because:
+
+- E2E remains deferred;
+- future providers are unavailable;
+- UI assurance is incomplete;
+- external integrations are incomplete;
+- historical documentation differs.
+
+Reopen only for:
+
+- material contradiction;
+- regression;
+- security/privacy/ownership violation;
+- canonical invariant violation;
+- failed verification;
+- invalid evidence.
+
+---
+
+# 8. PHASE 5 EXECUTION RECONCILIATION
+
+Phase 5 was reconciled against:
+
+- authority hierarchy;
+- Execution Strategy;
+- Implementation Contract;
+- actual GitHub DEV;
+- actual Supabase DEV.
+
+Result:
+
+VALID / EXECUTION-READY
+
+Minimal decomposition:
+
+P5A — Journey & Continuity Gap
+
+P5B — Clone Boundary & Agreement
+
+P5C — Inheritance, Legacy & Succession
+
+P5D — Recovery, Backup & Portability
+
+P5E — Invariant & Evidence Verification
+
+Dependency order:
+
+P5A
+ ↓
+P5B
+ ↓
+P5C
+ ↓
+P5D
+ ↓
+P5E
+
+The decomposition was intentionally kept minimal.
+
+Do NOT unnecessarily split these into many micro-phases unless a material dependency requires it.
+
+---
+
+# 9. PHASE 5 EXECUTION METHOD
+
+Owner GO was:
+
+P5A → verify → P5B → verify → P5C → verify → P5D → verify → P5E
+
+Interpretation:
+
+This means sequential vertical-slice execution.
+
+It does NOT mean:
+
+P5A+B+C+D+E mutate first, then verify everything afterward.
+
+Execution discipline:
+
+For each slice:
+
+reconcile
+→ minimal realization
+→ verify
+→ evidence
+
+Then continue to next slice.
+
+Initial Phase 5 audit/reconcile and final Phase 5 reconcile are implicit parts of this execution command.
+
+If a material contradiction appears:
+
+STOP ONLY THAT DEPENDENCY
+→ Owner Decision if required.
+
+Do not stop the entire project unnecessarily.
+
+---
+
+# 10. PHASE 5 COMPLETED
+
+## P5A — Journey & Continuity Gap
+
+Status:
+
+COMPLETE / DEV
+
+Implemented:
+
+- journey event representation;
+- temporal event boundary;
+- explicit continuity status;
+- explicit continuity-gap code;
+- owner-scoped RLS;
+- runtime recording function;
+- runtime contract verification.
+
+Invariant:
+
+Journey ≠ all Memory
+
+Continuity gaps must be explicit and must not be represented as perfect continuity.
+
+Evidence:
+
+EV-P5A-001_JOURNEY_CONTINUITY_GAP.md
+
+---
+
+## P5B — Clone Boundary & Agreement
+
+Status:
+
+COMPLETE / DEV
+
+Implemented:
+
+- clone agreements;
+- SH clone records;
+- owner/participant RLS;
+- approval/agreement requirement;
+- separate clone identity;
+- target-account boundary;
+- runtime clone creation;
+- runtime contract verification.
+
+Invariant:
+
+CLONE_SH ≠ SOURCE_SH
+
+Clone must not silently replace the source SH identity.
+
+Evidence:
+
+EV-P5B-001_CLONE_BOUNDARY_AGREEMENT.md
+
+---
+
+## P5C — Inheritance, Legacy & Succession
+
+Status:
+
+COMPLETE / DEV
+
+Implemented:
+
+- succession rules;
+- inheritance authorizations;
+- inheritance events;
+- legacy records;
+- participant/privacy RLS;
+- explicit source-owner approval;
+- provenance/lineage;
+- legacy preservation;
+- runtime inheritance;
+- runtime legacy recording.
+
+Invariants:
+
+INHERITANCE ≠ CLONE
+
+INHERITANCE ≠ AUTOMATIC IDENTITY TRANSFER
+
+Legacy does not imply automatic full private-memory access.
+
+Evidence:
+
+EV-P5C-001_INHERITANCE_LEGACY_SUCCESSION.md
+
+---
+
+## P5D — Recovery, Backup & Portability
+
+Status:
+
+COMPLETE / DEV
+
+Implemented:
+
+- recovery snapshots;
+- recovery events;
+- portability exports;
+- owner-scoped RLS;
+- identity-root manifest;
+- ownership-root capture;
+- memory/conversation/Journey snapshot capture;
+- same-identity restore validation;
+- recovery event recording;
+- JSON portability export;
+- runtime contract verification.
+
+Invariant:
+
+RECOVERY ≠ NEW SH
+
+Recovery must validate the original SH identity rather than silently replacing it.
+
+Evidence:
+
+EV-P5D-001_RECOVERY_BACKUP_PORTABILITY.md
+
+---
+
+## P5E — Invariant & Evidence Verification
+
+Status:
+
+COMPLETE / DEV
+
+Implemented:
+
+- cross-slice identity invariant verification;
+- authorization/audit gate verification;
+- Phase 5 evidence gate;
+- final GitHub reconciliation;
+- final Supabase reconciliation;
+- closure artifact.
+
+Role:
+
+P5E is the integration/evidence gate, not another independent capability.
+
+Evidence:
+
+EV-P5E-001_PHASE5_INVARIANT_EVIDENCE_GATE.md
+
+---
+
+# 11. PHASE 5 EVIDENCE CORRECTION
+
+Important discovery during session:
+
+Initial Phase 5 closure stated implementation/evidence availability, but did not have one dedicated evidence artifact per P5 slice.
+
+This was identified as an evidence-chain gap.
+
+Resolution:
+
+Evidence artifacts were added:
+
+docs/evidence/
+
+- EV-P5A-001_JOURNEY_CONTINUITY_GAP.md
+- EV-P5B-001_CLONE_BOUNDARY_AGREEMENT.md
+- EV-P5C-001_INHERITANCE_LEGACY_SUCCESSION.md
+- EV-P5D-001_RECOVERY_BACKUP_PORTABILITY.md
+- EV-P5E-001_PHASE5_INVARIANT_EVIDENCE_GATE.md
+
+Phase 5 closure was subsequently updated to reference the evidence chain.
+
+Interpretation:
+
+This was an evidence/documentation gap.
+
+It was NOT a Phase 5 implementation failure.
+
+No Phase 5 database mutation was required to resolve the evidence gap.
+
+---
+
+# 12. PHASE 5 CLOSURE
+
+Closure artifact:
+
+docs/phase5/SECOND_HEAD_PHASE_5_CLOSURE_v1.0.md
+
+Status:
+
+CLOSED FOR PHASE-LEVEL EXECUTION
+
+Canonical status:
+
+NON-CANONICAL
+
+Canonical mutation:
+
+NONE
+
+Closure result:
+
+P5A COMPLETE / DEV
+P5B COMPLETE / DEV
+P5C COMPLETE / DEV
+P5D COMPLETE / DEV
+P5E COMPLETE / DEV
+
+Overall:
+
+PHASE 5 = CLOSED WITH DEFERRED ASSURANCE
+
+---
+
+# 13. PHASE 5 VERIFICATION LEVEL
+
+## Implementation / Source Contract
+
+PASS
+
+Five vertical slices have implementation artifacts and contract-level tests.
+
+## Database / Schema
+
+PASS
+
+Phase 5 schema, RLS, runtime functions and zero persistent test residue were verified on Supabase DEV.
+
+## Application / API / UI E2E
+
+DEFERRED
+
+Not claimed as PASS.
+
+Environment did not establish complete:
+
+- authenticated application/API/UI flow;
+- production-like multi-account clone flow;
+- full cross-user inheritance;
+- large-data recovery performance;
+- external portability consumer integration;
+- broader external-action integration.
+
+Important:
+
+Database PASS ≠ Application/API/UI E2E PASS.
+
+---
+
+# 14. PHASE 5 DEFERRED ASSURANCE
+
+Deferred:
+
+- authenticated application/API/UI E2E;
+- real multi-account clone flow against production-like authentication;
+- full cross-user inheritance flow;
+- large-data backup/restore performance;
+- external portability consumer integration;
+- broader external-action integration.
+
+These are assurance gaps, not automatic implementation blockers.
+
+Do NOT reopen Phase 5 solely because these remain deferred.
+
+Reopen only if later verification finds:
+
+- regression;
+- security/privacy violation;
+- ownership violation;
+- identity invariant violation;
+- invalid evidence;
+- or newly authorized scope requiring change.
+
+---
+
+# 15. PHASE 5 IMPORTANT INVARIANTS
+
+Maintain:
+
+Journey ≠ all Memory
+
+CLONE_SH ≠ SOURCE_SH
+
+INHERITANCE ≠ CLONE
+
+INHERITANCE ≠ AUTOMATIC IDENTITY TRANSFER
+
+RECOVERY ≠ NEW SH
+
+EVOLUTION ≠ NEW SH
+
+MIGRATION ≠ NEW SH
+
+DECOMMISSION ≠ IMMEDIATE PERMANENT DELETE
+
+Advanced capability must not silently replace/reset the SH Identity Root or Ownership Root.
+
+Do not treat these as permission to invent new canonical wording.
+
+When necessary, verify exact wording against authority documents.
+
+---
+
+# 16. CURRENT KNOWN OPEN ITEMS
+
+## TRUE BLOCKER
+
+For completed Phase 5 implementation boundary:
+
+NONE
+
+## DEFERRED ASSURANCE
+
+- authenticated application/API/UI E2E;
+- multi-account clone assurance;
+- full cross-user inheritance;
+- large-data recovery;
+- external portability integration;
+- broader external-action integration.
+
+## FUTURE
+
+- Phase 6 / later advanced roadmap work;
+- additional providers;
+- broader integrations;
+- product-level E2E.
+
+---
+
+# 17. THINGS NOT TO REOPEN
+
+Do NOT reopen:
+
+Phase 4 P4A–P4F
+
+Phase 5 P5A–P5E
+
+merely because:
+
+- deferred E2E exists;
+- UI assurance is incomplete;
+- external integrations are future work;
+- historical terminology differs;
+- evidence/documentation required a correction that has already been resolved.
+
+Reopen only for material reason.
+
+---
+
+# 18. CURRENT OWNER / EXECUTION POSITION
+
+Latest relevant Owner GO:
+
+P5A → verify → P5B → verify → P5C → verify → P5D → verify → P5E
+
+This GO has been executed.
+
+Phase 5 implementation boundary is now closed.
+
+No new Owner GO for the next phase is represented in this checkpoint.
+
+Therefore:
+
+DO NOT begin Phase 6 implementation automatically.
+
+---
+
+# 19. CURRENT NEXT-STEP
+
+Current project state:
+
+PHASE 5 CLOSED
+
+Next action:
+
+WAIT FOR NEXT OWNER DIRECTION / NEXT PHASE AUTHORIZATION
+
+If a future phase receives GO:
+
+Use:
+
+PHASE -1
+→ latest Owner decisions
+→ authority
+→ phase definition/backlog
+→ actual GitHub DEV audit
+→ actual Supabase DEV audit
+→ reconcile
+→ minimal realization
+→ verify
+→ evidence
+→ DEV
+→ closure/reconcile
+
+---
+
+# 20. IMPORTANT WORKING PRINCIPLES
+
+KEEP MOVING FORWARD
++
+REVIEW BACKWARD ONLY WHEN NECESSARY
++
+DO NOT REOPEN SETTLED DECISIONS
++
+DO NOT INVENT MISSING DECISIONS
++
+DO NOT CONFUSE DOCUMENTATION STATUS WITH EXECUTION BLOCKER
++
+DO NOT CONFUSE READINESS WITH OWNER AUTHORIZATION
++
+DO NOT CONFUSE DATABASE PASS WITH E2E PASS
++
+DO NOT CLAIM EVIDENCE WITHOUT AN ACTUAL AUDITABLE ARTIFACT
++
+USE MINIMAL REALIZATION
++
+PRESERVE EXISTING FOUNDATION
++
+DO NOT CREATE NEW ARCHITECTURE FOR SMALL GAPS
+
+---
+
+# 21. FINAL CHECKPOINT SUMMARY
+
+PROJECT:
+
+SECOND HEAD — SYSTEM BUILD
+
+WORKING TERMINOLOGY:
+
+SECOND HEAD / SH
+
+NOT CURRENT TERMINOLOGY:
+
+SH Full / SH Lite
+
+PREVIOUS PHASE:
+
+PHASE 4 — Runtime & Orchestration
+
+STATUS:
+
+CLOSED
+
+CURRENT PHASE:
+
+PHASE 5 — Second Head Advanced Capabilities
+
+STATUS:
+
+CLOSED WITH DEFERRED ASSURANCE
+
+COMPLETED:
+
+P5A — Journey & Continuity Gap
+
+P5B — Clone Boundary & Agreement
+
+P5C — Inheritance, Legacy & Succession
+
+P5D — Recovery, Backup & Portability
+
+P5E — Invariant & Evidence Verification
+
+EVIDENCE:
+
+EV-P5A-001
+EV-P5B-001
+EV-P5C-001
+EV-P5D-001
+EV-P5E-001
+
+CLOSURE:
+
+SECOND_HEAD_PHASE_5_CLOSURE_v1.0.md
+
+GITHUB:
+
+https://github.com/savie/second-head
+
+BRANCH:
+
+dev
+
+SUPABASE:
+
+second-head / dev
+
+PHASE 5 DATABASE:
+
+Implemented and verified.
+
+Persistent test residue:
+
+NONE
+
+PRIVATE AUTHORITY ASSIGNMENTS:
+
+RLS OFF
+
+Status:
+
+INTENTIONAL INTERNAL GOVERNANCE CONDITION / PREVIOUSLY RECONCILED
+
+DO NOT MODIFY WITHOUT NEW FINDING.
+
+PHASE 5 E2E:
+
+DEFERRED
+
+NOT CLAIMED PASS.
+
+NEXT:
+
+NEXT PHASE / OWNER DIRECTION REQUIRED
+
+PRIMARY EXECUTION CONTROL:
+
+PHASE -1
+
+RESUME ROLE:
+
+CONTINUITY + CURRENT EXECUTION CONTEXT
+
+---
+
+# 22. CONTINUATION COMMAND
+
+Untuk melanjutkan:
+
+Continue SECOND HEAD from this Session Review Checkpoint.
+
+Jangan mulai dari nol.
+
+Audit actual source bila pekerjaan baru dimulai.
+
+Phase 4 dan Phase 5 sudah closed.
+
+Jangan reopen settled work tanpa material reason.
+
+Jika Owner memberikan GO phase berikutnya:
+
+→ Phase -1
+→ latest Owner decisions
+→ authority
+→ actual GitHub
+→ actual Supabase
+→ reconcile
+→ minimal realization
+→ verify
+→ evidence
+→ DEV
+
+---
+
+# 23. FINAL INSTRUCTION TO NEXT AGENT / SESSION
+
+Gunakan checkpoint ini untuk mengetahui:
+
+"di mana kita berada."
+
+Gunakan authority untuk mengetahui:
+
+"apa yang seharusnya kita kerjakan."
+
+Gunakan GitHub DEV dan Supabase DEV untuk mengetahui:
+
+"apa yang benar-benar sudah ada."
+
+Gunakan reconcile untuk menentukan:
+
+"apakah keduanya konsisten."
+
+Gunakan evidence artifact untuk menentukan:
+
+"apa yang benar-benar dapat dibuktikan."
+
+Gunakan minimal realization untuk menentukan:
+
+"apa perubahan paling kecil yang diperlukan."
+
+Gunakan Owner Decision hanya ketika memang ada keputusan baru yang belum tersedia.
+
+Khusus checkpoint ini:
+
+PHASE 4 = CLOSED
+
+PHASE 5 = CLOSED WITH DEFERRED ASSURANCE
+
+Evidence Phase 5 = COMPLETE FOR IMPLEMENTATION/DEV BOUNDARY
+
+Jangan menghidupkan kembali Phase 4 atau Phase 5 hanya karena deferred assurance masih ada.
+
+Next workstream menunggu Owner direction/authorization.
+
+PRINSIP:
+
+KEEP MOVING FORWARD
++
+REVIEW BACKWARD ONLY WHEN NECESSARY
++
+DO NOT REOPEN SETTLED DECISIONS
++
+DO NOT INVENT MISSING DECISIONS
++
+DO NOT CONFUSE DOCUMENTATION STATUS WITH EXECUTION BLOCKER
++
+DO NOT CONFUSE READINESS WITH OWNER AUTHORIZATION
++
+DO NOT CLAIM EVIDENCE WITHOUT ACTUAL EVIDENCE
++
+USE SECOND HEAD / SH AS CURRENT WORKING TERMINOLOGY
+
+---
+
+END OF SESSION REVIEW CHECKPOINT
+
+---
+
+SECOND HEAD — SESSION RESUME 38
+## Cross-Phase Assurance → Toolchain / Architecture Decision Surface
+### Current Position: Before Phase 6 Execution
+### Status: DISCUSSION / DECISION SURFACE — NO FINAL TOOLCHAIN DECISION
+
+---
+
+# 0. TERMINOLOGY RULE
+
+Istilah yang digunakan sekarang:
+
+- SECOND HEAD
+- SH
+- SH Core
+- SH Instance
+- SH-000 untuk SH milik Creator
+
+Jangan menggunakan istilah:
+- "SH Full"
+- "SH Lite"
+
+kecuali sedang mengutip / membahas dokumen atau sejarah lama yang memang memakai istilah tersebut.
+
+Istilah "SH Lite v2.0/v2.1" boleh disebut sebagai historical reference terhadap implementasi lama yang pernah dibuat Owner.
+
+---
+
+# 1. CURRENT PROJECT POSITION
+
+SECOND HEAD telah melewati periode konseptual → canonical → backend/runtime implementation.
+
+Actual development sampai sekarang terutama berada pada:
+
+GitHub
+↓
+Supabase DEV
+↓
+Database / RLS / Edge Functions / TypeScript Runtime / Tests / Evidence
+
+Namun APP / Delivery Surface belum dibangun.
+
+Dengan kata lain:
+
+SECOND HEAD saat ini sudah memiliki substantial backend/core/runtime implementation,
+tetapi belum memiliki aplikasi yang menjadi delivery surface bagi user.
+
+Target Owner tetap:
+- SECOND HEAD pada akhirnya menjadi APK / aplikasi nyata.
+- Pembangunan aplikasi berikutnya harus tetap tunduk pada arsitektur SH yang sudah dibangun.
+- Toolchain tidak boleh menentukan atau merusak arsitektur SH.
+- Toolchain dipilih setelah requirements arsitektur dan delivery surface jelas.
+
+---
+
+# 2. HISTORICAL ARCHITECTURE EVOLUTION
+
+Pada periode awal, arsitektur sering dibahas sebagai beberapa layer utama
+(sering disebut 4 layer).
+
+Kemudian terjadi evolusi abstraksi pada periode SH Core Canonical.
+
+Kesimpulan yang sudah diterima Owner:
+
+4 layer dasar tersebut TIDAK dianggap salah.
+
+Arsitektur mengalami:
+
+    4 architectural layers
+            ↓
+    abstraction reconciliation
+            ↓
+    2 higher-level architectural concepts
+
+Jadi ini bukan:
+    "arsitektur lama salah → diganti total"
+
+melainkan:
+
+    "4 layer operational/detail
+            ↓
+     direkonsiliasi
+            ↓
+     menjadi 2 higher-level concepts"
+
+Istilah yang dipakai:
+EVOLUSI ABSTRAKSI.
+
+Hal ini dianggap DONE dan tidak perlu diperdebatkan ulang
+kecuali ditemukan bukti teknis baru yang benar-benar kontradiktif.
+
+---
+
+# 3. SH CORE CONCEPT
+
+SH Core bukan sekadar:
+- database
+- runtime
+- model
+- system prompt
+- application
+
+SH Core merupakan konsep yang mengikat:
+- identity
+- ownership
+- governance
+- privacy
+- memory
+- knowledge
+- context
+- continuity
+- runtime behavior
+- invariants
+
+Canonical kemudian membedakan dimensi fundamental/governance
+dengan realisasi architectural/runtime.
+
+Implikasi penting:
+
+    SH Core ≠ Runtime
+    SH Core ≠ Database
+    SH Core ≠ Model
+    SH Core ≠ Application
+
+Runtime adalah implementasi operasional dari hukum/konsep SH,
+bukan identitas SH itu sendiri.
+
+---
+
+# 4. CORE INVARIANTS YANG HARUS TETAP DIJAGA
+
+Beberapa invariant yang berulang sepanjang proyek:
+
+    Model ≠ SH Identity
+    Runtime ≠ SH Identity
+    Database ≠ SH Identity
+    Hardware ≠ SH Identity
+
+Dan:
+
+    Creator Authority ≠ Private Data Access
+    SH-000 Core Authority ≠ Private Data Access
+
+Serta:
+
+    Memory ≠ Knowledge
+    Private Memory ≠ Shared Knowledge
+
+Dan:
+
+    Learning ≠ Automatic Core Modification
+
+Advanced capabilities juga tidak boleh diam-diam mengganti
+Identity Root atau Ownership Root.
+
+Contoh:
+
+    Evolution ≠ New SH
+    Migration ≠ New SH
+    Recovery ≠ New SH
+    Clone ≠ Source SH
+    Inheritance ≠ Clone
+    Inheritance ≠ Identity Transfer
+    Decommission ≠ Immediate Permanent Delete
+
+---
+
+# 5. SH-000 / CREATOR
+
+Creator memiliki authority tinggi terhadap:
+- Core
+- governance
+- rules
+- constitutional/system-level decisions
+
+Namun Creator tidak otomatis memperoleh:
+- private memory
+- private conversation
+- private context
+- private data milik SH/User lain.
+
+SH-000 adalah representasi governance Creator,
+bukan omniscient admin yang bebas membaca semua SH.
+
+Hal ini merupakan invariant canonical,
+bukan sekadar UI/security convention.
+
+---
+
+# 6. ACTUAL BACKEND PROGRESS
+
+Phase -1 → Phase 5 telah dikerjakan dan ditutup berdasarkan
+baseline / contract / execution artifacts yang ada.
+
+Secara garis besar:
+
+Phase -1
+- planning
+- risk
+- milestone
+- authority preparation
+
+Phase 0
+- infrastructure
+- Supabase
+- CI/CD
+- foundational setup
+
+Phase 1
+- identity
+- account / SH identity
+- ownership/privacy boundary
+- RLS
+
+Phase 2
+- governance
+- permission matrix
+- access decision / authority
+
+Phase 3
+- memory
+- knowledge
+- provenance
+- context assembly
+
+Phase 4
+- runtime
+- orchestration
+- reasoning/workflow
+- model orchestration
+- tools
+- action authorization
+
+Phase 5
+- Journey / Continuity Gap
+- Clone
+- Clone Agreement
+- Inheritance
+- Legacy
+- Succession
+- Recovery
+- Backup/Restore
+- Portability
+- advanced lifecycle invariants
+
+Closed phases tersebut TIDAK boleh dibuka kembali hanya karena
+APP layer belum dibangun.
+
+---
+
+# 7. PHASE 5 AUDIT RESULT
+
+Phase 5 akhirnya direkonsiliasi menjadi 5 slice minimal:
+
+P5A
+Journey & Continuity Gap
+
+P5B
+Clone Boundary & Agreement
+
+P5C
+Inheritance, Legacy & Succession
+
+P5D
+Recovery, Backup & Portability
+
+P5E
+Invariant & Evidence Verification
+
+Execution pattern:
+
+P5A → verify
+→ P5B → verify
+→ P5C → verify
+→ P5D → verify
+→ P5E → verify
+
+Evidence menjadi bagian eksplisit dari setiap slice,
+bukan hanya pekerjaan tambahan di akhir.
+
+---
+
+# 8. MIGRATION ISSUE
+
+Ditemukan masalah penting pada historical migration state.
+
+Titik perhatian utama:
+- GitHub migration history
+- Supabase actual migration history
+- folder/database migration structure
+- perubahan struktur repo sepanjang Phase 2 dst.
+
+Yang sudah dibahas:
+
+Pada satu titik:
+- GitHub terlihat sampai migration tertentu
+- Supabase DEV sudah berada pada migration berikutnya.
+
+Contoh yang menjadi perhatian:
+- GitHub sekitar migration 13
+- Supabase sekitar migration 14
+
+Ini menjadi titik awal GitHub ↔ Supabase divergence.
+
+Masalah tambahan:
+- pada awalnya migration sudah memiliki struktur tertentu
+- kemudian muncul struktur/folder `supabase`
+- terdapat historical branch / P2-related artifacts
+- pernah ada file/folder Phase 2 yang kemudian dirapikan/dihapus
+- sebagian historical intent tersebut tidak terdokumentasi dengan baik.
+
+Karena itu tidak boleh sekadar:
+"lihat folder sekarang → anggap itu canonical history."
+
+Migration history harus dilihat sebagai historical state.
+
+---
+
+# 9. GLOBAL RECONCILIATION WORKFLOW YANG SUDAH DILAKUKAN
+
+Workflow besar yang disepakati:
+
+① AUDIT MIGRATION HISTORY
+↓
+② RECONCILE GITHUB ↔ SUPABASE
+↓
+③ FREEZE CANONICAL MIGRATION DISPOSITION
+↓
+④ AUDIT / DESIGN REPOSITORY STRUCTURE
+↓
+⑤ RECONCILE EVIDENCE
+↓
+⑥ FINAL CROSS-PHASE ASSURANCE
+↓
+⑦ CONFIRM P6 DEPENDENCIES
+↓
+⑧ PHASE 6
+
+Poin penting:
+
+Jangan lompat-lompat antar pekerjaan jika dependency belum jelas.
+
+---
+
+# 10. MIGRATION DISPOSITION
+
+Tujuan canonical migration disposition:
+
+Setiap migration harus dapat dikategorikan,
+misalnya:
+
+- APPLIED
+- REPO-ONLY
+- SUPERSEDED
+- DUPLICATE
+- DRIFT
+- GAP
+
+Tujuannya bukan sekadar merapikan nama file.
+
+Tujuan utamanya:
+menentukan satu historical + canonical migration path
+yang dapat dipercaya sebelum repository dirapikan.
+
+---
+
+# 11. REPOSITORY STRUCTURE
+
+Owner mengingat struktur konseptual repo kira-kira:
+
+    /.github
+    /database
+    /docs
+    /src
+    /tests
+    README
+    .gitignore
+
+Ini BUKAN final structure.
+
+Yang sudah disepakati:
+- audit historical structure terlebih dahulu
+- pahami semantic meaning file/folder
+- pahami dependency
+- jangan asal move/delete
+- jangan menghapus historical evidence hanya demi terlihat rapi.
+
+Repository structure harus mengikuti canonical meaning,
+bukan sebaliknya.
+
+---
+
+# 12. EVIDENCE INTEGRITY
+
+Evidence sudah menjadi bagian penting dari execution.
+
+Masalah yang ditemukan:
+- struktur repository pernah berubah
+- beberapa artifact/history tidak terdokumentasi dengan cukup jelas
+- akibatnya evidence bisa terlihat lebih rapi daripada historical reality.
+
+Karena itu evidence harus direkonsiliasi terhadap:
+
+    Authority
+    ↓
+    Actual GitHub
+    ↓
+    Actual Supabase
+    ↓
+    Runtime
+    ↓
+    Tests
+    ↓
+    Evidence
+
+Bukan sebaliknya.
+
+Evidence tidak boleh dianggap benar hanya karena file EV-* ada.
+
+---
+
+# 13. CROSS-PHASE ASSURANCE
+
+Cross-phase assurance dilakukan untuk memastikan:
+Phase -1 → Phase 5 benar-benar konsisten.
+
+Audit dimensions yang sudah diidentifikasi:
+
+A. Authority & Taxonomy
+B. Phase Closure Integrity
+C. Cross-Phase Dependency
+D. Identity / Ownership / Privacy
+E. Memory / Knowledge / Context
+F. Runtime / Governance / Tools
+G. P5 Advanced Capabilities
+H. GitHub / Supabase / Runtime Consistency
+I. Evidence ↔ Actual State
+J. Intended vs Actual Capability
+K. Remaining Gaps / Deferred / Blockers
+L. P6 Dependency
+
+Status closed phases:
+tidak reopen hanya karena downstream layer belum dibuat.
+
+---
+
+# 14. MAJOR CROSS-PHASE FINDING
+
+Temuan paling penting:
+
+BACKEND / CORE / RUNTIME
+    sudah berkembang jauh.
+
+APP / DELIVERY SURFACE
+    belum ada.
+
+Tidak ditemukan frontend/mobile/client implementation
+di repository actual yang diaudit.
+
+Belum ada:
+- UI
+- chat interface
+- authentication UX sebagai product flow
+- journey UI
+- clone UI
+- recovery UI
+- confirmation UX
+- full product E2E
+- APK application layer
+
+Jadi sistem saat ini secara praktis:
+
+    SECOND HEAD APP
+        belum
+
+            ↓
+
+    SECOND HEAD CORE / RUNTIME
+        sudah dibangun
+
+            ↓
+
+    SUPABASE DEV
+        database / RLS / auth / storage
+
+---
+
+# 15. IMPORTANT DISTINCTION: BACKEND EXISTS ≠ PRODUCT EXISTS
+
+Ini penting untuk sesi berikutnya.
+
+Kita tidak boleh mengatakan:
+"SH sudah jadi."
+
+Lebih tepat:
+
+    SH backend/core/runtime foundation
+        sudah memiliki substantial implementation.
+
+Sedangkan:
+
+    SH product / application / delivery surface
+        belum dieksekusi.
+
+Ini bukan berarti Phase 1–5 gagal.
+
+Ini berarti downstream consumer / delivery layer belum dibangun.
+
+---
+
+# 16. PHASE 6 ISSUE
+
+Awalnya Phase 6 dirancang:
+
+P6A Integration Testing
+P6B Architecture Review
+P6C Contract Verification
+P6D Implementation Freeze
+P6E Release & Readiness
+Final Integration Gate
+
+Masalah:
+
+P6A "E2E" dapat berarti dua hal:
+
+1. Headless/API E2E
+2. Full Product E2E
+
+Backend dapat diuji headlessly.
+
+Namun Product E2E:
+
+    User
+      ↓
+    App
+      ↓
+    API
+      ↓
+    Runtime
+      ↓
+    Supabase
+      ↓
+    Response
+      ↓
+    App
+
+belum dapat diuji karena APP layer belum ada.
+
+Jadi P6 dependency harus ditentukan secara eksplisit.
+
+---
+
+# 17. OWNER POSITION TERHADAP P6
+
+Owner belum ingin langsung melompat ke P6.
+
+Pemikiran Owner:
+
+"Kalau mau maju ke P6,
+pastikan pekerjaan Phase -1 → Phase 5 benar-benar jelas dulu."
+
+Karena itu cross-phase assurance,
+migration reconciliation,
+repository cleanup,
+evidence reconciliation,
+dan dependency determination dilakukan terlebih dahulu.
+
+Closed phase tetap closed.
+
+Jika ada gap baru,
+klasifikasikan sebagai:
+
+- GAP
+- STRUCTURAL
+- DEFERRED
+- P6 DEPENDENCY
+- BLOCKER
+
+bukan otomatis reopen phase lama.
+
+---
+
+# 18. TOOLCHAIN DISCUSSION
+
+Setelah backend/core/runtime cukup matang,
+masalah berikutnya adalah:
+
+"Bagaimana SH benar-benar menjadi aplikasi/APK?"
+
+Owner ingin:
+- tetap menghasilkan APK
+- pembangunan dilakukan bersama ChatGPT
+- sebisa mungkin tidak harus bolak-balik membuka banyak aplikasi di HP
+- automation/plugin support sangat penting
+- zero-budget
+- zero-hardware
+- GitHub dan Supabase adalah dua hal yang sudah FIX
+- framework/client belum dipilih
+- Expo TIDAK wajib
+- EAS juga TIDAK wajib
+- pilihan lama seperti Expo hanya historical reference
+
+Toolchain harus dipilih berdasarkan kebutuhan SH,
+bukan karena tool tertentu populer atau paling mudah.
+
+---
+
+# 19. HISTORICAL TOOLCHAIN REFERENCES
+
+Owner pernah menggunakan / memiliki pengalaman dengan:
+
+- SH Lite v2.0/v2.1
+- Expo / kemungkinan Expo Go
+- EAS ID / EAS-related setup
+- Groq
+- Hugging Face
+- OpenRouter account
+- OpenAI belum digunakan untuk SH ini
+
+Catatan penting:
+
+SH Lite v2.0/v2.1 adalah IMPLEMENTASI LAMA / historical reference.
+
+Jangan otomatis menganggap stack tersebut harus dipakai sekarang.
+
+---
+
+# 20. HUGGING FACE EXPERIENCE
+
+Owner memiliki pengalaman buruk / kendala saat menggunakan Hugging Face
+pada implementasi lama.
+
+Karena itu:
+
+Hugging Face tidak boleh diasumsikan otomatis cocok hanya karena
+secara teknis tersedia.
+
+Pengalaman tersebut harus menjadi input dalam toolchain evaluation.
+
+Namun:
+HF juga belum diputuskan untuk ditolak.
+
+Status:
+REFERENCE / CANDIDATE ONLY.
+
+---
+
+# 21. MODEL LAYER
+
+Owner sempat bertanya apakah model masuk toolchain.
+
+Kesimpulan diskusi:
+YA, secara praktis Model Layer adalah bagian dari keseluruhan technology/toolchain surface,
+tetapi harus dipisahkan secara konseptual dari identity/core SH.
+
+Model Layer mencakup:
+
+- LLM provider
+- model
+- model routing
+- fallback strategy
+
+Tetapi invariant tetap:
+
+    Model ≠ SH Identity
+
+Model boleh diganti tanpa mengganti identity SH.
+
+---
+
+# 22. MODEL REFERENCES SAAT INI
+
+Provider/platform yang sudah pernah disentuh atau diketahui Owner:
+
+    Groq
+    OpenRouter
+    Hugging Face
+    OpenAI
+
+Status semuanya:
+CANDIDATE / REFERENCE.
+
+Belum ada keputusan final.
+
+Owner belum ingin memutuskan model/provider.
+
+---
+
+# 23. TOOLCHAIN DECISION SURFACE
+
+Toolchain awal yang sedang dipertimbangkan:
+
+    SH TOOLCHAIN
+    │
+    ├── Repository / Source
+    │   └── GitHub                    [FIX]
+    │
+    ├── Backend / Infrastructure
+    │   └── Supabase                  [FIX]
+    │
+    ├── Runtime
+    │   └── TypeScript / Deno /
+    │       Edge Functions            [ACTUAL]
+    │
+    ├── Model Layer
+    │   ├── LLM provider
+    │   ├── model(s)
+    │   ├── routing
+    │   └── fallback
+    │
+    ├── Tools / Actions
+    │   ├── interfaces
+    │   ├── authorization
+    │   └── execution
+    │
+    ├── App / Delivery
+    │   └── framework/client            [BELUM DIPILIH]
+    │
+    └── Testing / Automation
+        └── E2E + CI + agent tooling
+
+---
+
+# 24. TOOLCHAIN PRINCIPLES
+
+Owner menginginkan:
+
+1. Zero-budget sebisa mungkin.
+2. Zero-hardware.
+3. APK sebagai hasil akhir delivery.
+4. GitHub tetap digunakan.
+5. Supabase tetap digunakan.
+6. Tidak terikat Expo hanya karena pernah digunakan.
+7. Automation/plugin support kuat.
+8. Sebisa mungkin pekerjaan dapat dilakukan langsung bersama ChatGPT.
+9. Tidak ingin workflow yang mengharuskan Owner bolak-balik
+   membuka banyak aplikasi secara manual.
+10. Toolchain harus cocok dengan arsitektur SH,
+    bukan arsitektur SH dipaksa mengikuti toolchain.
+
+---
+
+# 25. CRITICAL OWNER CONCERN
+
+Owner tidak hanya mencari:
+
+"mana yang paling gampang?"
+
+Yang lebih penting:
+
+"mana yang membuat SECOND HEAD benar-benar menjadi SECOND HEAD,
+bukan sekadar mengulang hasil SH Lite dengan tool yang berbeda?"
+
+Karena:
+
+    Arsitektur berbeda
+        ↓
+    behavior / capability / boundaries berbeda
+        ↓
+    pengalaman produk berbeda
+
+Jadi pemilihan framework/model/provider harus dievaluasi
+terhadap architecture target SH.
+
+Kemudahan hanya salah satu faktor.
+
+---
+
+# 26. CHATGPT / PLUGIN REQUIREMENT
+
+Ini salah satu requirement paling penting dari Owner.
+
+Owner berharap workflow dapat memanfaatkan:
+- GPT plugins / connected tooling
+- GitHub integration
+- Supabase integration
+- automation
+- agent tooling
+
+sehingga Owner tidak perlu manual:
+- copy code
+- download
+- upload
+- kirim evidence
+- pindah aplikasi berkali-kali.
+
+Tujuannya:
+
+    Owner
+       ↓
+    ChatGPT
+       ↓
+    inspect / modify / test / verify
+       ↓
+    GitHub / Supabase / build pipeline
+
+sebisa mungkin menjadi satu workflow.
+
+Namun jangan menganggap semua tool otomatis dapat dieksekusi penuh
+hanya karena ada plugin.
+
+Kemampuan aktual tool harus diverifikasi sebelum dijadikan requirement.
+
+---
+
+# 27. CURRENT TOOLCHAIN DECISION STATUS
+
+BELUM MEMILIH:
+
+- Expo
+- React Native bare
+- framework lain
+- Groq
+- OpenRouter
+- Hugging Face
+- OpenAI
+- model tertentu
+- routing tertentu
+- fallback tertentu
+- EAS sebagai mandatory build path
+
+Yang FIX saat ini:
+
+    GitHub
+    Supabase
+
+Runtime actual:
+
+    TypeScript / Deno / Edge Functions
+
+Target delivery:
+
+    APK
+
+Constraints:
+
+    zero-budget
+    zero-hardware
+    automation/plugin-friendly
+
+---
+
+# 28. WHAT SHOULD HAPPEN BEFORE TOOLCHAIN DECISION
+
+Jangan langsung:
+
+    "Pilih Expo."
+
+Urutan yang lebih aman:
+
+    SH Architecture Target
+            ↓
+    Delivery Requirements
+            ↓
+    Model Layer Requirements
+            ↓
+    Tool / Action Requirements
+            ↓
+    Testing / Automation Requirements
+            ↓
+    ChatGPT / Plugin Capability
+            ↓
+    Candidate Toolchains
+            ↓
+    Cost / feasibility / build comparison
+            ↓
+    Owner Decision
+
+---
+
+# 29. AUDIT YANG SUDAH DIMINTA
+
+Instruksi yang menjadi titik acuan:
+
+GO Audit Toolchain Decision Surface
+→ keluarkan 2–3 kandidat stack yang benar-benar feasible
+→ bandingkan:
+
+- biaya
+- automation/plugin support
+- APK build
+- Supabase integration
+- model integration
+- E2E
+- kemampuan ChatGPT mengerjakannya bersama Owner
+
+Baru setelah itu Owner memilih.
+
+Namun setelah diskusi terakhir:
+Owner BELUM MAU MEMUTUSKAN.
+
+Jangan menganggap kandidat sebelumnya sebagai keputusan.
+
+---
+
+# 30. IMPORTANT: ARCHITECTURE FIRST
+
+Pertanyaan utama sekarang bukan:
+
+"Expo vs React Native vs X?"
+
+Tetapi:
+
+"Arsitektur SECOND HEAD seperti apa yang harus diwujudkan
+oleh delivery layer?"
+
+Setelah itu:
+
+"Toolchain mana yang paling mampu merealisasikannya
+dengan zero-budget / zero-hardware dan workflow ChatGPT-centric?"
+
+---
+
+# 31. OWNER'S CURRENT MINDSET
+
+Owner masih bingung dan BELUM ingin memutuskan.
+
+Owner ingin:
+- melihat opsi lebih dalam
+- memahami trade-off
+- memastikan architecture tidak dikorbankan
+- menghindari mengulang keterbatasan SH Lite
+- mempertimbangkan pengalaman buruk HF
+- mempertimbangkan Groq/OpenRouter/OpenAI sebagai kandidat
+- tetap membuka kemungkinan framework selain Expo
+- memaksimalkan automation/plugin
+- tetap menuju APK.
+
+Jadi jangan memaksa keputusan.
+
+---
+
+# 32. CURRENT GLOBAL POSITION
+
+Historically:
+
+    Concept
+       ↓
+    Temporary Baseline
+       ↓
+    SH Core Canonical
+       ↓
+    Implementation
+       ↓
+    Phase -1 → Phase 5
+       ↓
+    Migration / Repo / Evidence Reconciliation
+       ↓
+    Cross-Phase Assurance
+       ↓
+    APP / Toolchain Decision Surface
+       ↓
+    [CURRENT]
+
+CURRENT:
+
+    TOOLCHAIN NOT DECIDED
+    APP NOT IMPLEMENTED
+    P6 PRODUCT E2E NOT READY
+
+Backend/core/runtime:
+    SUBSTANTIALLY IMPLEMENTED
+
+GitHub:
+    FIXED SOURCE REPOSITORY
+
+Supabase:
+    FIXED BACKEND / DEV INFRASTRUCTURE
+
+APK:
+    TARGET
+
+---
+
+# 33. DO NOT LOSE THESE DISTINCTIONS
+
+### A.
+"Phase 1–5 closed"
+≠
+"seluruh SECOND HEAD product sudah selesai."
+
+### B.
+"Backend implemented"
+≠
+"APP implemented."
+
+### C.
+"Model available"
+≠
+"Model menjadi identity SH."
+
+### D.
+"Expo pernah dipakai"
+≠
+"Expo wajib digunakan sekarang."
+
+### E.
+"Groq/OpenRouter/HF/OpenAI tersedia"
+≠
+"provider sudah dipilih."
+
+### F.
+"Evidence exists"
+≠
+"evidence otomatis benar."
+
+### G.
+"GitHub source"
+≠
+"Supabase actual state"
+→ keduanya harus direkonsiliasi.
+
+### H.
+"Repository rapi"
+≠
+"historical state sudah benar."
+
+### I.
+"4 layer → 2 layer"
+≠
+"arsitektur lama gagal."
+→ ini EVOLUSI ABSTRAKSI.
+
+### J.
+"Phase 6 ada"
+≠
+"langsung execute P6A."
+→ dependency harus confirmed terlebih dahulu.
+
+---
+
+# 34. NEXT DISCUSSION
+
+Jangan langsung coding.
+
+Next logical discussion:
+
+## SH ARCHITECTURE → DELIVERY REQUIREMENTS
+
+Audit / definisikan:
+
+1. Apa yang harus bisa dilakukan APP terhadap SH Core?
+2. Bagaimana authentication sebenarnya menjadi product flow?
+3. Bagaimana chat masuk ke runtime?
+4. Bagaimana context/memory/journey ditampilkan?
+5. Bagaimana high-risk action confirmation bekerja?
+6. Bagaimana clone/recovery/continuity direpresentasikan?
+7. Apa yang harus terjadi jika model diganti?
+8. Bagaimana tool execution masuk dari APP?
+9. Apa yang wajib server-side?
+10. Apa yang boleh client-side?
+11. Apa yang harus tetap protected oleh Supabase/RLS?
+12. Bagaimana E2E nantinya membuktikan seluruh chain?
+
+Setelah requirement tersebut jelas:
+
+    baru candidate toolchain
+    baru model/provider
+    baru build pipeline
+    baru APP implementation.
+
+---
+
+# 35. CURRENT COMMAND / RESUME POINT
+
+Jika membuka sesi baru, gunakan:
+
+"LANJUT SECOND HEAD DARI SESSION RESUME.
+POSISI: SEBELUM TOOLCHAIN DECISION.
+JANGAN LANGSUNG PILIH EXPO / MODEL.
+KITA TENTUKAN DULU SH ARCHITECTURE → DELIVERY REQUIREMENTS
+→ BARU TOOLCHAIN."
+
+Dan tetap gunakan:
+GitHub + Supabase sebagai actual/current source,
+sementara resume dipakai sebagai continuity aid,
+bukan menggantikan audit terhadap actual state.
+
+Sip. Ini yang akan gue pakai mulai sekarang sebagai actual source addresses:
+
+GitHub repository: [SECOND HEAD — GitHub](https://github.com/savie/second-head?utm_source=chatgpt.com)
+
+Supabase DEV project: [SECOND HEAD — Supabase DEV](https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd?utm_source=chatgpt.com)
+
+
+Dan gue catat secara operasional:
+
+SOURCE HIERARCHY
+
+1. CANONICAL / CONTRACT DOCUMENTS
+   → menentukan INTENT, RULES, INVARIANTS, SCOPE
+
+2. GITHUB
+   → actual repository/source state
+   → migration files
+   → Edge Functions/runtime
+   → tests
+   → evidence/docs yang committed
+
+3. SUPABASE DEV
+   → actual deployed/database state
+   → schema
+   → RLS/policies
+   → functions
+   → auth/storage state
+   → migration history yang benar-benar applied
+
+4. EVIDENCE
+   → bukti, bukan authority
+   → wajib cocok dengan actual state
+
+5. SESSION RESUME / MEMORY
+   → continuity aid saja
+   → BUKAN source of truth
+
+Jadi kalau nanti ada konflik seperti:
+
+Resume bilang A, dokumen bilang B, GitHub bilang C, Supabase DEV bilang D
+
+gue nggak akan memilih berdasarkan resume atau asumsi. Kita reconcile berdasarkan authority + actual state, dan khusus status implementasi DEV, GitHub ↔ Supabase yang harus dibandingkan langsung.
+
+Ini juga menjawab masalah yang tadi bikin kita muter-muter: sesi baru nggak perlu menganggap project cuma punya lima dokumen upload. Dua alamat actual environment ini sekarang jelas sebagai referensi kerja.
+
+---
+
+# SECOND HEAD — SESSION RESUME 39
+## APP BUILD / CHAT VERTICAL SLICE CHECKPOINT
+
+Project:
+SECOND HEAD — SYSTEM BUILD
+
+Current working terminology:
+- Second Head
+- SH
+- SH Core
+- SH Instance
+- SH-000 = SH milik Creator
+
+Jangan gunakan "SH Full" / "SH Lite" sebagai terminology current.
+SH-Lite v2.0/v2.1 hanya historical reference.
+
+==================================================
+1. AUTHORITY & PROJECT POSITION
+==================================================
+
+Checkpoint/resume BUKAN Canonical authority.
+
+Tetap gunakan hierarchy:
+
+FROZEN BASELINE
+↓
+SH Core Canonical
+↓
+Build Scope
+↓
+Implementation Contract
+↓
+Implementation Guide
+↓
+Architecture
+↓
+Execution Strategy
+↓
+Phase -1
+↓
+Phase artifacts / backlog
+↓
+Actual GitHub DEV
+↓
+Actual Supabase DEV
+
+GitHub dan Supabase harus selalu diaudit terhadap authority saat pekerjaan baru dimulai.
+
+GitHub repository:
+https://github.com/savie/second-head
+
+Branch:
+dev
+
+Supabase DEV:
+project second-head
+ref:
+pkhkgvsrqeupvwoqjwmd
+
+==================================================
+2. PHASE STATUS
+==================================================
+
+Phase -1 → Phase 5:
+CLOSED sesuai boundary masing-masing.
+
+Phase 4:
+CLOSED.
+
+Phase 5:
+CLOSED WITH DEFERRED ASSURANCE.
+
+P5A → Journey & Continuity Gap
+P5B → Clone Boundary & Agreement
+P5C → Inheritance, Legacy & Succession
+P5D → Recovery, Backup & Portability
+P5E → Invariant & Evidence Verification
+
+Jangan reopen Phase 1–5 hanya karena APP layer baru sekarang dibangun.
+
+Deferred assurance Phase 5 tetap:
+- authenticated application/API/UI E2E
+- multi-account clone assurance
+- full cross-user inheritance
+- large-data recovery
+- external portability integration
+- broader external-action integration
+
+==================================================
+3. CORE INVARIANTS
+==================================================
+
+Tetap jaga:
+
+Model ≠ SH Identity
+Runtime ≠ SH Identity
+Database ≠ SH Identity
+Hardware ≠ SH Identity
+
+Creator Authority ≠ Private Data Access
+SH-000 Core Authority ≠ Private Data Access
+
+Memory ≠ Knowledge
+Private Memory ≠ Shared Knowledge
+
+Learning ≠ Automatic Core Modification
+
+Evolution ≠ New SH
+Migration ≠ New SH
+Recovery ≠ New SH
+Clone ≠ Source SH
+Inheritance ≠ Clone
+Inheritance ≠ Identity Transfer
+Decommission ≠ Immediate Permanent Delete
+
+==================================================
+4. ARCHITECTURE → DELIVERY REQUIREMENTS
+==================================================
+
+Sudah disepakati:
+
+Kita tidak memilih "Expo ATAU Bare React Native untuk selamanya".
+
+Keputusan delivery/toolchain:
+Candidate 2 dipilih sebagai pendekatan.
+
+Makna praktis:
+
+SH App
+  ↓
+React Native
+  ↓
+Expo capabilities terlebih dahulu
+  ↓
+native capability dapat ditambahkan bila suatu hari benar-benar diperlukan
+
+Prinsip:
+- maksimalkan Expo terlebih dahulu;
+- jangan menolak Expo hanya karena ada kemungkinan kebutuhan native;
+- jika suatu capability benar-benar menjadi barrier Expo, baru evaluasi native/Bare RN;
+- jangan mengulang aplikasi dari nol hanya karena suatu saat native capability diperlukan.
+
+Target:
+APK
+
+Constraint:
+- zero-budget sebisa mungkin
+- zero-hardware
+- GitHub tetap
+- Supabase tetap
+- automation/plugin-friendly
+- sebisa mungkin ChatGPT-centric
+- Owner tidak perlu manual mengurus hal teknis yang bisa dikerjakan melalui GitHub/automation.
+
+Model/provider BELUM dikunci.
+Candidate/reference:
+- Groq
+- OpenRouter
+- Hugging Face
+- OpenAI
+
+Model ≠ SH Identity.
+
+==================================================
+5. SH APP ARCHITECTURE BASELINE
+==================================================
+
+Baseline sudah diturunkan menjadi desain APP.
+
+Boundary utama:
+
+APP
+ ↓
+Runtime Adapter
+ ↓
+SH Runtime
+ ↓
+Supabase / backend infrastructure
+
+App TIDAK boleh langsung:
+- memanggil LLM provider untuk jalur SH utama;
+- melewati Runtime;
+- mengimplementasikan authorization sendiri sebagai pengganti server boundary.
+
+Supabase tetap menjadi backend/infrastructure boundary.
+
+Authentication:
+App menggunakan Supabase Auth.
+
+Session:
+session bootstrap dilakukan di App dan digunakan Runtime Adapter.
+
+Secure storage:
+credential/session secret tidak boleh hardcode ke source.
+
+Chat:
+App → Runtime Adapter → SH Runtime → response → App.
+
+Streaming:
+BELUM dikerjakan pada checkpoint ini.
+Request/response biasa harus dibuktikan dulu.
+
+High-risk action:
+tetap melalui authorization/runtime boundary dan confirmation UX.
+Belum menjadi pekerjaan slice sekarang.
+
+Clone/recovery/journey:
+UI belum seluruhnya dibangun.
+Capability backend Phase 5 sudah ada.
+Delivery UI akan diturunkan setelah basic chat flow stabil.
+
+==================================================
+6. APP SKELETON
+==================================================
+
+Minimal Expo/React Native app skeleton sudah dibuat di GitHub DEV.
+
+APP layer sekarang sudah memiliki:
+- Expo/React Native foundation
+- routing/navigation dasar
+- auth context
+- runtime adapter
+- chat screen mulai dibangun
+
+APP belum dianggap product-complete.
+
+==================================================
+7. AUTH / SESSION VERTICAL SLICE
+==================================================
+
+Authentication + session bootstrap sudah diimplementasikan.
+
+DEV test account:
+
+sh-dev-test@banned.idn
+
+Akun sudah dibuat dan sudah confirmed di Supabase DEV.
+
+Password:
+disimpan sebagai GitHub Actions Secret:
+
+SH_TEST_PASSWORD
+
+Password TIDAK boleh:
+- ditulis di source
+- ditaruh di chat
+- ditaruh di evidence
+- di-hardcode ke App.js
+
+Controlled Auth verification sudah PASS.
+
+Flow yang sudah terbukti:
+
+test account
+ ↓
+Supabase Auth
+ ↓
+authenticated session
+ ↓
+SH identity
+ ↓
+logout
+
+==================================================
+8. RUNTIME INVOCATION VERTICAL SLICE
+==================================================
+
+App → existing SH Runtime Adapter sudah dihubungkan.
+
+Controlled Runtime Verification sudah PASS.
+
+Flow yang berhasil:
+
+Login
+ ↓
+authenticated session
+ ↓
+Runtime request
+ ↓
+SH Identity ditemukan
+ ↓
+Runtime response
+ ↓
+Logout
+
+Verification juga memastikan response P4A-001 sesuai contract/provider-agnostic.
+
+Jadi status:
+
+APP → AUTH → SESSION → RUNTIME → RESPONSE → LOGOUT
+PASS untuk controlled verification.
+
+Catatan:
+ini belum berarti full Product E2E.
+Ini controlled/headless verification.
+
+==================================================
+9. GITHUB ACTIONS / AUTOMATION
+==================================================
+
+GitHub Actions dipakai sebagai "komputer cloud" untuk testing karena Owner bekerja dari HP.
+
+Tujuan:
+Owner tidak perlu:
+- laptop
+- terminal lokal
+- Node lokal
+- Android Studio
+- setup hardware
+
+GitHub Actions dapat:
+- install dependency
+- typecheck
+- menjalankan test
+- menghasilkan PASS/FAIL
+- menyimpan audit trail di GitHub
+
+Owner hanya perlu melakukan manual action jika memang membutuhkan interaksi akun/device.
+
+Jangan melempar semua action ke Owner.
+
+==================================================
+10. CHAT REQUEST/RESPONSE VERTICAL SLICE
+==================================================
+
+GO sudah diberikan:
+
+GO CHAT REQUEST/RESPONSE VERTICAL SLICE
+
+Implementasi sudah mulai dibuat di GitHub DEV.
+
+Komponen utama yang dibuat:
+
+app/features/chat/chat-service.ts
+
+Tujuan:
+lapisan tipis yang menggunakan Runtime Adapter yang sudah ada.
+
+Chat TIDAK membuat jalur langsung:
+App → LLM provider.
+
+Chat harus:
+
+Chat Screen
+ ↓
+Chat Service
+ ↓
+Runtime Adapter
+ ↓
+SH Runtime
+ ↓
+response
+ ↓
+Chat Screen
+
+Screen chat minimal sudah dibuat:
+
+app/app/chat.tsx
+
+Dan entry/navigation sudah disesuaikan agar chat dapat diakses.
+
+==================================================
+11. CHAT VERIFICATION
+==================================================
+
+GitHub workflow sudah dibuat:
+
+.sh / workflow:
+SH App Chat Verification
+
+Tujuan:
+- install dependency
+- typecheck
+- chat request/response contract test
+
+Saat pertama dijalankan:
+Typecheck FAIL.
+
+Error:
+state/auth-context.tsx
+TypeScript TS2345
+
+Masalah:
+callback Auth dianggap harus mengikuti async Promise<void> contract.
+
+Perbaikan sudah dilakukan di GitHub DEV.
+
+Commit perbaikan:
+274c294bb589a8ec34857b0b50ea80cb9878eb86
+
+Setelah perbaikan:
+Owner menjalankan ulang workflow dari GitHub Actions.
+
+STATUS TERKINI:
+Workflow masih/baru berjalan saat checkpoint ini dibuat.
+JANGAN menganggap Chat PASS sebelum hasil CI benar-benar diperiksa.
+
+Target:
+
+Install dependencies      ✅
+Typecheck                 ⏳
+Chat contract test        ⏳
+
+Jika FAIL:
+agent membaca log dan memperbaiki.
+
+Jika PASS:
+baru lanjut controlled App/HP verification.
+
+==================================================
+12. NODE.JS WARNING
+==================================================
+
+GitHub Actions sempat menampilkan:
+
+Node.js 20 is deprecated.
+actions/checkout@v4 forced to Node.js 24.
+
+Ini WARNING tooling GitHub Actions,
+BUKAN error SH.
+
+Jangan jadikan blocker dan jangan mengubah arsitektur hanya karena warning tersebut.
+
+==================================================
+13. HP-ONLY WORKFLOW
+==================================================
+
+Owner menggunakan HP.
+
+Gaya instruksi yang disukai:
+
+Kalau Owner memang harus melakukan sesuatu:
+jelaskan sangat konkret:
+
+LU LAKUKAN:
+1. buka ...
+2. tekan ...
+3. pilih ...
+4. selesai.
+
+JANGAN:
+- jangan edit kode
+- jangan ubah Supabase
+- jangan buat secret baru
+dst.
+
+SETELAH SELESAI:
+- kirim hasil/status ke agent.
+
+Kalau agent bisa mengerjakan sendiri lewat GitHub:
+JANGAN menyuruh Owner melakukan pekerjaan tersebut.
+
+==================================================
+14. CURRENT NEXT STEP
+==================================================
+
+Tunggu hasil:
+
+SH App Chat Verification
+
+Jika masih kuning:
+WAIT.
+
+Jika hijau:
+lanjut ke controlled real App verification:
+
+HP
+ ↓
+SH App
+ ↓
+login dengan:
+sh-dev-test@banned.idn
+ ↓
+Chat
+ ↓
+ketik test message
+ ↓
+Send
+ ↓
+Runtime
+ ↓
+response nyata
+ ↓
+tampil di layar
+
+Ini akan membuktikan:
+
+APP → AUTH → RUNTIME → APP
+
+secara nyata pada delivery surface.
+
+Jika Chat request/response sudah PASS:
+baru lanjut:
+
+Streaming
+ ↓
+Conversation persistence
+ ↓
+Context/memory/journey presentation
+ ↓
+High-risk confirmation
+ ↓
+Clone/recovery UI
+ ↓
+broader E2E
+
+Jangan melompat langsung ke model/provider sebelum basic chat flow stabil.
+
+==================================================
+15. CURRENT PROJECT POSITION
+==================================================
+
+Backend/Core/Runtime:
+SUBSTANTIALLY IMPLEMENTED.
+
+APP:
+sedang dibangun.
+
+APP Skeleton:
+DONE.
+
+Auth/Session:
+CONTROLLED PASS.
+
+Runtime Invocation:
+CONTROLLED PASS.
+
+Chat Request/Response:
+IMPLEMENTATION IN PROGRESS / CI VERIFICATION.
+
+Streaming:
+NOT STARTED.
+
+Model/provider final:
+NOT DECIDED.
+
+Full Product E2E:
+NOT READY.
+
+APK:
+TARGET, build pipeline belum menjadi release final.
+
+==================================================
+16. EXECUTION PRINCIPLE
+==================================================
+
+KEEP MOVING FORWARD
++
+REVIEW BACKWARD ONLY WHEN NECESSARY
++
+DO NOT REOPEN SETTLED DECISIONS
++
+DO NOT INVENT MISSING DECISIONS
++
+DO NOT CONFUSE READINESS WITH OWNER AUTHORIZATION
++
+DO NOT CONFUSE DATABASE PASS WITH E2E PASS
++
+DO NOT CLAIM EVIDENCE WITHOUT ACTUAL EVIDENCE
++
+USE MINIMAL REALIZATION
++
+PRESERVE EXISTING FOUNDATION
+
+==================================================
+17. RESUME COMMAND
+==================================================
+
+LANJUT SECOND HEAD DARI SESSION RESUME 39.
+
+Jangan mulai dari nol.
+
+Baca resume ini sebagai continuity context,
+bukan Canonical authority.
+
+Untuk pekerjaan baru:
+1. gunakan authority;
+2. audit actual GitHub DEV;
+3. audit actual Supabase DEV jika relevan;
+4. reconcile;
+5. implement minimal;
+6. verify;
+7. evidence;
+8. continue.
+
+CURRENT IMMEDIATE TASK:
+
+Tunggu / periksa hasil
+SH App Chat Verification.
+
+Jika PASS:
+lanjut controlled real App Chat verification di HP.
+
+Jika FAIL:
+audit log → perbaiki → rerun.
+
+Jangan meminta Owner mengulang setup yang sudah selesai.
+Jangan meminta Owner menjelaskan ulang architecture/toolchain decision.
+
+CURRENT TOOLCHAIN DECISION:
+Candidate 2 accepted.
+
+CURRENT DELIVERY APPROACH:
+Expo-first React Native,
+dengan jalur native capability bila benar-benar diperlukan.
+
+END SESSION RESUME 39
+
+---
+
+SECOND HEAD — SESSION RESUME 40
+## SESSION REVIEW CHECKPOINT
+
+### CURRENT PROJECT STATE SNAPSHOT
+
+Project:
+SECOND HEAD — SYSTEM BUILD
+
+Resume Type:
+CURRENT SESSION REVIEW / CROSS-SESSION CHECKPOINT
+
+Purpose:
+Menyimpan kondisi aktual proyek pada titik checkpoint agar sesi/chat/agen berikutnya dapat melanjutkan pekerjaan tanpa mengulang dari nol, tanpa membawa keputusan lama yang sudah tidak berlaku, dan tanpa menganggap rekomendasi sebagai keputusan Owner.
+
+---
+
+# 1. MASTER GLOBAL POSITION
+
+Master global project masih berada pada:
+
+## ⑥ FINAL CROSS-PHASE ASSURANCE
+
+Breakdown resmi yang menjadi acuan:
+
+| Slice | Fokus |
+|---|---|
+| ⑥A | Evolusi 4 layer → 2 layer, definisi Core, Runtime, Delivery/App, istilah resmi |
+| ⑥B | Phase -1 → P5 yang sudah closed benar-benar tetap closed; tidak ada hidden unfinished obligation |
+| ⑥C | Dependency antar-phase tidak putus atau terbalik |
+| ⑥D | Identity Root, SH_ID, ownership, privacy, Creator/SH-000 boundary |
+| ⑥E | Memory ≠ Knowledge ≠ Context; lifecycle dan isolation |
+| ⑥F | Runtime, governance, authorization, tools/actions dan high-risk gates |
+| ⑥G | Journey, Clone, Inheritance, Legacy, Recovery, Backup, Portability, Continuity |
+| ⑥H | Source GitHub ↔ actual Supabase ↔ runtime/deployment |
+| ⑥I | EV-* / closure/evidence benar-benar membuktikan actual state, bukan hanya dokumentasi |
+| ⑥J | Untuk setiap capability: IMPLEMENTED / VERIFIED / STRUCTURAL / DEFERRED / GAP / BLOCKER |
+| ⑥K | Semua temuan yang tersisa diklasifikasikan dan diberi dependency |
+| ⑥L | Menentukan apa yang benar-benar menjadi prerequisite P6, bukan sekadar asumsi |
+
+Penting:
+
+Pengerjaan App / APK yang dilakukan setelahnya adalah delivery/integration work yang berjalan di dalam konteks assurance tersebut.
+
+App yang berhasil dibangun menjadi APK TIDAK berarti ⑥A–⑥L sudah selesai.
+
+---
+
+# 2. POSISI ARSITEKTUR APP
+
+Setelah master global ⑥ tetap menjadi posisi utama, pekerjaan App berkembang dari draft sementara menjadi:
+
+## SH App Architecture Draft
+Memiliki 21 poin sebagai bentuk sementara/final working architecture.
+
+Kemudian dipadatkan menjadi:
+
+## SH App Architecture Baseline
+9 poin sebagai baseline operasional App, termasuk CI / Android / APK delivery.
+
+Baseline ini menjadi acuan saat setiap vertical slice App diaudit.
+
+Prinsip penting yang tetap dipertahankan:
+
+- App adalah Delivery/App surface.
+- App bukan pemilik Core.
+- App bukan pemilik authorization.
+- Runtime tetap menjadi boundary untuk execution dan authorization.
+- High-risk confirmation dilakukan secara eksplisit melalui App, tetapi keputusan authorization tetap berada di Runtime.
+- APK build membuktikan App dapat dibangun/dideliver; bukan membuktikan seluruh sistem SH telah selesai.
+
+---
+
+# 3. DELIVERY / VERTICAL SLICE PATH
+
+Working delivery sequence yang digunakan:
+
+1. App Skeleton
+2. Authentication / Session
+3. Chat Request / Response
+4. Chat Streaming
+5. Context / Memory / Search / Journey
+6. High-Risk Confirmation
+7. Lifecycle UI
+8. APK / Final App Integration
+
+Status aktual:
+
+| # | Vertical Slice | Status |
+|---|---|---|
+| 1 | App Skeleton | 🟢 |
+| 2 | Authentication / Session | 🟢 |
+| 3 | Chat Request / Response | 🟢 |
+| 4 | Chat Streaming | 🟢 |
+| 5 | Context / Memory / Search / Journey | 🟢 |
+| 6 | High-Risk Confirmation | 🟢 |
+| 7 | Lifecycle UI | 🟢 |
+| 8 | APK / Final App Integration | 🟢 DONE |
+
+Dengan demikian delivery path App yang sedang kita kerjakan sudah mencapai ujung:
+
+## APP → RUNTIME → ANDROID APK = 🟢
+
+---
+
+# 4. AUTHENTICATION / DEV TEST READINESS
+
+DEV test account sudah dibuat di Supabase:
+
+SH test account:
+sh-dev-test@banned.idn
+
+Karena email tersebut merupakan akun DEV/test dan bukan inbox email nyata, verification dilakukan melalui state/account yang tersedia di Supabase.
+
+Secret readiness yang telah digunakan:
+
+- SH_SUPABASE_URL
+- SH_TEST_EMAIL
+- SH_SUPABASE_ANON_KEY
+- SH_TEST_PASSWORD
+
+Password test disimpan sebagai GitHub Actions Secret dan tidak di-hardcode.
+
+Tidak ada kebutuhan untuk menambahkan OpenAI API key hanya demi vertical slice yang telah dikerjakan.
+
+Provider/API credentials yang tersedia di lingkungan kerja termasuk:
+- Groq
+- Supabase
+- GitHub
+- OpenRouter
+- HuggingFace
+
+OpenAI belum tersedia dan tidak menjadi blocker untuk slice App yang telah selesai.
+
+---
+
+# 5. RUNTIME INVOCATION VERTICAL SLICE
+
+Runtime invocation sebelumnya telah diverifikasi sebagai:
+
+App
+→ Runtime Adapter
+→ existing SH Runtime
+→ request / response
+
+Controlled verification dilakukan terhadap authenticated Runtime path.
+
+Hasil akhirnya memungkinkan App melakukan invocation terhadap Runtime tanpa menjadikan App sebagai pemilik logic Core.
+
+---
+
+# 6. CHAT REQUEST / RESPONSE
+
+Chat request/response vertical slice telah selesai.
+
+App dapat:
+
+App
+→ authenticated Runtime Adapter
+→ request
+→ Runtime response
+→ tampil pada Chat UI
+
+Boundary yang dipertahankan:
+
+App hanya menjadi delivery/UI surface.
+
+Runtime tetap menjadi pemilik execution semantics.
+
+---
+
+# 7. CHAT STREAMING
+
+Chat streaming vertical slice telah selesai.
+
+Yang diverifikasi:
+
+- authenticated streaming request
+- Runtime streaming response
+- Chat UI menerima event/token
+- streaming contract
+- controlled verification
+- Android build regression
+
+Beberapa iteration sempat gagal pada workflow, tetapi akhirnya Chat Verification berhasil hijau.
+
+Milestone penting:
+SH App Chat Verification #13
+commit 249db578
+🟢
+
+Streaming kemudian dilanjutkan ke context/lifecycle/high-risk work.
+
+---
+
+# 8. CONTEXT / MEMORY / SEARCH / JOURNEY
+
+Vertical slice:
+
+## CONTEXT / MEMORY / SEARCH / JOURNEY
+
+telah dikerjakan dan dinyatakan selesai.
+
+Scope-nya tetap mengikuti boundary canonical:
+
+Memory ≠ Knowledge ≠ Context
+
+serta mempertahankan isolation/lifecycle semantics yang menjadi bagian dari assurance.
+
+Slice ini tidak mengubah definisi Core canonical hanya karena App membutuhkan UI/Runtime access.
+
+Status:
+
+🟢 DONE
+
+---
+
+# 9. HIGH-RISK CONFIRMATION
+
+Vertical slice:
+
+## HIGH-RISK CONFIRMATION
+
+telah selesai.
+
+Boundary yang diverifikasi:
+
+Runtime
+→ authorization / high-risk gate
+→ CONFIRMATION_REQUIRED
+→ App confirmation UI
+→ explicit user confirmation
+→ Runtime tetap melakukan re-validation
+→ execution
+
+App TIDAK boleh:
+
+Confirm button
+→ langsung authorize
+→ langsung execute
+
+App hanya mengumpulkan explicit confirmation.
+
+Runtime tetap pemilik authorization dan execution boundary.
+
+Controlled test berhasil.
+
+Milestone terakhir:
+commit 295ebca6
+🟢
+
+Status:
+
+## HIGH-RISK CONFIRMATION = 🟢 DONE
+
+---
+
+# 10. LIFECYCLE UI
+
+Vertical slice:
+
+## LIFECYCLE UI
+
+kemudian dikerjakan.
+
+Implementasi meliputi lifecycle-aware Chat UI dan abortable runtime streaming.
+
+Konsep utamanya:
+
+App active
+→ streaming dapat berjalan
+
+App meninggalkan foreground
+→ streaming dapat dibatalkan
+
+App kembali active
+→ App dapat melanjutkan lifecycle normal
+
+Unmount
+→ active stream dibersihkan / di-abort
+
+Selain itu high-risk confirmation tetap tidak dipindahkan menjadi authorization milik App.
+
+Iteration pertama:
+
+commit b6e6794
+🔴
+
+Penyebab:
+TypeScript lifecycle state narrowing.
+
+Error terkait perbandingan state `background`.
+
+Fix dilakukan dengan menghilangkan check yang sudah tidak valid secara type narrowing pada `finally`.
+
+Fix commit:
+
+d1ea97a72da389f532f8ae1a1b86191c111f2754
+
+Hasil:
+
+SH App Chat Verification #22
+🟢
+
+SH App Android Build #21
+🟢
+
+Lifecycle UI:
+
+## 🟢 DONE
+
+---
+
+# 11. APK / FINAL APP INTEGRATION
+
+Setelah Lifecycle UI hijau, dilakukan:
+
+## APK / FINAL APP INTEGRATION VERTICAL SLICE
+
+Target:
+
+controlled build
+→ artifact verification
+→ architecture audit
+
+Build menggunakan Android/Expo/Gradle pipeline.
+
+Controlled build berhasil:
+
+- dependency install 🟢
+- Expo dependency reconciliation 🟢
+- Typecheck 🟢
+- clean Expo Android prebuild 🟢
+- Expo autolinking verification 🟢
+- Gradle project verification 🟢
+- assembleDebug 🟢
+- APK artifact upload 🟢
+
+Android Build:
+
+SH App Android Build #21
+commit d1ea97a
+🟢
+
+---
+
+# 12. APK ARTIFACT EVIDENCE
+
+APK artifact benar-benar berhasil dibuat dan di-upload.
+
+Artifact:
+
+sh-app-debug-apk.zip
+
+Artifact ID:
+
+9202722336
+
+Artifact berisi hasil debug APK.
+
+Artifact telah berhasil ditarik kembali untuk memastikan artifact bukan sekadar status workflow.
+
+SHA-256 yang tercatat:
+
+fdffc16dce9a563c4a458e2e65f4fc5501f48abf803c14f35ab2728dba76e045
+
+Dengan demikian:
+
+BUILD SUCCESS
+≠ hanya status CI
+
+tetapi:
+
+BUILD SUCCESS
++
+ARTIFACT EXISTS
++
+ARTIFACT RETRIEVABLE
+
+Status:
+
+## APK DELIVERY = 🟢 VERIFIED
+
+---
+
+# 13. CURRENT APP DELIVERY STATUS
+
+Current App delivery state:
+
+App Skeleton                    🟢
+Authentication / Session        🟢
+Chat Request / Response         🟢
+Chat Streaming                  🟢
+Context / Memory / Search       🟢
+Journey                         🟢
+High-Risk Confirmation          🟢
+Lifecycle UI                    🟢
+Android Build                   🟢
+APK Artifact                    🟢
+Artifact Retrieval              🟢
+
+## APP → RUNTIME → APK DELIVERY SURFACE = 🟢 DONE
+
+---
+
+# 14. WHAT THIS DOES NOT MEAN
+
+Penting untuk tidak salah membaca status di atas.
+
+APK berhasil bukan berarti:
+
+- seluruh SECOND HEAD selesai;
+- P6 selesai;
+- ⑥A–⑥L selesai;
+- seluruh Core selesai;
+- seluruh Runtime capability selesai;
+- seluruh Supabase state sudah final;
+- seluruh EV-* sudah terbukti;
+- seluruh architecture assurance sudah closed.
+
+Yang selesai adalah:
+
+## APP DELIVERY / INTEGRATION VERTICAL PATH
+
+yang sekarang sudah mempunyai bukti:
+
+App source
+→ Runtime invocation
+→ authenticated interaction
+→ streaming
+→ confirmation
+→ lifecycle handling
+→ Android build
+→ APK artifact
+
+---
+
+# 15. CURRENT MASTER POSITION
+
+Master global tetap:
+
+## ⑥ FINAL CROSS-PHASE ASSURANCE
+
+Bukan pindah menjadi "P6 selesai".
+
+Vertical App delivery sekarang memberi evidence aktual untuk bagian tertentu, terutama yang berkaitan dengan:
+
+- Delivery/App surface
+- Runtime invocation
+- authentication boundary
+- streaming
+- confirmation boundary
+- lifecycle
+- Android build
+- artifact delivery
+
+Evidence ini nantinya harus dimasukkan kembali ke proses assurance ⑥A–⑥L.
+
+---
+
+# 16. NEXT GLOBAL WORK
+
+Setelah APK terbukti:
+
+JANGAN kembali mengulang:
+
+- Chat UI
+- Chat streaming
+- High-risk confirmation
+- Lifecycle UI
+- APK build
+
+kecuali assurance menemukan GAP nyata.
+
+Next global path:
+
+## KEMBALI KE ⑥ FINAL CROSS-PHASE ASSURANCE
+
+dan lanjutkan:
+
+⑥A
+→ ⑥B
+→ ⑥C
+→ ⑥D
+→ ⑥E
+→ ⑥F
+→ ⑥G
+→ ⑥H
+→ ⑥I
+→ ⑥J
+→ ⑥K
+→ ⑥L
+
+dengan actual evidence dari App/Runtime/APK yang sekarang sudah tersedia.
+
+---
+
+# 17. IMPORTANT CONTINUATION RULE
+
+Sesi berikutnya harus membaca checkpoint ini sebagai:
+
+CURRENT STATE
+
+bukan sebagai instruksi untuk mengulang seluruh pembangunan.
+
+Jangan menganggap:
+
+- recommendation = Owner decision
+- draft = canonical
+- build success = architecture completion
+- APK exists = P6 complete
+- App behavior = Runtime authority
+
+Tetap gunakan canonical documents sebagai authority sesuai domain masing-masing.
+
+---
+
+# 18. ONE-LINE CURRENT POSITION
+
+SECOND HEAD saat ini berada pada:
+
+## ⑥ FINAL CROSS-PHASE ASSURANCE
+
+dengan:
+
+## APP → RUNTIME → ANDROID APK DELIVERY SURFACE = 🟢 VERIFIED / DONE
+
+dan pekerjaan berikutnya adalah:
+
+## RETURN TO ⑥A–⑥L FINAL CROSS-PHASE ASSURANCE
+
+bukan menambah fitur App secara acak dan bukan mengulang APK build.
+
+---
+
+SECOND HEAD — SESSION RESUME 41
+## RECONCILED SESSION REVIEW CHECKPOINT
+## Resume 37–40 Reconciliation → Current Working State
+
+Project:
+SECOND HEAD — SYSTEM BUILD
+
+Resume Type:
+RECONCILED CURRENT-STATE / CROSS-SESSION CONTINUITY CHECKPOINT
+
+Purpose:
+Menyimpan kondisi proyek setelah rekonsiliasi Resume 37–40,
+termasuk progress App/Runtime/APK, deferred assurance,
+migration/evidence concerns, dan hasil audit terhadap checkpoint sebelumnya.
+
+Checkpoint ini BUKAN Canonical authority.
+
+Checkpoint ini digunakan sebagai:
+- continuity record;
+- current-state snapshot;
+- execution context;
+- reconciliation checkpoint.
+
+Checkpoint tidak menggantikan:
+- Frozen Baseline;
+- SH Core Canonical;
+- Build Scope;
+- Implementation Contract;
+- Implementation Guide;
+- Architecture;
+- Execution Strategy;
+- Phase -1;
+- actual GitHub DEV;
+- actual Supabase DEV.
+
+Jika terjadi discrepancy:
+
+→ identify discrepancy
+→ determine authority
+→ inspect actual state
+→ reconcile
+→ do not invent resolution.
+
+==================================================
+0. CURRENT RECONCILIATION NOTE
+==================================================
+
+Resume 37 → Resume 40 telah direview secara berurutan.
+
+Kesimpulan:
+
+Secara global Resume 37–40 masih coherent.
+
+Tidak ditemukan contradiction temporal yang jelas pada progression:
+
+Phase 5 closed
+→ cross-phase assurance
+→ architecture/toolchain decision surface
+→ App implementation
+→ App vertical slices
+→ Android/APK delivery
+
+Namun beberapa status pada Resume 40 memiliki evidence depth
+yang berbeda-beda.
+
+Karena itu:
+
+RESUME 40 TIDAK BOLEH DIPERLAKUKAN SEBAGAI
+"RESUME TERAKHIR = AUTOMATIC TRUTH".
+
+Resume 40 adalah latest explicit checkpoint yang tersedia,
+sedangkan actual implementation state tetap harus diverifikasi
+terhadap GitHub DEV / Supabase DEV / runtime / CI / artifacts
+ketika pekerjaan assurance dilakukan.
+
+Resume 36 berasal dari sesi sebelumnya dan tidak tersedia
+secara penuh dalam konteks aktif saat checkpoint ini dibuat.
+
+Jangan mengarang isi Resume 36.
+
+Audit transition 36 → 37 tetap dianggap:
+NOT RECONSTRUCTED IN THIS CHECKPOINT.
+
+==================================================
+1. CURRENT MASTER GLOBAL POSITION
+==================================================
+
+MASTER GLOBAL POSITION:
+
+## ⑥ FINAL CROSS-PHASE ASSURANCE
+
+Breakdown:
+
+⑥A
+Architecture evolution:
+4 operational/detail layers
+→ abstraction reconciliation
+→ 2 higher-level concepts
+
+⑥B
+Closed-phase integrity:
+Phase -1 → Phase 5
+tetap closed sesuai boundary.
+
+⑥C
+Cross-phase dependency integrity.
+
+⑥D
+Identity Root / SH_ID / ownership / privacy /
+Creator / SH-000 boundary.
+
+⑥E
+Memory ≠ Knowledge ≠ Context
+beserta lifecycle/isolation.
+
+⑥F
+Runtime / governance / authorization /
+tools / actions / high-risk gates.
+
+⑥G
+Journey / Clone / Inheritance / Legacy /
+Recovery / Backup / Portability / Continuity.
+
+⑥H
+GitHub ↔ Supabase ↔ Runtime consistency.
+
+⑥I
+Evidence ↔ actual state integrity.
+
+⑥J
+Capability classification:
+- IMPLEMENTED
+- VERIFIED
+- STRUCTURAL
+- DEFERRED
+- GAP
+- BLOCKER
+
+⑥K
+Remaining findings and dependencies.
+
+⑥L
+P6 prerequisites.
+
+IMPORTANT:
+
+App / APK delivery work berjalan sebagai
+delivery/integration work di dalam konteks assurance.
+
+APP DELIVERY COMPLETE
+≠
+⑥A–⑥L COMPLETE
+
+APK VERIFIED
+≠
+P6 COMPLETE
+
+==================================================
+2. AUTHORITY HIERARCHY
+==================================================
+
+Working hierarchy:
+
+FROZEN BASELINE
+↓
+SH-LITE v2.0 / v2.1
+REFERENCE ONLY / HISTORICAL
+↓
+SH CORE CANONICAL
+↓
+BUILD SCOPE
+↓
+IMPLEMENTATION CONTRACT
+↓
+IMPLEMENTATION GUIDE
+↓
+ARCHITECTURE
+↓
+EXECUTION STRATEGY
+↓
+PHASE -1
+↓
+PHASE ARTIFACT / BACKLOG
+↓
+ACTUAL GITHUB DEV
+↓
+ACTUAL SUPABASE DEV
+
+Important:
+
+Source code ≠ authority.
+
+Resume ≠ authority.
+
+Evidence ≠ authority.
+
+Recommendation ≠ Owner Decision.
+
+Actual DEV state determines what is actually implemented.
+
+Canonical authority determines what is intended/allowed.
+
+Reconciliation determines whether the two are consistent.
+
+==================================================
+3. CURRENT WORKING TERMINOLOGY
+==================================================
+
+Use:
+
+- Second Head
+- SH
+- SH Core
+- SH Instance
+- SH-000
+
+SH-000:
+SH milik Creator.
+
+Do NOT use as current product terminology:
+
+- SH Full
+- SH Lite
+
+Historical references may still contain:
+SH Full
+SH Lite
+SH-Lite v2.0
+SH-Lite v2.1
+
+Treat those as:
+
+HISTORICAL / LEGACY TERMINOLOGY
+
+SH-Lite v2.0/v2.1:
+REFERENCE ONLY / HISTORICAL.
+
+==================================================
+4. ACTUAL ENVIRONMENT
+==================================================
+
+GitHub:
+
+Repository:
+https://github.com/savie/second-head
+
+Branch:
+dev
+
+Supabase:
+
+Project:
+second-head
+
+Project ref:
+pkhkgvsrqeupvwoqjwmd
+
+Branch:
+dev
+
+Working source addresses:
+
+GitHub:
+https://github.com/savie/second-head
+
+Supabase DEV:
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+Operational source distinction:
+
+GitHub:
+- source repository;
+- migration files;
+- runtime;
+- tests;
+- workflows;
+- evidence/docs.
+
+Supabase DEV:
+- actual schema;
+- RLS;
+- policies;
+- functions;
+- auth;
+- storage;
+- applied migration state;
+- actual deployed/database state.
+
+Evidence:
+- proof;
+- not authority.
+
+Resume:
+- continuity;
+- not source of truth.
+
+==================================================
+5. PHASE STATUS
+==================================================
+
+Phase -1:
+CLOSED according to existing execution boundary.
+
+Phase 0:
+CLOSED.
+
+Phase 1:
+CLOSED.
+
+Phase 2:
+CLOSED.
+
+Phase 3:
+CLOSED.
+
+Phase 4:
+CLOSED.
+
+Phase 5:
+CLOSED WITH DEFERRED ASSURANCE.
+
+Do NOT reopen Phase 1–5 merely because:
+- App was built later;
+- product E2E is incomplete;
+- external integration is incomplete;
+- deferred assurance remains.
+
+Reopen only for material reason:
+
+- regression;
+- security/privacy violation;
+- ownership violation;
+- identity invariant violation;
+- canonical contradiction;
+- failed verification;
+- invalid evidence;
+- newly authorized scope requiring mutation.
+
+==================================================
+6. PHASE 4
+==================================================
+
+Phase 4:
+Runtime & Orchestration
+
+Status:
+CLOSED.
+
+Completed groups:
+
+P4A-001 → P4A-010
+P4B-001 → P4B-003
+P4C-001 → P4C-003
+P4D-001 → P4D-003
+P4E-001 → P4E-004
+P4F-001 → P4F-005
+
+Do NOT reopen Phase 4 because:
+- E2E is deferred;
+- future providers unavailable;
+- UI assurance was historically absent;
+- external integration remains future work.
+
+Reopen only for material reason.
+
+==================================================
+7. PHASE 5
+==================================================
+
+Phase 5:
+Second Head Advanced Capabilities
+
+Status:
+
+## CLOSED WITH DEFERRED ASSURANCE
+
+Minimal decomposition:
+
+P5A
+Journey & Continuity Gap
+
+P5B
+Clone Boundary & Agreement
+
+P5C
+Inheritance, Legacy & Succession
+
+P5D
+Recovery, Backup & Portability
+
+P5E
+Invariant & Evidence Verification
+
+Execution order:
+
+P5A
+→ verify
+→ P5B
+→ verify
+→ P5C
+→ verify
+→ P5D
+→ verify
+→ P5E
+→ verify
+
+Phase 5 implementation boundary:
+CLOSED.
+
+==================================================
+8. PHASE 5 IMPLEMENTATION STATUS
+==================================================
+
+P5A:
+Journey & Continuity Gap
+STATUS:
+COMPLETE / DEV
+
+P5B:
+Clone Boundary & Agreement
+STATUS:
+COMPLETE / DEV
+
+P5C:
+Inheritance, Legacy & Succession
+STATUS:
+COMPLETE / DEV
+
+P5D:
+Recovery, Backup & Portability
+STATUS:
+COMPLETE / DEV
+
+P5E:
+Invariant & Evidence Verification
+STATUS:
+COMPLETE / DEV
+
+Evidence:
+
+EV-P5A-001_JOURNEY_CONTINUITY_GAP.md
+
+EV-P5B-001_CLONE_BOUNDARY_AGREEMENT.md
+
+EV-P5C-001_INHERITANCE_LEGACY_SUCCESSION.md
+
+EV-P5D-001_RECOVERY_BACKUP_PORTABILITY.md
+
+EV-P5E-001_PHASE5_INVARIANT_EVIDENCE_GATE.md
+
+Closure:
+
+docs/phase5/SECOND_HEAD_PHASE_5_CLOSURE_v1.0.md
+
+Overall:
+
+PHASE 5 =
+CLOSED WITH DEFERRED ASSURANCE
+
+==================================================
+9. PHASE 5 DEFERRED ASSURANCE
+==================================================
+
+Deferred assurance remains unless actual later evidence
+explicitly closes each item.
+
+Current known deferred areas:
+
+- authenticated application/API/UI E2E;
+- multi-account clone assurance;
+- full cross-user inheritance;
+- large-data recovery performance;
+- external portability consumer integration;
+- broader external-action integration.
+
+Important:
+
+App/APK success does NOT automatically close these.
+
+Examples:
+
+Clone backend
+≠
+Clone UI
+≠
+multi-account Clone E2E.
+
+Recovery backend
+≠
+large-data recovery performance verification.
+
+Portability implementation
+≠
+external consumer integration.
+
+Therefore deferred items must continue into:
+
+⑥J
+⑥K
+⑥L
+
+until classified/reconciled.
+
+==================================================
+10. PHASE 5 DATABASE STATE
+==================================================
+
+Phase 5 introduced/verified:
+
+- journey_events
+- clone_agreements
+- sh_clones
+- succession_rules
+- inheritance_authorizations
+- inheritance_events
+- legacy_records
+- recovery_snapshots
+- recovery_events
+- portability_exports
+
+Phase 5 runtime SQL functions:
+7 runtime functions verified.
+
+At Phase 5 closure:
+
+Persistent test residue:
+NONE
+
+No intentional persistent test residue remained
+in newly introduced Phase 5 tables.
+
+==================================================
+11. PRIVATE.AUTHORITY_ASSIGNMENTS
+==================================================
+
+Finding:
+
+RLS OFF on:
+private.authority_assignments
+
+Previous audit conclusion:
+
+INTENTIONAL INTERNAL GOVERNANCE CONDITION
+
+Phase 5 did not modify it.
+
+Current position:
+
+RLS OFF remains unchanged.
+
+Do NOT modify merely because automated security tooling
+reports RLS OFF.
+
+Reopen only if future authority/security audit establishes
+actual violation or canonical contradiction.
+
+==================================================
+12. CORE INVARIANTS
+==================================================
+
+Maintain:
+
+Model ≠ SH Identity
+
+Runtime ≠ SH Identity
+
+Database ≠ SH Identity
+
+Hardware ≠ SH Identity
+
+Creator Authority ≠ Private Data Access
+
+SH-000 Core Authority ≠ Private Data Access
+
+Memory ≠ Knowledge
+
+Private Memory ≠ Shared Knowledge
+
+Learning ≠ Automatic Core Modification
+
+Evolution ≠ New SH
+
+Migration ≠ New SH
+
+Recovery ≠ New SH
+
+Clone ≠ Source SH
+
+Inheritance ≠ Clone
+
+Inheritance ≠ Identity Transfer
+
+Decommission ≠ Immediate Permanent Delete
+
+Advanced capability must not silently replace/reset:
+
+- Identity Root
+- Ownership Root
+
+==================================================
+13. ARCHITECTURAL EVOLUTION
+==================================================
+
+Historical architectural discussion:
+
+4 architectural layers
+
+was reconciled into:
+
+2 higher-level architectural concepts
+
+This is:
+
+EVOLUTION OF ABSTRACTION
+
+NOT:
+
+old architecture wrong
+→
+new architecture replaces it completely.
+
+The 4 layers remain useful as
+operational/detail decomposition.
+
+The 2 higher-level concepts are the
+higher-level architectural abstraction.
+
+This is considered settled unless
+new technical evidence contradicts it.
+
+==================================================
+14. SH CORE
+==================================================
+
+SH Core is not simply:
+
+- database;
+- runtime;
+- model;
+- system prompt;
+- application.
+
+SH Core binds:
+
+- identity;
+- ownership;
+- governance;
+- privacy;
+- memory;
+- knowledge;
+- context;
+- continuity;
+- runtime behavior;
+- invariants.
+
+Therefore:
+
+SH Core ≠ Runtime
+
+SH Core ≠ Database
+
+SH Core ≠ Model
+
+SH Core ≠ Application
+
+Runtime is operational realization of SH rules,
+not SH identity itself.
+
+==================================================
+15. SH-000 / CREATOR
+==================================================
+
+Creator authority includes high-level authority over:
+
+- Core;
+- governance;
+- rules;
+- constitutional/system-level decisions.
+
+Creator does NOT automatically obtain:
+
+- private memory;
+- private conversation;
+- private context;
+- private data of another SH/User.
+
+SH-000 is governance representation.
+
+It is NOT an omniscient administrator.
+
+==================================================
+16. MIGRATION RECONCILIATION — STILL RELEVANT
+==================================================
+
+Historical migration divergence was identified.
+
+Important observations:
+
+- GitHub migration history;
+- Supabase actual migration history;
+- migration folder structure;
+- historical repository restructuring;
+- P2-related artifacts;
+- later cleanup/removal;
+- possible divergence around migration 13/14.
+
+Historical example:
+
+GitHub approximately migration 13
+
+Supabase approximately migration 14
+
+This was identified as a reconciliation point.
+
+IMPORTANT:
+
+No later Resume 39/40 statement explicitly establishes
+that the full GitHub ↔ Supabase migration reconciliation
+has been definitively closed.
+
+Therefore:
+
+MIGRATION RECONCILIATION =
+OPEN ASSURANCE ITEM / NEEDS ACTUAL VERIFICATION
+
+Do NOT assume it disappeared because App/APK work succeeded.
+
+Classification candidate:
+
+⑥H / ⑥K
+
+==================================================
+17. REPOSITORY STRUCTURE
+==================================================
+
+Historical conceptual repository structure:
+
+/.github
+/database
+/docs
+/src
+/tests
+README
+.gitignore
+
+This is NOT automatically final structure.
+
+Repository structure must be evaluated based on:
+
+- historical meaning;
+- dependencies;
+- canonical intent;
+- actual usage;
+- evidence;
+- migration semantics.
+
+Do NOT move/delete files merely for aesthetic cleanliness.
+
+Do NOT erase historical evidence merely to make repository
+look cleaner.
+
+Repository structure must follow canonical meaning.
+
+==================================================
+18. EVIDENCE INTEGRITY
+==================================================
+
+Evidence hierarchy:
+
+Authority
+↓
+Actual GitHub
+↓
+Actual Supabase
+↓
+Runtime
+↓
+Tests / CI
+↓
+Evidence artifact
+
+Not:
+
+Evidence file
+↓
+assume truth.
+
+Phase 5 previously had an evidence-chain gap:
+
+implementation/closure existed,
+but one dedicated artifact per slice was initially missing.
+
+Resolution:
+
+EV-P5A-001
+EV-P5B-001
+EV-P5C-001
+EV-P5D-001
+EV-P5E-001
+
+were added.
+
+That evidence gap was documentation/evidence integrity,
+not Phase 5 implementation failure.
+
+Current global assurance must nevertheless verify
+that EV-* claims correspond to actual state.
+
+==================================================
+19. TOOLCHAIN DECISION
+==================================================
+
+Current delivery approach:
+
+## CANDIDATE 2 ACCEPTED
+
+Meaning:
+
+React Native
++
+Expo capabilities first
++
+native capability escape hatch when truly required.
+
+This does NOT mean:
+
+"Expo forever."
+
+It means:
+
+- maximize Expo first;
+- avoid unnecessary native complexity;
+- if Expo becomes a real technical barrier;
+- evaluate native/Bare RN capability only where needed;
+- do not rewrite the whole application unnecessarily.
+
+Target:
+
+APK
+
+Constraints:
+
+- zero-budget sebisa mungkin;
+- zero-hardware;
+- GitHub fixed;
+- Supabase fixed;
+- automation/plugin-friendly;
+- ChatGPT-centric workflow preferred.
+
+==================================================
+20. MODEL LAYER
+==================================================
+
+Model layer is part of technology/toolchain surface,
+but conceptually separate from SH Identity.
+
+Model Layer includes:
+
+- LLM provider;
+- model;
+- routing;
+- fallback strategy.
+
+Invariant:
+
+Model ≠ SH Identity.
+
+Candidate/reference providers:
+
+- Groq
+- OpenRouter
+- Hugging Face
+- OpenAI
+
+Status:
+
+NO FINAL MODEL/PROVIDER DECISION.
+
+OpenAI is NOT required merely to implement
+the App delivery vertical path already built.
+
+Hugging Face experience from historical implementation
+must be considered as input,
+but HF is not automatically rejected.
+
+==================================================
+21. APP ARCHITECTURE BASELINE
+==================================================
+
+App boundary:
+
+APP
+↓
+Runtime Adapter
+↓
+SH Runtime
+↓
+Supabase / backend infrastructure
+
+App does NOT:
+
+- directly call LLM provider for primary SH path;
+- bypass Runtime;
+- replace server authorization;
+- directly implement authorization semantics as source of truth.
+
+Authentication:
+
+Supabase Auth.
+
+Session:
+
+App bootstrap
+→ authenticated session
+→ Runtime Adapter.
+
+Credential/session secret:
+
+must not be hardcoded.
+
+Chat:
+
+Chat Screen
+↓
+Chat Service
+↓
+Runtime Adapter
+↓
+SH Runtime
+↓
+response
+↓
+Chat Screen
+
+Streaming:
+
+implemented later in vertical sequence.
+
+High-risk:
+
+App confirmation UI
+but Runtime remains authorization owner.
+
+==================================================
+22. APP DELIVERY PROGRESSION
+==================================================
+
+Resume 39 established:
+
+App Skeleton:
+DONE
+
+Authentication/Session:
+CONTROLLED PASS
+
+Runtime Invocation:
+CONTROLLED PASS
+
+Chat Request/Response:
+IMPLEMENTATION / CI VERIFICATION
+
+Streaming:
+NOT STARTED
+
+Resume 40 then recorded progression through:
+
+1. App Skeleton
+2. Authentication / Session
+3. Chat Request / Response
+4. Chat Streaming
+5. Context / Memory / Search / Journey
+6. High-Risk Confirmation
+7. Lifecycle UI
+8. APK / Final App Integration
+
+This progression is internally coherent.
+
+The transition from Resume 39 → Resume 40 is accepted as
+a valid implementation progression.
+
+However, status labels remain subject to actual evidence audit.
+
+==================================================
+23. APP SKELETON
+==================================================
+
+Minimal Expo/React Native app skeleton:
+
+STATUS:
+🟢 DONE according to checkpoint history.
+
+Includes:
+
+- Expo/React Native foundation;
+- basic routing/navigation;
+- auth context;
+- runtime adapter;
+- chat screen.
+
+Product completeness:
+NO.
+
+==================================================
+24. AUTHENTICATION / SESSION
+==================================================
+
+DEV test account:
+
+sh-dev-test@banned.idn
+
+Supabase DEV account:
+created/confirmed according to checkpoint history.
+
+Secrets used:
+
+- SH_SUPABASE_URL
+- SH_TEST_EMAIL
+- SH_SUPABASE_ANON_KEY
+- SH_TEST_PASSWORD
+
+Password:
+
+stored as GitHub Actions Secret.
+
+Do NOT:
+- hardcode;
+- commit;
+- put in evidence;
+- put into chat.
+
+Controlled flow previously recorded:
+
+test account
+↓
+Supabase Auth
+↓
+authenticated session
+↓
+SH identity
+↓
+logout
+
+Status from previous verification:
+
+🟢 CONTROLLED PASS
+
+Actual current state should still be revalidated
+if required for later assurance.
+
+==================================================
+25. RUNTIME INVOCATION
+==================================================
+
+Flow:
+
+App
+↓
+Runtime Adapter
+↓
+existing SH Runtime
+↓
+request
+↓
+SH Identity
+↓
+response
+↓
+App
+
+Controlled verification:
+
+PASS
+
+Important:
+
+This is not automatically full Product E2E.
+
+==================================================
+26. CHAT REQUEST / RESPONSE
+==================================================
+
+Chat service:
+
+app/features/chat/chat-service.ts
+
+Chat screen:
+
+app/app/chat.tsx
+
+Required path:
+
+Chat Screen
+↓
+Chat Service
+↓
+Runtime Adapter
+↓
+SH Runtime
+↓
+response
+↓
+Chat Screen
+
+No direct:
+
+App
+↓
+LLM provider
+
+for the primary SH runtime path.
+
+Resume 39 recorded initial CI failure:
+
+state/auth-context.tsx
+TS2345
+
+Cause:
+callback contract mismatch around async Promise<void>.
+
+Fix commit:
+
+274c294bb589a8ec34857b0b50ea80cb9878eb86
+
+Later Resume 40 records Chat Verification as successfully green.
+
+Therefore:
+
+Chat Request/Response:
+🟢 VERIFIED according to checkpoint progression.
+
+==================================================
+27. CHAT STREAMING
+==================================================
+
+Resume 40 records:
+
+Chat Streaming:
+🟢 DONE
+
+Verification included:
+
+- authenticated streaming request;
+- Runtime streaming response;
+- Chat UI event/token handling;
+- streaming contract;
+- controlled verification;
+- Android build regression.
+
+Milestone:
+
+SH App Chat Verification #13
+
+commit:
+249db578
+
+Status from checkpoint:
+
+🟢
+
+This remains a checkpoint claim pending actual audit if needed.
+
+==================================================
+28. CONTEXT / MEMORY / SEARCH / JOURNEY
+==================================================
+
+Resume 40 records:
+
+CONTEXT / MEMORY / SEARCH / JOURNEY
+🟢 DONE
+
+Important audit correction:
+
+Evidence depth in Resume 40 is weaker than
+the detailed evidence provided for High-Risk,
+Lifecycle, and APK.
+
+Therefore current classification should NOT be:
+
+"independently proven globally complete."
+
+Working classification:
+
+🟡 CLAIMED DONE / EVIDENCE DEPTH REQUIRES AUDIT
+
+Need to distinguish:
+
+Journey backend capability
+≠
+Journey App presentation
+≠
+full Journey product E2E.
+
+Likewise:
+
+Memory backend
+≠
+Memory UI
+≠
+full Memory product E2E.
+
+Memory ≠ Knowledge ≠ Context remains invariant.
+
+Do not change canonical semantics merely to satisfy App UI.
+
+==================================================
+29. HIGH-RISK CONFIRMATION
+==================================================
+
+Flow:
+
+Runtime
+↓
+authorization/high-risk gate
+↓
+CONFIRMATION_REQUIRED
+↓
+App confirmation UI
+↓
+explicit user confirmation
+↓
+Runtime re-validation
+↓
+execution
+
+App must NOT:
+
+Confirm button
+↓
+direct authorization
+↓
+direct execution
+
+Runtime remains authority.
+
+Checkpoint evidence:
+
+commit:
+295ebca6
+
+Controlled test:
+PASS
+
+Status:
+
+🟢 CONTROLLED VERTICAL VERIFICATION
+
+Important:
+
+Controlled verification
+≠
+full Product E2E.
+
+==================================================
+30. LIFECYCLE UI
+==================================================
+
+Lifecycle behavior:
+
+App active
+→ streaming may run.
+
+App leaves foreground
+→ streaming may be aborted.
+
+App returns active
+→ normal lifecycle can continue.
+
+Unmount
+→ active stream cleaned/aborted.
+
+First implementation:
+
+commit:
+b6e6794
+
+Status:
+🔴
+
+Cause:
+TypeScript lifecycle state narrowing.
+
+Fix:
+
+commit:
+d1ea97a72da389f532f8ae1a1b86191c111f2754
+
+Then:
+
+SH App Chat Verification #22
+🟢
+
+SH App Android Build #21
+🟢
+
+Status:
+
+🟢 DONE according to controlled CI/build evidence.
+
+==================================================
+31. APK / ANDROID DELIVERY
+==================================================
+
+Final App integration vertical slice:
+
+controlled build
+→ artifact verification
+→ architecture audit
+
+Build sequence recorded:
+
+dependency install
+🟢
+
+Expo dependency reconciliation
+🟢
+
+Typecheck
+🟢
+
+clean Expo Android prebuild
+🟢
+
+Expo autolinking verification
+🟢
+
+Gradle project verification
+🟢
+
+assembleDebug
+🟢
+
+APK artifact upload
+🟢
+
+Android Build:
+
+SH App Android Build #21
+
+commit:
+d1ea97a
+
+Status:
+
+🟢
+
+==================================================
+32. APK ARTIFACT EVIDENCE
+==================================================
+
+Artifact:
+
+sh-app-debug-apk.zip
+
+Artifact ID:
+
+9202722336
+
+Artifact was retrieved to verify it existed
+beyond workflow status.
+
+SHA-256:
+
+fdffc16dce9a563c4a458e2e65f4fc5501f48abf803c14f35ab2728dba76e045
+
+Therefore checkpoint evidence supports:
+
+BUILD SUCCESS
++
+ARTIFACT EXISTS
++
+ARTIFACT RETRIEVABLE
+
+Classification:
+
+🟢 APK DELIVERY ARTIFACT VERIFIED
+
+Important:
+
+This does NOT mean:
+
+- production release;
+- Play Store release;
+- full Product E2E;
+- entire SH complete;
+- P6 complete.
+
+==================================================
+33. APP DELIVERY CURRENT STATUS
+==================================================
+
+Current checkpoint-derived status:
+
+App Skeleton
+🟢
+
+Authentication / Session
+🟢 controlled
+
+Runtime Invocation
+🟢 controlled
+
+Chat Request / Response
+🟢
+
+Chat Streaming
+🟢
+
+Context / Memory / Search / Journey
+🟡 claimed done / evidence depth requires audit
+
+High-Risk Confirmation
+🟢 controlled
+
+Lifecycle UI
+🟢 controlled CI/build evidence
+
+Android Build
+🟢
+
+APK Artifact
+🟢
+
+Artifact Retrieval
+🟢
+
+Overall:
+
+## APP → RUNTIME → ANDROID APK DELIVERY SURFACE
+## = 🟢 VERIFIED AT CONTROLLED VERTICAL-SLICE LEVEL
+
+Do not upgrade this statement to:
+
+"entire Second Head verified."
+
+==================================================
+34. WHAT APK SUCCESS PROVES
+==================================================
+
+APK success provides evidence for:
+
+- App source builds;
+- Expo/React Native delivery path works;
+- Android build pipeline works;
+- Runtime integration exists;
+- authenticated App path exists;
+- streaming/lifecycle/high-risk vertical slices have controlled
+  implementation evidence according to checkpoint history;
+- APK artifact can be produced/retrieved.
+
+It does NOT prove:
+
+- all Core invariants;
+- all Runtime capabilities;
+- all Phase 5 deferred assurance;
+- full multi-account clone;
+- full cross-user inheritance;
+- large-data recovery;
+- external portability;
+- complete product E2E;
+- complete ⑥A–⑥L;
+- P6 readiness.
+
+==================================================
+35. RESUME 37–40 AUDIT FINDINGS
+==================================================
+
+Finding A:
+
+Phase 5 deferred assurance must not disappear
+when App delivery succeeds.
+
+Status:
+OPEN ASSURANCE CLASSIFICATION
+
+Finding B:
+
+Migration GitHub ↔ Supabase reconciliation
+was identified in Resume 38 but not explicitly shown
+as definitively closed in Resume 39/40.
+
+Status:
+OPEN ASSURANCE ITEM
+
+Likely:
+⑥H / ⑥K
+
+Finding C:
+
+Evidence integrity was a major concern in Resume 37/38.
+
+Phase 5 evidence correction was completed,
+but global evidence reconciliation remains part of ⑥I.
+
+Status:
+OPEN ASSURANCE ITEM
+
+Finding D:
+
+Context / Memory / Search / Journey was marked DONE
+in Resume 40, but checkpoint contains less detailed
+verification evidence than other App slices.
+
+Status:
+🟡 CLAIMED DONE / REQUIRES EVIDENCE AUDIT
+
+Finding E:
+
+Journey UI/presentation must not be confused with
+Journey backend capability or full Product E2E.
+
+Status:
+OPEN BOUNDARY CHECK
+
+Finding F:
+
+Resume 40 is latest explicit checkpoint available,
+but not automatic source of truth.
+
+Status:
+PERMANENT CHECKPOINT RULE
+
+Finding G:
+
+Resume 36 is from previous session and not fully
+available in current context.
+
+Do not invent its contents.
+
+Status:
+TRANSITION 36 → 37 NOT RECONSTRUCTED HERE
+
+==================================================
+36. DEFERRED VS BLOCKER
+==================================================
+
+Current known TRUE implementation blocker:
+
+NONE established by this checkpoint.
+
+Known deferred / assurance areas:
+
+- application/API/UI E2E;
+- multi-account clone;
+- cross-user inheritance;
+- large-data recovery;
+- external portability integration;
+- broader external-action integration;
+- migration reconciliation;
+- global evidence reconciliation;
+- Context/Memory/Search/Journey evidence depth;
+- remaining ⑥A–⑥L classification.
+
+Do NOT convert deferred items automatically into blockers.
+
+==================================================
+37. FULL PRODUCT E2E
+==================================================
+
+Full Product E2E remains:
+
+NOT COMPLETE / NOT CLOSED
+
+Target chain:
+
+User
+↓
+App
+↓
+Authentication
+↓
+Runtime Adapter
+↓
+SH Runtime
+↓
+Supabase/backend
+↓
+response
+↓
+App
+
+App delivery now makes more of this chain testable.
+
+But existence of APK does not itself establish
+full end-to-end assurance.
+
+Controlled verification and full Product E2E
+must remain separate classifications.
+
+==================================================
+38. P6 STATUS
+==================================================
+
+P6:
+
+NOT CLOSED.
+
+Do not interpret App APK completion as P6 completion.
+
+P6 prerequisites remain subject to:
+
+⑥L
+
+P6 should only proceed when actual prerequisites
+are confirmed and Owner authorization exists.
+
+Possible historical P6 structure:
+
+P6A
+Integration Testing
+
+P6B
+Architecture Review
+
+P6C
+Contract Verification
+
+P6D
+Implementation Freeze
+
+P6E
+Release & Readiness
+
+Final Integration Gate
+
+However:
+
+Do NOT assume this automatically defines current P6 scope
+without checking canonical authority / latest Owner decision.
+
+==================================================
+39. CURRENT MASTER MODEL
+==================================================
+
+Current global model:
+
+Phase -1 → Phase 5
+        ↓
+       CLOSED
+        ↓
+⑥ FINAL CROSS-PHASE ASSURANCE
+        │
+        ├── ⑥A Architecture
+        ├── ⑥B Phase closure
+        ├── ⑥C Dependencies
+        ├── ⑥D Identity / ownership
+        ├── ⑥E Memory / Knowledge / Context
+        ├── ⑥F Runtime / governance
+        ├── ⑥G Advanced lifecycle
+        ├── ⑥H GitHub ↔ Supabase ↔ Runtime
+        ├── ⑥I Evidence
+        ├── ⑥J Capability status
+        ├── ⑥K Remaining gaps
+        └── ⑥L P6 prerequisites
+                       ↓
+                      P6
+
+App delivery is now an additional evidence branch:
+
+SECOND HEAD CORE / RUNTIME + APP DELIVERY SURFACE ↓ ⑥ ASSURANCE
+
+================================================== 40. CURRENT APP MODEL
+
+APP ↓ Auth / Session ↓ Runtime Adapter ↓ SH Runtime ↓ Supabase / backend ↓ response ↓ APP
+
+For streaming:
+
+APP ↓ Runtime Adapter ↓ SH Runtime ↓ stream ↓ APP
+
+For high-risk:
+
+Runtime ↓ authorization ↓ confirmation required ↓ App confirmation ↓ Runtime re-validation ↓ execution
+
+App never becomes the canonical authorization owner.
+
+================================================== 41. OWNER / EXECUTION RULES
+
+KEEP MOVING FORWARD
+
+
+REVIEW BACKWARD ONLY WHEN NECESSARY
+
+
+DO NOT REOPEN SETTLED DECISIONS
+
+
+DO NOT INVENT MISSING DECISIONS
+
+
+DO NOT CONFUSE READINESS WITH OWNER AUTHORIZATION
+
+
+DO NOT CONFUSE DATABASE PASS WITH E2E PASS
+
+
+DO NOT CONFUSE APK BUILD WITH PRODUCT COMPLETION
+
+
+DO NOT CLAIM EVIDENCE WITHOUT ACTUAL EVIDENCE
+
+
+USE MINIMAL REALIZATION
+
+
+PRESERVE EXISTING FOUNDATION
+
+
+DO NOT CREATE NEW ARCHITECTURE FOR SMALL GAPS
+
+================================================== 42. HP-ONLY WORKFLOW
+
+Owner works primarily from HP.
+
+If Owner must perform an action:
+
+Use concrete instructions:
+
+LU LAKUKAN:
+
+1. buka ...
+
+
+2. tekan ...
+
+
+3. pilih ...
+
+
+4. selesai.
+
+
+
+Do NOT ask Owner to perform work that agent/tooling can perform directly.
+
+Owner should not be asked to:
+
+manually edit source unnecessarily;
+
+manually recreate setup;
+
+repeat completed configuration;
+
+move data between apps when automation can handle it.
+
+
+GitHub Actions acts as cloud computer for:
+
+dependency installation;
+
+typecheck;
+
+tests;
+
+builds;
+
+artifact generation;
+
+audit trail.
+
+
+================================================== 43. SECURITY / SECRET RULE
+
+Never expose:
+
+SH_TEST_PASSWORD
+
+tokens
+
+API keys
+
+private credentials
+
+
+Do not place secrets into:
+
+source;
+
+commits;
+
+evidence;
+
+resume;
+
+chat.
+
+
+Use GitHub Actions Secrets or appropriate secure storage.
+
+================================================== 44. CURRENT TOOLCHAIN STATUS
+
+Accepted delivery approach:
+
+CANDIDATE 2
+
+React Native + Expo-first + native escape hatch if technically required.
+
+Fixed:
+
+GitHub Supabase
+
+Actual runtime:
+
+TypeScript / Deno / Edge Functions
+
+Target:
+
+APK
+
+Model/provider:
+
+NOT FINALIZED.
+
+Candidate/reference:
+
+Groq OpenRouter Hugging Face OpenAI
+
+Do not introduce provider selection merely because App APK has been built.
+
+Model remains replaceable.
+
+================================================== 45. NEXT GLOBAL WORK
+
+DO NOT automatically start a new App feature.
+
+DO NOT rebuild APK.
+
+DO NOT reopen Phase 4/5.
+
+DO NOT assume P6 has started.
+
+Next global work:
+
+RETURN TO ⑥ FINAL CROSS-PHASE ASSURANCE
+
+Priority:
+
+1. 
+
+Reconcile actual GitHub DEV against current checkpoint.
+
+2. 
+
+Reconcile actual Supabase DEV where relevant.
+
+3. 
+
+Verify App/Runtime/APK claims against actual source, CI, tests and artifact evidence.
+
+4. 
+
+Resolve Context / Memory / Search / Journey evidence depth.
+
+5. 
+
+Carry Phase 5 deferred assurance into ⑥J/⑥K.
+
+6. 
+
+Revisit GitHub ↔ Supabase migration reconciliation.
+
+7. 
+
+Reconcile evidence chain.
+
+8. 
+
+Continue ⑥A → ⑥L based on actual evidence.
+
+9. 
+
+Determine real P6 prerequisites.
+
+10. 
+
+Only then consider P6 under Owner authorization.
+
+================================================== 46. IMPORTANT DO-NOT-REOPEN RULE
+
+Do NOT reopen:
+
+Phase 4 Phase 5 Chat Streaming High-Risk Lifecycle APK
+
+merely because:
+
+full Product E2E is incomplete;
+
+external integrations are deferred;
+
+migration history needs reconciliation;
+
+global assurance is not yet closed.
+
+
+Reopen only if actual audit finds:
+
+regression;
+
+security/privacy violation;
+
+ownership violation;
+
+identity invariant violation;
+
+canonical contradiction;
+
+invalid evidence;
+
+material implementation failure.
+
+
+================================================== 47. CURRENT CAPABILITY CLASSIFICATION
+
+PHASE 4: 🟢 CLOSED
+
+PHASE 5: 🟢 CLOSED WITH DEFERRED ASSURANCE
+
+APP SKELETON: 🟢
+
+AUTH / SESSION: 🟢 CONTROLLED
+
+RUNTIME INVOCATION: 🟢 CONTROLLED
+
+CHAT REQUEST / RESPONSE: 🟢 VERIFIED BY CHECKPOINT HISTORY
+
+CHAT STREAMING: 🟢 VERIFIED BY CHECKPOINT HISTORY
+
+CONTEXT / MEMORY / SEARCH / JOURNEY: 🟡 CLAIMED DONE / EVIDENCE AUDIT REQUIRED
+
+HIGH-RISK CONFIRMATION: 🟢 CONTROLLED
+
+LIFECYCLE: 🟢 CONTROLLED CI/BUILD EVIDENCE
+
+ANDROID BUILD: 🟢
+
+APK ARTIFACT: 🟢 VERIFIED / RETRIEVABLE
+
+FULL PRODUCT E2E: 🔴 NOT COMPLETE
+
+PHASE 5 DEFERRED ASSURANCE: 🟡 OPEN
+
+MIGRATION RECONCILIATION: 🟡 OPEN / NEEDS ACTUAL VERIFICATION
+
+GLOBAL EVIDENCE RECONCILIATION: 🟡 OPEN
+
+⑥A–⑥L: 🟡 IN PROGRESS / NOT CLOSED
+
+P6: 🔴 NOT CLOSED / NOT AUTOMATICALLY AUTHORIZED
+
+================================================== 48. ONE-LINE CURRENT POSITION
+
+SECOND HEAD saat ini berada pada:
+
+⑥ FINAL CROSS-PHASE ASSURANCE
+
+dengan:
+
+APP → RUNTIME → ANDROID APK DELIVERY SURFACE
+
+= 🟢 VERIFIED AT CONTROLLED VERTICAL-SLICE LEVEL
+
+sementara:
+
+⑥A–⑥L
+
+= BELUM CLOSED
+
+dan:
+
+P6
+
+= BELUM DIMULAI SECARA OTOMATIS
+
+================================================== 49. RESUME CONTINUATION COMMAND
+
+LANJUT SECOND HEAD DARI SESSION RESUME 41.
+
+Jangan mulai dari nol.
+
+Jangan perlakukan Resume 41 sebagai Canonical authority.
+
+Gunakan:
+
+1. Canonical authority
+
+
+2. Actual GitHub DEV
+
+
+3. Actual Supabase DEV
+
+
+4. Runtime / CI / artifact evidence
+
+
+5. Resume 41 sebagai continuity context
+
+
+
+Urutan kerja:
+
+authority → actual state audit → reconcile → minimal realization → verify → evidence → update capability classification → continue ⑥A–⑥L
+
+Current immediate direction:
+
+RETURN TO ⑥ FINAL CROSS-PHASE ASSURANCE.
+
+Prioritaskan:
+
+actual-state reconciliation;
+
+Context/Memory/Search/Journey evidence;
+
+migration reconciliation;
+
+Phase 5 deferred assurance;
+
+evidence integrity;
+
+⑥A–⑥L;
+
+P6 dependency determination.
+
+
+Jangan:
+
+mengulang App build tanpa GAP;
+
+mengulang APK build tanpa GAP;
+
+reopen Phase 4/5 tanpa material reason;
+
+memilih model/provider tanpa Owner Decision;
+
+menganggap APK = P6;
+
+menganggap Resume = authority.
+
+
+================================================== 50. FINAL PRINCIPLE
+
+KEEP MOVING FORWARD + REVIEW BACKWARD ONLY WHEN NECESSARY + DO NOT REOPEN SETTLED DECISIONS + DO NOT INVENT MISSING DECISIONS + DO NOT CONFUSE READINESS WITH OWNER AUTHORIZATION + DO NOT CONFUSE DATABASE PASS WITH E2E PASS + DO NOT CONFUSE APP DELIVERY WITH SYSTEM COMPLETION + DO NOT CLAIM EVIDENCE WITHOUT ACTUAL EVIDENCE + USE MINIMAL REALIZATION + PRESERVE EXISTING FOUNDATION + SECOND HEAD / SH = CURRENT WORKING TERMINOLOGY
+
+
+---
+
+END OF SESSION RESUME 41
+
+---
+
+SECOND HEAD — SESSION RESUME 42
