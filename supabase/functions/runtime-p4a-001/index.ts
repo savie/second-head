@@ -32,7 +32,26 @@ async function resolveIdentity(req: Request) {
   const rows = (identities ?? []) as Identity[];
   if (rows.length !== 1) return { error: new Response(JSON.stringify({ error: "RUNTIME_REJECTED: SH identity could not be resolved" }), { status: 403, headers: jsonHeaders }) };
 
-  return { identity: rows[0] };
+  return { identity: rows[0], supabase };
+}
+
+async function recordConversation(
+  supabase: ReturnType<typeof createClient>,
+  shId: string,
+  role: "user" | "assistant",
+  content: string,
+) {
+  const { error } = await supabase.rpc("runtime_record_conversation", {
+    p_sh_id: shId,
+    p_role: role,
+    p_content: content,
+    p_metadata: {
+      source: "runtime-p4a-001",
+      persistence: "P4A-005",
+    },
+  });
+
+  if (error) throw new Error(`RUNTIME_CONVERSATION_PERSIST_FAILED: ${error.message}`);
 }
 
 Deno.serve(async (req: Request) => {
@@ -52,13 +71,22 @@ Deno.serve(async (req: Request) => {
   if (!userMessage) return new Response(JSON.stringify({ error: "RUNTIME_REJECTED: user_message is required" }), { status: 400, headers: jsonHeaders });
 
   const identity = resolved.identity;
+  const supabase = resolved.supabase;
   const output = userMessage;
+
+  try {
+    await recordConversation(supabase, identity.sh_id, "user", userMessage);
+    await recordConversation(supabase, identity.sh_id, "assistant", output);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "RUNTIME_CONVERSATION_PERSIST_FAILED";
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: jsonHeaders });
+  }
 
   if (!body.stream) {
     return new Response(JSON.stringify({
       sh_id: identity.sh_id,
       response: output,
-      meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred" },
+      meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", persistence: "verified-path" },
     }), { status: 200, headers: jsonHeaders });
   }
 
@@ -69,7 +97,7 @@ Deno.serve(async (req: Request) => {
       const send = (event: string, payload: unknown) => {
         controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
       };
-      send("response", { sh_id: identity.sh_id, text: "", meta: { phase: "P4A-001", model_provider: "mock", streaming: true } });
+      send("response", { sh_id: identity.sh_id, text: "", meta: { phase: "P4A-001", model_provider: "mock", streaming: true, persistence: "verified-path" } });
       for (const chunk of chunks) {
         send("token", { text: chunk });
         await new Promise((resolve) => setTimeout(resolve, 20));
