@@ -54,6 +54,25 @@ async function recordConversation(
   if (error) throw new Error(`RUNTIME_CONVERSATION_PERSIST_FAILED: ${error.message}`);
 }
 
+async function recordAudit(
+  supabase: ReturnType<typeof createClient>,
+  shId: string,
+  eventType: "RUNTIME_REQUEST" | "RUNTIME_RESPONSE",
+  metadata: Record<string, unknown>,
+) {
+  const { error } = await supabase.rpc("runtime_record_audit", {
+    p_sh_id: shId,
+    p_event_type: eventType,
+    p_status: "SUCCESS",
+    p_metadata: {
+      source: "runtime-p4a-001",
+      ...metadata,
+    },
+  });
+
+  if (error) throw new Error(`RUNTIME_AUDIT_PERSIST_FAILED: ${error.message}`);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "METHOD_NOT_ALLOWED" }), { status: 405, headers: jsonHeaders });
 
@@ -75,10 +94,18 @@ Deno.serve(async (req: Request) => {
   const output = userMessage;
 
   try {
+    await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", {
+      stream: body.stream === true,
+      user_message_length: userMessage.length,
+    });
     await recordConversation(supabase, identity.sh_id, "user", userMessage);
     await recordConversation(supabase, identity.sh_id, "assistant", output);
+    await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
+      stream: body.stream === true,
+      response_length: output.length,
+    });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "RUNTIME_CONVERSATION_PERSIST_FAILED";
+    const message = error instanceof Error ? error.message : "RUNTIME_PERSISTENCE_FAILED";
     return new Response(JSON.stringify({ error: message }), { status: 500, headers: jsonHeaders });
   }
 
@@ -86,7 +113,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({
       sh_id: identity.sh_id,
       response: output,
-      meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", persistence: "verified-path" },
+      meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", persistence: "verified-path", audit: "verified-path" },
     }), { status: 200, headers: jsonHeaders });
   }
 
@@ -97,7 +124,7 @@ Deno.serve(async (req: Request) => {
       const send = (event: string, payload: unknown) => {
         controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
       };
-      send("response", { sh_id: identity.sh_id, text: "", meta: { phase: "P4A-001", model_provider: "mock", streaming: true, persistence: "verified-path" } });
+      send("response", { sh_id: identity.sh_id, text: "", meta: { phase: "P4A-001", model_provider: "mock", streaming: true, persistence: "verified-path", audit: "verified-path" } });
       for (const chunk of chunks) {
         send("token", { text: chunk });
         await new Promise((resolve) => setTimeout(resolve, 20));
