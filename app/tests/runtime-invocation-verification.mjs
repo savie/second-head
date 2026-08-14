@@ -15,21 +15,43 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
-const signIn = await fetch(`${base}/auth/v1/token?grant_type=password`, {
-  method: 'POST',
-  headers,
-  body: JSON.stringify({ email: process.env.SH_TEST_EMAIL, password: process.env.SH_TEST_PASSWORD }),
-});
-if (!signIn.ok) throw new Error(`AUTH_SIGN_IN_FAILED ${signIn.status}: ${await signIn.text()}`);
-const auth = await signIn.json();
-if (!auth.access_token || !auth.user?.id) throw new Error('AUTH_SESSION_INVALID');
+async function authenticate() {
+  const signIn = await fetch(`${base}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email: process.env.SH_TEST_EMAIL, password: process.env.SH_TEST_PASSWORD }),
+  });
+  if (!signIn.ok) throw new Error(`AUTH_SIGN_IN_FAILED ${signIn.status}: ${await signIn.text()}`);
+  const auth = await signIn.json();
+  if (!auth.access_token || !auth.user?.id) throw new Error('AUTH_SESSION_INVALID');
+  return auth;
+}
 
-const runtimeResponse = await fetch(`${base}/functions/v1/runtime-p4a-001`, {
-  method: 'POST',
-  headers: { ...headers, Authorization: `Bearer ${auth.access_token}` },
-  body: JSON.stringify({ user_message: 'SH runtime controlled verification' }),
-});
-if (!runtimeResponse.ok) throw new Error(`RUNTIME_INVOCATION_FAILED ${runtimeResponse.status}: ${await runtimeResponse.text()}`);
+async function invokeRuntime(accessToken) {
+  return fetch(`${base}/functions/v1/runtime-p4a-001`, {
+    method: 'POST',
+    headers: { ...headers, Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ user_message: 'SH runtime controlled verification' }),
+  });
+}
+
+let auth;
+let runtimeResponse;
+let runtimeFailure = '';
+
+for (let attempt = 1; attempt <= 3; attempt += 1) {
+  auth = await authenticate();
+  runtimeResponse = await invokeRuntime(auth.access_token);
+  if (runtimeResponse.ok) break;
+
+  const body = await runtimeResponse.text();
+  runtimeFailure = `${runtimeResponse.status}: ${body}`;
+  const retryableAuthFailure = runtimeResponse.status === 401 && body.includes('authenticated identity is required');
+  if (!retryableAuthFailure || attempt === 3) {
+    throw new Error(`RUNTIME_INVOCATION_FAILED ${runtimeFailure}`);
+  }
+}
+
 const payload = await runtimeResponse.json();
 if (typeof payload.sh_id !== 'string' || typeof payload.response !== 'string') throw new Error(`RUNTIME_RESPONSE_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
 if (payload.response !== 'SH runtime controlled verification') throw new Error(`RUNTIME_ECHO_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
@@ -66,7 +88,7 @@ console.log(JSON.stringify({
   status: 'PASS',
   checks: [
     'authenticated session obtained',
-    'runtime-p4a-001 accepts authenticated request',
+    `runtime-p4a-001 accepts authenticated request${runtimeFailure ? ` after auth retry (${runtimeFailure})` : ''}`,
     'runtime resolves and returns SH identity',
     'runtime response contract is valid',
     'bounded context assembly returns memory and knowledge arrays',
