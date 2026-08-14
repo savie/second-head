@@ -52,3 +52,11 @@ jobs:
           SH_TEST_EMAIL: ${{ secrets.SH_TEST_EMAIL }}
           SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
         run: node tests/runtime-streaming-verification.mjs
+
+      - name: Verify Recovery round-trip and portability
+        env:
+          SUPABASE_URL: ${{ secrets.SH_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SH_SUPABASE_ANON_KEY }}
+          SH_TEST_EMAIL: ${{ secrets.SH_TEST_EMAIL }}
+          SH_TEST_PASSWORD: ${{ secrets.SH_TEST_PASSWORD }}
+        run: node tests/recovery-roundtrip-verification.mjs
