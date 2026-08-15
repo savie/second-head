@@ -16,7 +16,12 @@ export type MemoryDecisionInput = {
 
 export function extractMemoryCandidate(response: unknown): MemoryCandidate | null {
   if (!response || typeof response !== 'object' || Array.isArray(response)) return null;
-  const candidate = (response as Record<string, unknown>).memory_candidate;
+  const envelope = response as Record<string, unknown>;
+  const candidate = envelope.semantic_signals &&
+    typeof envelope.semantic_signals === 'object' &&
+    !Array.isArray(envelope.semantic_signals)
+    ? (envelope.semantic_signals as Record<string, unknown>).memory_candidate
+    : envelope.memory_candidate;
   if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return null;
   const c = candidate as Record<string, unknown>;
   if (typeof c.content !== 'string' || !c.content.trim()) return null;
