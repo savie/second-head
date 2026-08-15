@@ -37,15 +37,21 @@ export default function RuntimeTestScreen() {
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 12 }}>
       <Text style={{ fontSize: 24, fontWeight: '700' }}>Runtime + Context Verification</Text>
-      <Text style={{ fontSize: 20, fontWeight: '700' }}>Runtime</Text>
-      <TextInput value={message} onChangeText={setMessage} placeholder="Message" style={{ borderWidth: 1, borderRadius: 10, padding: 12 }} />
-      {busy ? <ActivityIndicator /> : <Button title="Invoke SH Runtime" onPress={() => void verify()} />}
+      <Text>Developer / diagnostic tool for checking authenticated runtime access and authorized context retrieval. It is not required for normal Chat, Journey, Clone, Recovery, or Inheritance use.</Text>
+
+      <Text style={{ fontSize: 20, fontWeight: '700' }}>Runtime verification</Text>
+      <Text>Send a test message through the authenticated SH Runtime and display the returned result.</Text>
+      <Text style={{ fontWeight: '600' }}>Test message</Text>
+      <TextInput value={message} onChangeText={setMessage} placeholder="Enter a test message" style={{ borderWidth: 1, borderRadius: 10, padding: 12 }} />
+      {busy ? <ActivityIndicator /> : <Button title="Verify SH Runtime" onPress={() => void verify()} />}
       {result ? <Text selectable>{result}</Text> : null}
 
-      <Text style={{ fontSize: 20, fontWeight: '700', marginTop: 16 }}>Context / Memory / Search / Journey</Text>
-      <TextInput value={query} onChangeText={setQuery} placeholder="Search authorized context..." style={{ borderWidth: 1, borderRadius: 10, padding: 12 }} />
-      {contextBusy ? <ActivityIndicator /> : <Button title="Search / Refresh" onPress={() => void loadContext()} />}
-      {contextError ? <Text style={{ color: 'crimson' }}>{contextError}</Text> : null}
+      <Text style={{ fontSize: 20, fontWeight: '700', marginTop: 16 }}>Authorized context lookup</Text>
+      <Text>Search the context available to the authenticated SH. Leave the search empty to refresh the available results.</Text>
+      <Text style={{ fontWeight: '600' }}>Search query (optional)</Text>
+      <TextInput value={query} onChangeText={setQuery} placeholder="Enter a context search term, or leave empty" style={{ borderWidth: 1, borderRadius: 10, padding: 12 }} />
+      {contextBusy ? <ActivityIndicator /> : <Button title="Search authorized context" onPress={() => void loadContext()} />}
+      {contextError ? <Text>{contextError}</Text> : null}
       {contextResult ? <>
         <Text style={{ fontWeight: '700' }}>Memory ({contextResult.memory.length})</Text>
         {contextResult.memory.length === 0 ? <Text>No authorized memory results.</Text> : contextResult.memory.map((item, index) => <Text key={`memory-${index}`}>{String(item.content ?? '')}</Text>)}
