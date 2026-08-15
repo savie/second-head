@@ -11,6 +11,17 @@ import {
   type CloneAgreement,
 } from '../features/clone/clone-service';
 
+function describeError(err: unknown, fallback: string) {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'object' && err !== null) {
+    const candidate = err as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown };
+    const parts = [candidate.message, candidate.code, candidate.details, candidate.hint]
+      .filter((value): value is string => typeof value === 'string' && value.length > 0);
+    if (parts.length > 0) return parts.join(' | ');
+  }
+  return fallback;
+}
+
 export default function CloneScreen() {
   const { session, context } = useAuth();
   const [agreements, setAgreements] = useState<CloneAgreement[]>([]);
@@ -31,7 +42,7 @@ export default function CloneScreen() {
     try {
       setAgreements(await listCloneAgreements());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load clone agreements');
+      setError(describeError(err, 'Unable to load clone agreements'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +79,7 @@ export default function CloneScreen() {
       setNotice(`Clone agreement created: ${agreement.agreement_id}`);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create clone agreement');
+      setError(describeError(err, 'Unable to create clone agreement'));
     } finally {
       setBusyId(null);
     }
@@ -82,7 +93,7 @@ export default function CloneScreen() {
       setNotice(`Agreement approved: ${agreementId}`);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to approve agreement');
+      setError(describeError(err, 'Unable to approve agreement'));
     } finally {
       setBusyId(null);
     }
@@ -96,7 +107,7 @@ export default function CloneScreen() {
       setNotice(`Agreement rejected: ${agreementId}`);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to reject agreement');
+      setError(describeError(err, 'Unable to reject agreement'));
     } finally {
       setBusyId(null);
     }
@@ -111,7 +122,7 @@ export default function CloneScreen() {
       setNotice(`Clone created: ${cloneShId}`);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to execute clone');
+      setError(describeError(err, 'Unable to execute clone'));
     } finally {
       setBusyId(null);
     }
