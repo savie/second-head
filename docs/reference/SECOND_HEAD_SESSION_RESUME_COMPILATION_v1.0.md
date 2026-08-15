@@ -39699,3 +39699,618 @@ END OF SESSION RESUME 41
 ---
 
 SECOND HEAD — SESSION RESUME 42
+
+Project: SECOND HEAD — SYSTEM BUILD
+Session: #42
+Posisi: Kelanjutan langsung dari Session #41
+Status: AKTIF — Feature Verification / Recovery Semantics
+APK yang sedang digunakan: "b714b3a"
+Commit: "b714b3aadfc03e30b6faf8b2655f869d580ac99b"
+
+---
+
+1. KONTINUITAS SESSION
+
+Session #42 melanjutkan pekerjaan SECOND HEAD dari posisi sebelumnya.
+
+Pada awal rangkaian ini sempat terjadi gangguan respons/tooling sehingga muncul kekhawatiran apakah konteks project hilang. Posisi project kemudian dikonfirmasi tetap berlanjut dan tidak dimulai ulang.
+
+Session #42 karena itu bukan restart Phase 1–10.
+
+Acuan tetap:
+
+- Frozen / Temporary Baseline
+- Compiled Documentation Baseline
+- Build Scope
+- Implementation Contract / Guide
+- Execution Strategy
+- actual GitHub source
+- actual Supabase DEV state
+- actual APK evidence
+
+---
+
+2. POSISI PROJECT SAAT INI
+
+Project sudah melewati tahap utama penyusunan baseline dan masuk ke tahap:
+
+IMPLEMENTASI
+    ↓
+CI / SOURCE VERIFICATION
+    ↓
+ACTUAL APK
+    ↓
+END-USER FEATURE VERIFICATION
+    ↓
+RECOVERY SEMANTICS / CONTRACT GAP
+
+Prinsip arsitektur yang tetap berlaku:
+
+1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH
+
+SH_ID = identity anchor
+
+MODEL ≠ SH identity
+RUNTIME ≠ SH identity
+MEMORY ≠ SH identity
+HARDWARE ≠ SH identity
+
+CLONE SH ≠ SOURCE SH
+
+Default authorization tetap deny dan perubahan kritis harus dapat ditelusuri.
+
+---
+
+3. POSISI P5
+
+Sebelumnya posisi implementasi P5 telah dinyatakan:
+
+Journey
+🟢 VERIFIED / CLOSED
+
+Clone
+🟢 VERIFIED / CLOSED
+
+Recovery
+🟢 VERIFIED / CLOSED
+
+Inheritance / Legacy / Succession
+🟢 VERIFIED / CLOSED
+
+Namun Session #42 melakukan actual end-user APK verification.
+
+Karena itu perlu dibedakan:
+
+IMPLEMENTATION / CONTRACT VERIFIED
+≠
+ACTUAL END-USER E2E VERIFIED
+
+Dokumentasi P5 sebelumnya memang telah memiliki evidence implementasi, database/schema, runtime, dan contract.
+
+Session #42 menambahkan pemeriksaan dari sudut pandang operator/user yang menjalankan APK secara nyata.
+
+---
+
+4. ACTUAL END-USER VERIFICATION
+
+4.1 Login / Authentication
+
+🟢 PASS
+
+Login sekarang sudah lebih jelas.
+
+Field sudah diberi keterangan:
+
+Email
+Password
+
+Walaupun tampilan field masih relatif polos/putih, hal tersebut tidak dianggap blocker karena user sudah tahu apa yang harus dimasukkan.
+
+---
+
+4.2 Home
+
+🟢 PASS
+
+Setelah authentication, Home menampilkan:
+
+- authenticated account
+- jumlah SH
+- akses ke feature utama
+
+Tidak ditemukan masalah functional clarity yang menghambat penggunaan.
+
+---
+
+5. CHAT
+
+🟢 PASS
+
+Actual APK telah digunakan untuk Chat.
+
+Yang telah diuji dalam rangkaian sebelumnya:
+
+- authentication
+- Chat request
+- response
+- streaming/runtime
+- persistence
+- reload/re-entry
+- isolation antar account
+
+Tidak ditemukan blocker baru pada actual end-user check.
+
+Chat tetap menjadi baseline operational feature.
+
+---
+
+6. JOURNEY
+
+🟡 OPEN — PERLU RECOVERY SEMANTICS
+
+Actual Journey screen dapat dibuka.
+
+Ketika belum ada event, UI menampilkan:
+
+No Journey events yet
+
+dan tombol kembali ke Home.
+
+Kondisi ini belum boleh langsung dianggap bug.
+
+Pertanyaan yang harus dijawab terlebih dahulu:
+
+Event apa yang sebenarnya membuat Journey event?
+
+Kapan event tersebut seharusnya tercatat?
+
+Apa hubungan Journey dengan Conversation?
+
+Apa hubungan Journey dengan Memory?
+
+Apa hubungan Journey dengan Knowledge?
+
+Bagaimana Continuity direpresentasikan?
+
+Jadi pekerjaan berikutnya adalah recover P5A Journey semantics, bukan sekadar memaksa layar Journey agar berisi data.
+
+---
+
+7. CLONE
+
+7.1 Actual Clone Agreement
+
+🟢 PASS — Agreement / Authorization
+
+Flow actual telah berhasil membuat agreement.
+
+Agreement yang diuji:
+
+0d72ed1d-3dcc-4d6a-825b-29a626822923
+
+Source:
+
+SH:
+78965d6c-33c2-45f1-9177-bd57b59eadf2
+
+Account:
+83c9f2a1-7617-471c-9c68-75e0003ea6ab
+
+Target:
+
+Account:
+5eacaa51-23d2-4f60-9938-300604368da6
+
+Source berhasil melakukan approval.
+
+Target kemudian melihat agreement dengan status:
+
+APPROVED
+
+Authorization boundary karena itu sudah terbukti bekerja secara actual pada tahap agreement.
+
+---
+
+7.2 Clone Execution
+
+🟡 DEFERRED
+
+Setelah approval, kita menemukan pertanyaan yang lebih fundamental:
+
+Apa sebenarnya yang harus disalin ketika Clone dieksekusi?
+
+Intuisi operator selama project adalah bahwa:
+
+CLONE
+≠
+COPY SELURUH SOURCE SH
+
+Clone bukan berarti semua chat source langsung disalin mentah-mentah.
+
+Canonical P5 juga menetapkan:
+
+CLONE_SH ≠ SOURCE_SH
+
+serta adanya boundary state dan memory yang terpisah.
+
+Source aktual yang sudah ditelusuri menunjukkan bahwa "runtime_create_clone" membuat identity/ownership/clone relationship, tetapi belum menjadi bukti bahwa seluruh conversation/memory/knowledge source otomatis disalin.
+
+Karena itu:
+
+Jangan mengarang payload Clone.
+
+Pertanyaan berikut harus dipulihkan dari canonical, contract, implementation history, dan evidence:
+
+Apa yang disalin?
+Apa yang tidak disalin?
+Apa yang hanya direferensikan?
+Apa yang dibuat ulang?
+Apa yang tetap private?
+Apa yang termasuk Memory?
+Apa yang termasuk Knowledge?
+Apa yang termasuk Journey?
+Apa yang termasuk Conversation?
+
+Sampai semantics tersebut cukup jelas:
+
+P5B Clone Execution
+🟡 DEFERRED / SEMANTICS RECOVERY
+
+Ini bukan dianggap gagal.
+
+---
+
+8. RECOVERY
+
+🟢 ACTUAL UI PASS
+
+Actual Recovery screen sudah dapat menampilkan snapshot per percakapan.
+
+Recovery juga menyediakan mekanisme restore.
+
+Konsep canonical yang tetap berlaku:
+
+RECOVERY ≠ NEW SH
+
+Recovery mempertahankan identity root dan berkaitan dengan:
+
+- conversation
+- memory
+- Journey
+- ownership/identity information
+- recovery event
+
+Tidak ada blocker baru dari end-user sanity check.
+
+---
+
+9. INHERITANCE / LEGACY / SUCCESSION
+
+🟡 FUNCTIONAL CLARITY / VERIFY SETELAH JOURNEY
+
+Screen sudah menjelaskan kebutuhan identifier source/target dengan lebih baik.
+
+Masalah yang dirasakan operator:
+
+Account ID dan SH ID sangat panjang sehingga sulit diingat.
+
+Ini saat ini dianggap sebagai masalah usability, bukan alasan untuk mengubah authorization contract.
+
+Canonical distinction tetap:
+
+INHERITANCE ≠ CLONE
+
+INHERITANCE ≠ AUTOMATIC IDENTITY TRANSFER
+
+Inheritance/Legacy/Succession juga tidak otomatis berarti:
+
+- full memory
+- full Journey
+- live state
+- identity transfer
+- private data access
+
+Feature ini sebaiknya diverifikasi kembali setelah P5A Journey semantics sudah jelas.
+
+---
+
+10. RUNTIME VERIFICATION
+
+🟢 PASS
+
+Runtime Verification clarity telah diperbaiki pada commit:
+
+b714b3a
+
+Sekarang screen menjelaskan bahwa Runtime Verification adalah:
+
+Developer / diagnostic tool
+
+dan bukan feature yang diperlukan untuk penggunaan normal:
+
+- Chat
+- Journey
+- Clone
+- Recovery
+- Inheritance / Legacy / Succession
+
+Screen sekarang menjelaskan:
+
+Runtime verification
+
+Test message
+
+VERIFY SH RUNTIME
+
+serta:
+
+Authorized context lookup
+
+Search query (optional)
+
+SEARCH AUTHORIZED CONTEXT
+
+Actual runtime test menghasilkan:
+
+{
+  "sh_id": "78965d6c-33c2-45f1-9177-bd57b59eadf2",
+  "response": "SH runtime verification",
+  "meta": {
+    "phase": "P4A-001",
+    "model_provider": "mock",
+    "context_entries": 0,
+    "memory_decision": "deferred",
+    "persistence": "verified-path",
+    "audit": "verified-path"
+  }
+}
+
+Hasil:
+
+Runtime access        🟢
+Authenticated SH     🟢
+Persistence path     🟢
+Audit path            🟢
+Mock provider         🟢
+Final AI provider     ⚪ OPEN
+
+Runtime Verification dipertahankan karena berguna sebagai alat diagnosis ketika operator menemukan error.
+
+---
+
+11. AI PROVIDER / MODEL
+
+AI provider/model tidak menjadi blocker.
+
+Keputusan model tetap OPEN.
+
+Prinsip yang dipilih:
+
+APP
+ ↓
+SH RUNTIME
+ ↓
+AI PROVIDER ABSTRACTION
+ ↓
+MODEL PROVIDER
+
+Idealnya provider/model berada di backend/runtime sehingga perubahan provider tidak memaksa perubahan APK.
+
+Jangan memasukkan provider credential atau provider-specific implementation ke frontend jika tidak diperlukan.
+
+Status:
+
+AI provider readiness
+⚪ RESOURCE / READINESS NOTE
+
+Model decision
+OPEN
+
+---
+
+12. END-USER SANITY PRINCIPLE
+
+Prioritas sekarang bukan membuat UI cantik.
+
+Prioritasnya:
+
+FUNCTION BERJALAN
++
+USER TAHU APA YANG HARUS DIISI
++
+USER TAHU APA YANG AKAN DILAKUKAN TOMBOL
++
+USER TAHU APA YANG TERJADI SETELAH ACTION
+
+Tidak perlu melakukan:
+
+visual redesign
+decorative polish
+new capability
+feature expansion
+
+Contoh yang memang layak diperbaiki:
+
+Input 1
+Input 2
+
+tanpa keterangan.
+
+Contoh yang tidak perlu dibesar-besarkan:
+
+field putih/polos tetapi label dan fungsi sudah jelas.
+
+---
+
+13. APK BUILD POLICY
+
+Jangan build APK untuk setiap perubahan kecil.
+
+Strategi:
+
+SOURCE FIX
+   ↓
+KUMPULKAN PERUBAHAN
+   ↓
+BATCH BUILD
+   ↓
+INSTALL
+   ↓
+ACTUAL VERIFICATION
+
+APK "b714b3a" saat ini cukup untuk melanjutkan verification yang masih dapat dilakukan.
+
+Perubahan kecil berikutnya sebaiknya dikumpulkan terlebih dahulu.
+
+---
+
+14. URUTAN KERJA SETELAH SESSION #42
+
+Prioritas berikut:
+
+1. RECOVER P5A JOURNEY SEMANTICS
+          ↓
+2. PAHAMI HUBUNGAN JOURNEY
+   DENGAN CONVERSATION / MEMORY / KNOWLEDGE
+          ↓
+3. VERIFIKASI ACTUAL JOURNEY EVENT
+          ↓
+4. RECOVER CLONE TRANSFER SEMANTICS
+          ↓
+5. LANJUTKAN CLONE EXECUTION
+          ↓
+6. REVERIFY INHERITANCE / LEGACY / SUCCESSION
+          ↓
+7. CROSS-FEATURE P5 E2E
+
+Urutan ini mengikuti dependency P5 yang telah ditetapkan.
+
+---
+
+15. ATURAN PENTING SESSION BERIKUTNYA
+
+Jangan membuat feature baru hanya karena menemukan sesuatu yang belum jelas.
+
+Setiap masalah harus terlebih dahulu diklasifikasikan:
+
+UI BUG
+IMPLEMENTATION BUG
+CONTRACT / SEMANTICS GAP
+DOCUMENTATION GAP
+NEW REQUIREMENT
+
+Jika implementation bug:
+
+→ fix.
+
+Jika UI clarity issue:
+
+→ fix seperlunya.
+
+Jika semantics sudah ada di canonical:
+
+→ ikuti canonical.
+
+Jika benar-benar belum pernah diputuskan:
+
+→ tandai OPEN dan minta keputusan.
+
+Jangan mengarang semantics baru.
+
+---
+
+16. STATUS AKHIR SESSION #42
+
+AUTHENTICATION
+🟢 PASS
+
+HOME
+🟢 PASS
+
+CHAT
+🟢 PASS
+
+RUNTIME VERIFICATION
+🟢 PASS
+
+RECOVERY
+🟢 PASS
+
+CLONE AGREEMENT / APPROVAL
+🟢 PASS
+
+JOURNEY
+🟡 OPEN — SEMANTICS RECOVERY
+
+CLONE EXECUTION
+🟡 DEFERRED — TRANSFER SEMANTICS RECOVERY
+
+INHERITANCE / LEGACY / SUCCESSION
+🟡 VERIFY AFTER JOURNEY
+
+AI PROVIDER / MODEL
+⚪ OPEN — NON-BLOCKING
+
+---
+
+17. SESSION #43 START POINT
+
+Jangan restart project dari awal.
+
+Mulai Session #43 dari:
+
+«P5A Journey — Recovery & Actual Verification»
+
+Pertanyaan utama:
+
+1. Apa yang membuat Journey event?
+
+2. Apa hubungan Journey dengan Conversation?
+
+3. Apa hubungan Journey dengan Memory?
+
+4. Apa hubungan Journey dengan Knowledge?
+
+5. Apa yang dimaksud Continuity?
+
+6. Kapan Continuity Gap muncul?
+
+7. Data apa yang dibutuhkan Clone dari Journey/Memory/Knowledge?
+
+8. Apa yang sebenarnya dimaksud "Clone" menurut canonical?
+
+Setelah pertanyaan tersebut terjawab dari source of truth, baru lanjutkan P5B.
+
+---
+
+KESIMPULAN
+
+Session #42 tidak menemukan kerusakan besar pada sistem.
+
+Sebaliknya, actual APK menunjukkan bahwa sebagian besar jalur dasar sudah berjalan.
+
+Hal terpenting yang ditemukan adalah:
+
+Kita tidak boleh menganggap Clone sebagai copy seluruh SH hanya karena flow agreement dan approval sudah berjalan.
+
+Sebelum Clone execution ditutup, semantics data/state yang dibawa harus benar-benar recovered.
+
+Karena Journey/continuity berada lebih awal dalam dependency lifecycle, pekerjaan berikutnya adalah:
+
+P5A Journey → recover semantics → actual verification.
+
+AI provider tetap tidak menghalangi.
+
+APK tidak perlu dibuild ulang sampai ada kumpulan perubahan yang memang layak diverifikasi.
+
+---
+
+SECOND HEAD — SESSION RESUME 43 (next)
+
+
+
+=========
+
+GitHub repository: [SECOND HEAD — GitHub](https://github.com/savie/second-head?utm_source=chatgpt.com)
+
+Supabase DEV project: [SECOND HEAD — Supabase DEV](https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd?utm_source=chatgpt.com)
