@@ -101,7 +101,7 @@ Deno.serve(async (req: Request) => {
   const resolved = await resolveIdentity(req);
   if (resolved.error) return resolved.error;
 
-  let body: { user_message?: string; stream?: boolean; response?: unknown };
+  let body: { user_message?: string; stream?: boolean };
   try {
     body = await req.json();
   } catch {
@@ -113,8 +113,10 @@ Deno.serve(async (req: Request) => {
 
   const identity = resolved.identity;
   const supabase = resolved.supabase;
-  const output: unknown = body.response ?? userMessage;
-  const responseText = typeof output === "string" ? output : JSON.stringify(output);
+  // The current P4A app runtime uses a mock textual response. A future model
+  // adapter supplies the structured memory_candidate object consumed by the
+  // detector; client input is never treated as that semantic signal.
+  const output = userMessage;
 
   try {
     await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", {
@@ -122,7 +124,7 @@ Deno.serve(async (req: Request) => {
       user_message_length: userMessage.length,
     });
     await recordConversation(supabase, identity.sh_id, "user", userMessage);
-    await recordConversation(supabase, identity.sh_id, "assistant", responseText);
+    await recordConversation(supabase, identity.sh_id, "assistant", output);
 
     const journeyDecision = createJourneyRuntimeDecisionSink(
       createMemoryJourneySignalDetector(),
@@ -136,7 +138,7 @@ Deno.serve(async (req: Request) => {
 
     await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
       stream: body.stream === true,
-      response_length: responseText.length,
+      response_length: output.length,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "RUNTIME_PERSISTENCE_FAILED";
@@ -146,13 +148,13 @@ Deno.serve(async (req: Request) => {
   if (!body.stream) {
     return new Response(JSON.stringify({
       sh_id: identity.sh_id,
-      response: responseText,
+      response: output,
       meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", journey_decision: "post-response", persistence: "verified-path", audit: "verified-path" },
     }), { status: 200, headers: jsonHeaders });
   }
 
   const encoder = new TextEncoder();
-  const chunks = responseText.match(/.{1,12}/g) ?? [responseText];
+  const chunks = output.match(/.{1,12}/g) ?? [output];
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: string, payload: unknown) => {
