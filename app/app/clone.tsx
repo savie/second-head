@@ -27,7 +27,6 @@ export default function CloneScreen() {
   const [agreements, setAgreements] = useState<CloneAgreement[]>([]);
   const [sourceShId, setSourceShId] = useState('');
   const [sourceAccountId, setSourceAccountId] = useState('');
-  const [targetAccountId, setTargetAccountId] = useState(context?.account.account_id ?? '');
   const [cloneName, setCloneName] = useState('');
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -134,8 +133,11 @@ export default function CloneScreen() {
       <Text>Current account: {currentAccountId}</Text>
       <Text>Create a clone agreement as the target account. The source account must approve it before execution.</Text>
 
-      <TextInput placeholder="Source SH ID" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Source account ID" value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
+      <TextInput placeholder="Enter the SH ID owned by the source account" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Source Account ID</Text>
+      <TextInput placeholder="Enter the account ID that owns the source SH" value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontSize: 12 }}>Target account is the currently authenticated account: {currentAccountId}</Text>
       <Button title={busyId === 'create' ? 'Creating…' : 'Request clone'} onPress={() => void requestClone()} disabled={busyId !== null || !sourceShId || !sourceAccountId} />
 
       {loading ? <ActivityIndicator /> : null}
@@ -147,8 +149,9 @@ export default function CloneScreen() {
         <View key={agreement.agreement_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 8 }}>
           <Text>Agreement: {agreement.agreement_id}</Text>
           <Text>Source SH: {agreement.source_sh_id}</Text>
+          <Text>Source account: {agreement.source_account_id}</Text>
           <Text>Status: {agreement.status}</Text>
-          {agreement.status === 'PENDING' ? <Text>Waiting for source account approval.</Text> : null}
+          {agreement.status === 'PENDING' ? <Text>Waiting for the source account to approve this agreement.</Text> : null}
         </View>
       ))}
 
@@ -158,16 +161,16 @@ export default function CloneScreen() {
           <Text>Agreement: {agreement.agreement_id}</Text>
           <Text>Target account: {agreement.target_account_id}</Text>
           <Text>Status: {agreement.status}</Text>
+          {agreement.status === 'PENDING' ? <Text>Target requested this clone. Source approval is required.</Text> : null}
           {agreement.status === 'PENDING' ? (
             <View style={{ gap: 8 }}>
-              <Text>Target requested this clone. Source approval is required.</Text>
               <Button title={busyId === agreement.agreement_id ? 'Working…' : 'Approve'} onPress={() => void approve(agreement.agreement_id)} disabled={busyId !== null} />
               <Button title="Reject" onPress={() => void reject(agreement.agreement_id)} disabled={busyId !== null} />
             </View>
           ) : null}
           {agreement.status === 'APPROVED' ? (
             <View style={{ gap: 8 }}>
-              <TextInput placeholder="Optional clone name" value={cloneName} onChangeText={setCloneName} style={{ borderWidth: 1, padding: 12 }} />
+              <TextInput placeholder="Optional clone name" value={cloneName} onChangeText={setCloneName} style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
               <Button title={busyId === agreement.agreement_id ? 'Creating…' : 'Create clone'} onPress={() => void execute(agreement.agreement_id)} disabled={busyId !== null} />
             </View>
           ) : null}
