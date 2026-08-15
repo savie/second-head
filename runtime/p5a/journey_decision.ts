@@ -2,9 +2,8 @@
  * P5A — Journey Decision Boundary
  *
  * Converts already-derived Journey signals into the canonical Journey recorder
- * input. This layer deliberately does not decide semantic significance itself;
- * semantic detection remains an injected dependency so Journey is not coupled
- * to a model/provider or to brittle keyword matching.
+ * input. Semantic significance detection remains an injected dependency so
+ * Journey is not coupled to a model/provider or to brittle keyword matching.
  */
 
 export type JourneyEventType =
@@ -66,6 +65,26 @@ export interface JourneyEventRecorder {
   }): Promise<string>;
 }
 
+/** Semantic/runtime machinery supplies candidates; Journey does not invent them. */
+export interface JourneySignalDetector {
+  detect(input: {
+    sh_id: string;
+    user_message: string;
+    response: unknown;
+  }): Promise<{
+    automatic_candidate?: JourneyCandidate | null;
+    explicit_intent?: ExplicitJourneyIntent | null;
+  }>;
+}
+
+export interface JourneyRuntimeDecisionSink {
+  decideAndRecord(input: {
+    sh_id: string;
+    user_message: string;
+    response: unknown;
+  }): Promise<JourneyDecision>;
+}
+
 /**
  * Explicit intent wins over an automatic candidate when both are present.
  * An explicit request without a concrete candidate is intentionally rejected
@@ -94,22 +113,28 @@ export function decideJourney(input: JourneyDecisionInput): JourneyDecision {
   return { record: false, reason: 'NONE' };
 }
 
-export async function recordJourneyDecision(
+export function createJourneyRuntimeDecisionSink(
+  detector: JourneySignalDetector,
   recorder: JourneyEventRecorder,
-  input: JourneyDecisionInput,
-): Promise<JourneyDecision> {
-  const decision = decideJourney(input);
-  if (!decision.record || !decision.candidate) return decision;
+): JourneyRuntimeDecisionSink {
+  return {
+    async decideAndRecord(input) {
+      const signals = await detector.detect(input);
+      const decision = decideJourney({ ...input, ...signals });
 
-  await recorder.record({
-    sh_id: input.sh_id,
-    event_type: decision.candidate.event_type,
-    occurred_at: decision.candidate.occurred_at,
-    continuity_status: decision.candidate.continuity_status,
-    gap_code: decision.candidate.gap_code,
-    payload: decision.candidate.payload,
-    source_ref: decision.candidate.source_ref,
-  });
+      if (!decision.record || !decision.candidate) return decision;
 
-  return decision;
+      await recorder.record({
+        sh_id: input.sh_id,
+        event_type: decision.candidate.event_type,
+        occurred_at: decision.candidate.occurred_at,
+        continuity_status: decision.candidate.continuity_status,
+        gap_code: decision.candidate.gap_code,
+        payload: decision.candidate.payload,
+        source_ref: decision.candidate.source_ref,
+      });
+
+      return decision;
+    },
+  };
 }
