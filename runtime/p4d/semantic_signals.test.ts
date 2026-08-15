@@ -41,6 +41,43 @@ Deno.test('P4D semantic signals are optional and provider-neutral', async () => 
   }
 });
 
+Deno.test('P4D forms semantic candidates from an explicit model-output envelope', async () => {
+  const executor = createModelExecutor({
+    async generate() {
+      return {
+        output: JSON.stringify({
+          semantic_signals: {
+            memory_candidate: {
+              content: 'User prefers concise answers.',
+              confidence: 0.88,
+              scope: 'PRIVATE',
+              visibility: 'OWNER_ONLY',
+              lifecycle: 'CANDIDATE',
+            },
+            knowledge_candidate: {
+              content: 'A learned rule from the interaction.',
+              source: 'runtime_semantic_output',
+              origin: 'MEMORY',
+            },
+          },
+        }),
+      };
+    },
+  });
+
+  const result = await executor.execute({
+    capability: 'text',
+    context: { prompt: 'hello' },
+  });
+
+  if (result.semantic_signals?.memory_candidate?.confidence !== 0.88) {
+    throw new Error('model-output memory candidate was not formed');
+  }
+  if (result.semantic_signals?.knowledge_candidate?.origin !== 'MEMORY') {
+    throw new Error('model-output knowledge candidate was not formed');
+  }
+});
+
 Deno.test('P4D does not require semantic signals for ordinary model output', async () => {
   const executor = createModelExecutor({
     async generate() {
