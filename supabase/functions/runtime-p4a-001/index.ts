@@ -1,5 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createJourneyRuntimeDecisionSink, type JourneyEventRecorder } from "../../../runtime/p5a/journey_decision.ts";
+import { createMemoryJourneySignalDetector } from "../../../runtime/p5a/memory_journey_signal.ts";
 
 const jsonHeaders = { "Content-Type": "application/json" };
 const streamHeaders = {
@@ -73,13 +75,33 @@ async function recordAudit(
   if (error) throw new Error(`RUNTIME_AUDIT_PERSIST_FAILED: ${error.message}`);
 }
 
+function createJourneyRecorder(supabase: ReturnType<typeof createClient>): JourneyEventRecorder {
+  return {
+    async record(input) {
+      const { data, error } = await supabase.rpc("runtime_record_journey_event", {
+        p_sh_id: input.sh_id,
+        p_event_type: input.event_type,
+        p_occurred_at: input.occurred_at ?? null,
+        p_continuity_status: input.continuity_status ?? null,
+        p_gap_code: input.gap_code ?? null,
+        p_payload: input.payload,
+        p_source_ref: input.source_ref ?? null,
+      });
+
+      if (error) throw new Error(`JOURNEY_RECORD_FAILED: ${error.message}`);
+      if (typeof data !== "string") throw new Error("JOURNEY_RECORD_FAILED: recorder returned no event id");
+      return data;
+    },
+  };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "METHOD_NOT_ALLOWED" }), { status: 405, headers: jsonHeaders });
 
   const resolved = await resolveIdentity(req);
   if (resolved.error) return resolved.error;
 
-  let body: { user_message?: string; stream?: boolean };
+  let body: { user_message?: string; stream?: boolean; response?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -91,7 +113,8 @@ Deno.serve(async (req: Request) => {
 
   const identity = resolved.identity;
   const supabase = resolved.supabase;
-  const output = userMessage;
+  const output: unknown = body.response ?? userMessage;
+  const responseText = typeof output === "string" ? output : JSON.stringify(output);
 
   try {
     await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", {
@@ -99,10 +122,21 @@ Deno.serve(async (req: Request) => {
       user_message_length: userMessage.length,
     });
     await recordConversation(supabase, identity.sh_id, "user", userMessage);
-    await recordConversation(supabase, identity.sh_id, "assistant", output);
+    await recordConversation(supabase, identity.sh_id, "assistant", responseText);
+
+    const journeyDecision = createJourneyRuntimeDecisionSink(
+      createMemoryJourneySignalDetector(),
+      createJourneyRecorder(supabase),
+    );
+    await journeyDecision.decideAndRecord({
+      sh_id: identity.sh_id,
+      user_message: userMessage,
+      response: output,
+    });
+
     await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
       stream: body.stream === true,
-      response_length: output.length,
+      response_length: responseText.length,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "RUNTIME_PERSISTENCE_FAILED";
@@ -112,19 +146,19 @@ Deno.serve(async (req: Request) => {
   if (!body.stream) {
     return new Response(JSON.stringify({
       sh_id: identity.sh_id,
-      response: output,
-      meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", persistence: "verified-path", audit: "verified-path" },
+      response: responseText,
+      meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", journey_decision: "post-response", persistence: "verified-path", audit: "verified-path" },
     }), { status: 200, headers: jsonHeaders });
   }
 
   const encoder = new TextEncoder();
-  const chunks = output.match(/.{1,12}/g) ?? [output];
+  const chunks = responseText.match(/.{1,12}/g) ?? [responseText];
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: string, payload: unknown) => {
         controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
       };
-      send("response", { sh_id: identity.sh_id, text: "", meta: { phase: "P4A-001", model_provider: "mock", streaming: true, persistence: "verified-path", audit: "verified-path" } });
+      send("response", { sh_id: identity.sh_id, text: "", meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", journey_decision: "post-response", streaming: true, persistence: "verified-path", audit: "verified-path" } });
       for (const chunk of chunks) {
         send("token", { text: chunk });
         await new Promise((resolve) => setTimeout(resolve, 20));
