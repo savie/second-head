@@ -2,7 +2,7 @@
  * BL-P4A-001 / BL-P4A-002 / P4B-001 / P4B-003 — Runtime Core Loop + Reasoning Security Boundary
  * Phase 4 — Runtime & Orchestration
  *
- * Minimal realization only.
+ * Minimal realization plus the P5A Journey post-response boundary.
  *
  * Invariants enforced:
  * - RUNTIME != SH IDENTITY
@@ -12,13 +12,15 @@
  * - reasoning consumes isolated context and has no memory/knowledge mutation capability
  * - external/contextual content cannot gain authority merely by appearing in reasoning input
  * - model provider is an adapter/execution dependency, not SH identity
- * - memory decision is post-response and outside context assembly/reasoning context
+ * - Journey decision is post-response and outside context assembly/reasoning context
+ * - memory decision remains post-response and separate from context assembly/reasoning context
  */
 
 import { resolveRuntimeIdentityAndState, type RuntimeIdentity } from './identity_state_resolution.ts';
 import type { ReasoningEngine } from '../p4b/reasoning_context.ts';
 import { createReasoningSecurityBoundary, type ReasoningSecurityEventSink } from '../p4b/reasoning_security.ts';
 import { createModelExecutor, type ModelAdapter } from '../p4d/model_abstraction.ts';
+import type { JourneyRuntimeDecisionSink } from '../p5a/journey_decision.ts';
 
 export type RuntimeInput = {
   user_message: string;
@@ -57,6 +59,7 @@ export type RuntimeDependencies = {
   contextAssembler: ContextAssembler;
   modelAdapter: ModelAdapter;
   memoryDecision: MemoryDecisionSink;
+  journeyDecision: JourneyRuntimeDecisionSink;
   reasoningEngine?: ReasoningEngine;
   reasoningSecurityEvents?: ReasoningSecurityEventSink;
 };
@@ -69,12 +72,12 @@ export type RuntimeResult = {
 /**
  * Executes the smallest valid SH runtime path:
  * auth.uid -> resolve existing identity/state -> read-only context assembly
- * -> reasoning security boundary -> model execution
- * -> response -> post-response memory decision.
+ * -> reasoning security boundary -> model execution -> response
+ * -> P5A Journey decision/recording -> post-response memory decision.
  *
- * The model dependency crosses the P4D abstraction boundary. Runtime does not
- * know which provider/SDK implements the adapter, and no model operation can
- * mutate or create SH identity.
+ * Journey detection/semantic significance is deliberately injected through
+ * JourneyRuntimeDecisionSink. Runtime owns the insertion point, not the
+ * semantic policy or model/provider implementation.
  */
 export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
   const secureReasoning = deps.reasoningEngine
@@ -102,6 +105,12 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
     const modelResponse = secureReasoning
       ? await secureReasoning.process({ context })
       : await model.execute({ capability: 'text', context });
+
+    await deps.journeyDecision.decideAndRecord({
+      sh_id: identity.sh_id,
+      user_message: input.user_message,
+      response: modelResponse.output,
+    });
 
     await deps.memoryDecision.decide({
       identity,
