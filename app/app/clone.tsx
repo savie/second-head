@@ -148,12 +148,7 @@ export default function CloneScreen() {
           <Text>Agreement: {agreement.agreement_id}</Text>
           <Text>Source SH: {agreement.source_sh_id}</Text>
           <Text>Status: {agreement.status}</Text>
-          {agreement.status === 'PENDING' ? (
-            <View style={{ gap: 8 }}>
-              <Button title={busyId === agreement.agreement_id ? 'Working…' : 'Approve'} onPress={() => void approve(agreement.agreement_id)} disabled={busyId !== null} />
-              <Button title="Reject" onPress={() => void reject(agreement.agreement_id)} disabled={busyId !== null} />
-            </View>
-          ) : null}
+          {agreement.status === 'PENDING' ? <Text>Waiting for source account approval.</Text> : null}
         </View>
       ))}
 
@@ -163,9 +158,16 @@ export default function CloneScreen() {
           <Text>Agreement: {agreement.agreement_id}</Text>
           <Text>Target account: {agreement.target_account_id}</Text>
           <Text>Status: {agreement.status}</Text>
+          {agreement.status === 'PENDING' ? (
+            <View style={{ gap: 8 }}>
+              <Text>Target requested this clone. Source approval is required.</Text>
+              <Button title={busyId === agreement.agreement_id ? 'Working…' : 'Approve'} onPress={() => void approve(agreement.agreement_id)} disabled={busyId !== null} />
+              <Button title="Reject" onPress={() => void reject(agreement.agreement_id)} disabled={busyId !== null} />
+            </View>
+          ) : null}
           {agreement.status === 'APPROVED' ? (
             <View style={{ gap: 8 }}>
-              <TextInput placeholder="Optional clone name" value={cloneName} onChangeText={setCloneName} style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+              <TextInput placeholder="Optional clone name" value={cloneName} onChangeText={setCloneName} style={{ borderWidth: 1, padding: 12 }} />
               <Button title={busyId === agreement.agreement_id ? 'Creating…' : 'Create clone'} onPress={() => void execute(agreement.agreement_id)} disabled={busyId !== null} />
             </View>
           ) : null}
