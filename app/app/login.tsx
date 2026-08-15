@@ -32,8 +32,10 @@ export default function LoginScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 12 }}>
       <Text style={{ fontSize: 28, fontWeight: '700' }}>Second Head</Text>
-      <TextInput autoCapitalize="none" keyboardType="email-address" placeholder="Email" value={email} onChangeText={setEmail} />
-      <TextInput secureTextEntry placeholder="Password" value={password} onChangeText={setPassword} />
+      <Text style={{ fontWeight: '600' }}>Email</Text>
+      <TextInput autoCapitalize="none" keyboardType="email-address" placeholder="Enter your account email" value={email} onChangeText={setEmail} />
+      <Text style={{ fontWeight: '600' }}>Password</Text>
+      <TextInput secureTextEntry placeholder="Enter your password" value={password} onChangeText={setPassword} />
       {error ? <Text>{error}</Text> : null}
       {busy ? <ActivityIndicator /> : (
         <>
