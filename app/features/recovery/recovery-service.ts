@@ -1,4 +1,5 @@
 import { supabase } from '../../services/supabase';
+import { recordRecoveryJourneyEvent } from '../journey/recovery-journey';
 
 export type RecoverySnapshot = {
   snapshot_id: string;
@@ -73,7 +74,10 @@ export async function restoreRecoverySnapshot(snapshotId: string) {
     p_snapshot_id: snapshotId,
   });
   if (error) throw error;
-  return data as string;
+
+  const recoveryEventId = data as string;
+  await recordRecoveryJourneyEvent(recoveryEventId);
+  return recoveryEventId;
 }
 
 export async function createPortabilityExport(snapshotId: string) {
