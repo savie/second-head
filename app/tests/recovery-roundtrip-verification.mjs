@@ -51,9 +51,20 @@ const shId = shRows[0].sh_id;
 const snapshotId = await rpc('runtime_create_recovery_snapshot', { p_sh_id: shId }, authHeaders);
 if (!snapshotId) throw new Error('RECOVERY_SNAPSHOT_ID_MISSING');
 
-const snapshotRows = await rest(`/rest/v1/recovery_snapshots?select=snapshot_id,sh_id,account_id,snapshot_kind&snapshot_id=eq.${encodeURIComponent(snapshotId)}`, { headers: authHeaders });
+const snapshotRows = await rest(`/rest/v1/recovery_snapshots?select=snapshot_id,sh_id,account_id,snapshot_kind,manifest&snapshot_id=eq.${encodeURIComponent(snapshotId)}`, { headers: authHeaders });
 if (snapshotRows.length !== 1 || snapshotRows[0].sh_id !== shId || snapshotRows[0].account_id !== accountId) {
   throw new Error(`RECOVERY_SNAPSHOT_SCOPE_FAILED: ${JSON.stringify(snapshotRows)}`);
+}
+
+const manifest = snapshotRows[0].manifest ?? {};
+const knowledge = Array.isArray(manifest.knowledge) ? manifest.knowledge : [];
+for (const row of knowledge) {
+  if (row.scope !== 'PRIVATE' || row.sh_id !== shId) {
+    throw new Error(`RECOVERY_KNOWLEDGE_ISOLATION_FAILED: ${JSON.stringify(row)}`);
+  }
+}
+if (Object.prototype.hasOwnProperty.call(manifest, 'knowledge') === false) {
+  throw new Error('RECOVERY_KNOWLEDGE_MANIFEST_MISSING');
 }
 
 const recoveryEventId = await rpc('runtime_restore_recovery_snapshot', { p_snapshot_id: snapshotId }, authHeaders);
@@ -72,4 +83,4 @@ if (exports.length !== 1 || exports[0].snapshot_id !== snapshotId || exports[0].
 }
 
 await fetch(`${base}/auth/v1/logout`, { method: 'POST', headers: authHeaders });
-console.log(JSON.stringify({ status: 'PASS', account_id: accountId, sh_id: shId, snapshot_id: snapshotId, recovery_event_id: recoveryEventId, export_id: exportId, checks: ['authenticated source SH resolved', 'full recovery snapshot created', 'snapshot ownership and SH scope verified', 'snapshot restored with RECOVERED outcome', 'JSON portability export created and verified'] }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', account_id: accountId, sh_id: shId, snapshot_id: snapshotId, recovery_event_id: recoveryEventId, export_id: exportId, checks: ['authenticated source SH resolved', 'full recovery snapshot created', 'snapshot ownership and SH scope verified', 'private Knowledge manifest present', 'private Knowledge is isolated to the recovered SH', 'snapshot restored with RECOVERED outcome', 'JSON portability export created and verified'] }, null, 2));
