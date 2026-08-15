@@ -11,6 +11,8 @@
  * - provider replacement must not require identity mutation
  */
 
+import type { SemanticSignals } from './semantic_signals.ts';
+
 export type ModelCapability = 'text' | 'vision' | 'image';
 
 export type ModelRequest = {
@@ -20,6 +22,8 @@ export type ModelRequest = {
 
 export type ModelResponse = {
   output: unknown;
+  /** Optional provider-neutral semantic proposals for downstream domain decisions. */
+  semantic_signals?: SemanticSignals;
 };
 
 /**
