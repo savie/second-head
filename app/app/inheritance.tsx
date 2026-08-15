@@ -62,15 +62,21 @@ export default function InheritanceScreen() {
       <Text>P5C preserves the boundary: inheritance is not identity transfer, succession does not automatically grant private data, and legacy is not full private state.</Text>
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Succession rule</Text>
-      <TextInput placeholder="Source SH ID" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Successor account ID" value={successorAccountId} onChangeText={setSuccessorAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
+      <TextInput placeholder="Enter the SH ID owned by the source account" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Successor Account ID</Text>
+      <TextInput placeholder="Enter the account ID that will become the successor" value={successorAccountId} onChangeText={setSuccessorAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Button title="Create succession rule" disabled={busy || !sourceShId || !successorAccountId} onPress={() => void run(() => createSuccessionRule({ sourceShId, successorAccountId }), (v) => `Succession created: ${String((v as SuccessionRule).succession_id)}`)} />
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Inheritance authorization</Text>
-      <TextInput placeholder="Source SH ID" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Target SH ID" value={targetShId} onChangeText={setTargetShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Source account ID" value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Target account ID" value={targetAccountId} onChangeText={setTargetAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
+      <TextInput placeholder="Enter the SH ID that grants inheritance authorization" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Target SH ID</Text>
+      <TextInput placeholder="Enter the SH ID that receives the authorized inheritance" value={targetShId} onChangeText={setTargetShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Source Account ID</Text>
+      <TextInput placeholder="Enter the account ID that owns the source SH" value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Target Account ID</Text>
+      <TextInput placeholder="Enter the account ID that owns the target SH" value={targetAccountId} onChangeText={setTargetAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Button title="Create authorization" disabled={busy || !sourceShId || !targetShId || !sourceAccountId || !targetAccountId} onPress={() => void run(() => createInheritanceAuthorization({ sourceShId, targetShId, sourceAccountId, targetAccountId }), (v) => `Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`)} />
 
       {loading ? <ActivityIndicator /> : null}
@@ -87,8 +93,10 @@ export default function InheritanceScreen() {
       ))}
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Legacy</Text>
-      <TextInput placeholder="Source SH ID" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Type: MEMORY / KNOWLEDGE / EXPERIENCE / JOURNEY / HISTORY / VALUE / REFERENCE" value={legacyType} onChangeText={(v) => setLegacyType(v.toUpperCase() as LegacyRecord['legacy_type'])} autoCapitalize="characters" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
+      <TextInput placeholder="Enter the SH ID whose legacy record is being recorded" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontWeight: '600' }}>Legacy Type</Text>
+      <TextInput placeholder="MEMORY / KNOWLEDGE / EXPERIENCE / JOURNEY / HISTORY / VALUE / REFERENCE" value={legacyType} onChangeText={(v) => setLegacyType(v.toUpperCase() as LegacyRecord['legacy_type'])} autoCapitalize="characters" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Button title="Record legacy" disabled={busy || !sourceShId || !legacyType} onPress={() => void run(() => recordLegacy({ sourceShId, legacyType }), (v) => `Legacy recorded: ${String(v)}`)} />
       {legacy.slice(0, 10).map((item) => <View key={item.legacy_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}><Text>{item.legacy_id}</Text><Text>{item.legacy_type} · {item.status}</Text></View>)}
 
