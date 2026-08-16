@@ -13,26 +13,27 @@ P6E security reconciliation removed unintended `anon` EXECUTE exposure from:
 - `public.runtime_record_journey_event`
 - `public.runtime_record_memory`
 
-The security remediation was committed at `8897c7ece4745db74af17320221cfeba3b7dad71`. This re-freeze record is itself the next repository state and therefore the candidate identity for subsequent P6E checks is the current `dev` tip below.
+The implementation/security remediation candidate is commit `8897c7ece4745db74af17320221cfeba3b7dad71`. This record is documentation/control metadata added after that implementation state and is not itself part of the implementation candidate identity.
 
 ## Current candidate identity
 
 - Repository: `savie/second-head`
-- Branch: `dev`
-- Candidate commit: `f3b5bf7debf00cd5b464689d37344dd6ee0d4c66`
-- Candidate parent: `8897c7ece4745db74af17320221cfeba3b7dad71`
+- Working branch: `dev`
+- Implementation candidate commit: `8897c7ece4745db74af17320221cfeba3b7dad71`
 - Supabase project: `pkhkgvsrqeupvwoqjwmd`
-- Candidate scope: current DEV state after P6E security remediation and this re-bind record
+- Candidate scope: current DEV implementation after P6E security remediation
+- Control-record commit: current `dev` tip after this record update
 
 ## Re-freeze conditions
 
-The candidate is considered re-bound for subsequent P6E readiness checks only when:
+The implementation candidate is considered re-bound for subsequent P6E readiness checks only when:
 
-1. repository commit identity is recorded;
+1. implementation candidate commit identity is recorded;
 2. corresponding Supabase DEV migration state is verified;
 3. security remediation verification is recorded;
-4. no additional post-bind implementation change is made without explicit change-control;
-5. Final Integration Gate remains a separate decision.
+4. no additional implementation change is made without explicit change-control;
+5. documentation-only commits do not alter the implementation candidate identity;
+6. Final Integration Gate remains a separate decision.
 
 ## Verification record
 
