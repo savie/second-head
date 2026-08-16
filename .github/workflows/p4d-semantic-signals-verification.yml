@@ -1,0 +1,26 @@
+name: P4D Semantic Signals Verification
+
+on:
+  push:
+    branches: [p4d-semantic-signals]
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'runtime/p3d/**'
+      - 'runtime/p4a/**'
+      - 'runtime/p4b/**'
+      - 'runtime/p4d/**'
+      - '.github/workflows/p4d-semantic-signals-verification.yml'
+
+jobs:
+  runtime-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run P3D/P4A/P4B/P4D tests
+        run: deno test runtime/p3d runtime/p4a runtime/p4b runtime/p4d
