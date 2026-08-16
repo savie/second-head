@@ -20,6 +20,7 @@ import { resolveRuntimeIdentityAndState, type RuntimeIdentity } from './identity
 import type { ReasoningEngine } from '../p4b/reasoning_context.ts';
 import { createReasoningSecurityBoundary, type ReasoningSecurityEventSink } from '../p4b/reasoning_security.ts';
 import { createModelExecutor, type ModelAdapter } from '../p4d/model_abstraction.ts';
+import type { SemanticKnowledgeCandidate } from '../p4d/semantic_signals.ts';
 import type { JourneyRuntimeDecisionSink } from '../p5a/journey_decision.ts';
 
 export type RuntimeInput = {
@@ -54,12 +55,25 @@ export interface MemoryDecisionSink {
   }): Promise<void>;
 }
 
+/**
+ * P3D acquisition boundary only. This is an intake handoff; it does not
+ * validate, classify, trust, persist, share, or mutate Core.
+ */
+export interface KnowledgeAcquisitionSink {
+  acquire(input: {
+    identity: ResolvedIdentity;
+    user_message: string;
+    candidate: SemanticKnowledgeCandidate;
+  }): Promise<void>;
+}
+
 export type RuntimeDependencies = {
   identityResolver: IdentityResolver;
   contextAssembler: ContextAssembler;
   modelAdapter: ModelAdapter;
   memoryDecision: MemoryDecisionSink;
   journeyDecision: JourneyRuntimeDecisionSink;
+  knowledgeAcquisition?: KnowledgeAcquisitionSink;
   reasoningEngine?: ReasoningEngine;
   reasoningSecurityEvents?: ReasoningSecurityEventSink;
 };
@@ -73,7 +87,7 @@ export type RuntimeResult = {
  * Executes the smallest valid SH runtime path:
  * auth.uid -> resolve existing identity/state -> read-only context assembly
  * -> reasoning security boundary -> model execution -> response
- * -> P5A Journey decision/recording -> post-response memory decision.
+ * -> P5A Journey decision/recording -> post-response Memory/Knowledge intake.
  *
  * Journey detection/semantic significance is deliberately injected through
  * JourneyRuntimeDecisionSink. Runtime owns the insertion point, not the
@@ -112,11 +126,22 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
       response: modelResponse.output,
     });
 
+    // Pass the full model/semantic response downstream. Passing only
+    // response.output would silently discard provider-neutral semantic signals.
     await deps.memoryDecision.decide({
       identity,
       user_message: input.user_message,
-      response: modelResponse.output,
+      response: modelResponse,
     });
+
+    const knowledgeCandidate = modelResponse.semantic_signals?.knowledge_candidate;
+    if (knowledgeCandidate && deps.knowledgeAcquisition) {
+      await deps.knowledgeAcquisition.acquire({
+        identity,
+        user_message: input.user_message,
+        candidate: knowledgeCandidate,
+      });
+    }
 
     return {
       sh_id: identity.sh_id,
