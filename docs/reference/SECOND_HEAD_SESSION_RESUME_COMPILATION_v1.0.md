@@ -40905,7 +40905,1476 @@ The current task is the final CI verification and merge-readiness audit for PR #
 
 ---
 
-SECOND HEAD — SESSION RESUME 44 (next)
+SECOND HEAD — SESSION REVIEW 44
+
+CURRENT PROJECT STATE SNAPSHOT
+
+Project:
+SECOND HEAD — SYSTEM BUILD
+
+Resume Type:
+CURRENT SESSION REVIEW / CROSS-SESSION CHECKPOINT
+
+Purpose:
+Menyimpan kondisi aktual proyek pada titik checkpoint agar sesi/chat/agen berikutnya dapat melanjutkan pekerjaan tanpa mengulang dari nol, tanpa membawa keputusan lama yang sudah tidak berlaku, dan tanpa menganggap rekomendasi sebagai keputusan Owner.
+
+Current checkpoint date:
+2026-08-16
+
+Current checkpoint position:
+PHASE 6 — P6E RELEASE READINESS / FINAL RECONCILIATION
+
+Current sub-position:
+P6E-006 — Final Reconciliation
+
+Current implementation candidate:
+8897c7ece4745db74af17320221cfeba3b7dad71
+
+Current GitHub DEV tip observed:
+eb750d900ef3c89ee705bcc59ad39928e0a6bb2d
+
+Important:
+"8897c7e..." adalah implementation/security-remediation candidate yang menjadi basis candidate binding.
+
+"eb750d9..." adalah commit dokumentasi/control terbaru yang terdeteksi setelah candidate implementation tersebut.
+
+Jangan menyamakan kedua SHA tersebut.
+
+---
+
+0. CARA MEMBACA CHECKPOINT
+
+Checkpoint ini BUKAN canonical authority.
+
+Checkpoint ini adalah:
+
+- continuity record;
+- execution context;
+- current-state snapshot;
+- audit/reconciliation checkpoint.
+
+Jika terdapat perbedaan antara checkpoint ini dengan authority project atau actual DEV:
+
+→ jangan mengarang penyelesaian;
+→ identifikasi discrepancy;
+→ lakukan reconcile terhadap authority dan actual source.
+
+Checkpoint tidak boleh mengubah:
+
+- Canonical;
+- Frozen Baseline;
+- Build Scope;
+- Implementation Contract;
+- Implementation Guide;
+- Architecture;
+- Execution Strategy;
+- Phase -1.
+
+Status "OPEN", "DEFERRED", atau "DOCUMENTATION GAP" tidak otomatis berarti blocker.
+
+Status "DONE" juga tidak otomatis berarti seluruh assurance telah selesai.
+
+---
+
+1. HIERARKI SUMBER KERJA
+
+Gunakan hierarchy authority yang ditetapkan oleh Phase -1:
+
+1. SH Core Canonical v1.0
+2. Frozen Baseline Phase 01–10
+3. SH Full Build Scope v1.0
+4. SH Full Implementation Contract v1.0
+5. SH Full Implementation Guide v1.0
+6. Canonical Architecture Diagram
+7. Execution Strategy v1.0
+8. Phase -1 Artifacts
+9. Actual Source Code / Repository
+
+Untuk actual implementation state, gunakan:
+
+10. Actual GitHub DEV
+11. Actual Supabase DEV
+
+Catatan penting:
+
+Frozen Baseline dan SH Core Canonical memiliki fungsi berbeda.
+
+SH Core Canonical:
+→ canonical system/core authority.
+
+Frozen Baseline:
+→ frozen project/baseline authority.
+
+Phase -1 sendiri mendefinisikan backlog sebagai derived operational artifact dan mewajibkan setiap backlog item traceable ke minimal satu authority document.
+
+SHL-v2.0 / SHL-v2.1:
+→ historical/reference material sesuai status yang berlaku;
+→ bukan dasar utama untuk membangun SH v1.0 apabila keputusan project terbaru telah memisahkan SH dari terminology/structure SHL.
+
+Jangan mengambil backlog Phase dari historical document hanya karena identifier-nya sama.
+
+Untuk menentukan pekerjaan aktual:
+
+Execution Strategy
+→ Phase -1 execution control
+→ reconciled Phase definition/backlog
+→ actual implementation.
+
+Jika terdapat perbedaan antara historical Phase definition dan execution direction yang lebih baru:
+
+→ identifikasi;
+→ reconcile;
+→ jangan otomatis mengikuti historical definition.
+
+---
+
+2. SUMBER AKTUAL
+
+GitHub
+
+Repository:
+
+https://github.com/savie/second-head
+
+Branch kerja:
+
+dev
+
+Branch policy:
+
+DEV menjadi branch kerja aktif.
+
+MAIN:
+→ tidak menjadi target pekerjaan saat ini;
+→ jangan melakukan implementation mutation ke main.
+
+Current implementation candidate:
+
+8897c7ece4745db74af17320221cfeba3b7dad71
+
+Candidate role:
+→ implementation/security-remediation baseline untuk current P6E candidate.
+
+Current GitHub DEV tip observed:
+
+eb750d900ef3c89ee705bcc59ad39928e0a6bb2d
+
+Latest observed commits after implementation candidate:
+
+- f3b5bf7 — docs(p6e): re-bind current release candidate after security remediation
+- 4d97c5c — docs(p6e): bind candidate to current dev tip
+- eb750d9 — docs(p6e): clarify implementation candidate identity
+
+Interpretation:
+
+Implementation candidate SHA:
+→ 8897c7e...
+
+Current DEV tip:
+→ eb750d9...
+
+The later commits are documentation/control commits and must not be mistaken as new implementation mutation unless actual diff proves otherwise.
+
+Working tree:
+UNKNOWN
+
+Remote synchronization:
+UNKNOWN
+
+Actual repository state must be rechecked before future mutation.
+
+---
+
+Supabase
+
+Project:
+
+second-head
+
+Dashboard:
+
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+Environment:
+
+DEV
+
+Project ID:
+
+pkhkgvsrqeupvwoqjwmd
+
+Supabase DEV digunakan untuk memeriksa actual database/runtime state:
+
+- schema;
+- tables;
+- migrations;
+- functions;
+- views;
+- RLS;
+- policies;
+- privileges;
+- relevant runtime/database state;
+- data;
+- test residue.
+
+Last verified in current session:
+
+2026-08-16
+
+Relevant verified state:
+
+- "private.authority_assignments" RLS enabled.
+- Direct client privileges pada "public.conversations" telah direvokasi.
+- "runtime_record_journey_event":
+  - anon EXECUTE = false
+  - authenticated EXECUTE = true
+- "runtime_record_memory":
+  - anon EXECUTE = false
+  - authenticated EXECUTE = true
+- Recovery/restore/portability runtime surfaces masih tersedia.
+- P5D recovery/backup/portability migration lineage masih terdapat pada DEV migration history.
+
+Persistent test residue:
+
+NONE CONFIRMED
+
+Catatan:
+Tidak dilakukan destructive restore pada current DEV candidate hanya untuk membuktikan rollback.
+
+---
+
+3. STATUS PROJECT
+
+Overall Project Mode:
+
+ACTUAL BUILD / CONTROLLED IMPLEMENTATION / RELEASE READINESS
+
+Current Phase:
+
+PHASE 6 — ASSURANCE, INTEGRATION & RELEASE
+
+Current Sub-Phase:
+
+P6E — RELEASE READINESS
+
+Previous Phase:
+
+PHASE 5 — ADVANCED CAPABILITIES
+
+Previous Phase status:
+
+Implementation lineage complete enough to proceed into Phase 6; assurance/release validation continues in Phase 6.
+
+Next immediate gate:
+
+FINAL INTEGRATION GATE
+
+Status:
+
+NOT YET EXECUTED
+
+---
+
+PHASE TRANSITION
+
+PREVIOUS PHASE:
+PHASE 5
+
+STATUS:
+COMPLETE FOR TRANSITION WITH ASSURANCE/RELEASE VALIDATION CONTINUING IN PHASE 6
+
+CURRENT PHASE:
+PHASE 6
+
+STATUS:
+IN PROGRESS
+
+CURRENT SUB-PHASE:
+P6E — RELEASE READINESS / FINAL RECONCILIATION
+
+NEXT GATE:
+FINAL INTEGRATION GATE
+
+STATUS:
+NOT YET EXECUTED
+
+CURRENT MODE:
+Controlled release-readiness reconciliation.
+
+IMPLEMENTATION AUTHORIZED:
+Yes, within current DEV/P6E scope and existing authority.
+
+OWNER DECISION REQUIRED:
+Only for genuine material contradiction, unresolved canonical/architecture/ownership/privacy/security decision, or acceptance criteria that cannot be satisfied without a new Owner decision.
+
+---
+
+4. PHASE CLOSURE STATUS
+
+Phase:
+
+PHASE 6 — ASSURANCE, INTEGRATION & RELEASE
+
+Implementation
+
+Status:
+IMPLEMENTATION CANDIDATE ESTABLISHED
+
+Evidence:
+
+Current implementation/security-remediation candidate:
+"8897c7ece4745db74af17320221cfeba3b7dad71"
+
+Security remediation was applied and verified in DEV.
+
+Formal Closure
+
+Status:
+FORMAL CLOSURE PENDING
+
+Reason:
+
+Final Integration Gate has not yet been executed.
+
+Runtime / E2E Assurance
+
+Status:
+PARTIALLY VERIFIED
+
+Verified:
+
+- database/runtime security boundary;
+- migration lineage;
+- recovery/restore/portability runtime surfaces.
+
+Not yet fully proven:
+
+- candidate-bound recovery execution evidence;
+- rollback assurance;
+- final nine-pillar evidence consolidation;
+- complete P6A/P6B/P6C final evidence package.
+
+Deferred Items
+
+- Candidate-bound recovery assurance is not yet proven.
+- Rollback assurance is not yet proven.
+- Some higher-level/application/E2E assurance remains pending where evidence is not available.
+
+Carry-Forward Items
+
+Item:
+P5D recovery/backup/portability evidence provenance.
+
+Reason:
+Implementation lineage is present, but an execution/evidence artifact explicitly bound to the current P6E candidate was not located.
+
+Impact on next phase:
+MATERIAL TO FINAL RELEASE READINESS / NOT AUTOMATICALLY A PRODUCT BLOCKER UNTIL FORMAL GATE DISPOSITION.
+
+Item:
+Rollback assurance.
+
+Reason:
+No destructive rollback test was performed against current DEV candidate.
+
+Impact on next phase:
+MATERIAL TO FINAL RELEASE READINESS.
+
+Closure Conclusion
+
+COMPLETE WITH DEFERRED ASSURANCE / FORMAL CLOSURE PENDING
+
+Phase 6 is NOT yet closed.
+
+---
+
+5. COMPLETED WORK
+
+P6E-003 — Security / Runtime Execute Boundary
+
+Item| Status| Verification| Evidence| Notes
+"private.authority_assignments" RLS| DONE| VERIFIED| Actual Supabase DEV| RLS enabled
+"public.conversations" direct client access| DONE| VERIFIED| Actual Supabase DEV| Direct privileges revoked
+"runtime_record_journey_event" anon boundary| DONE| VERIFIED| Actual Supabase DEV| anon=false, authenticated=true
+"runtime_record_memory" anon boundary| DONE| VERIFIED| Actual Supabase DEV| anon=false, authenticated=true
+
+Disposition:
+
+CLOSED / VERIFIED
+
+---
+
+P6E-004 — Candidate Re-Freeze / Re-Bind
+
+Item| Status| Verification| Evidence| Notes
+Security remediation incorporated| DONE| VERIFIED| Commit "8897c7e..."| Implementation candidate
+Candidate identity re-bound| DONE| VERIFIED| P6E control documentation| Candidate remains anchored
+Post-freeze documentation control| DONE| VERIFIED| Subsequent docs commits| Documentation/control only unless diff proves implementation change
+
+Disposition:
+
+READY FOR CONTINUED READINESS RECONCILIATION
+
+---
+
+P6E-005 — Operational / Recovery Trace
+
+Item| Status| Verification| Evidence| Notes
+P5D recovery/backup/portability migration lineage| DONE| VERIFIED| Supabase migration history| Present in current DEV
+Recovery snapshot runtime surface| DONE| VERIFIED| Supabase DEV| Available
+Restore runtime surface| DONE| VERIFIED| Supabase DEV| Available
+Portability runtime surface| DONE| VERIFIED| Supabase DEV| Available
+Recovery runtime access boundary| DONE| VERIFIED| Supabase DEV| Restricted from anon
+Candidate-bound recovery execution evidence| OPEN| NOT VERIFIED| Not located| Do not invent
+Rollback execution proof| OPEN| NOT VERIFIED| Not executed| Avoid destructive DEV operation
+
+Disposition:
+
+OPEN WITH ASSURANCE GAP
+
+---
+
+P6E-006 — Final Reconciliation
+
+Status:
+
+ACTIVE
+
+Purpose:
+
+Mengikat P6A–P6E evidence, nine-pillar gate requirements, deferred assurance, risk disposition, actual GitHub DEV, actual Supabase DEV, dan current candidate menjadi satu final reconciliation state.
+
+---
+
+6. CURRENT IMPLEMENTATION POSITION
+
+Current backlog:
+
+P6E — Release Readiness / Final Reconciliation
+
+Status:
+
+CURRENT
+
+Primary active item:
+
+P6E-006 — Final Reconciliation
+
+Acceptance Criteria:
+
+- Final evidence harus traceable.
+- Current candidate harus identifiable.
+- Actual GitHub DEV state harus reconciled.
+- Actual Supabase DEV state harus reconciled.
+- Security findings harus memiliki disposition.
+- Deferred assurance harus explicit.
+- Nine-pillar Final Integration Gate matrix harus dapat diisi.
+- Final Integration Gate tidak boleh dinyatakan PASS tanpa evidence.
+
+Dependency:
+
+P6A
+→ P6B
+→ P6C
+→ P6D
+→ P6E
+→ Final Integration Gate
+
+Next action:
+
+PHASE -1
+→ LATEST OWNER / DM DECISION CHECK
+→ AUTHORITY CHECK
+→ CURRENT P6E ARTIFACT
+→ GITHUB DEV AUDIT
+→ SUPABASE DEV AUDIT
+→ RECONCILE
+→ IDENTIFY TRUE GAP
+→ MINIMAL REALIZATION bila diperlukan
+→ VERIFY
+→ EVIDENCE
+→ UPDATE DEV
+
+---
+
+7. OWNER / DM DECISIONS TERBARU
+
+Hanya keputusan yang benar-benar diputuskan Owner dicatat di sini.
+
+Decision 1
+
+STATUS:
+OWNER-APPROVED / ACTIVE
+
+TOPIK:
+Working environment
+
+OWNER DECISION:
+
+Pekerjaan dilanjutkan di branch "dev".
+
+Main tidak menjadi branch kerja saat ini.
+
+RATIONALE:
+
+Owner explicitly directed work to remain in DEV and clarified that main is not the working target.
+
+AUTHORITY:
+
+Owner instruction.
+
+CONSTRAINT:
+
+Jangan melakukan implementation mutation ke main.
+
+IMPLEMENTATION IMPACT:
+
+All current implementation/reconciliation work remains scoped to DEV.
+
+---
+
+Decision 2
+
+STATUS:
+OWNER-APPROVED / ACTIVE
+
+TOPIK:
+RLS
+
+OWNER DECISION:
+
+RLS boleh dan perlu di-enable bila memang merupakan security requirement yang benar.
+
+RATIONALE:
+
+Owner explicitly agreed to enabling RLS and accepted the security rationale.
+
+AUTHORITY:
+
+Owner instruction + existing security architecture/authority.
+
+CONSTRAINT:
+
+RLS/security boundary tidak boleh dilemahkan hanya demi mempermudah implementation.
+
+IMPLEMENTATION IMPACT:
+
+Current DEV "private.authority_assignments" RLS is enabled.
+
+---
+
+Decision 3
+
+STATUS:
+OWNER-APPROVED / ACTIVE
+
+TOPIK:
+P6E progression
+
+OWNER DECISION:
+
+Proceed forward through P6E reconciliation rather than reopening earlier phases without evidence of material contradiction.
+
+RATIONALE:
+
+Owner repeatedly instructed continuation/go-forward after reconciliation.
+
+IMPLEMENTATION IMPACT:
+
+Current work remains in Phase 6/P6E.
+
+---
+
+YANG TIDAK BERUBAH
+
+- canonical invariant: unchanged.
+- ownership boundary: unchanged.
+- privacy boundary: unchanged.
+- security boundary: strengthened/reconciled, not weakened.
+- fundamental architecture: unchanged.
+- project scope: unchanged.
+
+REMAINING OPEN:
+
+- final evidence reconciliation;
+- candidate-bound recovery assurance;
+- rollback assurance;
+- final nine-pillar gate readiness.
+
+---
+
+8. DECISION vs DOKUMEN LAMA
+
+A. CONSISTENT
+
+Current security remediation is consistent with source implementation authority:
+
+- journey runtime function intended for authenticated access;
+- memory runtime function intended for authenticated access;
+- actual DEV was reconciled accordingly.
+
+→ continue.
+
+B. DOCUMENTATION LAG / PRACTICAL DECISION
+
+Some P6E control documentation was updated after the implementation candidate.
+
+These documentation commits do not automatically constitute implementation changes.
+
+→ preserve candidate identity separately from documentation/control commits;
+→ verify actual diff before treating a later commit as implementation mutation.
+
+C. MATERIAL CONTRADICTION
+
+NONE CURRENTLY IDENTIFIED.
+
+If a new contradiction appears:
+
+→ stop only that dependency;
+→ Owner decision if material.
+
+---
+
+9. OQ / OPEN ITEM RECONCILIATION
+
+OQ-07 — Backup / Restore Policy
+
+Formal historical status:
+
+Previously identified as Phase 5 dependency.
+
+Current practical state:
+
+Recovery/backup/portability implementation exists in current DEV lineage.
+
+Practical resolution:
+
+Implementation exists and is available.
+
+Remaining:
+
+Candidate-bound recovery assurance evidence is not proven.
+
+Canonical impact:
+
+NONE IDENTIFIED
+
+Execution:
+
+UNBLOCKED FOR CURRENT RECONCILIATION
+
+Formal documentation:
+
+RECONCILIATION / FINAL EVIDENCE PENDING
+
+---
+
+OQ-08 — Data Portability Format
+
+Formal historical status:
+
+Previously identified as Phase 5 dependency.
+
+Current practical state:
+
+Portability implementation surface exists in current DEV.
+
+Remaining:
+
+Final candidate-bound evidence provenance requires reconciliation.
+
+Canonical impact:
+
+NONE IDENTIFIED
+
+Execution:
+
+UNBLOCKED
+
+Formal documentation:
+
+FINAL EVIDENCE RECONCILIATION PENDING
+
+---
+
+10. VERIFICATION DISCIPLINE
+
+Bedakan secara eksplisit:
+
+IMPLEMENTATION VERIFIED
+
+Status:
+
+PASS untuk verified implementation surfaces.
+
+Contoh:
+
+- runtime functions exist;
+- migrations exist;
+- security privilege remediation exists.
+
+RUNTIME VERIFIED
+
+Status:
+
+PARTIALLY VERIFIED.
+
+Verified:
+
+- RLS state;
+- privileges;
+- function availability;
+- migration lineage.
+
+APPLICATION / E2E VERIFIED
+
+Status:
+
+NOT FULLY VERIFIED / DEFERRED WHERE EVIDENCE IS ABSENT.
+
+Jangan menyebut E2E PASS tanpa actual E2E test evidence.
+
+DEFERRED ASSURANCE
+
+Current deferred/assurance items:
+
+- candidate-bound recovery execution;
+- rollback proof;
+- portions of final application/E2E assurance where evidence is not available.
+
+Format:
+
+Implementation:
+PASS / VERIFIED WHERE CHECKED
+
+Runtime:
+PASS / VERIFIED WHERE CHECKED
+
+E2E:
+DEFERRED / NOT VERIFIED WHERE EVIDENCE IS ABSENT
+
+Reason for deferred:
+
+Evidence provenance or safe execution against the current candidate has not been established.
+
+---
+
+11. AUDIT RESULT
+
+Audit scope:
+
+Current Phase 6 / P6E release-readiness reconciliation.
+
+Sources checked:
+
+- Phase -1
+- Frozen Baseline / canonical authority context where available
+- SH Core Canonical context
+- Build Scope context
+- Implementation Contract context
+- Implementation Guide context
+- Architecture context
+- Execution Strategy context
+- Phase artifacts
+- GitHub DEV
+- Supabase DEV
+
+Audit result:
+
+PARTIALLY VERIFIED / RECONCILIATION OPEN
+
+Findings
+
+1. Current work is correctly operating on DEV.
+2. Security boundary issue involving unexpected anon EXECUTE was found and remediated.
+3. "private.authority_assignments" RLS is enabled in actual DEV.
+4. Current implementation candidate is "8897c7e...".
+5. DEV has later documentation/control commits; these must not be confused with implementation candidate identity.
+6. P5D recovery/backup/portability implementation lineage exists in current DEV.
+7. Recovery/restore/portability runtime surfaces remain available.
+8. Candidate-bound recovery execution evidence was not located.
+9. Rollback assurance has not been proven.
+10. Final Integration Gate has not yet been executed.
+
+Material Contradiction
+
+NONE CURRENTLY IDENTIFIED
+
+Canonical Risk
+
+NONE CURRENTLY IDENTIFIED
+
+Ownership Risk
+
+NONE CURRENTLY IDENTIFIED
+
+Privacy Risk
+
+NONE CURRENTLY IDENTIFIED
+
+Security Risk
+
+RESOLVED FOR THE SPECIFIC P6E FUNCTION-EXECUTE FINDING VERIFIED IN DEV.
+
+General security gate remains pending until final evidence consolidation.
+
+Architecture Risk
+
+NONE CURRENTLY IDENTIFIED
+
+---
+
+12. RECONCILIATION RESULT
+
+Reconciliation target:
+
+P6E-006 Final Reconciliation
+
+Existing implementation:
+
+Current DEV implementation candidate anchored to:
+
+"8897c7ece4745db74af17320221cfeba3b7dad71"
+
+Expected behavior:
+
+Current candidate must remain consistent with security boundary, recovery lineage, release control, and evidence requirements.
+
+Gap:
+
+YES — assurance/evidence gaps remain.
+
+Minimal realization already performed:
+
+Reconcile unexpected runtime function execute boundary.
+
+Mutation performed:
+
+- revoke anon execute for "runtime_record_journey_event";
+- revoke anon execute for "runtime_record_memory";
+- reconcile PUBLIC execute boundary;
+- verify anon=false / authenticated=true.
+
+Verification:
+
+PASSED for the specific privilege boundary.
+
+Evidence:
+
+Actual Supabase DEV privilege verification.
+
+Current remaining gap:
+
+No further implementation mutation is justified solely from the current recovery/rollback evidence gap until the evidence/authority requirement is established.
+
+---
+
+13. CURRENT GITHUB STATE
+
+Repository:
+
+https://github.com/savie/second-head
+
+Branch:
+
+dev
+
+Implementation candidate:
+
+8897c7ece4745db74af17320221cfeba3b7dad71
+
+Current DEV tip observed:
+
+eb750d900ef3c89ee705bcc59ad39928e0a6bb2d
+
+Working tree:
+
+UNKNOWN
+
+Remote:
+
+UNKNOWN
+
+Latest observed commit:
+
+"eb750d900ef3c89ee705bcc59ad39928e0a6bb2d"
+
+Latest observed message:
+
+"docs(p6e): clarify implementation candidate identity"
+
+Relevant security implementation commit:
+
+"8897c7ece4745db74af17320221cfeba3b7dad71"
+
+Relevant security gate documentation:
+
+"3a0ce96476a67c952ccc78be5143129638633f1d"
+
+Relevant candidate re-bind documentation:
+
+"f3b5bf7debf00cd5b464689d37344dd6ee0d4c66"
+
+Relevant current-tip binding documentation:
+
+"4d97c5c95e7082a27f995f80ec83192265071eb1"
+
+Relevant artifacts:
+
+- Phase 6 Final Integration Gate
+- P6E Release Readiness Working Record
+- P6E Current Candidate Re-Freeze
+- P6E security reconciliation documentation
+- P5D recovery/backup/portability migrations
+- P6E runtime privilege reconciliation migration
+
+Latest evidence:
+
+- security privilege verification;
+- current migration history;
+- recovery runtime surface verification.
+
+Latest implementation migration:
+
+P6E runtime function execute-boundary reconciliation.
+
+---
+
+14. CURRENT SUPABASE STATE
+
+Project:
+
+second-head
+
+Project ID:
+
+pkhkgvsrqeupvwoqjwmd
+
+Environment:
+
+DEV
+
+Last verified:
+
+2026-08-16
+
+Relevant schema:
+
+- public
+- private
+
+Relevant tables:
+
+- "private.authority_assignments"
+- "public.conversations"
+
+Relevant functions:
+
+- "runtime_record_journey_event"
+- "runtime_record_memory"
+- "runtime_create_recovery_snapshot"
+- "runtime_restore_recovery_snapshot"
+- "runtime_create_portability_export"
+
+Relevant RLS/policies:
+
+- "private.authority_assignments" RLS enabled.
+- Sensitive direct client access restricted.
+- Runtime function execute boundary reconciled to authenticated access.
+
+Relevant runtime state:
+
+- P5D recovery/backup/portability lineage exists.
+- Recovery/restore/portability runtime surfaces exist.
+- Current security remediation verified.
+
+Persistent residue:
+
+NONE CONFIRMED
+
+Known limitation:
+
+Current candidate-bound recovery execution and rollback proof have not been established.
+
+---
+
+15. KNOWN OPEN ITEMS
+
+TRUE BLOCKER
+
+Current:
+
+NONE CONFIRMED
+
+Important:
+
+Final Integration Gate may still produce a blocker if mandatory evidence cannot be satisfied or a material contradiction is discovered.
+
+---
+
+DOCUMENTATION GAP
+
+- Final P6A/P6B/P6C evidence consolidation.
+- Final nine-pillar evidence package.
+- Final risk/deferred register reconciliation.
+- Any stale phase-gate language discovered during final package review.
+
+---
+
+DEFERRED ASSURANCE
+
+- Candidate-bound recovery execution evidence.
+- Rollback assurance.
+- Higher-level application/E2E evidence where actual test evidence is absent.
+
+---
+
+OPEN / UNRESOLVED
+
+1. Final P6E-006 reconciliation.
+2. Whether existing P5D evidence can legitimately be reused for the current candidate.
+3. Rollback assurance disposition.
+4. Final nine-pillar evidence mapping.
+5. Final Integration Gate execution readiness.
+
+---
+
+FUTURE SCOPE
+
+Anything beyond Phase 6 final release readiness is not current implementation scope.
+
+Do not start a new phase until Phase 6 Final Integration Gate is appropriately disposed.
+
+---
+
+16. THINGS NOT TO REOPEN
+
+Jangan membuka kembali keputusan/implementation yang sudah:
+
+- FINAL;
+- OWNER-APPROVED;
+- CLOSED;
+- VERIFIED,
+
+kecuali audit baru menemukan contradiction material.
+
+Current examples:
+
+- DEV remains the active working branch.
+- RLS security boundary is accepted and enabled.
+- P6E security remediation for the two runtime functions is completed and verified.
+- Current implementation candidate identity remains anchored to "8897c7e...".
+
+Catatan:
+
+Documentation/control commits after the candidate do not automatically invalidate the implementation candidate.
+
+---
+
+17. SUPERSEDED DECISIONS
+
+Tidak ada superseded Owner decision baru yang perlu dicatat pada checkpoint ini.
+
+Historical discrepancies harus tetap ditelusuri bila diperlukan, tetapi jangan dianggap active decision tanpa current authority.
+
+---
+
+18. CURRENT DISCUSSIONS / EXPLORATIONS
+
+Status:
+
+DISCUSSION / EXPLORATION
+
+Topic 1
+
+Candidate-bound recovery assurance.
+
+Current understanding:
+
+Recovery implementation exists, but execution/evidence provenance against current candidate has not been established.
+
+Owner decision:
+
+NOT YET DECIDED
+
+Implementation authority:
+
+NOT AUTHORIZED FOR NEW IMPLEMENTATION
+
+Topic 2
+
+Rollback proof strategy.
+
+Current understanding:
+
+No destructive rollback operation should be performed on current DEV merely to manufacture evidence.
+
+Owner decision:
+
+NOT YET DECIDED
+
+Implementation authority:
+
+NOT AUTHORIZED FOR NEW IMPLEMENTATION
+
+---
+
+19. IMPORTANT BOUNDARIES / DO-NOT-DO
+
+Hal yang tidak boleh dilakukan pada checkpoint ini:
+
+- jangan mengubah Canonical tanpa authority;
+- jangan mengubah Frozen Baseline secara diam-diam;
+- jangan menganggap rekomendasi agen sebagai keputusan Owner;
+- jangan mengambil backlog Phase dari historical document jika Execution Strategy/Phase -1 menetapkan jalur berbeda;
+- jangan menghidupkan kembali keputusan superseded;
+- jangan membuat architecture baru untuk gap kecil;
+- jangan melakukan mutation tanpa gap nyata;
+- jangan menyebut deferred assurance sebagai PASS;
+- jangan menyebut E2E PASS tanpa E2E test;
+- jangan membuka phase baru tanpa authorization yang sesuai;
+- jangan menganggap OPEN otomatis sebagai blocker;
+- jangan menganggap COMPLETE otomatis berarti seluruh assurance selesai;
+- jangan mengulang keputusan Owner yang sudah final;
+- jangan melakukan destructive recovery/rollback di current DEV hanya untuk menghasilkan evidence;
+- jangan mencampur implementation candidate SHA dengan documentation/control commit SHA;
+- jangan melakukan mutation ke main selama current work remains DEV-scoped.
+
+---
+
+20. REFERENCE DOCUMENTS
+
+Dokumen| Fungsi| Status
+Frozen Baseline| Frozen project authority| ACTIVE / verify exact current version before mutation
+SH Core Canonical| Core canonical authority| ACTIVE
+Build Scope| Scope authority| ACTIVE
+Implementation Contract| Acceptance/implementation contract| ACTIVE
+Implementation Guide| Implementation guidance| ACTIVE
+Architecture| Architecture reference| ACTIVE
+Execution Strategy| Phase/execution direction| ACTIVE
+Phase -1| Primary execution control| FINAL
+Phase artifacts| Phase-specific execution evidence| ACTIVE / reconcile per phase
+P6E Release Readiness Working Record| Current release-readiness working record| ACTIVE / IN PROGRESS
+P6E Current Candidate Re-Freeze| Candidate binding/control record| ACTIVE
+P6E Final Integration Gate| Final release gate| NOT YET EXECUTED
+Session Review| Continuity only| NOT AUTHORITY
+Historical/reference docs| Historical/reference only| DO NOT TREAT AS CURRENT AUTHORITY WITHOUT RECONCILIATION
+
+Phase -1 explicitly defines its derived artifacts below the higher authority documents and requires traceability to authority.
+
+---
+
+21. CURRENT NEXT-STEP CANDIDATE
+
+NEXT CANDIDATE:
+
+P6E-006 — Final Reconciliation
+
+Status:
+
+CURRENT / ACTIVE
+
+Immediate next gate:
+
+FINAL INTEGRATION GATE
+
+Status:
+
+NOT YET EXECUTED
+
+Dasar:
+
+Current P6E reconciliation has identified:
+
+- security remediation completed;
+- candidate identity established;
+- P5D recovery implementation continuity established;
+- recovery runtime surfaces verified;
+- recovery evidence provenance still open;
+- rollback assurance still open;
+- final nine-pillar evidence package still incomplete.
+
+Next audit flow:
+
+PHASE -1
+→ LATEST OWNER DECISIONS
+→ FROZEN BASELINE
+→ SH CORE CANONICAL
+→ BUILD SCOPE
+→ IMPLEMENTATION CONTRACT
+→ IMPLEMENTATION GUIDE
+→ ARCHITECTURE
+→ EXECUTION STRATEGY
+→ CURRENT P6E ARTIFACTS
+→ GITHUB DEV
+→ SUPABASE DEV
+→ RECONCILE
+→ GAP?
+→ MINIMAL REALIZATION bila diperlukan
+→ VERIFY
+→ EVIDENCE
+→ FINAL INTEGRATION GATE
+
+---
+
+22. EXACT STOP / HOLD CONDITION
+
+STOP hanya jika:
+
+1. ada material contradiction terhadap authority;
+2. ada perubahan canonical yang belum diputuskan;
+3. ada perubahan fundamental architecture yang membutuhkan Owner;
+4. ada perubahan ownership/privacy/security boundary yang belum diputuskan;
+5. current implementation membutuhkan keputusan Owner yang benar-benar belum ada;
+6. acceptance criteria tidak dapat dipenuhi tanpa keputusan baru;
+7. actual DEV state bertentangan secara material dengan expected authority dan tidak aman untuk direkonsiliasi secara minimal.
+
+Jangan STOP hanya karena:
+
+- dokumentasi belum diperbarui;
+- OQ masih berstatus OPEN tetapi practical question sudah terjawab;
+- assurance E2E masih deferred;
+- ada gap kecil yang dapat diselesaikan secara minimal;
+- historical document berbeda dengan current execution direction;
+- recovery execution belum dilakukan jika melakukan recovery akan menjadi destructive mutation yang tidak justified.
+
+---
+
+23. CHECKPOINT SUMMARY
+
+PROJECT:
+
+SECOND HEAD — SYSTEM BUILD
+
+PREVIOUS PHASE:
+
+PHASE 5 — ADVANCED CAPABILITIES
+
+STATUS:
+
+TRANSITIONED INTO PHASE 6; PHASE 5 IMPLEMENTATION LINEAGE CONTINUES TO SUPPORT CURRENT ASSURANCE
+
+CURRENT PHASE:
+
+PHASE 6 — ASSURANCE, INTEGRATION & RELEASE
+
+STATUS:
+
+IN PROGRESS
+
+CURRENT SUB-PHASE:
+
+P6E — RELEASE READINESS
+
+CURRENT ACTIVE ITEM:
+
+P6E-006 — FINAL RECONCILIATION
+
+NEXT GATE:
+
+FINAL INTEGRATION GATE
+
+STATUS:
+
+NOT YET EXECUTED
+
+CURRENT MODE:
+
+CONTROLLED IMPLEMENTATION / RELEASE READINESS
+
+COMPLETED:
+
+- P6E security privilege reconciliation.
+- RLS/security boundary verification.
+- Current implementation candidate binding.
+- P6D → P6E candidate re-bind.
+- P5D recovery/backup/portability implementation lineage trace.
+- Recovery/restore/portability runtime surface verification.
+- Candidate migration lineage reconciliation.
+
+CURRENT:
+
+P6E-006 Final Reconciliation.
+
+Outstanding:
+
+- final P6A/P6B/P6C evidence consolidation;
+- nine-pillar evidence matrix;
+- candidate-bound recovery evidence;
+- rollback assurance;
+- final deferred/risk disposition;
+- Final Integration Gate readiness.
+
+NEXT CANDIDATE:
+
+FINAL INTEGRATION GATE — only after P6E-006 reconciliation reaches sufficient readiness.
+
+TRUE BLOCKERS:
+
+- NONE CONFIRMED AT THIS CHECKPOINT.
+
+DOCUMENTATION GAPS:
+
+- P6A/P6B/P6C final evidence consolidation.
+- Final nine-pillar package.
+- Final risk/deferred register reconciliation.
+
+DEFERRED ASSURANCE:
+
+- Candidate-bound recovery execution evidence.
+- Rollback assurance.
+- Any application/E2E assurance lacking actual test evidence.
+
+OPEN DECISIONS:
+
+- Final disposition of recovery evidence reuse/provenance.
+- Rollback assurance strategy, if required by final gate.
+
+LATEST OWNER DECISIONS:
+
+- Continue work in DEV.
+- Do not use main as the current working target.
+- RLS may/should be enabled when required by security boundary.
+- Continue forward through P6E rather than reopening settled work without material contradiction.
+
+GITHUB:
+
+https://github.com/savie/second-head
+
+SUPABASE:
+
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+PRIMARY EXECUTION CONTROL:
+
+PHASE -1
+
+ACTUAL REPOSITORY:
+
+GITHUB DEV
+
+ACTUAL DATABASE:
+
+SUPABASE DEV
+
+IMPLEMENTATION CANDIDATE:
+
+8897c7ece4745db74af17320221cfeba3b7dad71
+
+CURRENT DEV TIP OBSERVED:
+
+eb750d900ef3c89ee705bcc59ad39928e0a6bb2d
+
+RESUME ROLE:
+
+CONTINUITY + CURRENT EXECUTION CONTEXT
+
+---
+
+24. CONTINUATION COMMAND
+
+Untuk melanjutkan di chat/session berikutnya:
+
+Continue SECOND HEAD from this Session Review Checkpoint.
+
+Jangan mulai dari nol.
+
+Gunakan checkpoint ini sebagai continuity context,
+tetapi tetap audit actual source sebelum melakukan pekerjaan baru.
+
+Urutan:
+
+PHASE -1
+→ LATEST OWNER / DM DECISIONS
+→ FROZEN BASELINE
+→ SH CORE CANONICAL
+→ BUILD SCOPE
+→ IMPLEMENTATION CONTRACT
+→ IMPLEMENTATION GUIDE
+→ ARCHITECTURE
+→ EXECUTION STRATEGY
+→ CURRENT PHASE ARTIFACTS
+→ GITHUB DEV
+→ SUPABASE DEV
+→ RECONCILE
+→ VERIFY
+→ EVIDENCE
+→ DEV
+
+Jika keputusan Owner terbaru cukup jelas dan tidak mengubah:
+
+- canonical;
+- fundamental architecture;
+- ownership;
+- privacy;
+- security;
+- material scope;
+
+maka:
+
+MINIMAL RECONCILIATION / MINIMAL REALIZATION
+
+boleh dilakukan tanpa mengulang keputusan yang sudah dibuat.
+
+Jika benar-benar membutuhkan keputusan baru:
+
+STOP ONLY THAT DEPENDENCY
+→ Owner Decision.
+
+Jangan menghentikan seluruh project jika hanya satu dependency yang blocked.
+
+---
+
+25. FINAL INSTRUCTION TO NEXT AGENT / SESSION
+
+Jangan percaya checkpoint secara buta.
+
+Jangan percaya agen sebelumnya secara buta.
+
+Jangan percaya dokumen historical secara buta.
+
+Jangan percaya status "DONE" tanpa audit bila audit memang diperlukan.
+
+Gunakan checkpoint untuk mengetahui:
+
+"di mana kita berada."
+
+Gunakan authority untuk mengetahui:
+
+"apa yang seharusnya kita kerjakan."
+
+Gunakan GitHub DEV dan Supabase DEV untuk mengetahui:
+
+"apa yang benar-benar sudah ada."
+
+Gunakan reconcile untuk menentukan:
+
+"apakah keduanya konsisten."
+
+Gunakan minimal realization untuk menentukan:
+
+"apa perubahan paling kecil yang diperlukan."
+
+Dan gunakan Owner Decision hanya ketika memang ada keputusan yang belum tersedia.
+
+PRINSIP KERJA:
+
+KEEP MOVING FORWARD
++
+REVIEW BACKWARD ONLY WHEN NECESSARY
++
+DO NOT REOPEN SETTLED DECISIONS
++
+DO NOT INVENT MISSING DECISIONS
++
+DO NOT CONFUSE DOCUMENTATION STATUS WITH EXECUTION BLOCKER
+
+---
+
+END OF SESSION REVIEW 44
+
+---
+SECOND HEAD — SESSION RESUME 45 (next)
 
 
 
