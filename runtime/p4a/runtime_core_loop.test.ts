@@ -41,7 +41,7 @@ Deno.test('P4A production composition resolves ModelCandidate[] through the P4D 
   assertEquals(calls, ['primary']);
 });
 
-Deno.test('P4A/P3D authenticated deterministic E2E preserves semantic candidates and validates Knowledge before acquisition', async () => {
+Deno.test('P4A/P3D authenticated deterministic E2E hands semantic Knowledge candidate to Acquisition without validating in P4A', async () => {
   const seenMemory: unknown[] = [];
   const seenKnowledge: unknown[] = [];
   const seenJourney: unknown[] = [];
@@ -89,16 +89,15 @@ Deno.test('P4A/P3D authenticated deterministic E2E preserves semantic candidates
   const knowledgeInput = seenKnowledge[0] as Record<string, unknown>;
   const knowledgeIdentity = knowledgeInput.identity as { sh_id: string };
   const knowledgeCandidate = knowledgeInput.candidate as Record<string, unknown>;
-  const validation = knowledgeInput.validation as Record<string, unknown>;
   if (knowledgeIdentity.sh_id !== 'sh-001') throw new Error('Knowledge identity changed');
   if (knowledgeCandidate.content !== 'A rule explicitly proposed for acquisition.') throw new Error('Knowledge candidate was lost');
   if (knowledgeCandidate.origin !== 'EXPLICIT_TEACHING') throw new Error('Knowledge origin was changed');
   if (knowledgeCandidate.visibility !== 'OWNER_ONLY') throw new Error('Knowledge privacy boundary was changed');
-  if (validation.outcome !== 'VALID') throw new Error('Knowledge candidate was not validated as VALID');
+  if ('validation' in knowledgeInput) throw new Error('P4A must not perform P3D validation');
 });
 
-Deno.test('P3D invalid Knowledge candidate does not reach acquisition sink', async () => {
-  let acquisitions = 0;
+Deno.test('P3D invalid Knowledge candidate is still handed to Acquisition; validation is downstream', async () => {
+  const seen: unknown[] = [];
   const deterministicReasoning = createReasoningEngine({
     async generate() {
       return { output: 'response', semantic_signals: { knowledge_candidate: { content: ' ', source: 'test', origin: 'EXPLICIT_TEACHING' } } };
@@ -111,10 +110,12 @@ Deno.test('P3D invalid Knowledge candidate does not reach acquisition sink', asy
     reasoningEngine: deterministicReasoning,
     journeyDecision: { async decideAndRecord() { return { record: false, reason: 'NONE' }; } },
     memoryDecision: { async decide() {} },
-    knowledgeAcquisition: { async acquire() { acquisitions += 1; } },
+    knowledgeAcquisition: { async acquire(input) { seen.push(input); } },
   });
   await runtime({ auth_uid: 'auth-user-1', user_message: 'invalid candidate' });
-  if (acquisitions !== 0) throw new Error('INVALID candidate reached acquisition sink');
+  if (seen.length !== 1) throw new Error('Acquisition boundary did not receive candidate');
+  const input = seen[0] as Record<string, unknown>;
+  if ((input.candidate as Record<string, unknown>).content !== ' ') throw new Error('candidate changed before acquisition');
 });
 
 Deno.test('P4A-001 fails closed when identity cannot be resolved', async () => {
