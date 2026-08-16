@@ -10,7 +10,19 @@ P6D is the implementation-freeze step. In plain language: we identify exactly wh
 
 - Repository: `savie/second-head`
 - Working branch: `dev`
+- Current source SHA at evidence refresh: `05ab64e342909d64de08f0646f4b42b877ae8fc2`
 - `main` remains outside the working path.
+
+## Current DEV database observation
+
+- PostgreSQL: `17.6`
+- Timezone: `UTC`
+- Applied migrations: `60`
+- Latest migration: `20260816164740`
+
+The detailed current observed snapshot is recorded in `P6D_DEV_OBSERVED_SNAPSHOT_2026-08-16_CURRENT.md`.
+
+The migration ledger contains historical same-purpose P5A/P6D records as well as their later reconciliation records. This is observed history, not normalized or rewritten history.
 
 ## Implementation disposition
 
@@ -22,11 +34,13 @@ The ported implementation covers:
 2. Sensitive runtime function EXECUTE privileges reconciled so `anon` does not retain EXECUTE while `authenticated` does.
 3. Direct table privileges on `public.conversations` revoked from `public`, `anon`, and `authenticated`.
 
-## DEV evidence boundary
+These boundaries were re-verified directly against Supabase DEV after the latest remediation migrations.
+
+## Freeze/evidence boundary
 
 Current DEV state is treated as observed database/runtime evidence. It is not represented as a provider-native immutable backup/export.
 
-The current migration state must be refreshed from actual DEV after the latest P5A and P6D remediation changes before a final release-candidate freeze record is declared.
+The current observed evidence is now refreshed against the latest DEV migration state and current `dev` source identity. The remaining freeze action is to bind this current state to the final release-candidate manifest and explicit change-control record.
 
 ## Deferred boundary
 
@@ -36,6 +50,8 @@ The current migration state must be refreshed from actual DEV after the latest P
 
 P6D implementation reconciliation on `dev`: GREEN.
 
-P6D final freeze evidence: PENDING CURRENT-STATE REFRESH.
+Current DEV evidence refresh: GREEN.
+
+Final release-candidate freeze/change-control binding: PENDING.
 
 No claim of immutable provider-native database backup is made.
