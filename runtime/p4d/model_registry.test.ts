@@ -20,7 +20,7 @@ Deno.test('P4D registry preserves an ordered multi-candidate set', () => {
 
 Deno.test('P4D registry rejects duplicate candidate ids', async () => {
   await assertRejects(
-    () => Promise.resolve(createModelRegistry([
+    () => Promise.resolve().then(() => createModelRegistry([
       { id: 'same', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter },
       { id: 'same', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter },
     ])),
