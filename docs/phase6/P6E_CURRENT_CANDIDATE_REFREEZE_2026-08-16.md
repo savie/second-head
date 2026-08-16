@@ -13,15 +13,16 @@ P6E security reconciliation removed unintended `anon` EXECUTE exposure from:
 - `public.runtime_record_journey_event`
 - `public.runtime_record_memory`
 
-The repository branch `dev` now points to commit `8897c7ece4745db74af17320221cfeba3b7dad71`, whose parent is the prior P6E gate-update commit `3a0ce96476a67c952ccc78be5143129638633f1d`.
+The security remediation was committed at `8897c7ece4745db74af17320221cfeba3b7dad71`. This re-freeze record is itself the next repository state and therefore the candidate identity for subsequent P6E checks is the current `dev` tip below.
 
 ## Current candidate identity
 
 - Repository: `savie/second-head`
 - Branch: `dev`
-- Candidate commit: `8897c7ece4745db74af17320221cfeba3b7dad71`
+- Candidate commit: `f3b5bf7debf00cd5b464689d37344dd6ee0d4c66`
+- Candidate parent: `8897c7ece4745db74af17320221cfeba3b7dad71`
 - Supabase project: `pkhkgvsrqeupvwoqjwmd`
-- Candidate scope: current DEV state after P6E security remediation
+- Candidate scope: current DEV state after P6E security remediation and this re-bind record
 
 ## Re-freeze conditions
 
