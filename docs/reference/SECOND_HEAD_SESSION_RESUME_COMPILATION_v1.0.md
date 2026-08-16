@@ -40305,7 +40305,607 @@ APK tidak perlu dibuild ulang sampai ada kumpulan perubahan yang memang layak di
 
 ---
 
-SECOND HEAD — SESSION RESUME 43 (next)
+SECOND HEAD — SESSION RESUME 43
+
+Project: SECOND HEAD — SYSTEM BUILD
+Repository: "savie/second-head"
+Active branch: "p4d-semantic-signals"
+Base branch: "dev"
+Supabase DEV: "pkhkgvsrqeupvwoqjwmd"
+Session purpose: handoff dari Session 42/lanjutan pekerjaan P4D Semantic Signals → final verification → PR #2 merge readiness.
+
+---
+
+0. HANDOFF RULE
+
+Sesi berikutnya JANGAN MENGULANG AUDIT DARI NOL.
+
+Resume ini adalah continuation state.
+
+Prioritas pertama setelah membuka sesi baru:
+
+1. baca resume ini;
+2. cek actual GitHub state branch "p4d-semantic-signals";
+3. cek CI terbaru;
+4. lanjut dari CI verification setelah registry-test fix;
+5. hanya kembali ke canonical/contract jika hasil CI atau source aktual menunjukkan contradiction.
+
+Jangan membuat ulang architecture/policy yang sudah settled.
+
+---
+
+1. CURRENT HIGH-LEVEL POSITION
+
+SECOND HEAD sudah memiliki jalur semantic/model output provider-neutral yang sedang dibangun di P4D.
+
+Current conceptual path:
+
+App / authenticated runtime
+        ↓
+P4A runtime
+        ↓
+P4D ModelExecutor
+        ↓
+ModelAdapter
+        ↓
+semantic/model output
+        ↓
+semantic_signals
+        ↓
+Memory / Knowledge candidate formation
+        ↓
+existing lifecycle boundaries
+
+Provider belum dipilih.
+
+Candidate provider yang pernah disebut owner hanya:
+
+- Groq
+- OpenRouter
+- HuggingFace
+- OpenAI
+- Gemini baru disebut belakangan
+
+SEMUA MASIH KANDIDAT. Tidak ada keputusan provider.
+
+Jangan menganggap salah satu provider sudah selected.
+
+API key/provider credential baru relevan setelah provider dipilih.
+
+---
+
+2. IMPORTANT ARCHITECTURAL DECISIONS ALREADY SETTLED
+
+2.1 Provider-neutral boundary
+
+P4D menggunakan abstraction:
+
+ModelAdapter
+ModelRequest
+ModelResponse
+ModelCandidate
+ModelRegistry
+ModelExecutor
+
+Provider SDK harus berada di belakang "ModelAdapter".
+
+API credential tidak masuk ModelRequest dan tidak boleh disebarkan ke:
+
+- Memory
+- Knowledge
+- Journey
+- Core
+- SH identity
+
+Credential boundary nanti berada di provider adapter/configuration layer.
+
+---
+
+2.2 Multi-provider slot
+
+"ModelCandidate[]" / registry bukan keputusan memilih provider.
+
+Fungsinya hanya menyediakan slot provider-neutral:
+
+ModelCandidate[]
+       ↓
+ModelRegistry
+       ↓
+selection policy
+       ↓
+selected ModelAdapter
+       ↓
+ModelExecutor
+
+Registry tidak boleh memiliki:
+
+- provider-specific SDK logic;
+- Memory policy;
+- Knowledge policy;
+- Journey policy;
+- identity logic;
+- persistence/domain logic.
+
+---
+
+2.3 Memory / Knowledge policy tetap existing
+
+Semantic signal layer tidak mengubah lifecycle/policy Memory atau Knowledge.
+
+Tujuan layer ini hanya membuat semantic candidate/signal bisa masuk ke existing downstream lifecycle.
+
+Jangan membuat Core baru hanya untuk menampung semantic signals.
+
+---
+
+2.4 P3D Acquisition ≠ full Validation
+
+Ini merupakan correction penting dari PR #2.
+
+P4A tidak boleh diam-diam melakukan full P3D validation lalu baru mengirim candidate.
+
+Correct boundary:
+
+P4D semantic/model output
+        ↓
+P4A
+        ↓
+P3D Acquisition
+        ↓
+P3D Validation
+        ↓
+existing downstream lifecycle
+
+P4A hanya melakukan acquisition handoff.
+
+"knowledge_acquisition_validation.ts" boleh tetap ada sebagai validation implementation/test, tetapi P4A runtime composition tidak boleh memanggilnya sebagai hidden validation step.
+
+---
+
+3. GITHUB / PR STATE
+
+Repository
+
+"savie/second-head"
+
+Branch
+
+"p4d-semantic-signals"
+
+Base
+
+"dev"
+
+PR
+
+PR #2 — P4D semantic signals
+
+Status terakhir sebelum session handoff:
+
+- open
+- draft
+- base "dev"
+- head "p4d-semantic-signals"
+- belum merged
+
+PR sebelumnya direconcile dan ditemukan memang berisi implementation nyata, bukan sekadar documentation.
+
+---
+
+4. IMPORTANT COMMIT HISTORY FROM THIS WORK
+
+Relevant progression:
+
+34ac361...
+initial substantial p4d-semantic-signals branch state
+
+09a8e9f...
+added semantic-signals verification workflow
+
+f1844dd...
+separated P3D Acquisition boundary from full Validation
+
+0cafbe6...
+scoped verification workflow away from unrelated legacy tests
+
+5cbcc144...
+aligned affected P4A test with actual ModelRequest context contract
+
+e0c3a0b...
+further verification workflow/test infrastructure adjustment
+
+latest registry fixes:
+a84baf2...
+fix(p4d): freeze model registry candidate collection
+
+69b38ab...
+test(p4d): fix registry rejection assertion
+
+IMPORTANT: Verify actual branch HEAD before assuming the exact latest SHA/order. The above is the known progression from this session; GitHub actual state is authoritative.
+
+---
+
+5. WHY PR #2 WAS NOT MERGED EARLIER
+
+Initial verification command was:
+
+deno test runtime/p3d runtime/p4a runtime/p4b runtime/p4d
+
+That produced roughly 50 errors.
+
+Audit showed this was an invalid measurement because it pulled unrelated legacy tests into the semantic-signals verification.
+
+Problems included:
+
+- missing old modules;
+- Jest/Vitest-style globals in some legacy tests;
+- old "ModelRequest.identity" assumptions;
+- old P4B callback typing;
+- old P4D fallback/selection test contract.
+
+Those were not automatically PR #2 defects.
+
+Therefore workflow was narrowed to affected surface.
+
+---
+
+6. TARGETED VERIFICATION SUITE
+
+Current verification should only measure the relevant PR #2 surface.
+
+The intended targeted suite is approximately:
+
+P3D
+ └─ knowledge_acquisition_validation.test.ts
+
+P4A
+ ├─ memory_decision.test.ts
+ └─ runtime_core_loop.test.ts
+
+P4D
+ ├─ model_abstraction.test.ts
+ ├─ model_registry.test.ts
+ ├─ semantic_candidate_formation.test.ts
+ └─ semantic_signals.test.ts
+
+Do not reintroduce the entire runtime test tree merely to make CI look comprehensive.
+
+Legacy selection/fallback tests were specifically excluded because they have their own existing contract mismatch and are outside the semantic-signals PR surface.
+
+---
+
+7. LAST KNOWN CI RESULT BEFORE FINAL REGISTRY FIX
+
+The targeted suite eventually became:
+
+27 PASS
+2 FAIL
+
+This was a major improvement from the original ~50 errors.
+
+The two failures were both in "model_registry.test.ts".
+
+Failure A — duplicate candidate ID
+
+Production registry correctly throws synchronously:
+
+if (seen.has(candidate.id)) {
+    throw new Error(...)
+}
+
+The test incorrectly used an async assertion around a synchronous throw.
+
+Conclusion:
+
+test bug, not production registry bug.
+
+It was fixed by wrapping registry construction inside a promise chain.
+
+---
+
+Failure B — immutable candidate collection
+
+Test expected:
+
+Object.isFrozen(registry.candidates()) === true
+
+Production implementation previously froze:
+
+- each candidate;
+- registry object;
+
+but did not freeze the normalized candidate array.
+
+This was corrected by:
+
+Object.freeze(normalized);
+
+This is a legitimate implementation fix because the registry contract is an immutable candidate collection.
+
+---
+
+8. LAST KNOWN REGISTRY SHAPE
+
+Current intended implementation:
+
+createModelRegistry(candidates)
+        ↓
+validate candidate IDs
+        ↓
+reject duplicate IDs
+        ↓
+validate adapter
+        ↓
+freeze normalized candidates
+        ↓
+freeze candidate collection
+        ↓
+freeze registry object
+
+Registry contract:
+
+ModelRegistry
+  candidates(): readonly ModelCandidate[]
+
+Registry remains provider-neutral.
+
+---
+
+9. LAST KNOWN TEST FIX
+
+"runtime/p4d/model_registry.test.ts" was corrected so duplicate ID rejection is tested as a synchronous throw through an async assertion wrapper.
+
+The immutable collection test expects the actual registry candidate array to be frozen.
+
+These changes were made specifically to reach a valid CI signal.
+
+---
+
+10. CRITICAL CURRENT STATE: CI HAS NOT YET BEEN VERIFIED GREEN
+
+At the exact end of Session 43 preparation:
+
+Do NOT claim CI PASS yet.
+
+The last visible red run occurred before/around the registry fixes.
+
+The next session's first technical task is:
+
+check actual HEAD
+        ↓
+check latest GitHub Actions run
+        ↓
+inspect job result/log
+
+Target result:
+
+29 PASS
+0 FAIL
+
+or whatever exact count the current targeted workflow produces.
+
+If PASS:
+
+CI PASS
+   ↓
+final PR #2 canonical audit
+   ↓
+merge readiness
+
+If FAIL:
+
+inspect ONLY affected targeted failure
+   ↓
+fix only if justified by source/contract
+   ↓
+rerun
+
+Do not assume failure is architectural until source proves it.
+
+---
+
+11. CANONICAL / CONTRACT POSITION
+
+The uploaded canonical/reference documents available in this project include:
+
+SECOND_HEAD_SH_CORE_CANONICAL_v1.0_BILINGUAL.md
+SECOND_HEAD_SH_FULL_BUILD_SCOPE_v1.0.md
+SECOND_HEAD_SH_FULL_IMPLEMENTATION_GUIDE_v1.0.md
+SECOND_HEAD_SH_FULL_IMPLEMENTATION_CONTRACT_v1.0.md
+SECOND_HEAD_SH_FULL_EXECUTION_STRATEGY_v1.0.md
+
+These are the authority set for reconciling implementation.
+
+When auditing PR #2:
+
+1. canonical authority first;
+2. implementation contract second;
+3. actual GitHub source third;
+4. tests/evidence fourth.
+
+If actual source conflicts with contract, do not silently invent a new architecture.
+
+---
+
+12. WHAT PR #2 IS SUPPOSED TO ACCOMPLISH
+
+PR #2 is not a provider-selection PR.
+
+It is intended to establish:
+
+semantic/model output
+        ↓
+provider-neutral semantic envelope
+        ↓
+candidate formation
+        ↓
+Memory / Knowledge existing lifecycle entry points
+
+plus the runtime composition necessary to carry that signal through authenticated runtime.
+
+It should NOT:
+
+- select Groq;
+- select OpenAI;
+- select OpenRouter;
+- select HuggingFace;
+- select Gemini;
+- install provider API keys;
+- redesign Memory;
+- redesign Knowledge;
+- redesign Core;
+- redesign Journey;
+- implement trust promotion;
+- implement sharing;
+- bypass P3D validation;
+- make provider-specific assumptions.
+
+---
+
+13. RECOVERY WORK ALREADY COMPLETED BEFORE THIS P4D THREAD
+
+Earlier work in the same overall project established Recovery → Journey wiring.
+
+Important context:
+
+Recovery
+   ↓
+Recovery candidate
+   ↓
+existing Journey Decision
+   ↓
+Journey recorder
+   ↓
+journey_events
+
+Authenticated/runtime testing was used.
+
+Recovery persistent-state inventory was also expanded beyond obvious Core/Creator tables, including "legacy_records", and Recovery snapshot/restore/isolation work was performed.
+
+Do not restart Recovery work unless current source shows regression.
+
+---
+
+14. CREATOR / SH-000 CONTEXT
+
+Earlier audit explicitly searched for persistent Creator / SH-000 state beyond tables named Core/Creator.
+
+Principle:
+
+- Creator state that is clearly persistent and recovery-relevant must be restored;
+- do not invent additional Core;
+- Creator has elevated authority but still has defined privacy boundaries;
+- Creator SH-000 must not automatically gain access to private state of other SH instances.
+
+Do not revisit this unless PR #2 somehow touches it.
+
+---
+
+15. CURRENT OWNER DECISION STATUS
+
+No provider has been selected.
+
+No new architecture decision is currently required.
+
+No API key is currently required for this PR.
+
+The owner only needs to become involved when there is an actual choice such as:
+
+Which provider(s) should become real adapters?
+
+Until then:
+
+provider-neutral
+
+is the intended path.
+
+---
+
+16. WHAT NOT TO DO IN NEXT SESSION
+
+Do NOT:
+
+- start over from Phase 1;
+- re-audit all architecture from scratch;
+- recreate ModelRegistry;
+- recreate semantic_signals;
+- recreate P3D Acquisition boundary;
+- select an AI provider;
+- ask owner for API keys prematurely;
+- merge PR #2 merely because Git says mergeable;
+- call CI PASS without checking the actual workflow run;
+- fix unrelated legacy test infrastructure inside PR #2.
+
+---
+
+17. EXACT NEXT ACTION
+
+The next session should begin with:
+
+GO:
+Check actual HEAD of p4d-semantic-signals,
+then inspect the newest P4D Semantic Signals Verification workflow
+after commits a84baf2 / 69b38ab.
+
+If targeted suite is green:
+→ final canonical + Implementation Contract audit of PR #2
+→ verify no contradiction
+→ prepare merge to dev.
+
+If red:
+→ inspect only targeted failure
+→ determine whether source/test/workflow is wrong
+→ fix minimally
+→ rerun.
+
+Do not merge before this.
+
+---
+
+18. ONE-LINE CONTINUATION KEYWORD
+
+When opening the next session, user can simply say:
+
+«SECOND HEAD — RESUME 43 — GO: cek CI terbaru setelah registry fix, lalu final audit PR #2.»
+
+That is sufficient context when this document is present.
+
+---
+
+19. FINAL STATE AT HANDOFF
+
+SECOND HEAD
+│
+├─ Architecture baseline          🟢
+├─ Provider-neutral P4D           🟢
+├─ ModelAdapter boundary          🟢
+├─ ModelCandidate abstraction     🟢
+├─ ModelRegistry                  🟢
+├─ P4A registry composition       🟢
+├─ semantic_signals                🟢
+├─ Memory candidate path           🟢
+├─ Knowledge candidate path        🟢
+├─ P3D Acquisition boundary       🟢
+├─ P3D Validation separation      🟢
+│
+├─ Targeted verification workflow  🟢
+├─ Latest targeted CI result       ⚪ NOT YET VERIFIED
+│
+├─ PR #2                          🟡 OPEN / DRAFT
+├─ Merge to dev                   🔴 NOT YET
+│
+└─ Provider selection              ⚪ OWNER DECISION LATER
+
+Handoff conclusion:
+
+«We are NOT starting over.
+The current task is the final CI verification and merge-readiness audit for PR #2 on "p4d-semantic-signals". The architecture/provider-neutral decisions are already established. Only actual source, CI, and canonical/contract reconciliation should determine the next move.»
+
+
+
+---
+
+SECOND HEAD — SESSION RESUME 44 (next)
 
 
 
