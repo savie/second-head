@@ -9,7 +9,7 @@ Deno.test('P4A-001 resolves existing SH identity and preserves it through model 
   const runtime = createRuntimeCoreLoop({
     identityResolver: { async resolve(authUid) { calls.push(`identity:${authUid}`); return { account_id: 'account-1', sh_id: 'sh-001', ownership_role: 'owner' }; } },
     contextAssembler: { async assemble({ identity, user_message }) { calls.push(`context:${identity.sh_id}`); return { identity, user_message, entries: [] }; } },
-    modelAdapter: { async generate(context) { calls.push(`model:${context.context.identity.sh_id}`); return { output: { type: 'text', content: 'ok' } }; } },
+    modelAdapter: { async generate(context) { calls.push(`model:${context.identity.sh_id}`); return { output: { type: 'text', content: 'ok' } }; } },
     journeyDecision: { async decideAndRecord({ sh_id }) { calls.push(`journey:${sh_id}`); return { record: false, reason: 'NONE' }; } },
     memoryDecision: { async decide({ identity }) { calls.push(`memory:${identity.sh_id}`); } },
   });
