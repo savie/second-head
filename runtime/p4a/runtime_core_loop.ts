@@ -3,17 +3,6 @@
  * Phase 4 — Runtime & Orchestration
  *
  * Minimal realization plus the P5A Journey post-response boundary.
- *
- * Invariants enforced:
- * - RUNTIME != SH IDENTITY
- * - identity is resolved, never created by runtime
- * - request-scoped runtime state is resolved from the existing identity
- * - context assembly is read-only from the runtime's perspective
- * - reasoning consumes isolated context and has no memory/knowledge mutation capability
- * - external/contextual content cannot gain authority merely by appearing in reasoning input
- * - model provider is an adapter/execution dependency, not SH identity
- * - Journey decision is post-response and outside context assembly/reasoning context
- * - memory decision remains post-response and separate from context assembly/reasoning context
  */
 
 import { resolveRuntimeIdentityAndState, type RuntimeIdentity } from './identity_state_resolution.ts';
@@ -21,49 +10,23 @@ import type { ReasoningEngine } from '../p4b/reasoning_context.ts';
 import { createReasoningSecurityBoundary, type ReasoningSecurityEventSink } from '../p4b/reasoning_security.ts';
 import { createModelExecutor, type ModelAdapter } from '../p4d/model_abstraction.ts';
 import type { SemanticKnowledgeCandidate } from '../p4d/semantic_signals.ts';
+import { validateKnowledgeCandidate, type KnowledgeValidationResult } from '../p3d/knowledge_acquisition_validation.ts';
 import type { JourneyRuntimeDecisionSink } from '../p5a/journey_decision.ts';
 
-export type RuntimeInput = {
-  user_message: string;
-  auth_uid: string;
-};
-
+export type RuntimeInput = { user_message: string; auth_uid: string };
 export type ResolvedIdentity = RuntimeIdentity;
+export type RuntimeContext = { identity: ResolvedIdentity; user_message: string; entries: readonly unknown[] };
+export interface IdentityResolver { resolve(authUid: string): Promise<ResolvedIdentity | null>; }
+export interface ContextAssembler { assemble(input: { identity: ResolvedIdentity; user_message: string }): Promise<RuntimeContext>; }
+export interface MemoryDecisionSink { decide(input: { identity: ResolvedIdentity; user_message: string; response: unknown }): Promise<void>; }
 
-export type RuntimeContext = {
-  identity: ResolvedIdentity;
-  user_message: string;
-  entries: readonly unknown[];
-};
-
-export interface IdentityResolver {
-  resolve(authUid: string): Promise<ResolvedIdentity | null>;
-}
-
-export interface ContextAssembler {
-  assemble(input: {
-    identity: ResolvedIdentity;
-    user_message: string;
-  }): Promise<RuntimeContext>;
-}
-
-export interface MemoryDecisionSink {
-  decide(input: {
-    identity: ResolvedIdentity;
-    user_message: string;
-    response: unknown;
-  }): Promise<void>;
-}
-
-/**
- * P3D acquisition boundary only. This is an intake handoff; it does not
- * validate, classify, trust, persist, share, or mutate Core.
- */
+/** P3D acquisition handoff. Persistence/trust/sharing/Core remain outside this sink. */
 export interface KnowledgeAcquisitionSink {
   acquire(input: {
     identity: ResolvedIdentity;
     user_message: string;
     candidate: SemanticKnowledgeCandidate;
+    validation: KnowledgeValidationResult;
   }): Promise<void>;
 }
 
@@ -77,22 +40,8 @@ export type RuntimeDependencies = {
   reasoningEngine?: ReasoningEngine;
   reasoningSecurityEvents?: ReasoningSecurityEventSink;
 };
+export type RuntimeResult = { sh_id: string; response: unknown };
 
-export type RuntimeResult = {
-  sh_id: string;
-  response: unknown;
-};
-
-/**
- * Executes the smallest valid SH runtime path:
- * auth.uid -> resolve existing identity/state -> read-only context assembly
- * -> reasoning security boundary -> model execution -> response
- * -> P5A Journey decision/recording -> post-response Memory/Knowledge intake.
- *
- * Journey detection/semantic significance is deliberately injected through
- * JourneyRuntimeDecisionSink. Runtime owns the insertion point, not the
- * semantic policy or model/provider implementation.
- */
 export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
   const secureReasoning = deps.reasoningEngine
     ? createReasoningSecurityBoundary(deps.reasoningEngine, deps.reasoningSecurityEvents)
@@ -100,21 +49,11 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
   const model = createModelExecutor(deps.modelAdapter);
 
   return async function run(input: RuntimeInput): Promise<RuntimeResult> {
-    if (!input.user_message.trim()) {
-      throw new Error('RUNTIME_REJECTED: user_message is required');
-    }
+    if (!input.user_message.trim()) throw new Error('RUNTIME_REJECTED: user_message is required');
 
-    const resolved = await resolveRuntimeIdentityAndState(
-      deps.identityResolver,
-      input.auth_uid,
-    );
-
+    const resolved = await resolveRuntimeIdentityAndState(deps.identityResolver, input.auth_uid);
     const identity = resolved.identity;
-
-    const context = await deps.contextAssembler.assemble({
-      identity,
-      user_message: input.user_message,
-    });
+    const context = await deps.contextAssembler.assemble({ identity, user_message: input.user_message });
 
     const modelResponse = secureReasoning
       ? await secureReasoning.process({ context })
@@ -126,8 +65,6 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
       response: modelResponse.output,
     });
 
-    // Pass the full model/semantic response downstream. Passing only
-    // response.output would silently discard provider-neutral semantic signals.
     await deps.memoryDecision.decide({
       identity,
       user_message: input.user_message,
@@ -136,16 +73,17 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
 
     const knowledgeCandidate = modelResponse.semantic_signals?.knowledge_candidate;
     if (knowledgeCandidate && deps.knowledgeAcquisition) {
-      await deps.knowledgeAcquisition.acquire({
-        identity,
-        user_message: input.user_message,
-        candidate: knowledgeCandidate,
-      });
+      const validation = validateKnowledgeCandidate(knowledgeCandidate);
+      if (validation.outcome === 'VALID') {
+        await deps.knowledgeAcquisition.acquire({
+          identity,
+          user_message: input.user_message,
+          candidate: knowledgeCandidate,
+          validation,
+        });
+      }
     }
 
-    return {
-      sh_id: identity.sh_id,
-      response: modelResponse.output,
-    };
+    return { sh_id: identity.sh_id, response: modelResponse.output };
   };
 }
