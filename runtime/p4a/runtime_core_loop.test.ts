@@ -55,10 +55,31 @@ Deno.test('P4A-001 resolves existing SH identity and preserves it through model 
   }
 });
 
-Deno.test('P4A/P3D authenticated deterministic E2E preserves semantic candidates through runtime', async () => {
+Deno.test('P4A/P3D authenticated deterministic E2E preserves semantic candidates through P4B runtime', async () => {
   const seenMemory: unknown[] = [];
   const seenKnowledge: unknown[] = [];
   const seenJourney: unknown[] = [];
+
+  const deterministicReasoning = createReasoningEngine({
+    async generate() {
+      return {
+        output: 'deterministic model response',
+        semantic_signals: {
+          memory_candidate: {
+            content: 'User prefers concise replies.',
+            confidence: 0.91,
+          },
+          knowledge_candidate: {
+            content: 'A rule explicitly proposed for acquisition.',
+            source: 'deterministic-test-adapter',
+            origin: 'EXPLICIT_TEACHING',
+            scope: 'PRIVATE',
+            visibility: 'OWNER_ONLY',
+          },
+        },
+      };
+    },
+  });
 
   const runtime = createRuntimeCoreLoop({
     identityResolver: {
@@ -76,26 +97,14 @@ Deno.test('P4A/P3D authenticated deterministic E2E preserves semantic candidates
         return { identity, user_message, entries: [] };
       },
     },
+    // Required dependency remains provider-neutral; authenticated E2E uses
+    // the existing P4B reasoning composition with a deterministic adapter.
     modelAdapter: {
       async generate() {
-        return {
-          output: 'deterministic model response',
-          semantic_signals: {
-            memory_candidate: {
-              content: 'User prefers concise replies.',
-              confidence: 0.91,
-            },
-            knowledge_candidate: {
-              content: 'A rule explicitly proposed for acquisition.',
-              source: 'deterministic-test-adapter',
-              origin: 'EXPLICIT_TEACHING',
-              scope: 'PRIVATE',
-              visibility: 'OWNER_ONLY',
-            },
-          },
-        };
+        throw new Error('must not run when reasoningEngine is provided');
       },
     },
+    reasoningEngine: deterministicReasoning,
     journeyDecision: {
       async decideAndRecord(input) {
         seenJourney.push(input);
