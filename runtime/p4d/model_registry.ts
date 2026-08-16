@@ -32,6 +32,8 @@ export function createModelRegistry(
     return Object.freeze({ ...candidate });
   });
 
+  Object.freeze(normalized);
+
   return Object.freeze({
     candidates: () => normalized,
   });
