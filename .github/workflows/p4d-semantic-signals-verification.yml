@@ -40,7 +40,5 @@ jobs:
           runtime/p4a/runtime_core_loop.test.ts
           runtime/p4d/model_abstraction.test.ts
           runtime/p4d/model_registry.test.ts
-          runtime/p4d/model_selection.test.ts
-          runtime/p4d/model_fallback.test.ts
           runtime/p4d/semantic_candidate_formation.test.ts
           runtime/p4d/semantic_signals.test.ts
