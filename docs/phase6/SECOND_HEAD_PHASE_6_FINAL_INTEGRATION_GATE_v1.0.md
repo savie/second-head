@@ -120,11 +120,18 @@ Only allowed where the governing authority explicitly permits the specific defer
 
 ---
 
-## 7. KNOWN SECURITY CONDITION
+## 7. SECURITY CONDITION — CURRENT RECONCILED STATE
 
-`private.authority_assignments` currently has RLS disabled.
+The earlier gate draft contained a stale condition stating that `private.authority_assignments` had RLS disabled. That statement is superseded by the actual P6D remediation and current Supabase DEV verification.
 
-The condition must be explicitly reviewed and dispositioned during Phase 6 assurance. This gate definition does not authorize enabling RLS or changing its policy.
+Current DEV disposition:
+
+- `private.authority_assignments` RLS is **enabled**.
+- No client-facing RLS policy was added; the intended boundary remains deliberate default-deny.
+- Sensitive `runtime_*` functions are restricted from `anon` EXECUTE except the currently observed `runtime_record_journey_event` and `runtime_record_memory`, which still have `anon` EXECUTE.
+- `public.conversations` direct table privileges for `anon` are revoked.
+
+This section records the current observed disposition; it does not authorize any implementation change. Any remaining `anon` EXECUTE exposure must be explicitly dispositioned during Phase 6 assurance and must not be silently represented as PASS.
 
 A security advisory must never be silently ignored or represented as PASS without evidence and disposition.
 
