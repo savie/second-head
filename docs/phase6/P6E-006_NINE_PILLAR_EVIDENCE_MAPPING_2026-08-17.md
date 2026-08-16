@@ -28,12 +28,13 @@ Evidence lineage located:
 - `EV-APP-003_AUTH_CONTROLLED_RUNTIME_VERIFICATION.md`
 - `EV-APP-004_RUNTIME_INVOCATION_VERTICAL_SLICE.md`
 - `EV-APP-005_CONTEXT_MEMORY_SEARCH_JOURNEY_VERTICAL_SLICE.md`
+- `EV-PRE-P6-001_HIGH_RISK_RUNTIME_ROUNDTRIP.md`
 - `EV-CROSS-007_MASTER_RECONCILIATION_FINAL_DISPOSITION.md`
 - `EV-CROSS-008_PRE_P6_AH_RECONCILIATION.md`
 
 Disposition: **LINEAGE CONSOLIDATED / DEDICATED FULL P6A EXECUTED PACKAGE NOT PROVEN COMPLETE**.
 
-Important limitation: the retained App evidence explicitly distinguishes structural/controlled verification from device/application E2E. EV-APP-003 does not claim device E2E, and EV-APP-004 keeps controlled authenticated execution deferred. Therefore this mapping does not convert those records into full P6A PASS.
+The retained high-risk evidence is a real authenticated Runtime verification for the bounded `RECOVERY_RESTORE` action. It proves `confirmation_id → Runtime re-validation → execution → audit`, with a successful controlled GitHub Actions run. It does not prove every possible high-risk action or full device/application E2E.
 
 ### P6B — Architecture Review
 
@@ -73,9 +74,9 @@ No material authority/contract contradiction requiring reopening of Phase 1–5 
 | Memory Integrity | EV-APP-005; bounded `assemble_context`; memory/runtime lineage; EV-CROSS-007 | **EVIDENCED / FINAL CANDIDATE-BOUND PACKAGE PENDING** |
 | State Integrity | runtime/state lineage; P6D/P6E candidate binding; cross-phase reconciliation | **EVIDENCE LINEAGE PRESENT / FINAL PACKAGE PENDING** |
 | Continuity | Phase 5 continuity evidence; EV-APP-005 Journey retrieval; EV-CROSS-007 | **EVIDENCED / CANDIDATE-BOUND PACKAGE PENDING** |
-| Recovery | P5D recovery/backup/portability lineage; P6E operational readiness; DEV migration lineage | **IMPLEMENTATION EVIDENCED / EXECUTION ASSURANCE NOT PROVEN** |
-| Audit | P4A audit persistence lineage; P6D/P6E security/runtime reconciliation; EV-CROSS-007 | **CURRENT LINEAGE RECONCILED / FINAL PACKAGE PENDING** |
-| E2E Flow | EV-APP-003 harness; EV-APP-004 runtime slice; EV-APP-005 controlled verification; EV-CROSS-007/008 | **NOT PROVEN AS FULL E2E** |
+| Recovery | P5D recovery/backup/portability lineage; `EV-PRE-P6-001_HIGH_RISK_RUNTIME_ROUNDTRIP.md`; P6E operational readiness; DEV migration lineage | **IMPLEMENTATION + BOUNDED EXECUTION EVIDENCED / FINAL CANDIDATE PACKAGE PENDING** |
+| Audit | P4A audit persistence lineage; `EV-PRE-P6-001_HIGH_RISK_RUNTIME_ROUNDTRIP.md`; P6D/P6E security/runtime reconciliation; EV-CROSS-007 | **CURRENT LINEAGE RECONCILED / FINAL PACKAGE PENDING** |
+| E2E Flow | EV-APP-003 harness; EV-APP-004 runtime slice; EV-APP-005 controlled verification; EV-PRE-P6-001; EV-CROSS-007/008 | **BOUNDED AUTHENTICATED ROUND-TRIP VERIFIED / FULL E2E NOT PROVEN** |
 
 ## 4. Explicit Non-PASS Conditions
 
@@ -84,9 +85,9 @@ The following remain open or not proven and are intentionally preserved:
 1. No complete dedicated P6A executed matrix/result package has been established from the current evidence surface.
 2. No dedicated final P6B architecture matrix has been established.
 3. No dedicated final P6C contract traceability matrix has been established.
-4. High-risk Runtime confirmation round-trip remains an implementation/integration gap: `confirmation_id → Runtime re-validation → execution → audit` is not proven for a concrete high-risk action.
+4. `EV-PRE-P6-001_HIGH_RISK_RUNTIME_ROUNDTRIP.md` proves the concrete authenticated `RECOVERY_RESTORE` high-risk round-trip, but this remains bounded evidence rather than proof of every high-risk action or full application/device E2E.
 5. Current-candidate release APK traceability is not proven by the historical APK artifact.
-6. Recovery execution assurance is not proven against the current candidate.
+6. Broader recovery execution assurance beyond the proven `RECOVERY_RESTORE` round-trip is not established as a complete current-candidate release package.
 7. Rollback execution assurance is not proven.
 8. Migration #41 remains a historical provenance/source gap and must not be reconstructed by inference.
 
@@ -98,11 +99,15 @@ The older Phase 6 execution artifact contains a stale statement that `private.au
 
 Disposition: **DOCUMENTATION DRIFT IDENTIFIED — NO IMPLEMENTATION CONTRADICTION**.
 
-## 6. Gate Status
+## 6. Candidate Applicability Note
+
+The retained high-risk verification artifact records verification checkout SHA `8ac76f7f4b0d1820118992151e0e9e79824c535b`. Comparison of that verification checkout to implementation candidate `8897c7ece4745db74af17320221cfeba3b7dad71` shows the high-risk workflow changed only by one workflow-line update in the compared range; the high-risk Runtime implementation surface itself is not listed as changed in that comparison. Therefore the prior high-risk evidence remains relevant implementation-lineage evidence for the candidate, but it is not silently promoted to a full current-release E2E PASS.
+
+## 7. Gate Status
 
 The Final Integration Gate requires all mandatory inputs and nine-pillar evidence with explicit dispositions. The current mapping establishes provenance but does not satisfy the requirement for a completed final gate package.
 
-**P6E-006: OPEN — EVIDENCE MAPPING CONSOLIDATED**
+**P6E-006: OPEN — EVIDENCE MAPPING CONSOLIDATED / CORRECTED**
 
 **FINAL INTEGRATION GATE: NOT EXECUTED / PENDING**
 
