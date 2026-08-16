@@ -12,7 +12,6 @@ import { createModelExecutor, type ModelAdapter } from '../p4d/model_abstraction
 import { selectModel } from '../p4d/model_selection.ts';
 import type { ModelRegistry } from '../p4d/model_registry.ts';
 import type { SemanticKnowledgeCandidate } from '../p4d/semantic_signals.ts';
-import { validateKnowledgeCandidate, type KnowledgeValidationResult } from '../p3d/knowledge_acquisition_validation.ts';
 import type { JourneyRuntimeDecisionSink } from '../p5a/journey_decision.ts';
 
 export type RuntimeInput = { user_message: string; auth_uid: string };
@@ -22,13 +21,12 @@ export interface IdentityResolver { resolve(authUid: string): Promise<ResolvedId
 export interface ContextAssembler { assemble(input: { identity: ResolvedIdentity; user_message: string }): Promise<RuntimeContext>; }
 export interface MemoryDecisionSink { decide(input: { identity: ResolvedIdentity; user_message: string; response: unknown }): Promise<void>; }
 
-/** P3D acquisition handoff. Persistence/trust/sharing/Core remain outside this sink. */
+/** P3D acquisition handoff. Validation/classification/trust/persistence remain downstream. */
 export interface KnowledgeAcquisitionSink {
   acquire(input: {
     identity: ResolvedIdentity;
     user_message: string;
     candidate: SemanticKnowledgeCandidate;
-    validation: KnowledgeValidationResult;
   }): Promise<void>;
 }
 
@@ -90,15 +88,11 @@ export function createRuntimeCoreLoop(deps: RuntimeDependencies) {
 
     const knowledgeCandidate = modelResponse.semantic_signals?.knowledge_candidate;
     if (knowledgeCandidate && deps.knowledgeAcquisition) {
-      const validation = validateKnowledgeCandidate(knowledgeCandidate);
-      if (validation.outcome === 'VALID') {
-        await deps.knowledgeAcquisition.acquire({
-          identity,
-          user_message: input.user_message,
-          candidate: knowledgeCandidate,
-          validation,
-        });
-      }
+      await deps.knowledgeAcquisition.acquire({
+        identity,
+        user_message: input.user_message,
+        candidate: knowledgeCandidate,
+      });
     }
 
     return { sh_id: identity.sh_id, response: modelResponse.output };
