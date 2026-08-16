@@ -11,6 +11,9 @@
  * - provider replacement must not require identity mutation
  */
 
+import type { SemanticSignals } from './semantic_signals.ts';
+import { formSemanticSignalsFromModelOutput } from './semantic_candidate_formation.ts';
+
 export type ModelCapability = 'text' | 'vision' | 'image';
 
 export type ModelRequest = {
@@ -20,6 +23,8 @@ export type ModelRequest = {
 
 export type ModelResponse = {
   output: unknown;
+  /** Optional provider-neutral semantic proposals for downstream domain decisions. */
+  semantic_signals?: SemanticSignals;
 };
 
 /**
@@ -49,7 +54,13 @@ export function createModelExecutor(adapter: ModelAdapter): ModelExecutor {
         throw new Error('MODEL_REJECTED: unsupported capability');
       }
 
-      return adapter.generate(request);
+      const response = await adapter.generate(request);
+      if (response.semantic_signals !== undefined) return response;
+
+      const semantic_signals = formSemanticSignalsFromModelOutput(response.output);
+      return semantic_signals === undefined
+        ? response
+        : { ...response, semantic_signals };
     },
   };
 }

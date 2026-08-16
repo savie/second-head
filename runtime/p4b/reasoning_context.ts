@@ -10,6 +10,8 @@
  * - each reasoning cycle can emit bounded audit evidence without persisting raw context.
  */
 
+import type { SemanticSignals } from '../p4d/semantic_signals.ts';
+
 export type ReasoningContext = Readonly<{
   identity: Readonly<{ sh_id: string }>;
   user_message: string;
@@ -22,6 +24,7 @@ export type ReasoningRequest = Readonly<{
 
 export type ReasoningResult = Readonly<{
   output: unknown;
+  semantic_signals?: SemanticSignals;
 }>;
 
 export type ReasoningEvidence = Readonly<{
