@@ -1,12 +1,15 @@
+import { assertEquals } from 'jsr:@std/assert';
 import { createRuntimeCoreLoop } from './runtime_core_loop.ts';
 import { createReasoningEngine } from '../p4b/reasoning_context.ts';
+import { createModelRegistry } from '../p4d/model_registry.ts';
+import type { ModelAdapter } from '../p4d/model_abstraction.ts';
 
 Deno.test('P4A-001 resolves existing SH identity and preserves it through model response', async () => {
   const calls: string[] = [];
   const runtime = createRuntimeCoreLoop({
     identityResolver: { async resolve(authUid) { calls.push(`identity:${authUid}`); return { account_id: 'account-1', sh_id: 'sh-001', ownership_role: 'owner' }; } },
     contextAssembler: { async assemble({ identity, user_message }) { calls.push(`context:${identity.sh_id}`); return { identity, user_message, entries: [] }; } },
-    modelAdapter: { async generate(context) { calls.push(`model:${context.identity.sh_id}`); return { output: { type: 'text', content: 'ok' } }; } },
+    modelAdapter: { async generate(context) { calls.push(`model:${context.context.identity.sh_id}`); return { output: { type: 'text', content: 'ok' } }; } },
     journeyDecision: { async decideAndRecord({ sh_id }) { calls.push(`journey:${sh_id}`); return { record: false, reason: 'NONE' }; } },
     memoryDecision: { async decide({ identity }) { calls.push(`memory:${identity.sh_id}`); } },
   });
@@ -15,6 +18,27 @@ Deno.test('P4A-001 resolves existing SH identity and preserves it through model 
   if (calls.join('|') !== 'identity:auth-user-1|context:sh-001|model:sh-001|journey:sh-001|memory:sh-001') {
     throw new Error(`unexpected runtime order: ${calls.join('|')}`);
   }
+});
+
+Deno.test('P4A production composition resolves ModelCandidate[] through the P4D registry into ModelExecutor', async () => {
+  const calls: string[] = [];
+  const primary: ModelAdapter = { async generate() { calls.push('primary'); return { output: 'primary-response' }; } };
+  const paid: ModelAdapter = { async generate() { calls.push('paid'); return { output: 'paid-response' }; } };
+
+  const runtime = createRuntimeCoreLoop({
+    identityResolver: { async resolve() { return { account_id: 'account-1', sh_id: 'sh-001', ownership_role: 'owner' }; } },
+    contextAssembler: { async assemble({ identity, user_message }) { return { identity, user_message, entries: [] }; } },
+    modelRegistry: createModelRegistry([
+      { id: 'paid-first', capability: 'text', cost_tier: 'PAID', adapter: paid },
+      { id: 'zero-budget-primary', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter: primary },
+    ]),
+    journeyDecision: { async decideAndRecord() { return { record: false, reason: 'NONE' }; } },
+    memoryDecision: { async decide() {} },
+  });
+
+  const result = await runtime({ auth_uid: 'auth-user-1', user_message: 'hello' });
+  assertEquals(result.response, 'primary-response');
+  assertEquals(calls, ['primary']);
 });
 
 Deno.test('P4A/P3D authenticated deterministic E2E preserves semantic candidates and validates Knowledge before acquisition', async () => {
