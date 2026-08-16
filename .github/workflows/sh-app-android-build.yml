@@ -93,3 +93,5 @@ jobs:
           name: sh-app-release-apk
           path: app/dist/sh-app-release.apk
           if-no-files-found: error
+
+# Current-candidate release build marker: intentionally triggers the final dev APK build.
