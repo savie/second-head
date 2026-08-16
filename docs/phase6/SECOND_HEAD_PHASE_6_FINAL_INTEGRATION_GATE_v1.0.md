@@ -122,16 +122,17 @@ Only allowed where the governing authority explicitly permits the specific defer
 
 ## 7. SECURITY CONDITION — CURRENT RECONCILED STATE
 
-The earlier gate draft contained a stale condition stating that `private.authority_assignments` had RLS disabled. That statement is superseded by the actual P6D remediation and current Supabase DEV verification.
+The earlier gate draft contained stale security statements. They are superseded by the actual P6D/P6E remediation state and current Supabase DEV verification.
 
-Current DEV disposition:
+Current DEV disposition verified during P6E reconciliation:
 
 - `private.authority_assignments` RLS is **enabled**.
-- No client-facing RLS policy was added; the intended boundary remains deliberate default-deny.
-- Sensitive `runtime_*` functions are restricted from `anon` EXECUTE except the currently observed `runtime_record_journey_event` and `runtime_record_memory`, which still have `anon` EXECUTE.
-- `public.conversations` direct table privileges for `anon` are revoked.
+- No client-facing RLS policy was added to that private table; the intended boundary remains deliberate default-deny.
+- `public.conversations` direct client table privileges are revoked; no `anon`/`authenticated` table grant was observed in the current DEV check.
+- `runtime_record_journey_event` EXECUTE is granted to `authenticated` (and administrative roles) and is not granted to `anon`.
+- `runtime_record_memory` EXECUTE is granted to `authenticated` (and administrative roles) and is not granted to `anon`.
 
-This section records the current observed disposition; it does not authorize any implementation change. Any remaining `anon` EXECUTE exposure must be explicitly dispositioned during Phase 6 assurance and must not be silently represented as PASS.
+The above is an observed security disposition, not a declaration that the Security pillar has passed. Final pillar disposition remains subject to the complete nine-pillar evidence package.
 
 A security advisory must never be silently ignored or represented as PASS without evidence and disposition.
 
