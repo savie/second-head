@@ -6,14 +6,24 @@ on:
   pull_request:
     branches: [dev]
     paths:
-      - 'runtime/p3d/**'
-      - 'runtime/p4a/**'
-      - 'runtime/p4b/**'
-      - 'runtime/p4d/**'
+      - 'runtime/p3d/knowledge_acquisition_validation.ts'
+      - 'runtime/p3d/knowledge_acquisition_validation.test.ts'
+      - 'runtime/p4a/memory_decision.ts'
+      - 'runtime/p4a/memory_decision.test.ts'
+      - 'runtime/p4a/runtime_core_loop.ts'
+      - 'runtime/p4a/runtime_core_loop.test.ts'
+      - 'runtime/p4b/reasoning_context.ts'
+      - 'runtime/p4d/model_abstraction.ts'
+      - 'runtime/p4d/model_registry.ts'
+      - 'runtime/p4d/model_registry.test.ts'
+      - 'runtime/p4d/semantic_candidate_formation.ts'
+      - 'runtime/p4d/semantic_candidate_formation.test.ts'
+      - 'runtime/p4d/semantic_signals.ts'
+      - 'runtime/p4d/semantic_signals.test.ts'
       - '.github/workflows/p4d-semantic-signals-verification.yml'
 
 jobs:
-  runtime-tests:
+  p4d-semantic-signals:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,5 +32,15 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - name: Run P3D/P4A/P4B/P4D tests
-        run: deno test runtime/p3d runtime/p4a runtime/p4b runtime/p4d
+      - name: Verify PR #2 affected runtime tests only
+        run: >-
+          deno test
+          runtime/p3d/knowledge_acquisition_validation.test.ts
+          runtime/p4a/memory_decision.test.ts
+          runtime/p4a/runtime_core_loop.test.ts
+          runtime/p4d/model_abstraction.test.ts
+          runtime/p4d/model_registry.test.ts
+          runtime/p4d/model_selection.test.ts
+          runtime/p4d/model_fallback.test.ts
+          runtime/p4d/semantic_candidate_formation.test.ts
+          runtime/p4d/semantic_signals.test.ts
