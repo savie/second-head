@@ -1,27 +1,27 @@
 /**
- * P4D-002 — Model Selection Policy & Zero-Budget Path
- * Phase 4 — Runtime & Orchestration
+ * P4D-002 — Automatic multi-model selection policy.
  *
- * Minimal realization of the accepted v1 policy:
- * - one provider/model path is sufficient for initial execution;
- * - core execution must not require a paid provider;
- * - provider choice remains replaceable through P4D-001's abstraction;
- * - model selection never participates in SH identity resolution or mutation.
+ * Provider-neutral, task-aware routing. Provider/model choice remains an
+ * execution dependency and never participates in SH identity or authority.
  */
 
 import type { ModelAdapter, ModelCapability } from './model_abstraction.ts';
 
 export type ModelCostTier = 'ZERO_BUDGET' | 'PAID';
+export type ModelTask = 'conversation' | 'reasoning' | 'semantic' | 'image' | 'vision';
 
 export type ModelCandidate = Readonly<{
   id: string;
   capability: ModelCapability;
   cost_tier: ModelCostTier;
   adapter: ModelAdapter;
+  tasks?: readonly ModelTask[];
+  priority?: number;
 }>;
 
 export type ModelSelectionRequest = Readonly<{
   capability: ModelCapability;
+  task?: ModelTask;
   require_zero_budget?: boolean;
 }>;
 
@@ -32,28 +32,35 @@ export type ModelSelectionResult = Readonly<{
 }>;
 
 /**
- * Selects the first eligible candidate deterministically.
- *
- * The policy intentionally does not hardcode a provider or provider name.
- * A zero-budget request rejects paid-only candidates rather than silently
- * introducing a paid dependency.
+ * Select the best eligible candidate deterministically.
+ * Exact task matches rank above general candidates. Within the same rank,
+ * lower explicit priority wins. Zero-budget rejects paid-only candidates.
  */
 export function selectModel(
   candidates: readonly ModelCandidate[],
   request: ModelSelectionRequest,
 ): ModelSelectionResult {
   const requireZeroBudget = request.require_zero_budget ?? true;
-
-  const candidate = candidates.find((item) =>
+  const eligible = candidates.filter((item) =>
     item.capability === request.capability &&
     (!requireZeroBudget || item.cost_tier === 'ZERO_BUDGET'),
   );
 
+  const ranked = eligible
+    .map((candidate, index) => ({
+      candidate,
+      index,
+      taskRank: request.task && candidate.tasks?.includes(request.task) ? 0 : 1,
+      priority: candidate.priority ?? index,
+    }))
+    .sort((a, b) => a.taskRank - b.taskRank || a.priority - b.priority || a.index - b.index);
+
+  const candidate = ranked[0]?.candidate;
   if (!candidate) {
     throw new Error(
       requireZeroBudget
-        ? 'MODEL_SELECTION_FAILED: no zero-budget model available for capability'
-        : 'MODEL_SELECTION_FAILED: no eligible model available for capability',
+        ? 'MODEL_SELECTION_FAILED: no zero-budget model available for capability/task'
+        : 'MODEL_SELECTION_FAILED: no eligible model available for capability/task',
     );
   }
 
