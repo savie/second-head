@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Button, ScrollView, Text, TextInput, View } from 'react-native';
-import { loadConversationHistory, streamSHRuntime } from '../services/runtime-stream';
-import { supabase } from '../services/supabase';
-import { loadAuthenticatedContext } from '../services/account';
+import { captureJourneyEvent, loadConversationHistory, streamSHRuntime } from '../services/runtime-stream';
 
 type PendingConfirmation = {
   confirmation_id: string;
@@ -181,24 +179,7 @@ export default function ChatScreen() {
 
     setJourneyCaptureState('saving');
     try {
-      const context = await loadAuthenticatedContext();
-      const shId = context?.shInstances[0]?.sh_id;
-      if (!shId) throw new Error('JOURNEY_SH_ID_REQUIRED');
-
-      const { error } = await supabase.rpc('runtime_record_journey_event', {
-        p_sh_id: shId,
-        p_event_type: 'EXPERIENCE',
-        p_occurred_at: new Date().toISOString(),
-        p_continuity_status: 'CONTINUOUS',
-        p_gap_code: null,
-        p_payload: {
-          representation: lastUserMessage,
-          capture_mode: 'EXPLICIT_USER',
-        },
-        p_source_ref: 'app:chat:explicit_journey_capture',
-      });
-
-      if (error) throw error;
+      await captureJourneyEvent(lastUserMessage);
       setJourneyCaptureState('saved');
     } catch {
       setJourneyCaptureState('error');
