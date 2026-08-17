@@ -3,9 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createJourneyRuntimeDecisionSink, type JourneyEventRecorder } from "../../../runtime/p5a/journey_decision.ts";
 import { createMemoryJourneySignalDetector } from "../../../runtime/p5a/memory_journey_signal.ts";
 import { createSemanticJourneySignalDetector } from "../../../runtime/p5a/semantic_journey_signal.ts";
-import { createModelExecutor, type ModelAdapter } from "../../../runtime/p4d/model_abstraction.ts";
-import { selectModel, type ModelCandidate } from "../../../runtime/p4d/model_selection.ts";
-import { createOpenRouterFreeAdapter } from "../../../runtime/p4d/openrouter_free_adapter.ts";
+import { executeAutomatically, inferModelTask } from "../../../runtime/p4d/automatic_model_router.ts";
 
 type JourneyDecisionSignal = {
   automatic_candidate?: Awaited<ReturnType<ReturnType<typeof createMemoryJourneySignalDetector>["detect"]>>["automatic_candidate"];
@@ -55,12 +53,8 @@ async function recordConversation(
     p_sh_id: shId,
     p_role: role,
     p_content: content,
-    p_metadata: {
-      source: "runtime-p4a-001",
-      persistence: "P4A-005",
-    },
+    p_metadata: { source: "runtime-p4a-001", persistence: "P4A-005" },
   });
-
   if (error) throw new Error(`RUNTIME_CONVERSATION_PERSIST_FAILED: ${error.message}`);
 }
 
@@ -74,12 +68,8 @@ async function recordAudit(
     p_sh_id: shId,
     p_event_type: eventType,
     p_status: "SUCCESS",
-    p_metadata: {
-      source: "runtime-p4a-001",
-      ...metadata,
-    },
+    p_metadata: { source: "runtime-p4a-001", ...metadata },
   });
-
   if (error) throw new Error(`RUNTIME_AUDIT_PERSIST_FAILED: ${error.message}`);
 }
 
@@ -95,27 +85,10 @@ function createJourneyRecorder(supabase: ReturnType<typeof createClient>): Journ
         p_payload: input.payload,
         p_source_ref: input.source_ref ?? null,
       });
-
       if (error) throw new Error(`JOURNEY_RECORD_FAILED: ${error.message}`);
       if (typeof data !== "string") throw new Error("JOURNEY_RECORD_FAILED: recorder returned no event id");
       return data;
     },
-  };
-}
-
-function createZeroBudgetModelExecutor() {
-  const adapter: ModelAdapter = createOpenRouterFreeAdapter();
-  const candidate: ModelCandidate = {
-    id: "openrouter/free",
-    capability: "text",
-    cost_tier: "ZERO_BUDGET",
-    adapter,
-  };
-  const selected = selectModel([candidate], { capability: "text", require_zero_budget: true });
-  return {
-    executor: createModelExecutor(selected.adapter),
-    model_id: selected.model_id,
-    cost_tier: selected.cost_tier,
   };
 }
 
@@ -142,21 +115,15 @@ Deno.serve(async (req: Request) => {
   const supabase = resolved.supabase;
 
   if (body.journey_only === true) {
-    if (body.explicit_journey_capture !== true) {
-      return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: explicit capture is required" }), { status: 400, headers: jsonHeaders });
-    }
-
+    if (body.explicit_journey_capture !== true) return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: explicit capture is required" }), { status: 400, headers: jsonHeaders });
     const representation = body.journey_representation?.trim();
-    if (!representation) {
-      return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: representation is required" }), { status: 400, headers: jsonHeaders });
-    }
+    if (!representation) return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: representation is required" }), { status: 400, headers: jsonHeaders });
 
     try {
       const journeyDecision = createJourneyRuntimeDecisionSink(
         { async detect() { return {}; } },
         createJourneyRecorder(supabase),
       );
-
       const decision = await journeyDecision.decideAndRecord({
         sh_id: identity.sh_id,
         user_message: representation,
@@ -171,10 +138,8 @@ Deno.serve(async (req: Request) => {
           },
         },
       });
-
       await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", { journey_only: true, explicit_journey_capture: true });
       await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", { journey_only: true, journey_decision: decision.reason });
-
       return new Response(JSON.stringify({ sh_id: identity.sh_id, journey_decision: decision.reason, event_id: decision.candidate ? "recorded" : null }), { status: 200, headers: jsonHeaders });
     } catch (error) {
       const message = error instanceof Error ? error.message : "JOURNEY_CAPTURE_FAILED";
@@ -185,29 +150,30 @@ Deno.serve(async (req: Request) => {
   const userMessage = body.user_message?.trim();
   if (!userMessage) return new Response(JSON.stringify({ error: "RUNTIME_REJECTED: user_message is required" }), { status: 400, headers: jsonHeaders });
 
-  let modelResponse: Awaited<ReturnType<ReturnType<typeof createZeroBudgetModelExecutor>["executor"]["execute"]>>;
-  let modelId = "openrouter/free";
+  let modelId = "unselected";
+  let modelProvider = "unselected";
+  const task = inferModelTask(userMessage);
 
   try {
     await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", {
       stream: body.stream === true,
       user_message_length: userMessage.length,
-      model_policy: "ZERO_BUDGET",
+      model_policy: "ZERO_BUDGET_AUTOMATIC_MULTI_MODEL",
+      requested_task: task,
     });
 
-    const model = createZeroBudgetModelExecutor();
-    modelId = model.model_id;
-    modelResponse = await model.executor.execute({
-      capability: "text",
-      context: {
-        user_message: userMessage,
+    const modelResponse = await executeAutomatically(
+      {
+        capability: task === "image" ? "image" : "text",
+        context: { user_message: userMessage },
       },
-    });
+      task,
+    );
 
-    const output = typeof modelResponse.output === "string"
-      ? modelResponse.output
-      : JSON.stringify(modelResponse.output);
+    modelId = modelResponse.model_id;
+    modelProvider = modelResponse.provider;
 
+    const output = typeof modelResponse.output === "string" ? modelResponse.output : JSON.stringify(modelResponse.output);
     await recordConversation(supabase, identity.sh_id, "user", userMessage);
     await recordConversation(supabase, identity.sh_id, "assistant", output);
 
@@ -245,9 +211,10 @@ Deno.serve(async (req: Request) => {
       stream: body.stream === true,
       response_length: output.length,
       journey_decision: decision.reason,
-      model_provider: "openrouter",
+      model_provider: modelProvider,
       model_id: modelId,
-      cost_tier: "ZERO_BUDGET",
+      cost_tier: modelResponse.cost_tier,
+      task,
       semantic_signals_present: modelResponse.semantic_signals !== undefined,
     });
 
@@ -257,9 +224,10 @@ Deno.serve(async (req: Request) => {
         response: output,
         meta: {
           phase: "P4A-001",
-          model_provider: "openrouter",
+          model_provider: modelProvider,
           model_id: modelId,
-          cost_tier: "ZERO_BUDGET",
+          cost_tier: modelResponse.cost_tier,
+          task,
           context_entries: 0,
           memory_decision: "deferred",
           journey_decision: decision.reason,
@@ -274,17 +242,16 @@ Deno.serve(async (req: Request) => {
     const chunks = output.match(/.{1,12}/g) ?? [output];
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
-        const send = (event: string, payload: unknown) => {
-          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
-        };
+        const send = (event: string, payload: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
         send("response", {
           sh_id: identity.sh_id,
           text: "",
           meta: {
             phase: "P4A-001",
-            model_provider: "openrouter",
+            model_provider: modelProvider,
             model_id: modelId,
-            cost_tier: "ZERO_BUDGET",
+            cost_tier: modelResponse.cost_tier,
+            task,
             context_entries: 0,
             memory_decision: "deferred",
             journey_decision: decision.reason,
@@ -301,19 +268,19 @@ Deno.serve(async (req: Request) => {
         controller.close();
       },
     });
-
     return new Response(stream, { status: 200, headers: streamHeaders });
   } catch (error) {
     const message = error instanceof Error ? error.message : "RUNTIME_MODEL_EXECUTION_FAILED";
     try {
       await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
         status: "FAILED",
-        model_provider: "openrouter",
+        model_provider: modelProvider,
         model_id: modelId,
+        task,
         error: message,
       });
     } catch {
-      // Preserve the original runtime failure when audit persistence also fails.
+      // Preserve original runtime failure when audit persistence also fails.
     }
     return new Response(JSON.stringify({ error: message }), { status: 502, headers: jsonHeaders });
   }
