@@ -87,3 +87,32 @@ Deno.test('P5A Journey runtime sink records selected candidate through recorder'
     throw new Error(`unexpected Journey decision flow: ${calls.join('|')}`);
   }
 });
+
+Deno.test('P5A runtime sink accepts explicit intent without detector inference', async () => {
+  const calls: string[] = [];
+  const sink = createJourneyRuntimeDecisionSink(
+    {
+      async detect() {
+        calls.push('detect');
+        return {};
+      },
+    },
+    {
+      async record(input) {
+        calls.push(`record:${input.sh_id}:${input.event_type}`);
+        return 'event-002';
+      },
+    },
+  );
+
+  const decision = await sink.decideAndRecord({
+    sh_id: 'sh-001',
+    user_message: 'save this',
+    response: { type: 'text', content: 'ok' },
+    explicit_intent: { requested: true, candidate },
+  });
+
+  if (!decision.record || decision.reason !== 'EXPLICIT' || calls.join('|') !== 'detect|record:sh-001:EXPERIENCE') {
+    throw new Error(`explicit Journey capture failed: ${calls.join('|')}`);
+  }
+});
