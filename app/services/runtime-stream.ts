@@ -69,6 +69,7 @@ export async function streamSHRuntime(
   userMessage: string,
   onEvent: (event: RuntimeStreamEvent) => void,
   signal?: AbortSignal,
+  options?: { explicitJourneyCapture?: boolean },
 ): Promise<void> {
   const message = userMessage.trim();
   if (!message) throw new Error('Runtime request requires a non-empty user message');
@@ -85,7 +86,11 @@ export async function streamSHRuntime(
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
     },
-    body: JSON.stringify({ user_message: message, stream: true }),
+    body: JSON.stringify({
+      user_message: message,
+      stream: true,
+      explicit_journey_capture: options?.explicitJourneyCapture === true,
+    }),
     signal,
   });
 
