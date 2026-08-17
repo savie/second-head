@@ -1,7 +1,7 @@
 # EV-P5A-004 — Journey Producer Reconciliation
 
 **Phase:** P5A — Journey & Continuity
-**Status:** RECONCILED / IMPLEMENTATION BOUNDARY ESTABLISHED
+**Status:** RECONCILED / PRODUCER PLUMBING IMPLEMENTED
 **Baseline:** commit `6acbb156c6aff499914bf88f82d3237ab0090482`
 
 ## 1. Why this reconciliation exists
@@ -71,6 +71,8 @@ An explicit request without a concrete candidate is not converted into a guessed
 
 `runtime/p4a/runtime_core_loop.ts` now calls the Journey decision boundary after model response and before the existing post-response memory decision.
 
+The actual deployed `runtime-p4a-001` composition now also uses the Journey decision boundary with structured semantic and memory detectors, and exposes an authenticated explicit-capture path.
+
 This preserves:
 
 - read-only context assembly;
@@ -81,7 +83,7 @@ This preserves:
 
 ## 6. What this reconciliation does not claim
 
-This change does **not** claim that a concrete semantic/LLM Journey detector already existed in v1.0 source. The detector remains an explicit dependency boundary.
+This change does **not** claim that the concrete semantic/LLM Journey detector is already producing positive automatic events in DEV. The current DEV runtime still uses a mock textual response; automatic semantic capture therefore remains dependent on the future model/semantic composition.
 
 It also does not claim that every P3/P4/P5 domain event is automatically a Journey event. A domain operation must still produce a significant Journey candidate through the semantic/runtime machinery.
 
@@ -99,10 +101,21 @@ identity → context → model → journey → memory
 - automatic candidate capture;
 - explicit-over-automatic precedence;
 - no invented event when explicit intent lacks a candidate;
-- detector → recorder flow.
+- detector → recorder flow;
+- explicit capture supplied at the runtime sink.
 
-## 8. Remaining implementation work
+`runtime/p5a/semantic_journey_signal.test.ts` covers:
 
-The reconciliation is complete for the **runtime insertion point and producer contract**.
+- structured semantic Journey candidate adaptation;
+- rejection of ordinary prose as an automatic Journey signal.
 
-Remaining work is to connect the existing semantic/runtime machinery to `JourneySignalDetector` so that actual automatic and explicit Journey candidates are produced from real user interactions. That work must continue from existing source/authority and must not be implemented as blanket transcript logging or brittle keyword matching.
+## 8. Current disposition
+
+The previously open **technical producer-plumbing work is implemented**.
+
+Remaining assurance is execution evidence:
+
+- authenticated explicit Journey capture on the rebuilt APK;
+- authenticated automatic semantic Journey capture once the actual model/semantic runtime can produce a structured Journey candidate.
+
+No blanket transcript logging and no brittle keyword matching are introduced.
