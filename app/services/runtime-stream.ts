@@ -65,19 +65,47 @@ function parseSseText(text: string, onEvent: (event: RuntimeStreamEvent) => void
   }
 }
 
+async function getAccessToken() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Authenticated session required for runtime access');
+  return token;
+}
+
+export async function captureJourneyEvent(representation: string): Promise<void> {
+  const value = representation.trim();
+  if (!value) throw new Error('Journey capture requires a non-empty representation');
+
+  const token = await getAccessToken();
+  const response = await fetch(RUNTIME_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      journey_only: true,
+      explicit_journey_capture: true,
+      journey_representation: value,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`SH_JOURNEY_CAPTURE_FAILED: ${await response.text()}`);
+  }
+}
+
 export async function streamSHRuntime(
   userMessage: string,
   onEvent: (event: RuntimeStreamEvent) => void,
   signal?: AbortSignal,
-  options?: { explicitJourneyCapture?: boolean },
 ): Promise<void> {
   const message = userMessage.trim();
   if (!message) throw new Error('Runtime request requires a non-empty user message');
 
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  const token = data.session?.access_token;
-  if (!token) throw new Error('Authenticated session required for runtime streaming');
+  const token = await getAccessToken();
 
   const response = await fetch(RUNTIME_URL, {
     method: 'POST',
@@ -86,11 +114,7 @@ export async function streamSHRuntime(
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
     },
-    body: JSON.stringify({
-      user_message: message,
-      stream: true,
-      explicit_journey_capture: options?.explicitJourneyCapture === true,
-    }),
+    body: JSON.stringify({ user_message: message, stream: true }),
     signal,
   });
 
