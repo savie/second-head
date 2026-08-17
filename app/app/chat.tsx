@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Button, ScrollView, Text, TextInput, View } from 'react-native';
 import { loadConversationHistory, streamSHRuntime } from '../services/runtime-stream';
+import { supabase } from '../services/supabase';
+import { loadAuthenticatedContext } from '../services/account';
 
 type PendingConfirmation = {
   confirmation_id: string;
@@ -28,6 +30,10 @@ export default function ChatScreen() {
   >('idle');
   const [lifecycleState, setLifecycleState] =
     useState<ChatLifecycleState>('active');
+  const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
+  const [journeyCaptureState, setJourneyCaptureState] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
@@ -90,6 +96,8 @@ export default function ChatScreen() {
     abortControllerRef.current = controller;
 
     setDraft('');
+    setLastUserMessage(message);
+    setJourneyCaptureState('idle');
     setSending(true);
     setLifecycleState('streaming');
     setConfirmationState('idle');
@@ -168,6 +176,35 @@ export default function ChatScreen() {
     }
   }
 
+  async function saveLastMessageToJourney() {
+    if (!lastUserMessage || sending || journeyCaptureState === 'saving') return;
+
+    setJourneyCaptureState('saving');
+    try {
+      const context = await loadAuthenticatedContext();
+      const shId = context?.shInstances[0]?.sh_id;
+      if (!shId) throw new Error('JOURNEY_SH_ID_REQUIRED');
+
+      const { error } = await supabase.rpc('runtime_record_journey_event', {
+        p_sh_id: shId,
+        p_event_type: 'EXPERIENCE',
+        p_occurred_at: new Date().toISOString(),
+        p_continuity_status: 'CONTINUOUS',
+        p_gap_code: null,
+        p_payload: {
+          representation: lastUserMessage,
+          capture_mode: 'EXPLICIT_USER',
+        },
+        p_source_ref: 'app:chat:explicit_journey_capture',
+      });
+
+      if (error) throw error;
+      setJourneyCaptureState('saved');
+    } catch {
+      setJourneyCaptureState('error');
+    }
+  }
+
   function cancelStreaming() {
     if (!abortControllerRef.current) return;
 
@@ -234,6 +271,24 @@ export default function ChatScreen() {
           </Text>
         ))}
       </ScrollView>
+
+      {lastUserMessage && !sending ? (
+        <View style={{ gap: 6 }}>
+          <Button
+            title={journeyCaptureState === 'saving'
+              ? 'Saving to Journey...'
+              : 'SAVE LAST MESSAGE TO JOURNEY'}
+            onPress={() => void saveLastMessageToJourney()}
+            disabled={journeyCaptureState === 'saving'}
+          />
+          {journeyCaptureState === 'saved' ? (
+            <Text>Journey event saved.</Text>
+          ) : null}
+          {journeyCaptureState === 'error' ? (
+            <Text>Journey capture failed.</Text>
+          ) : null}
+        </View>
+      ) : null}
 
       {pendingConfirmation ? (
         <View
