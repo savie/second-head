@@ -3,6 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createJourneyRuntimeDecisionSink, type JourneyEventRecorder } from "../../../runtime/p5a/journey_decision.ts";
 import { createMemoryJourneySignalDetector } from "../../../runtime/p5a/memory_journey_signal.ts";
 import { createSemanticJourneySignalDetector } from "../../../runtime/p5a/semantic_journey_signal.ts";
+import { createModelExecutor, type ModelAdapter } from "../../../runtime/p4d/model_abstraction.ts";
+import { selectModel, type ModelCandidate } from "../../../runtime/p4d/model_selection.ts";
+import { createOpenRouterFreeAdapter } from "../../../runtime/p4d/openrouter_free_adapter.ts";
 
 type JourneyDecisionSignal = {
   automatic_candidate?: Awaited<ReturnType<ReturnType<typeof createMemoryJourneySignalDetector>["detect"]>>["automatic_candidate"];
@@ -100,6 +103,22 @@ function createJourneyRecorder(supabase: ReturnType<typeof createClient>): Journ
   };
 }
 
+function createZeroBudgetModelExecutor() {
+  const adapter: ModelAdapter = createOpenRouterFreeAdapter();
+  const candidate: ModelCandidate = {
+    id: "openrouter/free",
+    capability: "text",
+    cost_tier: "ZERO_BUDGET",
+    adapter,
+  };
+  const selected = selectModel([candidate], { capability: "text", require_zero_budget: true });
+  return {
+    executor: createModelExecutor(selected.adapter),
+    model_id: selected.model_id,
+    cost_tier: selected.cost_tier,
+  };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "METHOD_NOT_ALLOWED" }), { status: 405, headers: jsonHeaders });
 
@@ -134,11 +153,7 @@ Deno.serve(async (req: Request) => {
 
     try {
       const journeyDecision = createJourneyRuntimeDecisionSink(
-        {
-          async detect() {
-            return {};
-          },
-        },
+        { async detect() { return {}; } },
         createJourneyRecorder(supabase),
       );
 
@@ -151,29 +166,16 @@ Deno.serve(async (req: Request) => {
           candidate: {
             event_type: "EXPERIENCE",
             continuity_status: "CONTINUOUS",
-            payload: {
-              representation,
-              capture_mode: "EXPLICIT_USER",
-            },
+            payload: { representation, capture_mode: "EXPLICIT_USER" },
             source_ref: "runtime:p5a:explicit_user_capture",
           },
         },
       });
 
-      await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", {
-        journey_only: true,
-        explicit_journey_capture: true,
-      });
-      await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
-        journey_only: true,
-        journey_decision: decision.reason,
-      });
+      await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", { journey_only: true, explicit_journey_capture: true });
+      await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", { journey_only: true, journey_decision: decision.reason });
 
-      return new Response(JSON.stringify({
-        sh_id: identity.sh_id,
-        journey_decision: decision.reason,
-        event_id: decision.candidate ? "recorded" : null,
-      }), { status: 200, headers: jsonHeaders });
+      return new Response(JSON.stringify({ sh_id: identity.sh_id, journey_decision: decision.reason, event_id: decision.candidate ? "recorded" : null }), { status: 200, headers: jsonHeaders });
     } catch (error) {
       const message = error instanceof Error ? error.message : "JOURNEY_CAPTURE_FAILED";
       return new Response(JSON.stringify({ error: message }), { status: 500, headers: jsonHeaders });
@@ -183,16 +185,29 @@ Deno.serve(async (req: Request) => {
   const userMessage = body.user_message?.trim();
   if (!userMessage) return new Response(JSON.stringify({ error: "RUNTIME_REJECTED: user_message is required" }), { status: 400, headers: jsonHeaders });
 
-  // The current P4A app runtime uses a mock textual response. A future model
-  // adapter supplies structured semantic signals consumed by the Journey
-  // detector; client input is never treated as an automatic semantic signal.
-  const output = userMessage;
+  let modelResponse: Awaited<ReturnType<ReturnType<typeof createZeroBudgetModelExecutor>["executor"]["execute"]>>;
+  let modelId = "openrouter/free";
 
   try {
     await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", {
       stream: body.stream === true,
       user_message_length: userMessage.length,
+      model_policy: "ZERO_BUDGET",
     });
+
+    const model = createZeroBudgetModelExecutor();
+    modelId = model.model_id;
+    modelResponse = await model.executor.execute({
+      capability: "text",
+      context: {
+        user_message: userMessage,
+      },
+    });
+
+    const output = typeof modelResponse.output === "string"
+      ? modelResponse.output
+      : JSON.stringify(modelResponse.output);
+
     await recordConversation(supabase, identity.sh_id, "user", userMessage);
     await recordConversation(supabase, identity.sh_id, "assistant", output);
 
@@ -212,17 +227,14 @@ Deno.serve(async (req: Request) => {
     const decision = await journeyDecision.decideAndRecord({
       sh_id: identity.sh_id,
       user_message: userMessage,
-      response: output,
+      response: modelResponse.output,
       explicit_intent: body.explicit_journey_capture === true
         ? {
             requested: true,
             candidate: {
               event_type: "EXPERIENCE",
               continuity_status: "CONTINUOUS",
-              payload: {
-                representation: userMessage,
-                capture_mode: "EXPLICIT_USER",
-              },
+              payload: { representation: userMessage, capture_mode: "EXPLICIT_USER" },
               source_ref: "runtime:p5a:explicit_user_capture",
             },
           }
@@ -233,36 +245,76 @@ Deno.serve(async (req: Request) => {
       stream: body.stream === true,
       response_length: output.length,
       journey_decision: decision.reason,
+      model_provider: "openrouter",
+      model_id: modelId,
+      cost_tier: "ZERO_BUDGET",
+      semantic_signals_present: modelResponse.semantic_signals !== undefined,
     });
+
+    if (!body.stream) {
+      return new Response(JSON.stringify({
+        sh_id: identity.sh_id,
+        response: output,
+        meta: {
+          phase: "P4A-001",
+          model_provider: "openrouter",
+          model_id: modelId,
+          cost_tier: "ZERO_BUDGET",
+          context_entries: 0,
+          memory_decision: "deferred",
+          journey_decision: decision.reason,
+          semantic_signals: modelResponse.semantic_signals ?? null,
+          persistence: "verified-path",
+          audit: "verified-path",
+        },
+      }), { status: 200, headers: jsonHeaders });
+    }
+
+    const encoder = new TextEncoder();
+    const chunks = output.match(/.{1,12}/g) ?? [output];
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const send = (event: string, payload: unknown) => {
+          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
+        };
+        send("response", {
+          sh_id: identity.sh_id,
+          text: "",
+          meta: {
+            phase: "P4A-001",
+            model_provider: "openrouter",
+            model_id: modelId,
+            cost_tier: "ZERO_BUDGET",
+            context_entries: 0,
+            memory_decision: "deferred",
+            journey_decision: decision.reason,
+            streaming: true,
+            persistence: "verified-path",
+            audit: "verified-path",
+          },
+        });
+        for (const chunk of chunks) {
+          send("token", { text: chunk });
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+        send("complete", { sh_id: identity.sh_id });
+        controller.close();
+      },
+    });
+
+    return new Response(stream, { status: 200, headers: streamHeaders });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "RUNTIME_PERSISTENCE_FAILED";
-    return new Response(JSON.stringify({ error: message }), { status: 500, headers: jsonHeaders });
+    const message = error instanceof Error ? error.message : "RUNTIME_MODEL_EXECUTION_FAILED";
+    try {
+      await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
+        status: "FAILED",
+        model_provider: "openrouter",
+        model_id: modelId,
+        error: message,
+      });
+    } catch {
+      // Preserve the original runtime failure when audit persistence also fails.
+    }
+    return new Response(JSON.stringify({ error: message }), { status: 502, headers: jsonHeaders });
   }
-
-  if (!body.stream) {
-    return new Response(JSON.stringify({
-      sh_id: identity.sh_id,
-      response: output,
-      meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", journey_decision: "post-response", persistence: "verified-path", audit: "verified-path" },
-    }), { status: 200, headers: jsonHeaders });
-  }
-
-  const encoder = new TextEncoder();
-  const chunks = output.match(/.{1,12}/g) ?? [output];
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const send = (event: string, payload: unknown) => {
-        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`));
-      };
-      send("response", { sh_id: identity.sh_id, text: "", meta: { phase: "P4A-001", model_provider: "mock", context_entries: 0, memory_decision: "deferred", journey_decision: "post-response", streaming: true, persistence: "verified-path", audit: "verified-path" } });
-      for (const chunk of chunks) {
-        send("token", { text: chunk });
-        await new Promise((resolve) => setTimeout(resolve, 20));
-      }
-      send("complete", { sh_id: identity.sh_id });
-      controller.close();
-    },
-  });
-
-  return new Response(stream, { status: 200, headers: streamHeaders });
 });
