@@ -82,6 +82,7 @@ export interface JourneyRuntimeDecisionSink {
     sh_id: string;
     user_message: string;
     response: unknown;
+    explicit_intent?: ExplicitJourneyIntent | null;
   }): Promise<JourneyDecision>;
 }
 
@@ -120,7 +121,11 @@ export function createJourneyRuntimeDecisionSink(
   return {
     async decideAndRecord(input) {
       const signals = await detector.detect(input);
-      const decision = decideJourney({ ...input, ...signals });
+      const decision = decideJourney({
+        ...input,
+        ...signals,
+        explicit_intent: input.explicit_intent ?? signals.explicit_intent,
+      });
 
       if (!decision.record || !decision.candidate) return decision;
 
