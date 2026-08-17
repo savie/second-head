@@ -42374,6 +42374,889 @@ DO NOT CONFUSE DOCUMENTATION STATUS WITH EXECUTION BLOCKER
 END OF SESSION REVIEW 44
 
 ---
+
+# SECOND HEAD — SESSION RESUME 45
+
+## Reconciled Continuation Checkpoint
+### Resume 44 → Actual Work Since Resume 44 → Current Working State
+
+**Project:** SECOND HEAD — SYSTEM BUILD  
+**Resume:** 45  
+**Resume Type:** Reconciled Current-State / Cross-Session Continuation Checkpoint
+
+---
+
+## 0. ROLE OF THIS RESUME
+
+Resume 45 is a continuity and reconciliation checkpoint. It is **not Canonical authority** and does not replace Phase -1, SH Core Canonical, Frozen Baseline, Build Scope, Implementation Contract, Implementation Guide, Execution Strategy, relevant phase artifacts, actual GitHub DEV, actual Supabase DEV, or runtime/CI/evidence.
+
+Use:
+
+`Resume → Authority → Actual GitHub DEV → Actual Supabase DEV → Runtime/Evidence → Reconcile`
+
+Do not treat an older Resume as current merely because it says DONE, and do not treat an older OPEN item as current merely because it appears unfinished there.
+
+The purpose of Resume 45 is specifically to prevent the recent drift pattern:
+
+`P5 closed → pre-P6 audit → backward audit → session drift → old work mistaken as unfinished → forward again → accidental P6 jump → backward again.`
+
+---
+
+# 1. RECONCILIATION INPUT
+
+Resume 45 continues Resume 44.
+
+Resume 41 is used as the reconciliation pattern: it explicitly reconciled Resumes 37–40 into a current working state rather than treating the latest historical checkpoint as automatic truth.
+
+Relevant authority and actual-state inputs:
+
+- Resume 44
+- relevant prior Resume checkpoints only where needed to explain drift
+- Phase -1 / execution control
+- SH Core Canonical
+- Frozen Baseline
+- Build Scope
+- Implementation Contract
+- Implementation Guide
+- Execution Strategy
+- actual GitHub DEV
+- actual Supabase DEV
+- current runtime behavior
+- current Journey and Knowledge evidence
+- Recovery implementation/evidence
+
+---
+
+# 2. GLOBAL POSITION
+
+Working global model:
+
+```text
+Phase -1
+   ↓
+Phase 0
+   ↓
+Phase 1
+   ↓
+...
+   ↓
+Phase 5
+   ↓
+⑥ FINAL CROSS-PHASE ASSURANCE
+   ↓
+P6 only after prerequisites + gate + authorization
+```
+
+Phase -1 → Phase 5 must not be reopened merely because assurance finds a gap.
+
+Reopen only for a material regression, canonical contradiction, identity/ownership violation, privacy/security violation, invalid evidence, or material implementation failure.
+
+Current practical execution sequence:
+
+```text
+Journey
+   ↓
+Recovery
+   ↓
+Inheritance
+   ↓
+Clone
+   ↓
+Final integration
+   ↓
+BUILD APK
+```
+
+This is a working execution sequence, not a replacement for the canonical phase registry.
+
+---
+
+# 3. JOURNEY RECONCILIATION
+
+Journey was previously at risk of being mixed into the pre-P6/backward-audit loop.
+
+Actual runtime verification established the core Journey path.
+
+A continuity/lifecycle statement produced a Journey event with:
+
+```text
+type: LIFECYCLE
+state: CONTINUOUS
+source: runtime:p4d:journey_candidate
+```
+
+### Verdict
+
+**Journey core E2E = PASS.**
+
+Journey does not need to be rebuilt merely because Recovery, Inheritance, or Clone still require reconciliation.
+
+Do not reopen Journey without a material regression.
+
+---
+
+# 4. MEMORY / KNOWLEDGE / CONTEXT
+
+The invariant remains:
+
+```text
+MEMORY ≠ KNOWLEDGE ≠ CONTEXT
+```
+
+Memory is not a transcript dump.
+
+Knowledge is not a transcript dump.
+
+Context is dynamic and may use relevant Memory, Knowledge, Reference, current task, relationship, project, tool, and session state.
+
+Do not merge these domains merely to simplify implementation.
+
+---
+
+# 5. KNOWLEDGE — ACTUAL WORK SINCE RESUME 44
+
+Test teaching:
+
+> Saya mau mengajarkan kamu pengetahuan umum: untuk fotografi, shutter speed yang lebih cepat membantu mengurangi motion blur pada objek bergerak.
+
+Initial runtime behavior showed that the model understood the teaching but the candidate path was not initially visible downstream.
+
+The semantic runtime was then corrected so explicit teaching forms a:
+
+`knowledge_candidate`
+
+The first corrected attempt produced:
+
+`KNOWLEDGE_REJECTED: invalid origin`
+
+Actual root cause:
+
+The runtime semantic output was not normalized to the canonical P3D origin.
+
+Valid origin values include:
+
+- `MEMORY`
+- `EXPLICIT_TEACHING`
+- `EXTERNAL_REFERENCE`
+
+The runtime was corrected to normalize teaching variants to:
+
+`EXPLICIT_TEACHING`
+
+The error then disappeared.
+
+---
+
+# 6. KNOWLEDGE — ACTUAL RESULT
+
+The later teaching request successfully reached P3D acquisition and produced a Knowledge candidate.
+
+Observed state:
+
+```text
+knowledge_class = LEARNED
+scope           = GENERAL
+visibility      = SHARED
+origin          = EXPLICIT_TEACHING
+lifecycle       = CANDIDATE
+confidence      = 1
+```
+
+Provenance included:
+
+```text
+origin      = EXPLICIT_TEACHING
+acquisition = runtime:p4d:knowledge_candidate
+```
+
+### Knowledge verdict
+
+```text
+Explicit teaching recognition      🟢
+Semantic candidate formation       🟢
+Origin normalization               🟢
+P3D acquisition                    🟢
+Candidate persistence              🟢
+GENERAL classification             🟢
+SHARED visibility boundary         🟢
+Provenance                         🟢
+CANDIDATE lifecycle                🟢
+```
+
+---
+
+# 7. KNOWLEDGE THRESHOLD RECONCILIATION
+
+A temporary assumption appeared during the investigation:
+
+```text
+occurrence_count >= 5
+→ Knowledge ACTIVE
+```
+
+That assumption is not supported.
+
+The reconciled interpretation is:
+
+```text
+occurrence_count >= 5
+→ practical knowledge eligibility signal
+```
+
+It does **not** establish:
+
+```text
+occurrence_count >= 5
+→ automatic ACTIVE / trusted Knowledge
+```
+
+Explicit Owner/User teaching is a legitimate candidate-formation path.
+
+Therefore these can coexist:
+
+```text
+Explicit teaching
+      ↓
+Knowledge Candidate
+```
+
+and:
+
+```text
+Repeated/general information
+      ↓
+occurrence_count >= 5
+      ↓
+knowledge_candidate eligibility signal
+```
+
+Candidate is not trust promotion.
+
+Do not invent a new automatic promotion engine merely because a candidate remains in `CANDIDATE`.
+
+### Current Knowledge conclusion
+
+**Knowledge acquisition/integration for the implemented scope = PASS.**
+
+Automatic trust promotion is not a current blocker because the reconciled contract does not establish automatic promotion as a required policy.
+
+---
+
+# 8. RECOVERY — EXISTING FOUNDATION
+
+Recovery implementation already exists.
+
+Relevant runtime surfaces:
+
+```text
+runtime_create_recovery_snapshot(sh_id)
+runtime_restore_recovery_snapshot(snapshot_id)
+```
+
+Recovery remains:
+
+`RECOVERY ≠ NEW SH`
+
+Recovery is expected to preserve identity continuity and is associated with:
+
+- identity/ownership
+- conversations
+- memory
+- Journey
+- recovery event
+- portability/recovery state
+
+Historical/current evidence shows:
+
+- authenticated snapshot surface exists;
+- authenticated restore surface exists;
+- recovery scope binding exists;
+- restore produces recovery state;
+- Recovery → Journey linkage exists;
+- portability runtime surface exists;
+- recovery access is not exposed to anon;
+- authenticated recovery round-trip verification exists historically.
+
+Therefore Recovery is **not a subsystem that needs to be rebuilt from zero**.
+
+---
+
+# 9. RECOVERY — TRUE GAP FOUND
+
+The current audit found a concrete implementation gap.
+
+## G-REC-01 — Continuity-gap evaluation
+
+The restore implementation contains:
+
+```text
+v_gap := null
+```
+
+without an actual continuity-gap evaluation before assigning continuity status.
+
+Therefore a `RECOVERED` result is not, by itself, proof that continuity gaps were evaluated.
+
+This is an implementation gap, not merely an evidence gap.
+
+---
+
+# 10. RECOVERY — OTHER OPEN ITEMS
+
+## G-REC-02 — Full-state restore scope
+
+The current implementation clearly handles several major state classes, but the available evidence is insufficient to claim full canonical Recovery scope is restored for the current candidate.
+
+The scope to reconcile includes:
+
+- identity/root
+- ownership
+- memory
+- conversations
+- Journey
+- private Knowledge
+- legacy state
+- other continuity metadata
+
+Do not assume every historical snapshot field is restored merely because it is present in snapshot creation.
+
+## G-REC-03 — Current-candidate evidence
+
+Historical recovery evidence exists, but current-candidate-bound recovery evidence is not yet sufficiently established.
+
+## G-REC-04 — Rollback assurance
+
+Rollback/destructive restore proof is not established for the current DEV candidate.
+
+Do **not** perform destructive rollback merely to manufacture evidence.
+
+---
+
+# 11. RECOVERY VERDICT
+
+```text
+Recovery implementation exists          🟢
+Snapshot runtime surface                 🟢
+Restore runtime surface                  🟢
+Authenticated boundary                   🟢
+Identity/root preservation boundary      🟢
+Recovery → Journey linkage               🟢
+Portability surface                      🟢
+Continuity-gap evaluation                🔴 GAP
+Full-state restore proof                 🟡 OPEN
+Current-candidate evidence              🟡 OPEN
+Rollback assurance                       🟡 DEFERRED
+```
+
+Therefore:
+
+## Recovery = NOT YET PASS.
+
+The primary current implementation target is Recovery reconciliation.
+
+---
+
+# 12. WHAT RECOVERY GAP DOES NOT MEAN
+
+It does not mean:
+
+- rebuild Recovery from zero;
+- reopen all Phase 5;
+- redesign Recovery architecture;
+- create a new Recovery subsystem;
+- destroy DEV state to test rollback;
+- discard existing evidence.
+
+Correct path:
+
+```text
+existing foundation
+   ↓
+targeted reconciliation
+   ↓
+minimal correction
+   ↓
+non-destructive verification
+   ↓
+evidence
+```
+
+---
+
+# 13. INHERITANCE
+
+Canonical boundaries:
+
+```text
+INHERITANCE ≠ CLONE
+INHERITANCE ≠ IDENTITY TRANSFER
+```
+
+Inheritance must not automatically imply:
+
+- full Memory transfer;
+- full Journey transfer;
+- live state transfer;
+- identity transfer;
+- private-data access.
+
+Existing UI/functionality is not enough to declare semantic completion.
+
+### Current status
+
+```text
+Implementation surface       🟡
+Semantic reconciliation      🟡
+Full E2E verification        ⏳
+```
+
+Inheritance is next after Recovery reconciliation.
+
+---
+
+# 14. CLONE
+
+Canonical boundary:
+
+```text
+CLONE_SH ≠ SOURCE_SH
+```
+
+Actual historical agreement/authorization path is proven:
+
+```text
+request
+  ↓
+permission
+  ↓
+agreement
+  ↓
+approval
+```
+
+Clone execution is a separate problem.
+
+The existing clone creation path establishes identity/ownership/clone relationship, but does not by itself prove what state is copied.
+
+Do not guess the clone payload.
+
+Must be reconciled:
+
+- what is copied;
+- what is not copied;
+- what is referenced;
+- what is regenerated;
+- private-state boundaries;
+- Memory;
+- Knowledge;
+- Journey;
+- Conversation;
+- Context;
+- Relationship state.
+
+### Current status
+
+```text
+Clone agreement / authorization    🟢 PASS
+Clone execution semantics          🟡 RECONCILIATION REQUIRED
+Clone execution E2E                ⏳
+```
+
+---
+
+# 15. IDENTITY / CREATOR BOUNDARY
+
+Remain fixed:
+
+```text
+Creator ≠ SH
+Credential ≠ Identity
+SH-000 = Creator's SH
+```
+
+Creator authority does not imply access to every private User Memory.
+
+Creator SH is non-clonable.
+
+Recovery restores the same identity rather than creating another Creator identity.
+
+Clone does not equal identity transfer.
+
+---
+
+# 16. AUTOMATIC MULTI-MODEL ROUTING
+
+Owner decision:
+
+## Automatic multi-model routing
+
+The SH should not identify itself as the underlying provider.
+
+Provider/model is an internal runtime implementation detail.
+
+Conceptual flow:
+
+```text
+User request
+    ↓
+SH routing
+    ↓
+appropriate model/provider path
+```
+
+The route may vary by task/capability.
+
+Provider/model remains replaceable.
+
+Historically discussed candidates include:
+
+- Groq
+- OpenRouter
+- Hugging Face
+- OpenAI
+- Gemini
+
+Credentials remain outside source, commits, evidence, and resumes.
+
+---
+
+# 17. APP / APK
+
+App delivery exists and has controlled evidence.
+
+However:
+
+```text
+APP ≠ RUNTIME AUTHORITY
+APK ≠ PRODUCT COMPLETION
+APK ≠ P6 COMPLETION
+```
+
+APK build is intentionally downstream of the current capability reconciliation sequence.
+
+Do not rebuild APK merely because Recovery is not yet closed.
+
+---
+
+# 18. P6
+
+P6 is not automatically authorized by:
+
+- Phase 5 completion;
+- App completion;
+- APK existence;
+- Recovery runtime surface;
+- Knowledge candidate persistence;
+- historical assurance claims.
+
+P6 requires actual prerequisite confirmation and appropriate gate/authorization.
+
+Do not jump to P6.
+
+---
+
+# 19. RECONCILED CAPABILITY MATRIX
+
+| Capability | Classification | Reconciled meaning |
+|---|---|---|
+| Phase -1 | Authority | Primary execution control |
+| Phase 1–4 | CLOSED unless material regression | Do not reopen casually |
+| Phase 5 | CLOSED WITH DEFERRED ASSURANCE | Targeted assurance only |
+| Journey | 🟢 PASS | Core E2E verified |
+| Memory/Knowledge separation | 🟢 PASS | Boundary maintained |
+| Explicit teaching → Knowledge Candidate | 🟢 PASS | Actual candidate persisted |
+| Knowledge validation/classification boundary | 🟢 PASS for implemented scope | Keep separate from trust |
+| Automatic Knowledge trust promotion | ⚪ OPEN BY DESIGN | No automatic policy established |
+| Recovery implementation | 🟢 EXISTS | Not equivalent to full assurance |
+| Recovery continuity-gap evaluation | 🔴 GAP | Current primary target |
+| Recovery full-state proof | 🟡 OPEN | Targeted verification required |
+| Recovery current-candidate evidence | 🟡 OPEN | Evidence gap |
+| Recovery rollback proof | 🟡 DEFERRED | No destructive test |
+| Inheritance | 🟡 RECONCILIATION | After Recovery |
+| Clone agreement | 🟢 PASS | Authorization proven |
+| Clone execution | 🟡 RECONCILIATION | Semantics incomplete |
+| App | 🟢 Existing | Not current target |
+| APK | 🟢 Existing artifact/evidence | Do not rebuild without GAP |
+| Full Product E2E | 🔴 NOT COMPLETE | Broader assurance remains |
+| P6 | 🔴 NOT AUTHORIZED / NOT CLOSED | Requires gate |
+
+---
+
+# 20. TRUE GAPS VS NON-GAPS
+
+## TRUE IMPLEMENTATION GAP
+
+**G-REC-01:** Recovery continuity-gap evaluation is not actually implemented/evaluated.
+
+## OPEN ASSURANCE ITEMS
+
+**G-REC-02:** Full-state restore scope requires targeted verification.
+
+**G-REC-03:** Current-candidate recovery evidence is not sufficiently bound.
+
+**G-REC-04:** Rollback assurance remains unproven.
+
+## RECONCILIATION ITEMS
+
+**G-INH-01:** Inheritance semantics and implementation require reconciliation after Recovery.
+
+**G-CLONE-01:** Clone execution semantics require reconciliation; agreement is already proven.
+
+## NOT CURRENT GAPS
+
+**N-KNOW-01:** Knowledge remaining `CANDIDATE` is not itself a bug.
+
+**N-KNOW-02:** `occurrence >= 5` does not imply automatic ACTIVE/trust promotion.
+
+**N-JOURNEY-01:** Journey does not need to be rebuilt.
+
+**N-APK-01:** APK does not need rebuilding without a material gap.
+
+---
+
+# 21. DO-NOT-REOPEN LIST
+
+Do not reopen without material evidence of regression:
+
+```text
+Journey core E2E
+Memory ≠ Knowledge ≠ Context
+Knowledge explicit teaching acquisition
+Knowledge origin normalization
+Knowledge candidate persistence
+basic App chat
+basic runtime invocation
+existing APK build
+Phase 4 foundation
+identity boundaries
+ownership/privacy invariants
+automatic multi-model routing decision
+```
+
+Do not restart Phase 1–5 because historical Resumes contain older unfinished-looking checkpoints.
+
+---
+
+# 22. CURRENT EXECUTION SEQUENCE
+
+```text
+Journey
+   🟢 PASS
+      ↓
+Knowledge acquisition / separation
+   🟢 PASS
+      ↓
+Recovery
+   🔴 CURRENT TARGET
+      ↓
+Inheritance
+   🟡 NEXT
+      ↓
+Clone
+   🟡 NEXT
+      ↓
+Final integration
+   ⏳
+      ↓
+APK / final build
+   ⏳
+```
+
+This is a practical execution order only. It does not override canonical phase registry or P6 authorization.
+
+---
+
+# 23. NEXT EXECUTION TARGET — RECOVERY RECONCILIATION
+
+Start with:
+
+```text
+Phase -1
+   ↓
+Recovery canonical requirements
+   ↓
+Recovery implementation contract
+   ↓
+Recovery implementation guide / execution strategy
+   ↓
+existing Recovery artifacts
+   ↓
+GitHub DEV
+   ↓
+Supabase DEV
+   ↓
+runtime/evidence
+   ↓
+RECONCILE
+   ↓
+exact gap
+   ↓
+minimal realization
+   ↓
+non-destructive verification
+   ↓
+evidence
+```
+
+Priority questions:
+
+1. What exact Recovery state is canonical and mandatory?
+2. What exact continuity-gap semantics are required?
+3. What does current snapshot creation actually capture?
+4. What does current restore actually restore?
+5. Is Knowledge/legacy state required in restore or only referenced?
+6. How is identity preservation verified?
+7. How is Journey recovery event verified?
+8. How are privacy boundaries verified?
+9. Can current-candidate evidence be generated non-destructively?
+10. What, if anything, genuinely requires an Owner decision?
+
+Do not implement based on assumption.
+
+---
+
+# 24. OWNER DECISION / STOP CONDITION
+
+No new Owner decision is currently required for the known Recovery technical gap unless reconciliation discovers that the required behavior itself is undefined or contradictory.
+
+STOP only if:
+
+- canonical Recovery semantics conflict;
+- ownership/privacy/security must change;
+- identity model must change;
+- Recovery scope is undefined in a way that changes architecture;
+- acceptance criteria cannot be satisfied without a new decision.
+
+Otherwise:
+
+```text
+AUDIT
+→ RECONCILE
+→ MINIMAL REALIZATION
+→ VERIFY
+→ EVIDENCE
+→ DEV
+```
+
+---
+
+# 25. ANTI-DRIFT RULE FOR NEXT SESSION
+
+Every new session must establish:
+
+1. What does Resume 45 say?
+2. What does authority say?
+3. What does GitHub DEV actually contain?
+4. What does Supabase DEV actually contain?
+5. What has actually been verified?
+6. What is a true implementation gap?
+7. What is only an evidence gap?
+8. What is intentionally deferred?
+9. What has already PASS and must not be rebuilt?
+10. What is the ONE current execution target?
+
+Do not infer current phase from an old Resume paragraph.
+
+Do not infer unfinished work merely because an old Resume says it was unfinished.
+
+Do not infer completion merely because a newer Resume says DONE.
+
+Reconcile first.
+
+---
+
+# 26. SESSION CONTINUATION COMMAND
+
+> **Continue SECOND HEAD from Session Resume 45.**
+>
+> Resume 45 is a reconciled continuity checkpoint, not Canonical authority.
+>
+> Do not restart Phase 1–5.
+>
+> Do not jump to P6.
+>
+> Do not rebuild Journey or Knowledge acquisition.
+>
+> Current execution target is **Recovery Reconciliation**.
+>
+> Start:
+>
+> `Phase -1 → Owner decisions → SH Core Canonical → Frozen Baseline → Build Scope → Implementation Contract → Implementation Guide → Execution Strategy → Recovery artifacts → GitHub DEV → Supabase DEV → runtime/evidence`
+>
+> Then:
+>
+> `RECONCILE → TRUE GAP → MINIMAL REALIZATION → VERIFY → EVIDENCE → DEV`
+>
+> Known current Recovery gap:
+>
+> **continuity-gap evaluation is not actually implemented/evaluated.**
+>
+> Also verify:
+>
+> - full-state restore scope;
+> - current-candidate recovery evidence;
+> - rollback assurance without destructive mutation.
+>
+> Do not invent Recovery semantics.
+>
+> If authority is sufficient, implement minimally and continue.
+>
+> If a genuine Owner decision is required, stop only at that point.
+
+---
+
+# 27. ONE-LINE CURRENT POSITION
+
+```text
+⑥ FINAL CROSS-PHASE ASSURANCE / CONTROLLED RECONCILIATION
+
+Journey                 🟢 PASS
+Knowledge acquisition   🟢 PASS
+Recovery                🔴 CURRENT TARGET / GAP FOUND
+Inheritance             🟡 NEXT
+Clone                   🟡 NEXT
+Final integration       ⏳
+APK                     ⏳ AFTER INTEGRATION
+P6                      🔴 NOT AUTOMATICALLY AUTHORIZED
+```
+
+---
+
+# 28. FINAL PRINCIPLE
+
+```text
+KEEP MOVING FORWARD
++
+REVIEW BACKWARD ONLY WHEN NECESSARY
++
+RECONCILE BEFORE REBUILDING
++
+DO NOT REOPEN SETTLED WORK WITHOUT MATERIAL REASON
++
+DO NOT INVENT MISSING DECISIONS
++
+DO NOT CONFUSE EVIDENCE GAP WITH IMPLEMENTATION GAP
++
+DO NOT CONFUSE CANDIDATE WITH TRUSTED KNOWLEDGE
++
+DO NOT CONFUSE APK WITH SYSTEM COMPLETION
++
+DO NOT CONFUSE ASSURANCE WORK WITH P6 AUTHORIZATION
++
+USE MINIMAL REALIZATION
++
+PRESERVE EXISTING FOUNDATION
++
+VERIFY ACTUAL GITHUB + SUPABASE
++
+CLAIM ONLY WHAT EVIDENCE SUPPORTS
+```
+
+---
+
+## END OF SESSION RESUME 45
+
+---
 SECOND HEAD — SESSION RESUME 45 (next)
 
 
