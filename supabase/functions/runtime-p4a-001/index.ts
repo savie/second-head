@@ -2,6 +2,11 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createJourneyRuntimeDecisionSink, type JourneyEventRecorder } from "../../../runtime/p5a/journey_decision.ts";
 import { createMemoryJourneySignalDetector } from "../../../runtime/p5a/memory_journey_signal.ts";
+import { createSemanticJourneySignalDetector } from "../../../runtime/p5a/semantic_journey_signal.ts";
+
+type JourneyDecisionSignal = {
+  automatic_candidate?: Awaited<ReturnType<ReturnType<typeof createMemoryJourneySignalDetector>["detect"]>>["automatic_candidate"];
+};
 
 const jsonHeaders = { "Content-Type": "application/json" };
 const streamHeaders = {
@@ -101,21 +106,86 @@ Deno.serve(async (req: Request) => {
   const resolved = await resolveIdentity(req);
   if (resolved.error) return resolved.error;
 
-  let body: { user_message?: string; stream?: boolean };
+  let body: {
+    user_message?: string;
+    stream?: boolean;
+    journey_only?: boolean;
+    explicit_journey_capture?: boolean;
+    journey_representation?: string;
+  };
   try {
     body = await req.json();
   } catch {
     return new Response(JSON.stringify({ error: "RUNTIME_REJECTED: invalid JSON" }), { status: 400, headers: jsonHeaders });
   }
 
+  const identity = resolved.identity;
+  const supabase = resolved.supabase;
+
+  if (body.journey_only === true) {
+    if (body.explicit_journey_capture !== true) {
+      return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: explicit capture is required" }), { status: 400, headers: jsonHeaders });
+    }
+
+    const representation = body.journey_representation?.trim();
+    if (!representation) {
+      return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: representation is required" }), { status: 400, headers: jsonHeaders });
+    }
+
+    try {
+      const journeyDecision = createJourneyRuntimeDecisionSink(
+        {
+          async detect() {
+            return {};
+          },
+        },
+        createJourneyRecorder(supabase),
+      );
+
+      const decision = await journeyDecision.decideAndRecord({
+        sh_id: identity.sh_id,
+        user_message: representation,
+        response: null,
+        explicit_intent: {
+          requested: true,
+          candidate: {
+            event_type: "EXPERIENCE",
+            continuity_status: "CONTINUOUS",
+            payload: {
+              representation,
+              capture_mode: "EXPLICIT_USER",
+            },
+            source_ref: "runtime:p5a:explicit_user_capture",
+          },
+        },
+      });
+
+      await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", {
+        journey_only: true,
+        explicit_journey_capture: true,
+      });
+      await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
+        journey_only: true,
+        journey_decision: decision.reason,
+      });
+
+      return new Response(JSON.stringify({
+        sh_id: identity.sh_id,
+        journey_decision: decision.reason,
+        event_id: decision.candidate ? "recorded" : null,
+      }), { status: 200, headers: jsonHeaders });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "JOURNEY_CAPTURE_FAILED";
+      return new Response(JSON.stringify({ error: message }), { status: 500, headers: jsonHeaders });
+    }
+  }
+
   const userMessage = body.user_message?.trim();
   if (!userMessage) return new Response(JSON.stringify({ error: "RUNTIME_REJECTED: user_message is required" }), { status: 400, headers: jsonHeaders });
 
-  const identity = resolved.identity;
-  const supabase = resolved.supabase;
   // The current P4A app runtime uses a mock textual response. A future model
-  // adapter supplies the structured memory_candidate object consumed by the
-  // detector; client input is never treated as that semantic signal.
+  // adapter supplies structured semantic signals consumed by the Journey
+  // detector; client input is never treated as an automatic semantic signal.
   const output = userMessage;
 
   try {
@@ -126,19 +196,43 @@ Deno.serve(async (req: Request) => {
     await recordConversation(supabase, identity.sh_id, "user", userMessage);
     await recordConversation(supabase, identity.sh_id, "assistant", output);
 
+    const memoryDetector = createMemoryJourneySignalDetector();
+    const semanticDetector = createSemanticJourneySignalDetector();
     const journeyDecision = createJourneyRuntimeDecisionSink(
-      createMemoryJourneySignalDetector(),
+      {
+        async detect(input) {
+          const semantic = await semanticDetector.detect(input);
+          if (semantic.automatic_candidate) return semantic;
+          return memoryDetector.detect(input);
+        },
+      },
       createJourneyRecorder(supabase),
     );
-    await journeyDecision.decideAndRecord({
+
+    const decision = await journeyDecision.decideAndRecord({
       sh_id: identity.sh_id,
       user_message: userMessage,
       response: output,
+      explicit_intent: body.explicit_journey_capture === true
+        ? {
+            requested: true,
+            candidate: {
+              event_type: "EXPERIENCE",
+              continuity_status: "CONTINUOUS",
+              payload: {
+                representation: userMessage,
+                capture_mode: "EXPLICIT_USER",
+              },
+              source_ref: "runtime:p5a:explicit_user_capture",
+            },
+          }
+        : null,
     });
 
     await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", {
       stream: body.stream === true,
       response_length: output.length,
+      journey_decision: decision.reason,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "RUNTIME_PERSISTENCE_FAILED";
