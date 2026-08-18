@@ -67,6 +67,10 @@ declare
   v_agreement clone_agreements%rowtype;
   v_clone_sh_id uuid := gen_random_uuid();
 begin
+  if auth.uid() is null then
+    raise exception 'CLONE_REJECTED: authentication required';
+  end if;
+
   select * into v_agreement
   from public.clone_agreements
   where agreement_id = p_agreement_id
