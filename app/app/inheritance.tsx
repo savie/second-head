@@ -16,12 +16,25 @@ import {
   type SuccessionRule,
 } from '../features/inheritance/inheritance-service';
 
+function describeError(err: unknown, fallback: string) {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'object' && err !== null) {
+    const candidate = err as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown };
+    const parts = [candidate.message, candidate.code, candidate.details, candidate.hint]
+      .filter((value): value is string => typeof value === 'string' && value.length > 0);
+    if (parts.length > 0) return parts.join(' | ');
+  }
+  return fallback;
+}
+
 export default function InheritanceScreen() {
   const { session, context } = useAuth();
   const [succession, setSuccession] = useState<SuccessionRule[]>([]);
   const [authorizations, setAuthorizations] = useState<InheritanceAuthorization[]>([]);
   const [legacy, setLegacy] = useState<LegacyRecord[]>([]);
-  const [sourceShId, setSourceShId] = useState(context?.shInstances[0]?.sh_id ?? '');
+  const [successionSourceShId, setSuccessionSourceShId] = useState(context?.shInstances[0]?.sh_id ?? '');
+  const [inheritanceSourceShId, setInheritanceSourceShId] = useState('');
+  const [legacySourceShId, setLegacySourceShId] = useState('');
   const [successorAccountId, setSuccessorAccountId] = useState('');
   const [targetShId, setTargetShId] = useState('');
   const [sourceAccountId, setSourceAccountId] = useState('');
@@ -39,7 +52,7 @@ export default function InheritanceScreen() {
     try {
       const [s, a, l] = await Promise.all([listSuccessionRules(), listInheritanceAuthorizations(), listLegacyRecords()]);
       setSuccession(s); setAuthorizations(a); setLegacy(l);
-    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to load P5C data'); }
+    } catch (err) { setError(describeError(err, 'Unable to load P5C data')); }
     finally { setLoading(false); }
   }, []);
 
@@ -51,7 +64,7 @@ export default function InheritanceScreen() {
   async function run(action: () => Promise<string | object>, message: (value: string | object) => string) {
     setBusy(true); setError(null); setNotice(null);
     try { const result = await action(); setNotice(message(result)); await refresh(); }
-    catch (err) { setError(err instanceof Error ? err.message : 'P5C operation failed'); }
+    catch (err) { setError(describeError(err, 'P5C operation failed')); }
     finally { setBusy(false); }
   }
 
@@ -63,21 +76,21 @@ export default function InheritanceScreen() {
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Succession rule</Text>
       <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
-      <TextInput placeholder="Enter the SH ID owned by the source account" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <TextInput placeholder="Enter the SH ID owned by the source account" value={successionSourceShId} onChangeText={setSuccessionSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Text style={{ fontWeight: '600' }}>Successor Account ID</Text>
       <TextInput placeholder="Enter the account ID that will become the successor" value={successorAccountId} onChangeText={setSuccessorAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <Button title="Create succession rule" disabled={busy || !sourceShId || !successorAccountId} onPress={() => void run(() => createSuccessionRule({ sourceShId, successorAccountId }), (v) => `Succession created: ${String((v as SuccessionRule).succession_id)}`)} />
+      <Button title="Create succession rule" disabled={busy || !successionSourceShId || !successorAccountId} onPress={() => void run(() => createSuccessionRule({ sourceShId: successionSourceShId, successorAccountId }), (v) => `Succession created: ${String((v as SuccessionRule).succession_id)}`)} />
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Inheritance authorization</Text>
       <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
-      <TextInput placeholder="Enter the SH ID that grants inheritance authorization" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <TextInput placeholder="Enter the SH ID that grants inheritance authorization" value={inheritanceSourceShId} onChangeText={setInheritanceSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Text style={{ fontWeight: '600' }}>Target SH ID</Text>
       <TextInput placeholder="Enter the SH ID that receives the authorized inheritance" value={targetShId} onChangeText={setTargetShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Text style={{ fontWeight: '600' }}>Source Account ID</Text>
       <TextInput placeholder="Enter the account ID that owns the source SH" value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Text style={{ fontWeight: '600' }}>Target Account ID</Text>
       <TextInput placeholder="Enter the account ID that owns the target SH" value={targetAccountId} onChangeText={setTargetAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <Button title="Create authorization" disabled={busy || !sourceShId || !targetShId || !sourceAccountId || !targetAccountId} onPress={() => void run(() => createInheritanceAuthorization({ sourceShId, targetShId, sourceAccountId, targetAccountId }), (v) => `Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`)} />
+      <Button title="Create authorization" disabled={busy || !inheritanceSourceShId || !targetShId || !sourceAccountId || !targetAccountId} onPress={() => void run(() => createInheritanceAuthorization({ sourceShId: inheritanceSourceShId, targetShId, sourceAccountId, targetAccountId }), (v) => `Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`)} />
 
       {loading ? <ActivityIndicator /> : null}
       {notice ? <Text>{notice}</Text> : null}
@@ -94,10 +107,10 @@ export default function InheritanceScreen() {
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Legacy</Text>
       <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
-      <TextInput placeholder="Enter the SH ID whose legacy record is being recorded" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <TextInput placeholder="Enter the SH ID whose legacy record is being recorded" value={legacySourceShId} onChangeText={setLegacySourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Text style={{ fontWeight: '600' }}>Legacy Type</Text>
       <TextInput placeholder="MEMORY / KNOWLEDGE / EXPERIENCE / JOURNEY / HISTORY / VALUE / REFERENCE" value={legacyType} onChangeText={(v) => setLegacyType(v.toUpperCase() as LegacyRecord['legacy_type'])} autoCapitalize="characters" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <Button title="Record legacy" disabled={busy || !sourceShId || !legacyType} onPress={() => void run(() => recordLegacy({ sourceShId, legacyType }), (v) => `Legacy recorded: ${String(v)}`)} />
+      <Button title="Record legacy" disabled={busy || !legacySourceShId || !legacyType} onPress={() => void run(() => recordLegacy({ sourceShId: legacySourceShId, legacyType }), (v) => `Legacy recorded: ${String(v)}`)} />
       {legacy.slice(0, 10).map((item) => <View key={item.legacy_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}><Text>{item.legacy_id}</Text><Text>{item.legacy_type} · {item.status}</Text></View>)}
 
       <Button title="Refresh" disabled={busy} onPress={() => void refresh()} />
