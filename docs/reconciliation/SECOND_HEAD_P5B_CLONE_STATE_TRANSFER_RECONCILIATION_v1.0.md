@@ -9,13 +9,13 @@ Mutation: NO CANONICAL MUTATION
 
 ## 1. Purpose
 
-This document reconciles what the current authority chain actually establishes about Clone state transfer.
+This document reconciles what the current authority chain and Owner decisions establish about Clone state transfer.
 
-It is intentionally separate from the previously recorded P5B target-identity reconciliation. Target registration and PRIMARY SH semantics are already Owner-locked in `SECOND_HEAD_P5B_CLONE_EXECUTION_RECONCILIATION_v1.0.md`.
+It is separate from the previously recorded P5B target-identity reconciliation. Target registration and PRIMARY SH semantics are already Owner-locked in `SECOND_HEAD_P5B_CLONE_EXECUTION_RECONCILIATION_v1.0.md`.
 
 This document answers a narrower question:
 
-> What state is inherited by a Clone, what is not inherited by default, and what remains open for implementation?
+> What state is inherited by a Clone, what is not inherited, and what implementation work remains?
 
 No unsupported Clone payload is invented here.
 
@@ -38,6 +38,8 @@ Phase -1 / Phase artifacts
 ↓
 Session Resume / recovered semantics
 ↓
+Owner Decisions recorded here
+↓
 Actual GitHub DEV implementation
 ```
 
@@ -47,9 +49,7 @@ This document is a reconciliation artifact, not a replacement authority.
 
 ## 3. Established Clone Semantics
 
-The recovered project semantics establish that Clone is **not** a full copy of the Source SH.
-
-The following boundaries are explicit:
+Clone is **not** a full copy of the Source SH.
 
 ```text
 CLONE_SH ≠ SOURCE_SH
@@ -67,241 +67,261 @@ Clone has:
 
 A Clone therefore does not become the Source SH or continue the Source SH as the same identity.
 
-The canonical/recovered model also states that Clone does not automatically inherit:
+The Clone does not automatically inherit:
 
 - SH Identity;
 - Core;
-- private Memory;
-- original Journey;
-- live State;
+- private Source Memory;
+- original Source Journey;
+- live Source State;
 - ownership;
 - credentials;
 - authorization;
-- Creator-only/private data.
-
-This is consistent with the invariant that Clone is a separate SH identity and that advanced capabilities must not silently replace Identity Root or Ownership Root.
+- Creator-only/private data;
+- Source Conversation / chat history.
 
 ---
 
-## 4. Selective Inheritance Boundary
+## 4. OWNER DECISIONS — STATE TRANSFER
 
-The recovered semantics explicitly allow **selective** inheritance when permission and agreement authorize it.
+The Owner resolves the remaining Clone state-transfer semantics as follows.
 
-The established candidate categories are:
+### 4.1 Automatic inherited state
+
+When a Clone is created, the following Source state is intended to come with the Clone:
 
 ```text
 Knowledge
-Selected Memory
-Selected Traits
-References
+Memory
 Context
-Relationship Context
+References
+Traits
 ```
 
-This is an authorization/scope concept, not an instruction to copy all source state.
+This is the intended human/semantic meaning of Clone state inheritance. It is not a request to copy unrelated private infrastructure state, identity, credentials, ownership, or conversations.
 
-Therefore:
+### 4.2 Candidate state
+
+Candidate state is included in the Clone inheritance semantics.
+
+This applies to Candidate forms of the relevant domains, including for example:
 
 ```text
-Clone creation
-    ≠
-full state copy
+Knowledge Candidate → Clone
+Memory Candidate    → Clone
 ```
 
-and:
+A Candidate remains a Candidate unless an existing higher-authority lifecycle rule explicitly promotes it. Clone creation itself must not silently promote Candidate material into trusted/active Knowledge or Memory.
+
+### 4.3 Conversation / chat
+
+Conversation, using the Owner's human terminology of **chat**, does **not** come into the Clone.
+
+This is intentional and already established by the recovered Clone semantics.
 
 ```text
-permission + agreement + scope
+Source chat
     ↓
-selective inheritance
+NOT transferred
+    ↓
+Clone starts with its own conversation history
 ```
 
-The distinction between private Memory and shared/general Knowledge must remain intact. Provenance may persist across transferred Knowledge/Memory where the applicable lineage model permits it, without automatically exposing the private identity of the original source.
+### 4.4 Journey
 
----
+The Source Journey does **not** come into the Clone.
 
-## 5. Conversation
-
-Conversation is **not established as automatically transferable Clone state**.
-
-The recovered Clone semantics explicitly distinguish Clone from copying the Source SH's live/private state, and the session evidence states that Clone execution must not be assumed to copy all Source conversations.
-
-Therefore the safe current classification is:
-
-```text
-Source Conversation → NOT INHERITED BY DEFAULT
-```
-
-A future explicit conversation-transfer requirement would require its own authority reconciliation rather than being inferred from the existence of Clone.
-
-Operationally this supports the expected initial experience of a newly materialized Clone having its own conversation history rather than silently exposing/copying the Source's private chat history.
-
----
-
-## 6. Journey
-
-Journey is a temporal continuity construct, not a generic storage layer.
-
-The recovered semantics state that a Clone has its **own Journey** and that the original Source Journey is **not inherited by default**.
-
-Therefore:
+Clone has its own Journey and begins its own continuity/development.
 
 ```text
 Source Journey
-     ↓
-NOT copied into Clone Journey by default
-     ↓
-Clone begins its own Journey
+    ↓
+NOT transferred
+    ↓
+Clone Journey
 ```
 
-If selected historical information from the Source Journey is ever transferred, it must be represented as an explicitly authorized state/reference/inheritance operation rather than silently making the Clone's Journey identical to the Source's Journey.
+### 4.5 Recipient consent / acceptance
+
+The intended recipient cannot be assumed to have chosen to become a Clone merely because the Source created the Clone relationship.
+
+The resolved human flow is:
+
+```text
+A creates Clone for B
+        ↓
+B is intended recipient
+        ↓
+B registers / claims the recipient identity
+        ↓
+Clone becomes B's PRIMARY SH
+```
+
+The implementation must therefore preserve a recipient-side acceptance/claim boundary appropriate to the registration lifecycle. A Source action must not silently force an already-unwilling person into a Clone identity.
+
+The exact UI wording/mechanism may be derived during implementation as long as it preserves this semantic boundary.
 
 ---
 
-## 7. Memory
+## 5. What "Automatic" Means Here
 
-Memory is deliberately retained state, not a transcript of everything that happened.
+"Automatic" means that once the Clone is legitimately materialized for the intended recipient, the defined transferable state categories are part of the Clone's initial state without requiring the Owner to manually select individual rows one by one.
 
-The established lifecycle is:
-
-```text
-Experience
-↓
-Memory Candidate
-↓
-Relevance / Scope / Privacy / Governance
-↓
-Memory
-```
-
-For Clone:
+It does **not** mean:
 
 ```text
-Private Memory → NOT INHERITED BY DEFAULT
-
-Selected Memory → MAY BE INHERITED
-                   only with explicit permission/agreement/scope
+COPY every row from every Source table
 ```
 
-Therefore the presence of a `scope` field in `clone_agreements` is compatible with selective transfer, but the current implementation does not yet establish a complete, category-specific Memory transfer engine.
+The implementation must still respect:
 
-That implementation gap must not be filled by simply copying all memory rows.
+- privacy boundaries;
+- domain lifecycle rules;
+- Candidate status;
+- provenance;
+- source/target ownership separation;
+- authorization;
+- data-model constraints.
+
+Therefore the target is a **domain-aware automatic transfer**, not a raw database clone.
 
 ---
 
-## 8. Knowledge
+## 6. State Transfer Matrix
 
-Knowledge is distinct from Memory and Reference:
+| State / Domain | Clone Result | Notes |
+|---|---|---|
+| SH Identity | ❌ Not copied | Clone has its own identity |
+| Core | ❌ Not copied | Clone remains independently governed |
+| Ownership | ❌ Not copied | Target recipient owns Clone |
+| Credentials | ❌ Not copied | Target has independent credentials |
+| Authorization | ❌ Not copied | Source authorization does not become Target authorization |
+| Private Source data | ❌ Not copied wholesale | Privacy boundary remains |
+| Knowledge | 🟢 Inherited | Owner decision: automatic domain transfer |
+| Knowledge Candidate | 🟢 Inherited | Remains Candidate unless existing lifecycle promotes it |
+| Memory | 🟢 Inherited | Owner decision: automatic domain transfer |
+| Memory Candidate | 🟢 Inherited | Remains Candidate unless existing lifecycle promotes it |
+| Context | 🟢 Inherited | Initial transferable Context state; not live Source session |
+| References | 🟢 Inherited | Preserve applicable provenance/lineage |
+| Traits | 🟢 Inherited | Does not make Clone's Personality identical to Source |
+| Conversation / chat | ❌ Not inherited | Explicit Owner decision |
+| Source Journey | ❌ Not inherited | Clone has its own Journey |
+| Live Source runtime/session | ❌ Not inherited | Clone gets its own runtime state |
+| Provenance | 🟢 Preserved where applicable | Must remain auditable without exposing private Source data |
+
+---
+
+## 7. Knowledge, Memory, and Candidate Semantics
+
+Knowledge and Memory remain distinct domains.
 
 ```text
 Reference = where information comes from
 Knowledge = what SH understands / can use
-Memory = what SH retains
-Context = what SH currently needs
+Memory    = what SH retains
+Context   = what SH currently needs
 ```
 
-The recovered Clone semantics allow selective Knowledge inheritance.
+Candidate is a lifecycle/trust state, not a synonym for Knowledge or Memory.
 
 Therefore:
 
 ```text
-Knowledge → NOT automatically copied in full
-Selected Knowledge → MAY be inherited when authorized
+Knowledge Candidate → inherited as Candidate
+Memory Candidate    → inherited as Candidate
 ```
 
-Knowledge provenance/lineage should be preserved where the relevant implementation supports it, while source-private identity information must remain protected.
+and not:
 
-The practical Knowledge Candidate rule recovered elsewhere in the project (`occurrence_count >= 5`) does **not** mean that every candidate becomes trusted/active, and it does not by itself define Clone transfer semantics.
+```text
+Candidate → automatic promotion
+```
+
+Existing Candidate promotion rules remain authoritative. Clone transfer must not bypass them.
 
 ---
 
-## 9. Candidate State
+## 8. Personality / Traits
 
-`CANDIDATE` is a lifecycle/trust state and must not be conflated with active Knowledge or Memory.
+Traits are included in the automatic inherited state.
 
-Therefore a Clone implementation must not assume:
-
-```text
-Candidate → automatically promoted Knowledge
-```
-
-or:
+However:
 
 ```text
-Candidate → automatically promoted Memory
+Selected/inherited Traits
+        ≠
+copy Source Personality wholesale
 ```
 
-If Candidate material is within an explicitly authorized transfer scope, its Candidate status should remain semantically distinguishable unless a higher-authority rule explicitly authorizes promotion.
-
-Current authority does not establish an automatic Candidate promotion during Clone creation.
-
-Classification: **OPEN IMPLEMENTATION DETAIL, bounded by existing Candidate semantics**.
+The Clone still develops its own Personality over its own Journey and subsequent interaction.
 
 ---
 
-## 10. Personality / Traits
+## 9. Context
 
-The recovered semantics allow selective inheritance of **Selected Traits**, while also establishing that a Clone develops its own Personality over its own Journey.
+Context is transferable initial state, but it must not become the Source's live session.
 
 Therefore:
 
 ```text
-Source Personality → NOT copied wholesale
-Selected Traits    → MAY be inherited when authorized
-Clone Personality  → develops independently
+Source Context
+    ↓
+initial Clone Context state
+    ↓
+Clone subsequently assembles its own runtime Context
 ```
 
-A Clone must not become behaviorally identical merely because selected traits were transferred.
+The implementation must distinguish transferred Context from a live Source runtime/session.
 
 ---
 
-## 11. Context
+## 10. Conversation / Chat Boundary
 
-Context is dynamic and request/session scoped. It is not identical to Memory or Knowledge.
+Conversation is explicitly excluded by Owner decision.
 
-The recovered semantics allow selective inheritance of Context / Relationship Context when explicitly authorized.
-
-However, the current implementation does not establish a complete generic Context transfer engine.
-
-Therefore:
+The expected user-visible behavior is:
 
 ```text
-Live Source Context → NOT automatically inherited
-Selected Context    → MAY be inherited if explicitly scoped
-Clone Context       → subsequently assembled for Clone's own runtime
+B registers
+↓
+Clone PRIMARY SH exists
+↓
+Knowledge / Memory / Context / References / Traits / Candidates exist as applicable
+↓
+Chat history is empty/new
+↓
+Clone starts a new conversation
 ```
 
-A live Source session must never become the Clone's live session merely because a Clone was created.
+No historical Source chat should be copied merely because Clone state is materialized.
 
 ---
 
-## 12. Ownership / Identity / Credentials / Authorization
+## 11. Journey Boundary
 
-These are explicitly **not transferred as Source state**.
+The Source Journey is explicitly excluded.
 
-The Owner-resolved target lifecycle establishes the new Account and PRIMARY Clone SH as belonging to the recipient.
-
-Therefore:
+Clone begins its own Journey:
 
 ```text
-Source Account      ≠ Target Account
-Source SH           ≠ Clone SH
-Source ownership    ≠ Target ownership
-Source credentials  ≠ Clone credentials
-Source authorization ≠ automatic target authorization
+Source Journey ────────────────┐
+                              │
+                              X  not transferred
+                              │
+Clone Journey → starts independently
 ```
 
-The target's ownership is newly established through its own identity lifecycle.
+This does not prevent future authorized references to historical Source information from existing elsewhere in the Clone state. Such references must not silently become the Clone's original Journey.
 
 ---
 
-## 13. Provenance / Lineage
+## 12. Provenance / Lineage
 
 Provenance is not the same thing as private-data access.
 
-A transferred Knowledge/Memory/reference lineage may preserve source provenance without exposing private source identity beyond the authorization boundary.
+Transferred Knowledge, Memory, References, Traits, Context, and Candidate material may retain appropriate Source lineage while respecting privacy boundaries.
 
-At minimum, the Clone relationship itself must remain auditable through:
+At minimum the Clone relationship remains auditable through:
 
 ```text
 Clone SH
@@ -313,62 +333,89 @@ Clone Agreement
 Target ownership
 ```
 
-The current `sh_clones` relationship and agreement metadata provide a foundation for this relationship.
+The implementation must preserve provenance where the domain model supports it.
 
-A complete per-item state-transfer lineage mechanism is **not yet proven by the current Clone implementation**.
+---
+
+## 13. Recipient Acceptance Boundary
+
+The Owner clarified an important human semantic:
+
+> The Source can create someone as the intended Clone recipient, but the recipient cannot be assumed to have consented merely because the Source created the relationship.
+
+Therefore the registration/claim lifecycle must provide a meaningful recipient boundary.
+
+The conceptual flow is:
+
+```text
+A / Source
+↓
+creates Clone for B's email
+↓
+B is an intended recipient
+↓
+B registers / claims the invitation
+↓
+B becomes Account owner
+↓
+Clone becomes B's PRIMARY SH
+```
+
+If B does not claim/register the intended Clone, the implementation must not silently turn an unrelated account into the Clone.
 
 ---
 
 ## 14. Current Implementation vs Reconciled Semantics
 
-Current DEV implementation now materializes the target Clone as the recipient's PRIMARY SH through the email-registration lifecycle.
+Current DEV implementation has reconciled the target identity lifecycle and PRIMARY SH semantics.
 
-However, the current Clone materialization path creates identity/ownership/relationship records; it does not establish a complete selective state-transfer engine for Memory, Knowledge, Candidate, Journey, Conversation, Context, or Traits.
+The remaining implementation gap is the domain-aware automatic transfer described by the Owner decisions in this document.
 
-Therefore the current state is:
+Current status:
 
 ```text
 Clone identity/materialization       🟢 RECONCILED
 Target PRIMARY SH                    🟢 RECONCILED
 Source/Clone separation              🟢 RECONCILED
 Agreement/provenance relationship    🟢 FOUNDATION
-Full state transfer                  🟡 NOT IMPLEMENTED / NOT PROVEN
-Selective Memory transfer            🟡 OPEN IMPLEMENTATION
-Selective Knowledge transfer         🟡 OPEN IMPLEMENTATION
-Candidate transfer semantics         🟡 OPEN IMPLEMENTATION
-Journey transfer                     🟡 OPEN / NOT DEFAULT
-Conversation transfer                🟡 NOT DEFAULT / NOT IMPLEMENTED
-Trait transfer                       🟡 OPEN IMPLEMENTATION
-Context transfer                     🟡 OPEN IMPLEMENTATION
-Per-item provenance transfer         🟡 OPEN IMPLEMENTATION
+Knowledge transfer                   🟡 IMPLEMENTATION REQUIRED
+Knowledge Candidate transfer         🟡 IMPLEMENTATION REQUIRED
+Memory transfer                      🟡 IMPLEMENTATION REQUIRED
+Memory Candidate transfer            🟡 IMPLEMENTATION REQUIRED
+Context transfer                     🟡 IMPLEMENTATION REQUIRED
+Reference transfer                   🟡 IMPLEMENTATION REQUIRED
+Trait transfer                       🟡 IMPLEMENTATION REQUIRED
+Conversation transfer                🟢 EXCLUDED
+Source Journey transfer              🟢 EXCLUDED
+Recipient acceptance/claim           🟡 IMPLEMENTATION REQUIRED
+Per-item provenance transfer         🟡 IMPLEMENTATION REQUIRED
+Authenticated E2E                     ⏳ PENDING
 ```
 
 ---
 
 ## 15. What We Must NOT Do
 
-Do not implement any of the following merely to make Clone look complete:
+Do not implement any of the following:
 
 ```text
-COPY all conversations
-COPY all Memory
-COPY all Knowledge
-COPY all Journey events
-COPY live Context
-PROMOTE all Candidates
-COPY credentials
-COPY ownership
-COPY source authorization
+COPY Source conversations/chat
+COPY Source Journey as Clone Journey
+COPY Source credentials
+COPY Source ownership
+COPY Source authorization
 MAKE Clone share Source SH_ID
+PROMOTE every Candidate automatically
+COPY live Source runtime/session
 ```
 
-Those behaviors would conflict with the recovered Clone boundaries.
+Also do not implement state transfer as a blind table-to-table copy. The transfer must respect each domain's existing lifecycle and privacy rules.
 
 ---
 
 ## 16. Implementation Target
 
-The next implementation should be a **scope-driven selective transfer layer**, not a full database clone.
+The next implementation should be a **domain-aware automatic Clone transfer layer**.
 
 Conceptual target:
 
@@ -377,22 +424,30 @@ Source SH
    ↓
 Approved Clone Agreement
    ↓
-Transfer Scope
-   ├── selected Knowledge
-   ├── selected Memory
-   ├── selected Traits
-   ├── selected References
-   ├── selected Context
-   └── selected Relationship Context
+Recipient registration / claim
    ↓
-validate privacy / ownership / provenance
+Create target Account + Clone PRIMARY SH
    ↓
-materialize authorized state into Clone SH
+Transfer initial authorized Clone state
+   ├── Knowledge
+   ├── Knowledge Candidates
+   ├── Memory
+   ├── Memory Candidates
+   ├── Context
+   ├── References
+   └── Traits
    ↓
-record per-transfer provenance/audit
+DO NOT transfer
+   ├── Conversation / chat
+   ├── Source Journey
+   ├── credentials
+   ├── ownership
+   └── live Source session
+   ↓
+Preserve applicable provenance / audit
 ```
 
-The exact scope schema and per-domain transfer functions remain implementation details to be derived from existing Memory/Knowledge/Context contracts before code mutation.
+The exact implementation must reuse existing domain contracts and lifecycle rules instead of inventing parallel representations.
 
 ---
 
@@ -400,20 +455,21 @@ The exact scope schema and per-domain transfer functions remain implementation d
 
 Before Clone state transfer can be called complete:
 
-- [ ] Clone has independent identity and ownership.
-- [ ] Source private state is not copied by default.
-- [ ] Conversation is not copied by default.
-- [ ] Source Journey is not copied by default.
-- [ ] Live Source Context is not copied by default.
-- [ ] Transfer is driven by explicit agreement scope.
-- [ ] Selected Memory can be transferred without bypassing privacy rules.
-- [ ] Selected Knowledge can be transferred while preserving Memory/Knowledge distinction.
-- [ ] Candidate state remains distinguishable from promoted Knowledge/Memory.
-- [ ] Selected Traits do not collapse Clone Personality into Source Personality.
-- [ ] Provenance is preserved where applicable.
+- [ ] Knowledge is inherited automatically as defined above.
+- [ ] Knowledge Candidate state is inherited and remains Candidate.
+- [ ] Memory is inherited automatically as defined above.
+- [ ] Memory Candidate state is inherited and remains Candidate.
+- [ ] Context is inherited as initial state, not as a live Source session.
+- [ ] References are inherited with applicable provenance.
+- [ ] Traits are inherited without collapsing Clone Personality into Source Personality.
+- [ ] Conversation/chat is not copied.
+- [ ] Source Journey is not copied.
+- [ ] Credentials and ownership are never copied.
+- [ ] Source authorization is never silently transferred.
+- [ ] Recipient registration/claim is required before the Clone is assigned to the recipient.
 - [ ] Target ownership remains exclusive to the recipient.
-- [ ] Source credentials/authorization are never transferred.
-- [ ] Every transfer is auditable.
+- [ ] Provenance remains auditable.
+- [ ] Privacy boundaries remain enforced.
 - [ ] Authenticated E2E verifies the user-visible result.
 
 ---
@@ -425,11 +481,17 @@ Target identity semantics        🟢 OWNER LOCKED
 Registration lifecycle            🟢 RECONCILED
 Primary SH semantics              🟢 RECONCILED
 Clone/source separation           🟢 RECONCILED
-Default state-transfer boundary   🟢 RECOVERED
-Selective transfer model          🟡 IMPLEMENTATION REQUIRED
-Exact transfer schema             🟡 OPEN
-Per-domain transfer RPCs          🟡 OPEN
-Per-item provenance               🟡 OPEN
+Knowledge inheritance             🟢 OWNER DECISION LOCKED
+Memory inheritance                🟢 OWNER DECISION LOCKED
+Context inheritance               🟢 OWNER DECISION LOCKED
+Reference inheritance             🟢 OWNER DECISION LOCKED
+Trait inheritance                 🟢 OWNER DECISION LOCKED
+Knowledge Candidate inheritance  🟢 OWNER DECISION LOCKED
+Memory Candidate inheritance     🟢 OWNER DECISION LOCKED
+Conversation/chat                 🟢 OWNER EXCLUDED
+Source Journey                    🟢 OWNER EXCLUDED
+Recipient acceptance/claim        🟢 OWNER SEMANTICS LOCKED
+Implementation transfer layer    🟡 NEXT
 Authenticated E2E                  ⏳ PENDING
 Canonical                         UNCHANGED
 Mutation                          NONE
@@ -437,10 +499,27 @@ Mutation                          NONE
 
 ## 19. Session Handoff
 
-The next session/auditor should not reopen the question "Does Clone copy the whole Source SH?" unless a higher-authority source contradicts this reconciliation.
+The next session/auditor should treat the Owner decisions in this document as the current P5B Clone state-transfer resolution.
 
-The current recovered answer is:
+Do not reopen these questions unless a higher-authority document explicitly contradicts them:
 
-> **No. Clone is a new SH with its own identity, Journey, Personality development, Relationship state, Memory boundary and access control. Selected state may be inherited through explicit permission/agreement/scope.**
+```text
+Clone gets automatically:
+Knowledge
+Memory
+Context
+References
+Traits
+Knowledge Candidates
+Memory Candidates
 
-If the exact transfer mechanism for a state category is not specified by the authority chain, classify it as OPEN rather than inventing a copy rule.
+Clone does NOT get:
+Conversation / chat
+Source Journey
+Credentials
+Ownership
+Source authorization
+Live Source runtime/session
+```
+
+If a technical implementation detail is not specified here or by the applicable authority chain, derive it from the existing domain contracts and lifecycle rules. If it still cannot be determined without changing semantics, stop and request an Owner Decision rather than inventing behavior.
