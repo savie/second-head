@@ -10,7 +10,6 @@
 > TC-ID assignments are locked once established and must never be reused with a different meaning. This file is updated incrementally as domain verification progresses.
 
 ## Status Legend
-
 - 🟢 PASS
 - 🟡 IN PROGRESS
 - 🔴 FAIL
@@ -19,7 +18,6 @@
 - 🔵 EXPECTED / NOT A BUG
 
 ## Fix Disposition Legend
-
 - `BE` — Backend / Supabase fix
 - `FE` — Frontend / APK rebuild required
 - `—` — Not yet determined
@@ -27,7 +25,6 @@
 ---
 
 # 1. AUTH
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-AUTH-01 | Valid login → authenticated session | 🟢 | Runtime proven on APK #81. |
@@ -35,120 +32,112 @@
 | TC-AUTH-03 | Logout → login kembali | 🟢 | Runtime proven. |
 | TC-AUTH-04 | Authenticated → force close → reopen | 🟢 | Session remained authenticated. |
 | TC-AUTH-05 | Signed-out → force close → reopen | 🟢 | Login screen returned. |
-| TC-AUTH-06 | Account identity consistency | 🟢 | Account `83c9f2a1-7617-471c-9c68-75e0003ea6ab` consistent. |
+| TC-AUTH-06 | Account identity consistency | 🟢 | Account UUID consistent. |
 | TC-AUTH-07 | SH resolution consistency | 🟢 | SH instances remained `1`. |
 | TC-AUTH-08 | Unauthorized / invalid session access | ⏳ | Not tested. |
 | TC-AUTH-09 | Session expiration / invalidation handling | ⏳ | Not tested. |
 
 # 2. ACCOUNT
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-ACCOUNT-01 | Authenticated account resolution | ⏳ | — |
-| TC-ACCOUNT-02 | Account → primary SH resolution | ⏳ | — |
-| TC-ACCOUNT-03 | Account consistency after logout/login | ⏳ | — |
-| TC-ACCOUNT-04 | Account / SH isolation | ⏳ | — |
-| TC-ACCOUNT-05 | Wrong-account object access | ⏳ | — |
+| TC-ACCOUNT-01 | Authenticated account resolution | 🟢 | Account displayed correctly on Home. |
+| TC-ACCOUNT-02 | Account → primary SH resolution | 🟢 | Home showed `SH instances: 1`. |
+| TC-ACCOUNT-03 | Account consistency after logout/login | 🟢 | Same account UUID after re-login. |
+| TC-ACCOUNT-04 | Account / SH isolation | ⏳ | Not tested against another account. |
+| TC-ACCOUNT-05 | Wrong-account object access | ⏳ | Authorization test not yet run. |
 
 # 3. HOME / NAVIGATION
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-HOME-01 | Home loads authenticated state | ⏳ | — |
-| TC-HOME-02 | Home → Chat | ⏳ | — |
-| TC-HOME-03 | Home → Journey | ⏳ | — |
-| TC-HOME-04 | Home → Clone | ⏳ | — |
-| TC-HOME-05 | Home → Recovery | ⏳ | — |
-| TC-HOME-06 | Home → Inheritance | ⏳ | — |
-| TC-HOME-07 | Home → Runtime Verification | ⏳ | — |
-| TC-HOME-08 | Route exit/re-entry preserves auth context | ⏳ | — |
+| TC-HOME-01 | Home loads authenticated state | 🟢 | Authenticated Home observed. |
+| TC-HOME-02 | Home → Chat | 🟢 | Route reachable and Chat tested. |
+| TC-HOME-03 | Home → Journey | 🟢 | Route reachable and Journey tested. |
+| TC-HOME-04 | Home → Clone | 🟢 | Route reachable; functionality still unproven. |
+| TC-HOME-05 | Home → Recovery | 🟢 | Route reachable; full controlled E2E still unproven. |
+| TC-HOME-06 | Home → Inheritance | 🟢 | Route reachable; full lifecycle still unproven. |
+| TC-HOME-07 | Home → Runtime Verification | 🟢 | Route reachable. |
+| TC-HOME-08 | Route exit/re-entry preserves auth context | 🟢 | Tested across Chat/Journey/Clone/Recovery/Inheritance/Runtime. |
 
 # 4. CHAT
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-CHAT-01 | Open authenticated SH Chat | ⏳ | — |
-| TC-CHAT-02 | Send message → SH response | ⏳ | — |
-| TC-CHAT-03 | Streaming lifecycle → completion | ⏳ | — |
-| TC-CHAT-04 | Conversation persists after Chat exit/re-entry | ⏳ | — |
-| TC-CHAT-05 | User message persists | ⏳ | — |
-| TC-CHAT-06 | SH response persists | ⏳ | — |
-| TC-CHAT-07 | Fresh response exposes Save Last Message | ⏳ | — |
-| TC-CHAT-08 | Save Last Message → Journey | ⏳ | — |
-| TC-CHAT-09 | Saved event actually persists in Journey | ⏳ | — |
-| TC-CHAT-10 | Save button behavior after Chat re-entry | ⏳ | — |
-| TC-CHAT-11 | Chat error handling | ⏳ | — |
-| TC-CHAT-12 | Chat unauthorized runtime access | ⏳ | — |
-| TC-CHAT-13 | Chat → Experience / Memory / Knowledge acquisition | ⏳ | — |
-| TC-CHAT-14 | Retrieved acquired context usable through Chat | ⏳ | — |
+| TC-CHAT-01 | Open authenticated SH Chat | 🟢 | Runtime proven. |
+| TC-CHAT-02 | Send message → SH response | 🟢 | Multiple messages received responses. |
+| TC-CHAT-03 | Streaming lifecycle → completion | 🟢 | Active/streaming/idle behavior observed. |
+| TC-CHAT-04 | Conversation persists after Chat exit/re-entry | 🟢 | Existing conversation remained after re-entry. |
+| TC-CHAT-05 | User message persists | 🟢 | Test markers remained in conversation. |
+| TC-CHAT-06 | SH response persists | 🟢 | Responses remained in conversation. |
+| TC-CHAT-07 | Fresh response exposes Save Last Message | 🟢 | Button appeared after fresh response. |
+| TC-CHAT-08 | Save Last Message → Journey | 🟢 | `Journey event saved.` observed. |
+| TC-CHAT-09 | Saved event actually persists in Journey | 🟢 | EXPERIENCE event remained after leaving/re-entering Journey. |
+| TC-CHAT-10 | Save button behavior after Chat re-entry | 🔵 | Button disappears after Chat re-entry because current last-message state is not restored; not a backend bug. |
+| TC-CHAT-11 | Chat error handling | ⏳ | Not tested. |
+| TC-CHAT-12 | Chat unauthorized runtime access | ⏳ | Not tested. |
+| TC-CHAT-13 | Chat → Experience / Memory / Knowledge acquisition | ⏳ | Not tested; required later. |
+| TC-CHAT-14 | Retrieved acquired context usable through Chat | ⏳ | Not tested; required later. |
 
 # 5. JOURNEY
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-JOURNEY-01 | Open Journey for current SH | ⏳ | — |
-| TC-JOURNEY-02 | Existing Journey events readable | ⏳ | — |
-| TC-JOURNEY-03 | Chat explicit capture creates EXPERIENCE | ⏳ | — |
-| TC-JOURNEY-04 | Correct event type = EXPERIENCE | ⏳ | — |
-| TC-JOURNEY-05 | Correct source = runtime:p5a:explicit_user_capture | ⏳ | — |
-| TC-JOURNEY-06 | Correct captured representation / payload | ⏳ | — |
-| TC-JOURNEY-07 | Event persists after route exit/re-entry | ⏳ | — |
-| TC-JOURNEY-08 | Experience lifecycle / read semantics | ⏳ | — |
-| TC-JOURNEY-09 | Journey visibility semantics | ⏳ | — |
-| TC-JOURNEY-10 | Private Journey event enforcement | ⏳ | — |
-| TC-JOURNEY-11 | Non-transferable Journey event enforcement | ⏳ | — |
-| TC-JOURNEY-12 | Invalid Journey operation rejected | ⏳ | — |
-| TC-JOURNEY-13 | Journey → Memory relationship | ⏳ | — |
-| TC-JOURNEY-14 | Journey → Knowledge relationship | ⏳ | — |
+| TC-JOURNEY-01 | Open Journey for current SH | 🟢 | Journey opened for SH `78965d6c-33c2-45f1-9177-bd57b59eadf2`. |
+| TC-JOURNEY-02 | Existing Journey events readable | 🟢 | Existing RECOVERY events displayed. |
+| TC-JOURNEY-03 | Chat explicit capture creates EXPERIENCE | 🟢 | Explicit save created EXPERIENCE event. |
+| TC-JOURNEY-04 | Correct event type = EXPERIENCE | 🟢 | Observed `EXPERIENCE`. |
+| TC-JOURNEY-05 | Correct source = runtime:p5a:explicit_user_capture | 🟢 | Observed exact source. |
+| TC-JOURNEY-06 | Correct captured representation / payload | 🟢 | Event creation and captured marker verified. |
+| TC-JOURNEY-07 | Event persists after route exit/re-entry | 🟢 | EXPERIENCE remained after Back Home → Journey. |
+| TC-JOURNEY-08 | Experience lifecycle / read semantics | ⏳ | Deeper lifecycle/read semantics not yet tested. |
+| TC-JOURNEY-09 | Journey visibility semantics | ⏳ | Not yet tested. |
+| TC-JOURNEY-10 | Private Journey event enforcement | ⏳ | Not yet tested. |
+| TC-JOURNEY-11 | Non-transferable Journey event enforcement | ⏳ | Not yet tested. |
+| TC-JOURNEY-12 | Invalid Journey operation rejected | ⏳ | Not yet tested. |
+| TC-JOURNEY-13 | Journey → Memory relationship | ⏳ | Not yet tested. |
+| TC-JOURNEY-14 | Journey → Knowledge relationship | ⏳ | Not yet tested. |
 
 # 6. EXPERIENCE
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-EXP-01 | Create Experience through supported runtime path | ⏳ | — |
-| TC-EXP-02 | Experience persistence | ⏳ | — |
-| TC-EXP-03 | Experience payload integrity | ⏳ | — |
-| TC-EXP-04 | Experience retrieval | ⏳ | — |
-| TC-EXP-05 | Experience continuity semantics | ⏳ | — |
-| TC-EXP-06 | Experience visibility | ⏳ | — |
-| TC-EXP-07 | Experience transfer eligibility | ⏳ | — |
-| TC-EXP-08 | Experience non-transferable enforcement | ⏳ | — |
-| TC-EXP-09 | Experience unauthorized access | ⏳ | — |
-| TC-EXP-10 | Experience usable by downstream Chat / context | ⏳ | — |
+| TC-EXP-01 | Create Experience through supported runtime path | 🟢 | Current explicit capture path proven. |
+| TC-EXP-02 | Experience persistence | 🟢 | Created event persisted in Journey. |
+| TC-EXP-03 | Experience payload integrity | 🟢 | Current explicit capture marker/source verified. |
+| TC-EXP-04 | Experience retrieval | ⏳ | Deeper retrieval semantics not yet tested. |
+| TC-EXP-05 | Experience continuity semantics | ⏳ | Not yet tested. |
+| TC-EXP-06 | Experience visibility | ⏳ | Not yet tested. |
+| TC-EXP-07 | Experience transfer eligibility | ⏳ | Not yet tested. |
+| TC-EXP-08 | Experience non-transferable enforcement | ⏳ | Not yet tested. |
+| TC-EXP-09 | Experience unauthorized access | ⏳ | Not yet tested. |
+| TC-EXP-10 | Experience usable by downstream Chat / context | ⏳ | Not yet tested. |
 
 # 7. MEMORY
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-MEM-01 | Memory creation / acquisition through supported path | ⏳ | — |
-| TC-MEM-02 | Memory persistence | ⏳ | — |
-| TC-MEM-03 | Memory retrieval | ⏳ | — |
-| TC-MEM-04 | Memory continuity | ⏳ | — |
-| TC-MEM-05 | Memory visibility / privacy | ⏳ | — |
-| TC-MEM-06 | Memory authorization | ⏳ | — |
-| TC-MEM-07 | Memory transfer selection | ⏳ | — |
-| TC-MEM-08 | Memory transfer enforcement | ⏳ | — |
-| TC-MEM-09 | Memory usable through Chat / context | ⏳ | — |
+| TC-MEM-01 | Memory creation / acquisition through supported path | ⏳ | Not tested. |
+| TC-MEM-02 | Memory persistence | ⏳ | Not tested. |
+| TC-MEM-03 | Memory retrieval | ⏳ | Not tested. |
+| TC-MEM-04 | Memory continuity | ⏳ | Not tested. |
+| TC-MEM-05 | Memory visibility / privacy | ⏳ | Not tested. |
+| TC-MEM-06 | Memory authorization | ⏳ | Not tested. |
+| TC-MEM-07 | Memory transfer selection | ⏳ | Not tested. |
+| TC-MEM-08 | Memory transfer enforcement | ⏳ | Not tested. |
+| TC-MEM-09 | Memory usable through Chat / context | ⏳ | Not tested. |
 
 # 8. KNOWLEDGE
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-KNOW-01 | Knowledge acquisition / creation | ⏳ | — |
-| TC-KNOW-02 | Knowledge persistence | ⏳ | — |
-| TC-KNOW-03 | Knowledge retrieval | ⏳ | — |
-| TC-KNOW-04 | Knowledge continuity | ⏳ | — |
-| TC-KNOW-05 | Knowledge visibility | ⏳ | — |
-| TC-KNOW-06 | Knowledge authorization | ⏳ | — |
-| TC-KNOW-07 | Knowledge transfer selection | ⏳ | — |
-| TC-KNOW-08 | Knowledge transfer enforcement | ⏳ | — |
-| TC-KNOW-09 | Knowledge usable through Chat / context | ⏳ | — |
+| TC-KNOW-01 | Knowledge acquisition / creation | ⏳ | Not tested. |
+| TC-KNOW-02 | Knowledge persistence | ⏳ | Not tested. |
+| TC-KNOW-03 | Knowledge retrieval | ⏳ | Not tested. |
+| TC-KNOW-04 | Knowledge continuity | ⏳ | Not tested. |
+| TC-KNOW-05 | Knowledge visibility | ⏳ | Not tested. |
+| TC-KNOW-06 | Knowledge authorization | ⏳ | Not tested. |
+| TC-KNOW-07 | Knowledge transfer selection | ⏳ | Not tested. |
+| TC-KNOW-08 | Knowledge transfer enforcement | ⏳ | Not tested. |
+| TC-KNOW-09 | Knowledge usable through Chat / context | ⏳ | Not tested. |
 
 # 9. CLONE
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-CLONE-01 | Clone screen / current implementation | ⏳ | — |
+| TC-CLONE-01 | Clone screen / current implementation | 🟢 | Route/UI observed; current APK uses older Clone implementation. |
 | TC-CLONE-02 | Create invitation | ⏳ | — |
 | TC-CLONE-03 | Invitation persisted | ⏳ | — |
 | TC-CLONE-04 | Recipient approval | ⏳ | — |
@@ -160,30 +149,28 @@
 | TC-CLONE-10 | Non-transferable content excluded | ⏳ | — |
 | TC-CLONE-11 | Source / recipient isolation | ⏳ | — |
 | TC-CLONE-12 | Unauthorized clone operation | ⏳ | — |
-| TC-CLONE-13 | Current APK matches latest Clone contract | ⏳ | — |
+| TC-CLONE-13 | Current APK matches latest Clone contract | ⏳ | Potential FE/build blocker because observed APK is older Clone UI. |
 
 # 10. RECOVERY
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-REC-01 | Recovery screen / current SH resolution | ⏳ | — |
-| TC-REC-02 | Create new FULL snapshot | ⏳ | — |
+| TC-REC-01 | Recovery screen / current SH resolution | 🟢 | Route and SH resolution observed. |
+| TC-REC-02 | Create new FULL snapshot | ⏳ | Existing snapshots are historical data, not new-operation proof. |
 | TC-REC-03 | Snapshot persists | ⏳ | — |
 | TC-REC-04 | Snapshot contains expected domains | ⏳ | — |
 | TC-REC-05 | Restore same SH | ⏳ | — |
-| TC-REC-06 | Recovery event generated | ⏳ | — |
-| TC-REC-07 | Continuity becomes RECOVERED | ⏳ | — |
+| TC-REC-06 | Recovery event generated | ⏳ | Historical events observed; fresh operation not yet tested. |
+| TC-REC-07 | Continuity becomes RECOVERED | ⏳ | Historical state observed; fresh operation not yet tested. |
 | TC-REC-08 | Post-recovery Chat | ⏳ | — |
 | TC-REC-09 | Post-recovery Journey | ⏳ | — |
 | TC-REC-10 | Post-recovery Memory / Knowledge / Experience | ⏳ | — |
 | TC-REC-11 | Unauthorized restore rejected | ⏳ | — |
-| TC-REC-12 | JSON portability export | ⏳ | — |
+| TC-REC-12 | JSON portability export | ⏳ | Existing READY exports observed; fresh export not yet tested. |
 
 # 11. INHERITANCE
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-INH-01 | Inheritance screen / current account | ⏳ | — |
+| TC-INH-01 | Inheritance screen / current account | 🟢 | Route/UI observed. |
 | TC-INH-02 | Explicit Memory selection | ⏳ | — |
 | TC-INH-03 | Explicit Knowledge selection | ⏳ | — |
 | TC-INH-04 | Explicit Experience selection | ⏳ | — |
@@ -196,7 +183,6 @@
 | TC-INH-11 | Unauthorized inheritance rejected | ⏳ | — |
 
 # 12. SUCCESSION
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-SUC-01 | Create succession rule | ⏳ | — |
@@ -211,7 +197,6 @@
 | TC-SUC-10 | Unauthorized succession | ⏳ | — |
 
 # 13. END-OF-LIFE
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-EOL-01 | Enter EOL lifecycle condition | ⏳ | — |
@@ -223,7 +208,6 @@
 | TC-EOL-07 | Unauthorized EOL action | ⏳ | — |
 
 # 14. LEGACY
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-LEG-01 | Select transfer for Legacy | ⏳ | — |
@@ -235,7 +219,6 @@
 | TC-LEG-07 | Unauthorized Legacy operation | ⏳ | — |
 
 # 15. ERROR
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-ERR-01 | Invalid ID | ⏳ | — |
@@ -246,7 +229,6 @@
 | TC-ERR-06 | Network / runtime failure handling | ⏳ | — |
 
 # 16. AUTHORIZATION
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-AUTHZ-01 | Wrong account access | ⏳ | — |
@@ -259,7 +241,6 @@
 | TC-AUTHZ-08 | Unauthorized Legacy operation | ⏳ | — |
 
 # 17. FUNCTIONAL CLOSURE GATE
-
 | Gate | Status | Keterangan |
 |---|---|---|
 | All required domain TCs PASS | ⏳ | — |
@@ -271,7 +252,6 @@
 | **FUNCTIONAL CLOSURE** | ⏳ | — |
 
 # 18. UI / UX
-
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-UI-01 | Login form / input presentation | ⏳ | — |
@@ -288,49 +268,13 @@
 ---
 
 # Global Execution Flow
-
 ```text
-AUTH
-  ↓
-ACCOUNT
-  ↓
-HOME / NAVIGATION
-  ↓
-CHAT
-  ↓
-JOURNEY
-  ↓
-EXPERIENCE
-  ↓
-MEMORY
-  ↓
-KNOWLEDGE
-  ↓
-CROSS-DOMAIN CHAT / CONTEXT
-  ↓
-CLONE
-  ↓
-RECOVERY
-  ↓
-INHERITANCE
-  ↓
-SUCCESSION
-  ↓
-END-OF-LIFE
-  ↓
-LEGACY
-  ↓
-ERROR / AUTHORIZATION
-  ↓
-FUNCTIONAL CLOSURE
-  ↓
-UI / UX
-  ↓
-FINAL BUILD
+AUTH → ACCOUNT → HOME/NAV → CHAT → JOURNEY → EXPERIENCE → MEMORY → KNOWLEDGE
+→ CROSS-DOMAIN CHAT/CONTEXT → CLONE → RECOVERY → INHERITANCE → SUCCESSION
+→ END-OF-LIFE → LEGACY → ERROR/AUTHORIZATION → FUNCTIONAL CLOSURE → UI/UX → FINAL BUILD
 ```
 
 # Execution Rules
-
 1. TC-ID is permanent once assigned. Never reuse an existing TC-ID for a different test meaning.
 2. New uncovered tests receive a new TC-ID appended to the relevant domain.
 3. At least one domain-level progress update must update this file and create a new commit.
