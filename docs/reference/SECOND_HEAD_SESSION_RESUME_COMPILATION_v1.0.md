@@ -47234,7 +47234,710 @@ END OF SESSION RESUME 48
 
 ---
 
-SECOND HEAD — SESSION RESUME 49 (next)
+# SECOND HEAD — SESSION RESUME 49
+
+## Melanjutkan dari
+Resume 48
+
+Reference continuation commit:
+`1eccecfa40575d5c1e70492ca9d2b89c3ead0741`
+
+Related canonical matrix:
+`docs/SECOND_HEAD_CANONICAL_REAL_E2E_VERIFICATION_MATRIX_v1.0.md`
+
+Repository:
+`savie/second-head`
+
+Branch:
+`dev`
+
+---
+
+# 1. POSISI PROJECT
+
+SECOND HEAD sudah memasuki fase:
+
+REAL E2E FUNCTIONAL VERIFICATION
+
+dengan:
+
+- Canonical REAL E2E Verification Matrix v1.0 sebagai authority
+- GitHub DEV sebagai implementation source
+- Supabase DEV sebagai backend/runtime environment
+- APK sebagai REAL E2E runtime test vehicle
+
+Matrix sudah menetapkan TC-ID secara immutable.
+
+Tidak boleh membuat TC-ID baru jika test yang dibutuhkan sebenarnya sudah mempunyai TC-ID.
+
+Jika terdapat konflik antara isi chat dan matrix aktual di GitHub DEV, file matrix aktual GitHub menjadi canonical authority.
+
+---
+
+# 2. PERUBAHAN BESAR DARI SEBELUMNYA
+
+Sebelumnya kita sudah mempunyai:
+
+- Frozen / Canonical implementation documents
+- Build Scope
+- Implementation Contract
+- Execution Strategy
+- Canonical REAL E2E Verification Matrix
+- APK #81 sebagai runtime test vehicle awal
+
+Kemudian REAL E2E dilakukan menggunakan APK #81.
+
+Hasil testing menunjukkan bahwa sebagian jalur memang bekerja, tetapi ditemukan gap antara:
+
+CANONICAL IMPLEMENTATION
+        ↓
+BACKEND / RUNTIME
+        ↓
+FRONTEND
+        ↓
+APK YANG DIPAKAI TEST
+
+Terutama pada jalur:
+
+Experience
+Memory
+Knowledge
+Journey relationship
+dan domain lintas lifecycle lainnya.
+
+Kesimpulan penting:
+
+Jangan memaksa REAL E2E terhadap fitur yang belum benar-benar tersedia di APK.
+
+---
+
+# 3. CANONICAL MATRIX
+
+File utama:
+
+`docs/SECOND_HEAD_CANONICAL_REAL_E2E_VERIFICATION_MATRIX_v1.0.md`
+
+Matrix adalah satu-satunya master matrix.
+
+Tidak membuat matrix kedua.
+
+Tidak membuat TC-ID baru secara sembarangan.
+
+Setiap progres domain harus diperbarui pada file matrix yang sama.
+
+Matrix membedakan:
+
+- 🟢 PASS
+- 🟡 IN PROGRESS
+- 🔴 FAIL
+- ⏳ NOT TESTED
+- ⚠️ BLOCKED
+- 🔵 EXPECTED / NOT A BUG
+
+Fix disposition:
+
+- `BE` = Backend / Supabase fix
+- `FE` = Frontend / APK rebuild required
+- `—` = belum ditentukan
+
+---
+
+# 4. HASIL REAL E2E APK #81
+
+APK #81 berhasil membuktikan beberapa fondasi:
+
+AUTH
+ACCOUNT
+HOME/NAV
+CHAT
+JOURNEY
+
+sebagian besar sudah berjalan.
+
+Journey juga berhasil menunjukkan:
+
+- EXPERIENCE event
+- MEMORY event
+- LEARNING / Knowledge event
+
+dengan source runtime:p5a yang sesuai.
+
+Namun testing juga menemukan bahwa keberadaan Journey signal tidak otomatis membuktikan bahwa domain underlying-nya benar-benar:
+
+- persisted sebagai domain object
+- retrievable
+- continuous
+- transferable
+- authorized
+- usable oleh Chat/context
+
+Ini menjadi alasan audit implementation harus dilakukan sebelum test berikutnya diteruskan.
+
+---
+
+# 5. TEMUAN PENTING EXPERIENCE
+
+Sebelumnya SAVE LAST MESSAGE TO JOURNEY menghasilkan:
+
+EXPERIENCE Journey event
+
+tetapi jalur Experience domain/retrieval belum cukup terbukti.
+
+Kemudian dilakukan audit implementation.
+
+Ditemukan bahwa canonical backend memiliki domain Experience dan runtime path yang harus menghubungkan:
+
+Chat
+→ Experience persistence
+→ Journey EXPERIENCE signal
+→ Experience retrieval
+
+Frontend DEV juga kemudian ditemukan sudah memiliki Experience retrieval implementation.
+
+Kesimpulan:
+
+Jangan menyamakan:
+
+Journey EXPERIENCE row
+
+dengan:
+
+Experience domain retrieval.
+
+Keduanya harus dibuktikan secara terpisah.
+
+---
+
+# 6. BE-FIRST AUDIT / FIX
+
+Sesuai keputusan kerja terbaru:
+
+Backend harus diaudit dan diperbaiki terlebih dahulu.
+
+Domain yang menjadi target:
+
+Memory
+Knowledge
+Experience
+Clone
+Recovery
+Inheritance
+Succession
+EOL
+Legacy
+Error
+Authorization
+
+Prinsip:
+
+Jika defect dapat diperbaiki di BE,
+FIX DI BE.
+
+Jangan langsung meminta user rebuild APK.
+
+Jika jalur FE memang belum tersedia atau implementation FE salah,
+tandai sebagai FE.
+
+---
+
+# 7. BE YANG SUDAH DIAUDIT / DIPERBAIKI
+
+## Memory
+
+Backend sudah memiliki ownership/authentication boundary untuk runtime Memory.
+
+Target enforcement:
+
+authenticated
+→ current account
+→ owned SH
+→ active SH
+→ valid Memory payload
+→ persistence
+→ Journey MEMORY signal
+
+---
+
+## Knowledge
+
+Backend sudah memiliki Knowledge candidate path.
+
+Target enforcement:
+
+authenticated
+→ current account
+→ owned SH
+→ valid candidate
+→ persistence
+→ Journey LEARNING signal
+
+---
+
+## Experience
+
+Backend memiliki:
+
+`runtime_record_experience`
+
+serta retrieval boundary:
+
+`list_experiences`
+`get_experience`
+
+Experience diperlakukan sebagai domain tersendiri.
+
+Journey EXPERIENCE signal bukan pengganti Experience persistence.
+
+---
+
+## Clone
+
+Audit menemukan gap pada execution privilege / authorization boundary.
+
+Sudah dilakukan hardening sehingga Clone execution tidak boleh tersedia secara publik.
+
+Model canonical:
+
+Creator/source SH
+→ create invitation
+→ recipient approval
+→ recipient registration/session
+→ materialization
+
+Clone tidak boleh menjadi silent copy seluruh data.
+
+Private / NON_TRANSFERABLE content harus tetap excluded.
+
+---
+
+## Recovery
+
+Recovery harus membawa domain yang memang termasuk FULL snapshot.
+
+Target coverage mencakup:
+
+Memory
+Knowledge
+Conversation
+Journey
+Experience
+Legacy
+Identity / ownership state
+
+Historical snapshot tidak dihitung sebagai bukti fresh recovery operation.
+
+REAL E2E tetap harus membuat dan menguji fresh snapshot/restore.
+
+---
+
+## Inheritance
+
+Backend sudah memiliki explicit scope model.
+
+Scope harus eksplisit.
+
+Tidak boleh silently approximate domain IDs.
+
+Private dan NON_TRANSFERABLE content harus ditolak/excluded sesuai contract.
+
+---
+
+## Succession
+
+Backend sudah memiliki:
+
+succession rule
+→ configured successor
+→ successor PRIMARY SH
+→ explicit scope
+→ transfer selected eligible content
+
+Succession tidak boleh menjadi arbitrary clone.
+
+---
+
+## EOL
+
+Audit menemukan gap:
+
+EOL sebelumnya melakukan lifecycle transition tetapi belum menghasilkan Journey lifecycle record yang dibutuhkan matrix.
+
+Sudah diperbaiki sehingga EOL menghasilkan lifecycle record dengan semantics END_OF_LIFE dan protected/non-transferable characteristics sesuai canonical behavior.
+
+EOL bersifat terminal.
+
+Tidak boleh diam-diam direaktivasi.
+
+---
+
+## Legacy
+
+Backend sudah memiliki selected transfer → Legacy path.
+
+Domain yang belum memiliki persistent canonical representation tidak boleh dipalsukan atau diam-diam diabaikan tanpa explicit contract.
+
+Private / NON_TRANSFERABLE content tetap harus protected.
+
+---
+
+## Authorization
+
+RPC penting yang memakai elevated execution harus memiliki authenticated execution boundary.
+
+Target:
+
+anon/public
+→ DENIED
+
+authenticated
+→ allowed hanya setelah ownership / scope validation
+
+Authorization tidak boleh hanya bergantung pada frontend.
+
+---
+
+# 8. RUNTIME
+
+Runtime utama:
+
+`runtime-p4a-001`
+
+Sempat terdapat deployment probe yang bukan implementation production.
+
+Kemudian runtime implementation canonical dideploy ulang.
+
+Runtime harus benar-benar menjalankan:
+
+Chat
+→ model response
+→ conversation persistence
+→ semantic lifecycle
+→ Memory / Knowledge candidate
+→ Journey signal
+
+dan explicit capture:
+
+Chat
+→ Experience persistence
+→ Journey EXPERIENCE signal
+
+Deployment harus dianggap valid hanya jika implementation asli ter-deploy dan smoke verification berhasil.
+
+Jangan menganggap deployment probe sebagai production runtime.
+
+---
+
+# 9. FRONTEND AUDIT
+
+Frontend DEV kemudian diaudit.
+
+Ditemukan bahwa source DEV sudah memiliki implementation untuk beberapa domain yang sebelumnya belum tersedia di APK #81.
+
+Contoh:
+
+Experience retrieval UI
+Clone Model-B
+Recovery
+Inheritance
+Succession
+Legacy
+
+Artinya:
+
+SOURCE DEV ≠ APK #81.
+
+Ini adalah alasan utama mengapa test APK #81 sebelumnya menghasilkan banyak:
+
+"fiturnya tidak ada"
+
+walaupun source terbaru sebenarnya sudah memilikinya.
+
+---
+
+# 10. BUILD STRATEGY
+
+Kita TIDAK akan rebuild APK setiap kali satu test gagal.
+
+Strategi yang disepakati:
+
+BE FIRST
+    ↓
+audit/fix backend
+    ↓
+lanjut audit domain lain
+    ↓
+jangan rebuild hanya karena BE defect
+    ↓
+selesaikan kumpulan BE fixes
+    ↓
+audit/fix FE
+    ↓
+kumpulkan FE fixes
+    ↓
+build APK baru
+    ↓
+REAL E2E
+
+Jika pada REAL E2E APK baru ditemukan defect:
+
+### Jika BE masih bisa diperbaiki:
+
+FIX BE
+→ jangan langsung rebuild APK
+→ lanjutkan audit/test domain lain yang tidak membutuhkan perubahan FE
+
+### Jika BE sudah mentok / implementation BE sudah canonical:
+
+FIX FE
+→ kumpulkan FE fixes
+→ build APK baru
+→ retest
+
+### Jika defect BE + FE banyak:
+
+Lebih efisien:
+
+BE FIXES
++
+FE FIXES
+→ satu build APK baru
+→ REAL E2E ulang
+
+Tujuan:
+
+menghindari siklus:
+
+test
+→ rebuild
+→ test satu hal
+→ rebuild
+→ test satu hal
+→ rebuild
+
+---
+
+# 11. APK TERBARU
+
+APK #81:
+
+runtime test vehicle awal.
+
+Kemudian source DEV sudah diperbaiki.
+
+Build baru dibuat dari commit:
+
+`94f4edb`
+
+User sudah download:
+
+`APK #85`
+
+APK #85 sekarang menjadi kandidat runtime test vehicle baru.
+
+Namun:
+
+APK #85 belum dianggap PASS secara E2E.
+
+Harus dilakukan REAL E2E berdasarkan Canonical Matrix.
+
+---
+
+# 12. POSISI SAAT RESUME 49
+
+Current intended flow:
+
+CANONICAL MATRIX
+        ↓
+BE AUDIT / FIX
+        ↓
+FE AUDIT / FIX
+        ↓
+BUILD APK #85
+        ↓
+REAL E2E
+        ↓
+record result ke matrix
+        ↓
+jika BE defect:
+FIX BE FIRST
+        ↓
+lanjut audit/test lain
+        ↓
+jika BE mentok:
+FIX FE
+        ↓
+build APK berikutnya
+        ↓
+REAL E2E ulang
+
+---
+
+# 13. DOMAIN AUDIT STATUS
+
+Memory        🟢 BE audited/fixed
+Knowledge     🟢 BE audited/fixed
+Experience    🟢 BE audited/fixed
+Clone         🟢 BE audited/fixed
+Recovery      🟢 BE audited/fixed
+Inheritance   🟢 BE audited
+Succession    🟢 BE audited
+EOL           🟢 BE fixed
+Legacy        🟢 BE audited
+Error         🔄 audit lanjut
+Authorization 🟢 BE hardened
+
+↓
+
+FE audit/fix
+
+↓
+
+APK #85
+
+↓
+
+REAL E2E
+
+---
+
+# 14. IMPORTANT TESTING RULE
+
+Jangan menyuruh user melakukan test apabila:
+
+- jalur tidak tersedia di APK
+- test hanya mengulang Chat persistence
+- test tidak benar-benar menguji semantics yang dimaksud TC
+- source implementation belum siap
+- backend masih diketahui rusak
+
+Jika belum tersedia:
+
+⚠️ BLOCKED / FE
+
+Jika backend defect:
+
+BE FIX FIRST
+
+Jika frontend defect:
+
+FE → BUILD APK
+
+Jika hanya implementation sudah ada tetapi belum REAL E2E:
+
+⏳ NOT TESTED
+
+Code existence ≠ E2E PASS.
+
+Historical database row ≠ fresh mutation proof.
+
+Journey signal ≠ proof of underlying domain retrieval.
+
+---
+
+# 15. NEXT SESSION / NEXT ACTION
+
+Jangan langsung membuat TC baru.
+
+Pertama:
+
+1. Baca ulang matrix aktual dari GitHub DEV.
+2. Cocokkan commit terbaru.
+3. Jangan mengandalkan chat sebagai authority jika berbeda.
+4. Lanjutkan BE audit untuk seluruh domain yang belum benar-benar selesai.
+5. Audit Error.
+6. Audit Authorization.
+7. Audit FE terhadap seluruh test yang matrix nyatakan.
+8. Pastikan APK #85 memang berasal dari source DEV yang sudah diperbaiki.
+9. Setelah implementation dianggap siap, baru REAL E2E.
+10. Update matrix secara incremental.
+
+TC-ID immutable.
+
+Jangan mengubah definisi TC hanya karena hasil test.
+
+---
+
+# 16. CANONICAL WORKING RULE
+
+Prioritas kerja:
+
+BE correctness
+→ FE correctness
+→ build
+→ REAL E2E
+→ evidence
+→ matrix update
+→ Functional Closure
+
+Bukan:
+
+test user
+→ menemukan fitur belum ada
+→ bingung
+→ rebuild
+→ test lagi
+→ menemukan backend rusak
+→ rebuild lagi.
+
+---
+
+# 17. CURRENT USER EXPECTATION
+
+User tidak ingin melakukan test kosong.
+
+User hanya akan menjalankan REAL E2E apabila implementation sudah dianggap siap.
+
+Assistant bertanggung jawab untuk:
+
+- audit GitHub canonical
+- audit Supabase DEV
+- fix backend
+- audit/fix frontend
+- menentukan kapan APK rebuild memang diperlukan
+- menjaga TC-ID dan matrix tetap canonical
+- tidak mengarang PASS
+- tidak meminta user mengulang test yang tidak menguji TC sebenarnya.
+
+---
+
+# 18. CURRENT HANDOFF
+
+APK #85 sudah tersedia di sisi user.
+
+Namun sebelum mulai REAL E2E:
+
+lanjutkan audit implementation sampai confidence bahwa:
+
+BE
++
+FE
++
+runtime
++
+APK
+
+sudah berada pada baseline yang layak untuk REAL E2E.
+
+Setelah itu gunakan Canonical Matrix sebagai satu-satunya urutan test.
+
+Do not create competing matrix.
+
+Do not invent TC-ID.
+
+Do not fabricate evidence.
+
+Do not treat historical rows as fresh E2E proof.
+
+---
+
+END OF SESSION RESUME 49
+
+---
+
+
+---
+
+SECOND HEAD — SESSION RESUME 50 (next)
 
 
 
