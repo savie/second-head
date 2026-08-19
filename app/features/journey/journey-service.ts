@@ -1,5 +1,9 @@
 import { supabase } from '../../services/supabase';
 
+export type JourneyVisibility = 'PRIVATE' | 'SHARED' | 'PUBLIC';
+export type JourneyTransferPolicy = 'NON_TRANSFERABLE' | 'TRANSFERABLE' | 'EXPLICIT_ONLY';
+export type JourneyTransferOperation = 'CLONE' | 'INHERITANCE' | 'SUCCESSION';
+
 export type JourneyEvent = {
   event_id: string;
   event_type: string;
@@ -8,6 +12,9 @@ export type JourneyEvent = {
   gap_code: string | null;
   payload: Record<string, unknown> | null;
   source_ref: string | null;
+  visibility: JourneyVisibility;
+  transfer_policy: JourneyTransferPolicy;
+  provenance: Record<string, unknown> | null;
   created_at: string;
 };
 
@@ -17,11 +24,67 @@ export async function loadJourneyEvents(shId: string, limit = 50): Promise<Journ
 
   const { data, error } = await supabase
     .from('journey_events')
-    .select('event_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,created_at')
+    .select('event_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,visibility,transfer_policy,provenance,created_at')
     .eq('sh_id', shId)
     .order('occurred_at', { ascending: false })
     .limit(safeLimit);
 
   if (error) throw new Error(`JOURNEY_RETRIEVAL_FAILED: ${error.message}`);
   return (data ?? []) as JourneyEvent[];
+}
+
+export async function classifyJourneyEvent(
+  eventId: string,
+  visibility: JourneyVisibility,
+  transferPolicy: JourneyTransferPolicy,
+  provenance: Record<string, unknown> = {},
+): Promise<void> {
+  if (!eventId.trim()) throw new Error('JOURNEY_EVENT_ID_REQUIRED');
+
+  const { error } = await supabase.rpc('runtime_classify_journey_event', {
+    p_event_id: eventId,
+    p_visibility: visibility,
+    p_transfer_policy: transferPolicy,
+    p_provenance: provenance,
+  });
+
+  if (error) throw new Error(`JOURNEY_CLASSIFY_FAILED: ${error.message}`);
+}
+
+export async function transferSelectedJourneyEvents(
+  operation: JourneyTransferOperation,
+  sourceShId: string,
+  targetShId: string,
+  eventIds: string[],
+): Promise<number> {
+  if (!sourceShId.trim()) throw new Error('JOURNEY_SOURCE_SH_ID_REQUIRED');
+  if (!targetShId.trim()) throw new Error('JOURNEY_TARGET_SH_ID_REQUIRED');
+  if (eventIds.length === 0) throw new Error('JOURNEY_EVENT_SELECTION_REQUIRED');
+
+  const { data, error } = await supabase.rpc('runtime_transfer_selected_journey_events', {
+    p_operation: operation,
+    p_source_sh_id: sourceShId,
+    p_target_sh_id: targetShId,
+    p_event_ids: eventIds,
+  });
+
+  if (error) throw new Error(`JOURNEY_TRANSFER_FAILED: ${error.message}`);
+  return Number(data ?? 0);
+}
+
+export async function preserveSelectedJourneyAsLegacy(
+  sourceShId: string,
+  eventIds: string[],
+): Promise<string> {
+  if (!sourceShId.trim()) throw new Error('JOURNEY_SOURCE_SH_ID_REQUIRED');
+  if (eventIds.length === 0) throw new Error('JOURNEY_EVENT_SELECTION_REQUIRED');
+
+  const { data, error } = await supabase.rpc('runtime_preserve_selected_journey_as_legacy', {
+    p_source_sh_id: sourceShId,
+    p_event_ids: eventIds,
+  });
+
+  if (error) throw new Error(`JOURNEY_LEGACY_PRESERVE_FAILED: ${error.message}`);
+  if (!data) throw new Error('JOURNEY_LEGACY_PRESERVE_FAILED: legacy record was not created');
+  return String(data);
 }
