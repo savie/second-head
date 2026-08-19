@@ -46,6 +46,12 @@ export async function createSuccessionRule(input: { sourceShId: string; successo
   return data as SuccessionRule;
 }
 
+export async function executeSuccession(successionId: string) {
+  const { data, error } = await supabase.rpc('runtime_execute_succession', { p_succession_id: successionId.trim() });
+  if (error) throw error;
+  return data as string;
+}
+
 export async function listInheritanceAuthorizations() {
   const { data, error } = await supabase.from('inheritance_authorizations').select('*').order('created_at', { ascending: false });
   if (error) throw error;
