@@ -1,0 +1,3 @@
+E2E backend hardening checkpoint: 2b0728a5eb6e9b143ef94c4feb33aa41e4fe3b8c
+Supabase DEV runtime-p4a-001 remains the backend target.
+This file intentionally triggers the DEV Android build workflow; it has no runtime effect.
