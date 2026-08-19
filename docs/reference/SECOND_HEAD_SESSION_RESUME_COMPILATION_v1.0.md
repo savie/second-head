@@ -40905,7 +40905,7 @@ The current task is the final CI verification and merge-readiness audit for PR #
 
 ---
 
-SECOND HEAD — SESSION REVIEW 44
+SECOND HEAD — SESSION RESUME 44
 
 CURRENT PROJECT STATE SNAPSHOT
 
@@ -43920,7 +43920,7 @@ Resume 46 dibuat karena terdapat pekerjaan aktual setelah Resume 45 yang belum m
 
 Checkpoint terakhir yang sebelumnya tersedia adalah:
 
-SECOND HEAD — SESSION RESUME 45
+SESSION RESUME 45
 
 dengan commit dokumentasi:
 
@@ -43939,7 +43939,7 @@ Belum ada Resume setelah pekerjaan Recovery ini sebelum dokumen ini dibuat.
 
 Jika sesi berikutnya dimulai, gunakan:
 
-SECOND HEAD — SESSION RESUME 46
+SESSION RESUME 46
 
 Lanjut dari actual Recovery execution setelah Resume 45.
 
@@ -45529,7 +45529,7 @@ Those are already Owner-resolved.
 
 Next session should start from:
 
-SECOND HEAD — SESSION RESUME 47
+SESSION RESUME 47
 
 CURRENT TARGET:
 FINAL BACKEND ↔ FRONTEND FUNCTIONAL AUDIT
@@ -45632,7 +45632,1609 @@ Dan gue sengaja **tidak mengklaim semua backend/frontend sudah PASS**, karena da
 
 ---
 
-SECOND HEAD — SESSION RESUME 48 (next)
+# SECOND HEAD — SESSION RESUME 48
+
+## APK #81 → Real E2E Functional Verification Checkpoint
+### Resume 47 → Functional Runtime Testing → Pre-Closure Verification
+
+**Project:** SECOND HEAD — SYSTEM BUILD  
+**Resume:** 48  
+**Resume Type:** Reconciled Runtime / E2E Continuation Checkpoint  
+**Status:** ACTIVE  
+**Canonical Status:** NON-CANONICAL  
+**Purpose:** Melanjutkan langsung dari Resume 47 menuju pembuktian functional runtime aktual menggunakan APK #81. Resume ini mencatat hasil observasi APK #81, status domain yang benar-benar sudah/prosesnya belum proven, serta urutan E2E berikutnya sampai Functional Closure.
+
+---
+
+# 0. ROLE OF THIS RESUME
+
+Resume 48 meneruskan Resume 47.
+
+Resume ini BUKAN:
+
+- SH Core Canonical;
+- Canonical Architecture;
+- Frozen Baseline;
+- Build Scope;
+- Implementation Guide;
+- Implementation Contract;
+- Execution Strategy;
+- Phase definition;
+- source of truth architecture.
+
+Resume ini adalah:
+
+- runtime checkpoint;
+- E2E verification checkpoint;
+- continuity document;
+- catatan evidence dan status testing aktual.
+
+Resume 47 tetap menjadi konteks sebelumnya.
+
+Resume 48 dimulai pada kondisi:
+
+Resume 47
+   ↓
+final backend ↔ frontend reconciliation
+   ↓
+functional closure preparation
+   ↓
+APK build
+   ↓
+APK #81
+   ↓
+REAL E2E VERIFICATION
+
+
+---
+
+1. CURRENT GLOBAL POSITION
+
+Current project position:
+
+Phase -1
+   ↓
+P1
+   ↓
+P2
+   ↓
+P3
+   ↓
+P4
+   ↓
+P5
+   ↓
+Cross-phase assurance
+   ↓
+Backend ↔ Frontend reconciliation
+   ↓
+Functional implementation
+   ↓
+APK #81
+   ↓
+[CURRENT]
+REAL E2E FUNCTIONAL VERIFICATION
+   ↓
+Fix deterministic failures
+   ↓
+Rebuild / Retest
+   ↓
+FUNCTIONAL CLOSURE
+   ↓
+UI / UX POLISH
+
+P6:
+
+NOT STARTED
+NOT AUTOMATICALLY AUTHORIZED
+
+
+---
+
+2. IMPORTANT CHANGE FROM PREVIOUS CHECKPOINT
+
+Sebelum APK #81, status beberapa domain sempat dianggap:
+
+🟢 / 🟡
+
+berdasarkan:
+
+source inspection;
+
+frontend wiring;
+
+RPC/service mapping;
+
+schema;
+
+migration;
+
+static reconciliation.
+
+
+Setelah APK #81 dijalankan, Owner menegaskan:
+
+> Banyak domain sebenarnya belum benar-benar proven, termasuk Chat.
+
+
+
+Maka status harus dibedakan antara:
+
+IMPLEMENTED
+
+dan:
+
+RUNTIME PROVEN
+
+Jangan menganggap:
+
+button exists
++
+RPC exists
++
+screen opens
+
+sebagai:
+
+FEATURE VERIFIED
+
+
+---
+
+3. APK #81
+
+GitHub workflow:
+
+SH App Android Build
+
+sh-app-android-build.yml
+
+Run:
+#81
+Manually run by savie
+
+Branch:
+dev
+
+Status:
+In progress
+
+Previous run:
+
+#80
+commit afe5c3d
+status successful
+
+APK #81 digunakan sebagai:
+
+REAL RUNTIME TEST VEHICLE
+
+Bukan sebagai bukti bahwa seluruh aplikasi sudah functional closure.
+
+
+---
+
+4. CURRENT TEST ACCOUNT OBSERVATION
+
+APK login menggunakan account test:
+
+sh-dev-test@banned.idn
+
+Home menunjukkan:
+
+Account:
+83c9f2a1-7617-471c-9c68-75e0003ea6ab
+
+SH instances:
+1
+
+Ini membuktikan:
+
+Login
+ ↓
+authenticated session
+ ↓
+Account resolution
+ ↓
+SH instance resolution
+ ↓
+Home
+
+berhasil pada runtime.
+
+Namun ini baru membuktikan authentication/bootstrap happy path.
+
+Belum membuktikan seluruh lifecycle/error cases.
+
+
+---
+
+5. LOGIN — CURRENT STATUS
+
+Observed UI:
+
+Login
+
+Second Head
+
+Email
+
+Password
+
+SIGN IN
+
+CREATE ACCOUNT
+
+Authenticated login berhasil.
+
+Current classification:
+
+LOGIN HAPPY PATH
+🟢 OBSERVED / WORKING
+
+LOGIN FULL E2E
+🟡 NOT YET PROVEN
+
+Masih perlu:
+
+invalid credentials;
+
+wrong password;
+
+invalid email;
+
+logout;
+
+re-login;
+
+session persistence;
+
+account isolation;
+
+inactive/deactivated account behavior;
+
+End-of-Life account behavior;
+
+reserved email behavior.
+
+
+UI presentation seperti input yang masih sederhana dicatat sebagai UI polish, bukan functional blocker.
+
+
+---
+
+6. HOME — CURRENT STATUS
+
+Observed:
+
+Authenticated.
+
+Account:
+83c9f2a1-7617-471c-9c68-75e0003ea6ab
+
+SH instances:
+1
+
+OPEN SH CHAT
+OPEN JOURNEY
+OPEN CLONE
+OPEN RECOVERY
+OPEN INHERITANCE / LEGACY / SUCCESSION
+RUNTIME VERIFICATION
+SIGN OUT
+
+Main navigation entry points reachable.
+
+Current classification:
+
+HOME / MAIN NAVIGATION
+🟢 BASIC ROUTE REACHABILITY
+
+FULL NAVIGATION COMPLETENESS
+🟡 STILL TO VERIFY
+
+Need to verify every action actually reaches the intended feature and returns correctly.
+
+
+---
+
+7. CHAT — MUST BE REOPENED AS UNPROVEN
+
+Chat screen successfully opened.
+
+Observed:
+
+SH Chat
+
+App → authenticated Runtime → lifecycle-aware streaming
+
+State:
+active
+
+Existing conversation was visible.
+
+User messages were sent and SH responses were received.
+
+Example interaction:
+
+You:
+SH runtime controlled verification
+
+SH:
+Understood. Runtime-controlled verification is noted.
+
+Repeated messages also produced responses.
+
+Therefore:
+
+CHAT BASIC REQUEST/RESPONSE
+🟢 OBSERVED
+
+BUT:
+
+CHAT FULL FUNCTIONALITY
+🟡 NOT PROVEN
+
+This is an important correction from earlier assumptions.
+
+
+---
+
+8. CHAT E2E TEST MATRIX
+
+Chat must be tested beyond "message sent and response appeared".
+
+Required:
+
+Chat
+├── open authenticated chat
+├── send message
+├── receive response
+├── streaming lifecycle
+├── persistence
+├── close/reopen
+├── existing conversation loading
+├── conversation ownership
+├── SH isolation
+├── context usage
+├── Memory interaction
+├── Knowledge interaction
+├── Journey interaction
+├── provenance where applicable
+├── failure / timeout
+├── unauthorized access
+├── malformed/error response
+└── session lifecycle
+
+Do not mark Chat 🟢 until these are sufficiently proven.
+
+
+---
+
+9. JOURNEY — BASIC RUNTIME OBSERVED
+
+Journey opened successfully.
+
+Observed Journey ID:
+
+78965d6c-33c2-45f1-9177-bd57b59eadf2
+
+Existing lifecycle events were displayed.
+
+Examples included:
+
+RECOVERY
+RECOVERED
+
+with sources such as:
+
+recovery_event:...
+recovery:...
+
+Therefore:
+
+JOURNEY READ / DISPLAY
+🟢 OBSERVED
+
+But:
+
+JOURNEY FULL SEMANTIC E2E
+🟡 NOT PROVEN
+
+Still required:
+
+event creation;
+
+persistence;
+
+ownership;
+
+public/private classification;
+
+private Journey exclusion;
+
+public/transferable Journey selection;
+
+provenance;
+
+Clone behavior;
+
+Inheritance behavior;
+
+Succession behavior;
+
+Legacy linkage.
+
+
+
+---
+
+10. JOURNEY PRIVACY SEMANTICS
+
+Previously Owner confirmed:
+
+Journey
+├── Public / transferable
+└── Private / non-transferable
+
+Private Journey must not automatically become transferable.
+
+User may explicitly classify where appropriate, but backend must remain authoritative.
+
+Examples of information that should not automatically transfer:
+
+highly private personal material;
+
+intimate conversations;
+
+private/confidential content;
+
+other data explicitly classified as private.
+
+
+Current APK screen displaying Journey events does NOT prove this contract.
+
+It must be tested at backend/runtime transfer level.
+
+
+---
+
+11. CLONE — CURRENT OBSERVATION
+
+Clone screen opened.
+
+Observed:
+
+Current account:
+83c9f2a1-7617-471c-9c68-75e0003ea6ab
+
+UI explicitly states:
+
+Create a Clone invitation for a new recipient email.
+The recipient does not need an Account or SH yet.
+
+After approval, the recipient registers with this email.
+Registration/session bootstrap then materializes the Clone
+as the recipient's PRIMARY SH.
+
+This matches the settled Owner Model B semantics.
+
+Current:
+
+CLONE UI / BASIC WIRING
+🟢 OBSERVED
+
+MODEL B CLEAN E2E
+🟡 NOT YET PROVEN
+
+
+---
+
+12. CLONE EXISTING TEST DATA
+
+Incoming invitation displayed:
+
+Agreement:
+d0eedae9-5fb0-4c83-9edd-3a3aa96ae2d3
+
+Source SH:
+2e88494a-e233-4878-acb4-c8f7aabd76b8
+
+Source account:
+82f0f817-b4bb-42c1-9336-8ad3009157d8
+
+Recipient email:
+sh-dev-test@banned.idn
+
+Status:
+PENDING
+
+Recipient account linked:
+83c9f2a1-7617-471c-9c68-75e0003ea6ab
+
+Outgoing invitation:
+
+Recipient email:
+sh-clone-test@banned.idn
+
+Target account:
+5eacaa51-23d2-4f60-9938-300604368da6
+
+Status:
+APPROVED
+
+These appear to be existing test/history data.
+
+Do NOT delete or modify merely because they are present.
+
+They are not sufficient to prove the clean Model B path.
+
+
+---
+
+13. REQUIRED CLEAN CLONE E2E
+
+The proper test is:
+
+A
+ ↓
+create Clone invitation
+ ↓
+recipient email B
+ ↓
+B has NO Account
+ ↓
+A approves
+ ↓
+B registers using invited email
+ ↓
+authenticated bootstrap
+ ↓
+approved invitation detected
+ ↓
+Clone materialized
+ ↓
+B PRIMARY SH
+ ↓
+verify transferred initial state
+
+Verify:
+
+Memory
+Knowledge
+Experience
+eligible Journey
+Reference/initial reference semantics
+Traits/initial trait semantics
+provenance
+
+Do NOT transfer:
+
+Source conversation
+Source private Journey
+Source credentials
+Source ownership
+live Source runtime
+
+
+---
+
+14. RECOVERY — BASIC RUNTIME OBSERVED
+
+Recovery screen opened.
+
+Observed SH:
+
+78965d6c-33c2-45f1-9177-bd57b59eadf2
+
+Snapshots displayed:
+
+FULL
+
+Multiple snapshots existed.
+
+Actions:
+
+CREATE SNAPSHOT
+RESTORE
+CREATE JSON EXPORT
+
+Recovery events showed:
+
+Outcome:
+RESTORED
+
+Continuity:
+RECOVERED
+
+JSON exports showed:
+
+Format:
+JSON
+
+Status:
+READY
+
+Therefore:
+
+RECOVERY BASIC E2E
+🟢 OBSERVED
+
+But full functional closure still requires controlled state mutation testing.
+
+
+---
+
+15. REQUIRED RECOVERY E2E
+
+Test:
+
+create snapshot
+ ↓
+record state
+ ↓
+modify state
+ ↓
+restore snapshot
+ ↓
+verify state restoration
+ ↓
+verify same SH identity
+ ↓
+verify no accidental new SH
+ ↓
+verify Journey continuity
+
+Recovery must remain:
+
+Recovery
+=
+restore same SH
+
+and must not become:
+
+Recovery
+=
+create new SH
+
+
+---
+
+16. INHERITANCE / SUCCESSION / LEGACY — BASIC UI OBSERVED
+
+Screen:
+
+Inheritance / Legacy / Succession
+
+Current account:
+
+83c9f2a1-7617-471c-9c68-75e0003ea6ab
+
+UI explicitly says:
+
+Transfers are explicit selections.
+Private/non-transferable Journey events are rejected by the backend.
+Reference / Value / History source-domain IDs are not silently approximated.
+
+This is consistent with the reconciliation work.
+
+
+---
+
+17. INHERITANCE SELECTION
+
+UI provides:
+
+CREATE AUTHORIZATION WITH SELECTED SCOPE
+
+with selection structure:
+
+memory_ids
+knowledge_ids
+experience_ids
+journey_event_ids
+
+Inheritance semantic:
+
+A active
+ ↓
+explicit authorization
+ ↓
+selected transferable state
+ ↓
+B receives only selected state
+
+Current:
+
+INHERITANCE WIRING
+🟢 OBSERVED
+
+INHERITANCE E2E
+🟡 NOT PROVEN
+
+Need actual selected-data test.
+
+Example:
+
+A
+├── M1
+├── M2
+├── K1
+├── K2
+├── E1
+├── E2
+├── J-public
+└── J-private
+
+authorization
+↓
+B receives:
+M1
+K2
+E1
+J-public
+
+B does NOT receive:
+M2
+K1
+E2
+J-private
+
+
+---
+
+18. SUCCESSION SEMANTICS
+
+Settled model:
+
+A End-of-Life
+ ↓
+Succession
+ ↓
+B receives explicitly selected state
+
+Example:
+
+Memory:
+☑ M1
+☐ M2
+
+Knowledge:
+☑ K1
+☐ K2
+
+Experience:
+☐ E1
+
+Journey:
+☐ J1
+
+Reference:
+☐ R1
+
+Value:
+☐ V1
+
+History:
+☐ H1
+
+Experience is a distinct domain.
+
+It must not be collapsed into Knowledge.
+
+Current:
+
+SUCCESSION UI / BASIC WIRING
+🟡
+
+SUCCESSION FULL E2E
+🔴 NOT PROVEN
+
+Required test:
+
+A active
+ ↓
+create succession selection
+ ↓
+A End-of-Life
+ ↓
+lifecycle boundary enforced
+ ↓
+selected state transferred
+ ↓
+non-selected state not transferred
+ ↓
+provenance recorded
+
+
+---
+
+19. END-OF-LIFE
+
+Owner decision is now official working boundary:
+
+Account + SH identity
+        ↓
+remain permanently stored
+        ↓
+become inactive
+        ↓
+cannot operate as active SH
+        ↓
+email remains permanently reserved
+        ↓
+cannot create new Account/SH using same email
+
+Conceptual interpretation:
+
+SH active
+ ↓
+End-of-Life
+ ↓
+SH remains identity/history
+ ↓
+SH becomes inactive
+ ↓
+SH no longer participates in active SH world
+
+This is distinct from deleting identity/history.
+
+Current E2E status:
+
+END-OF-LIFE
+🔴 NOT YET PROVEN IN APK
+
+Must verify:
+
+active SH can perform allowed actions before EOL;
+
+EOL changes lifecycle state;
+
+active operations become unavailable;
+
+identity/history remains;
+
+succession becomes eligible according to contract;
+
+email becomes permanently reserved;
+
+same email cannot create another Account/SH;
+
+existing historical records remain linked.
+
+
+
+---
+
+20. LEGACY
+
+Legacy semantic:
+
+selected preservation
+ ↓
+Legacy record
+ ↓
+provenance
+
+It is not simply "everything inherited".
+
+Current screen provides:
+
+PRESERVE SELECTED TRANSFER AS LEGACY
+RECORD LEGACY TYPE
+
+Current:
+
+LEGACY UI
+🟢 OBSERVED
+
+LEGACY FULL SELECTION/PROVENANCE E2E
+🟡 NOT PROVEN
+
+Need verify selected preservation and resulting immutable/history linkage.
+
+
+---
+
+21. EXPERIENCE
+
+Experience has been settled as a separate semantic domain:
+
+Experience
+≠
+Knowledge
+
+Canonical conceptual position:
+
+SH INSTANCE
+     │
+     ▼
+EXPERIENTIAL
+     │
+ ┌───┼─────────────┐
+ ▼   ▼             ▼
+Memory Knowledge Journey
+     │
+     ▼
+Experience
+(semantic domain)
+
+Experience is therefore eligible for explicit selection where the transfer contract allows it.
+
+Current APK UI exposes:
+
+experience_ids
+
+in selection payloads.
+
+Current:
+
+EXPERIENCE DOMAIN REPRESENTATION
+🟢 IMPLEMENTATION PRESENT
+
+EXPERIENCE TRANSFER E2E
+🟡 NOT PROVEN
+
+
+---
+
+22. REFERENCE / VALUE / HISTORY
+
+These remain distinct from the established core domains unless explicitly reconciled.
+
+Current UI itself states:
+
+Reference / Value / History source-domain IDs
+are not silently approximated.
+
+This is important.
+
+Do NOT invent:
+
+reference_ids
+value_ids
+history_ids
+
+merely because they are mentioned semantically.
+
+The existing implementation must determine whether each has a real persistent representation or whether its semantics are realized through existing domains/records.
+
+Current:
+
+REFERENCE
+🟡 RECONCILED SEMANTICALLY / NOT FULL E2E
+
+VALUE
+🟡 REPRESENTATION REQUIRES VERIFICATION
+
+HISTORY
+🟡 REPRESENTATION / LEGACY LINKAGE REQUIRES VERIFICATION
+
+
+---
+
+23. RUNTIME VERIFICATION
+
+Runtime screen opened:
+
+Runtime + Context Verification
+
+Available:
+
+VERIFY SH RUNTIME
+SEARCH AUTHORIZED CONTEXT
+
+The screen explicitly identifies itself as:
+
+Developer / diagnostic tool
+
+and says it is not required for normal:
+
+Chat;
+
+Journey;
+
+Clone;
+
+Recovery;
+
+Inheritance.
+
+
+Current:
+
+RUNTIME DIAGNOSTIC ROUTE
+🟢 REACHABLE
+
+FULL AUTHORIZED-CONTEXT E2E
+🟡 NOT YET PROVEN
+
+
+---
+
+24. ERROR HANDLING
+
+Error handling is not considered closed merely because service errors exist.
+
+Required verification:
+
+backend error
+ ↓
+service
+ ↓
+frontend
+ ↓
+message/code/details/hint
+
+rather than:
+
+backend error
+ ↓
+generic "operation failed"
+
+Current:
+
+ERROR NORMALIZATION
+🟡 NOT YET FULLY PROVEN
+
+Need deliberate failure tests for:
+
+invalid authorization;
+
+unauthorized SH;
+
+invalid selection;
+
+private Journey transfer;
+
+duplicate action;
+
+inactive SH;
+
+invalid Clone recipient state;
+
+invalid Recovery state;
+
+malformed request;
+
+backend exception.
+
+
+
+---
+
+25. NAVIGATION / ROUTE COMPLETENESS
+
+Observed main routes:
+
+Login
+ ↓
+Home
+ ├── Chat
+ ├── Journey
+ ├── Clone
+ ├── Recovery
+ ├── Inheritance / Legacy / Succession
+ └── Runtime Verification
+
+Basic reachability:
+
+🟢
+
+But complete navigation still requires:
+
+open
+ ↓
+perform action
+ ↓
+return
+ ↓
+refresh
+ ↓
+state preserved
+ ↓
+logout
+ ↓
+login
+ ↓
+route state safe
+
+No dead-end or unauthorized route should remain.
+
+
+---
+
+26. CURRENT FUNCTIONAL STATUS MATRIX
+
+AUTH / LOGIN
+🟢 basic runtime
+🟡 full E2E
+
+HOME
+🟢 basic runtime
+🟡 full navigation
+
+CHAT
+🟢 request/response observed
+🟡 FULL E2E
+
+JOURNEY
+🟢 read/display observed
+🟡 FULL E2E + privacy
+
+EXPERIENCE
+🟢 representation/wiring
+🟡 FULL E2E
+
+CLONE
+🟢 UI + Model B wiring
+🟡 CLEAN MODEL-B E2E
+
+RECOVERY
+🟢 snapshot/restore/export observed
+🟡 controlled restore E2E
+
+INHERITANCE
+🟢 selection UI/wiring
+🟡 selected transfer E2E
+
+SUCCESSION
+🟡 selection/wiring
+🔴 End-of-Life + transfer E2E
+
+LEGACY
+🟢 UI/wiring
+🟡 selection/provenance E2E
+
+ERROR HANDLING
+🟡
+
+NAVIGATION
+🟢 basic reachability
+🟡 full action sweep
+
+PROVENANCE
+🟡 runtime verification required
+
+
+---
+
+27. IMPORTANT TESTING RULE
+
+Do not use the following as sufficient evidence:
+
+screen exists
+button exists
+RPC exists
+service exists
+database row exists
+
+Functional proof should follow:
+
+USER ACTION
+   ↓
+FRONTEND ACTION
+   ↓
+SERVICE
+   ↓
+RPC
+   ↓
+DATABASE / RLS
+   ↓
+RESULT
+   ↓
+PERSISTENCE
+   ↓
+REOPEN / REQUERY
+   ↓
+EXPECTED SEMANTICS
+
+For transfer domains additionally:
+
+selection
+ ↓
+eligibility
+ ↓
+transfer
+ ↓
+destination state
+ ↓
+non-selected state absent
+ ↓
+provenance
+
+
+---
+
+28. APK #81 IS NOT FUNCTIONAL CLOSURE YET
+
+This is the most important status correction.
+
+APK #81 proves:
+
+the application runs
++
+authentication works
++
+main screens are reachable
++
+several happy paths work
+
+It does NOT yet prove:
+
+all features work correctly
+
+Therefore:
+
+APK #81
+=
+TEST VEHICLE
+
+NOT:
+FUNCTIONAL CLOSURE
+
+
+---
+
+29. TESTING ORDER FROM HERE
+
+Continue sequentially.
+
+1. Auth / Account
+       ↓
+2. Home / Navigation
+       ↓
+3. Chat
+       ↓
+4. Journey
+       ↓
+5. Memory / Knowledge / Experience interaction
+       ↓
+6. Clone
+       ↓
+7. Recovery
+       ↓
+8. Inheritance
+       ↓
+9. Succession
+       ↓
+10. End-of-Life
+       ↓
+11. Legacy
+       ↓
+12. Provenance
+       ↓
+13. Error / authorization paths
+       ↓
+14. Final navigation sweep
+       ↓
+FUNCTIONAL CLOSURE
+
+If a deterministic bug appears:
+
+STOP CURRENT DOMAIN
+ ↓
+trace
+ ↓
+fix
+ ↓
+verify
+ ↓
+rebuild APK
+ ↓
+resume testing
+
+If a genuine semantic ambiguity appears:
+
+STOP
+ ↓
+Owner Decision
+
+Otherwise:
+
+GO
+
+
+---
+
+30. UI POLISH REMAINS DEFERRED
+
+Observed UI issues include simple/plain text inputs.
+
+Example:
+
+Tulis pesan
+
+would be preferable as placeholder for Chat input.
+
+Login fields also need later visual refinement.
+
+These are intentionally NOT being fixed now.
+
+Current priority:
+
+FUNCTION
+>
+E2E
+>
+CORRECTNESS
+>
+PROVENANCE
+>
+ERROR HANDLING
+>
+UI/UX
+
+UI/UX polish begins only after functional closure.
+
+
+---
+
+31. SINGLE-DEVICE TESTING
+
+One Android device is sufficient.
+
+For Clone:
+
+A
+ ↓
+logout
+ ↓
+B
+ ↓
+register/login
+ ↓
+verify Clone
+ ↓
+logout
+ ↓
+A
+ ↓
+verify Source unchanged
+
+The same device does not change the semantics.
+
+For transfer tests, separate test accounts/SH instances should be used as needed.
+
+
+---
+
+32. IMPORTANT CONTINUITY RULE
+
+Next session must NOT restart:
+
+Clone semantics recovery;
+
+Model B discussion;
+
+Candidate Memory semantics;
+
+Candidate Knowledge semantics;
+
+Conversation exclusion;
+
+Journey transfer semantics;
+
+Experience ≠ Knowledge;
+
+End-of-Life conceptual decision;
+
+explicit selection semantics.
+
+
+Those are already settled.
+
+Resume 48 starts from:
+
+APK #81
+ ↓
+REAL E2E FUNCTIONAL VERIFICATION
+
+
+---
+
+33. WHAT HAS BEEN PROVEN SO FAR IN APK #81
+
+Observed directly:
+
+✓ Login happy path
+✓ Authenticated Home
+✓ Account resolution
+✓ SH instance resolution
+✓ Main navigation reachability
+✓ Chat opens
+✓ Chat message/response basic path
+✓ Journey opens
+✓ Journey data loads
+✓ Clone screen opens
+✓ Clone Model-B instructions are present
+✓ Recovery screen opens
+✓ Snapshot records load
+✓ Restore path is exposed
+✓ JSON export records load
+✓ Inheritance/Legacy/Succession screen opens
+✓ Selected-scope controls are exposed
+✓ Runtime diagnostic screen opens
+
+These are observations, not blanket functional closure.
+
+
+---
+
+34. WHAT IS STILL UNPROVEN
+
+Major remaining proof areas:
+
+❌ Chat full E2E
+❌ Chat persistence/isolation
+❌ Journey creation/privacy/transfer
+❌ Memory interaction
+❌ Knowledge interaction
+❌ Experience transfer
+❌ Clean Clone Model-B E2E
+❌ Clone provenance
+❌ Controlled Recovery mutation/restore
+❌ Inheritance selected transfer
+❌ Succession selected transfer
+❌ End-of-Life
+❌ permanent email reservation
+❌ Legacy preservation/provenance
+❌ error normalization
+❌ unauthorized/failure paths
+❌ full navigation/action sweep
+❌ final provenance verification
+
+
+---
+
+35. CURRENT NEXT ACTION
+
+The immediate next action is NOT another schema redesign.
+
+It is:
+
+APK #81
+ ↓
+AUTH / ACCOUNT E2E
+ ↓
+HOME / NAVIGATION E2E
+ ↓
+CHAT E2E
+
+Chat is deliberately included early because it has not yet been sufficiently proven.
+
+If Chat passes:
+
+→ Journey
+→ Memory / Knowledge / Experience
+→ Clone
+→ Recovery
+→ Inheritance
+→ Succession / EOL
+→ Legacy
+→ Error handling
+
+Continue until the first real failure.
+
+
+---
+
+36. BUILD POLICY
+
+Do not build another APK simply because a test is incomplete.
+
+Build again only when:
+
+code/schema/RPC/service/frontend
+
+is changed in a way that requires new runtime verification.
+
+Current APK #81 remains the active test vehicle until a deterministic defect requires a new build.
+
+
+---
+
+37. FINAL CURRENT POSITION
+
+SECOND HEAD
+=
+PRE-FUNCTIONAL-CLOSURE E2E
+
+Canonical
+🟢
+
+Semantics
+🟢 Owner-resolved where previously settled
+
+Backend implementation
+🟢 substantially implemented
+
+Frontend wiring
+🟢 substantially implemented
+
+APK #81
+🟢 running
+
+Runtime basic paths
+🟢 observed
+
+FULL FUNCTIONAL PROOF
+🟡 IN PROGRESS
+
+Chat
+🟡 UNPROVEN BEYOND BASIC HAPPY PATH
+
+Journey
+🟡
+
+Clone
+🟡
+
+Recovery
+🟡
+
+Inheritance
+🟡
+
+Succession
+🔴 EOL E2E pending
+
+Legacy
+🟡
+
+Error handling
+🟡
+
+Navigation
+🟡 full sweep pending
+
+FUNCTIONAL CLOSURE
+⏳
+
+UI POLISH
+⏳ AFTER FUNCTIONAL CLOSURE
+
+P6
+🔴 NOT STARTED
+
+
+---
+
+38. ONE-LINE HANDOFF
+
+SECOND HEAD — RESUME 48
+
+APK #81 is now the active runtime test vehicle.
+
+Do NOT assume functional closure.
+
+Start REAL E2E from:
+Auth → Account → Home → Chat.
+
+Prove each domain through:
+Frontend action
+→ service
+→ RPC
+→ DB/RLS
+→ persistence
+→ expected semantics
+→ provenance where applicable.
+
+Fix deterministic failures immediately,
+rebuild only when code changes require it,
+and continue until FUNCTIONAL CLOSURE.
+
+UI polish comes only afterward.
+P6 remains untouched.
+
+
+---
+
+END OF SESSION RESUME 48
+
+---
+
+SECOND HEAD — SESSION RESUME 49 (next)
 
 
 
