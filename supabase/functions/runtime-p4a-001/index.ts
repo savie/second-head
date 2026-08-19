@@ -65,8 +65,23 @@ Deno.serve(async (req: Request) => {
     const sink = createJourneySink(() => candidate, createRecorder(supabase));
     const decision = await sink.decideAndRecord({ sh_id: identity.sh_id, user_message: userMessage, response: modelResponse, explicit: body.explicit_journey_capture === true });
     const lifecycle = await recordSemanticLifecycle(supabase, identity.sh_id, userMessage, modelResponse);
-    await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", { stream: body.stream === true, response_length: output.length, journey_decision: decision.reason, memory_decision: lifecycle.memory ? "RECORDED" : "NONE", knowledge_decision: lifecycle.knowledge ? "ACQUIRED_CANDIDATE" : "NONE", model_provider: modelProvider, model_id: modelId, cost_tier: routed.cost_tier, task, semantic_signals_present: modelResponse.semantic_signals !== undefined });
-    const meta = { phase: "P4A-001", model_provider: modelProvider, model_id: modelId, cost_tier: routed.cost_tier, task, context_entries: 0, memory_decision: lifecycle.memory ? "RECORDED" : "NONE", knowledge_decision: lifecycle.knowledge ? "ACQUIRED_CANDIDATE" : "NONE", journey_decision: decision.reason, semantic_signals: modelResponse.semantic_signals ?? null, persistence: "verified-path", audit: "verified-path" };
+    let knowledgeJourney = false;
+    if (lifecycle.knowledge) {
+      await createRecorder(supabase).record({
+        sh_id: identity.sh_id,
+        event_type: "LEARNING",
+        continuity_status: "CONTINUOUS",
+        payload: {
+          knowledge_id: lifecycle.knowledge,
+          acquisition: "runtime:p4d:knowledge_candidate",
+          knowledge_decision: "ACQUIRED_CANDIDATE",
+        },
+        source_ref: "runtime:p5a:knowledge_candidate",
+      });
+      knowledgeJourney = true;
+    }
+    await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", { stream: body.stream === true, response_length: output.length, journey_decision: decision.reason, memory_decision: lifecycle.memory ? "RECORDED" : "NONE", knowledge_decision: lifecycle.knowledge ? "ACQUIRED_CANDIDATE" : "NONE", knowledge_journey: knowledgeJourney ? "RECORDED" : "NONE", model_provider: modelProvider, model_id: modelId, cost_tier: routed.cost_tier, task, semantic_signals_present: modelResponse.semantic_signals !== undefined });
+    const meta = { phase: "P4A-001", model_provider: modelProvider, model_id: modelId, cost_tier: routed.cost_tier, task, context_entries: 0, memory_decision: lifecycle.memory ? "RECORDED" : "NONE", knowledge_decision: lifecycle.knowledge ? "ACQUIRED_CANDIDATE" : "NONE", knowledge_journey: knowledgeJourney ? "RECORDED" : "NONE", journey_decision: decision.reason, semantic_signals: modelResponse.semantic_signals ?? null, persistence: "verified-path", audit: "verified-path" };
     if (!body.stream) return new Response(JSON.stringify({ sh_id: identity.sh_id, response: output, meta }), { status: 200, headers: jsonHeaders });
     const encoder = new TextEncoder(); const chunks = output.match(/.{1,12}/g) ?? [output];
     const stream = new ReadableStream<Uint8Array>({ async start(controller) { const send = (event: string, payload: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`)); send("response", { sh_id: identity.sh_id, text: "", meta: { ...meta, streaming: true } }); for (const chunk of chunks) { send("token", { text: chunk }); await new Promise(resolve => setTimeout(resolve, 20)); } send("complete", { sh_id: identity.sh_id }); controller.close(); } });
