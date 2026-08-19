@@ -5,6 +5,7 @@ import { useAuth } from '../state/auth-context';
 import {
   approveCloneAgreement,
   createCloneAgreement,
+  executeClone,
   listCloneAgreements,
   rejectCloneAgreement,
   type CloneAgreement,
@@ -32,6 +33,7 @@ export default function CloneScreen() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const currentAccountId = context?.account.account_id ?? '';
+  const currentEmail = context?.account.email?.trim().toLowerCase() ?? '';
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -50,8 +52,8 @@ export default function CloneScreen() {
   }, [context, refresh]);
 
   const incoming = useMemo(
-    () => agreements.filter((item) => item.target_account_id === currentAccountId),
-    [agreements, currentAccountId],
+    () => agreements.filter((item) => item.target_account_id === currentAccountId || item.target_email === currentEmail),
+    [agreements, currentAccountId, currentEmail],
   );
   const outgoing = useMemo(
     () => agreements.filter((item) => item.source_account_id === currentAccountId),
@@ -66,11 +68,7 @@ export default function CloneScreen() {
     setError(null);
     setNotice(null);
     try {
-      const agreement = await createCloneAgreement({
-        sourceShId,
-        sourceAccountId: currentAccountId,
-        targetEmail: recipientEmail,
-      });
+      const agreement = await createCloneAgreement({ sourceShId, sourceAccountId: currentAccountId, targetEmail: recipientEmail });
       setSourceShId('');
       setRecipientEmail('');
       setNotice(`Clone invitation created: ${agreement.agreement_id}`);
@@ -110,41 +108,33 @@ export default function CloneScreen() {
     }
   }
 
+  async function materialize(agreementId: string) {
+    setBusyId(agreementId);
+    setError(null);
+    setNotice(null);
+    try {
+      const cloneShId = await executeClone(agreementId);
+      setNotice(`Clone materialized as PRIMARY SH: ${cloneShId}`);
+      await refresh();
+    } catch (err) {
+      setError(describeError(err, 'Unable to materialize Clone'));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 16 }}>
       <Text style={{ fontSize: 28, fontWeight: '700' }}>Clone</Text>
-      <Text>Current source account: {currentAccountId}</Text>
+      <Text>Current account: {currentAccountId}</Text>
       <Text>Create a Clone invitation for a new recipient email. The recipient does not need an Account or SH yet.</Text>
 
       <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
-      <TextInput
-        placeholder="Enter the SH ID owned by this account"
-        value={sourceShId}
-        onChangeText={setSourceShId}
-        autoCapitalize="none"
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
-      />
-
+      <TextInput placeholder="Enter the SH ID owned by this account" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Text style={{ fontWeight: '600' }}>Recipient email</Text>
-      <TextInput
-        placeholder="Enter the intended recipient email"
-        value={recipientEmail}
-        onChangeText={setRecipientEmail}
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="email-address"
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
-      />
-
-      <Text style={{ fontSize: 12 }}>
-        After approval, the recipient registers with this email. Registration materializes the Clone as the recipient's PRIMARY SH.
-      </Text>
-
-      <Button
-        title={busyId === 'create' ? 'Creating…' : 'Create Clone invitation'}
-        onPress={() => void requestClone()}
-        disabled={busyId !== null || !sourceShId.trim() || !recipientEmail.trim()}
-      />
+      <TextInput placeholder="Enter the intended recipient email" value={recipientEmail} onChangeText={setRecipientEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
+      <Text style={{ fontSize: 12 }}>After approval, the recipient registers with this email. Registration then materializes the Clone as the recipient's PRIMARY SH.</Text>
+      <Button title={busyId === 'create' ? 'Creating…' : 'Create Clone invitation'} onPress={() => void requestClone()} disabled={busyId !== null || !sourceShId.trim() || !recipientEmail.trim()} />
 
       {loading ? <ActivityIndicator /> : null}
       {notice ? <Text>{notice}</Text> : null}
@@ -158,7 +148,10 @@ export default function CloneScreen() {
           <Text>Source account: {agreement.source_account_id}</Text>
           <Text>Recipient email: {agreement.target_email}</Text>
           <Text>Status: {agreement.status}</Text>
-          <Text>After registration, this Clone becomes the recipient's PRIMARY SH.</Text>
+          {agreement.status === 'APPROVED' && !agreement.target_account_id ? (
+            <Button title={busyId === agreement.agreement_id ? 'Materializing…' : 'Become Clone'} onPress={() => void materialize(agreement.agreement_id)} disabled={busyId !== null} />
+          ) : null}
+          {agreement.target_account_id ? <Text>Recipient account linked: {agreement.target_account_id}</Text> : null}
         </View>
       ))}
 
@@ -175,10 +168,8 @@ export default function CloneScreen() {
               <Button title="Reject" onPress={() => void reject(agreement.agreement_id)} disabled={busyId !== null} />
             </View>
           ) : null}
-          {agreement.status === 'APPROVED' && !agreement.target_account_id ? (
-            <Text>Approved. Waiting for the recipient to register with the intended email.</Text>
-          ) : null}
-          {agreement.target_account_id ? <Text>Recipient registered and Clone materialization is linked to this Account.</Text> : null}
+          {agreement.status === 'APPROVED' && !agreement.target_account_id ? <Text>Approved. Waiting for the recipient to register with the intended email.</Text> : null}
+          {agreement.target_account_id ? <Text>Recipient account linked and Clone materialization is complete or in progress.</Text> : null}
         </View>
       ))}
 
