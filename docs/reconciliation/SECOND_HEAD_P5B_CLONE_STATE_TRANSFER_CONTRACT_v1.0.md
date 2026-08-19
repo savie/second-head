@@ -3,7 +3,7 @@
 Project: SECOND HEAD — SYSTEM BUILD  
 Document Type: P5B Clone State Transfer Contract / Execution Reconciliation  
 Version: v1.0  
-Status: ACTIVE — IMPLEMENTATION MAPPING  
+Status: ACTIVE — OWNER-RESOLVED / IMPLEMENTATION  
 Canonical Status: NON-CANONICAL  
 Mutation: NO CANONICAL MUTATION  
 Working Branch: `dev`
@@ -12,7 +12,7 @@ Working Branch: `dev`
 
 ## 1. Purpose
 
-This document converts the latest Owner decisions for Clone state transfer into an implementation-facing contract without changing the Canonical.
+This document converts the Owner-resolved Clone state-transfer semantics into an implementation-facing contract without changing the Canonical.
 
 Authority order remains:
 
@@ -59,11 +59,33 @@ Memory Candidate
 Owner clarification:
 
 ```text
-Memory Candidate → Memory
+Memory Candidate   → Memory
 Knowledge Candidate → Knowledge
 ```
 
 Candidates are therefore not preserved as Candidate state when transferred by Clone. They become the corresponding destination domain.
+
+### Context / Reference / Traits clarification
+
+Owner selected the **initial inherited runtime-state model**.
+
+Meaning:
+
+```text
+Source
+  ↓
+Clone creation
+  ↓
+initial inherited runtime state / starting configuration
+  ↓
+Clone lives independently
+  ↓
+existing Context / Reference / Personality mechanisms govern it
+```
+
+This does **not** authorize creation of new generic `context`, `reference`, or `traits` persistence tables merely to make Clone transfer possible.
+
+The implementation must use an existing representation where one exists. Where a domain is runtime-composed rather than persisted, Clone receives the corresponding initial semantics through the existing runtime boundary rather than by copying Source runtime/session state.
 
 ### Never transfer
 
@@ -80,7 +102,7 @@ The Clone starts with its own Journey and new conversations.
 
 ---
 
-## 3. Existing Schema Mapping
+## 3. Existing Schema / Runtime Mapping
 
 ### Memory — IMPLEMENTABLE
 
@@ -97,7 +119,7 @@ CANDIDATE → ACTIVE
 ACTIVE    → ACTIVE
 ```
 
-Existing fields to preserve where represented:
+Existing fields are preserved where represented:
 
 - memory_type
 - content
@@ -123,53 +145,65 @@ source Knowledge           → destination Knowledge
 
 Destination lifecycle is materialized as active Knowledge rather than Candidate.
 
-Existing provenance must be retained and extended so the destination can still identify its source lineage.
+Existing provenance is retained and extended so the destination can identify its Source lineage.
 
-### Context — NOT YET MATERIALIZABLE
+### Context — RUNTIME INITIAL STATE
 
-Current implementation search found no dedicated persistent `context` table in Supabase DEV.
+Current DEV implementation uses runtime context assembly rather than a dedicated persistent `context` table.
 
-Canonical semantics define Context as dynamic/request-scoped state rather than a Memory-like storage domain.
+Therefore:
 
-Therefore no `SELECT → INSERT` transfer is permitted yet.
+```text
+Clone SH
+ ↓
+existing context assembly
+ ↓
+Clone-specific Memory / Knowledge / Journey
+```
 
-### Reference — NOT YET MATERIALIZABLE
+No new Context table is introduced by P5B.
 
-Current implementation search found no dedicated persistent `reference` table in Supabase DEV.
+Source Journey remains excluded; the Clone has its own Journey.
 
-Canonical semantics define Reference as a source used for verification/reasoning/knowledge formation/context enrichment.
+### Reference — INITIAL INHERITED RUNTIME SEMANTICS
 
-Therefore no new Reference storage model may be invented inside P5B merely to satisfy the Clone transfer request.
+Owner decision is that Reference is part of the Clone's initial inherited runtime state, not a reason to invent a new generic persistence domain.
 
-### Traits — NOT YET MATERIALIZABLE
+If an existing Reference representation is consumed by the runtime, the Clone must receive the corresponding initial semantics through that existing mechanism. Source credentials, private authorization, and live Source state are never transferred.
 
-Current implementation search found no dedicated persistent `traits` table in Supabase DEV.
+### Traits — INITIAL INHERITED PERSONALITY SEMANTICS
 
-Canonical semantics place Traits within Personality development rather than defining an independent storage table in the currently verified schema.
+Owner decision is that Traits are part of the Clone's initial inherited runtime/personality starting state, not a reason to invent a new generic `traits` table inside P5B.
 
-Therefore no new Personality/Trait storage architecture may be invented inside P5B without reconciliation.
+After materialization, the Clone evolves independently through the existing Personality/Traits mechanisms.
 
 ---
 
-## 4. Current Stop Condition
+## 4. Materialization Contract
 
-The Owner has already answered the semantic question: these domains are intended to be available to the Clone.
-
-The remaining unresolved question is technical/materialization semantics for three domains:
+The intended recipient does not need an Account or SH when the Source creates the invitation.
 
 ```text
-Context
-Reference
-Traits
+A / Source Account
+ ↓
+create Clone invitation for B email
+ ↓
+Source approves
+ ↓
+B does not yet have Account / SH
+ ↓
+B registers with intended email
+ ↓
+auth bootstrap detects approved invitation
+ ↓
+transactional Clone materialization
+ ↓
+B Account + one PRIMARY Clone SH
 ```
 
-Before adding a new persistence model, Owner clarification is required in plain language:
+The recipient does not manually press a `Become Clone` action after registration. Registration/session bootstrap is the materialization trigger.
 
-> Saat Clone lahir, ketika kita bilang Context, Reference, dan Traits "ikut", apakah maksudnya ketiganya harus menjadi **data/state persistent milik Clone**, atau cukup menjadi **initial inherited runtime state** yang tersedia untuk Clone tetapi tidak menjadi storage domain baru?
-
-This is a material implementation decision because the current DEV schema does not contain dedicated persistent representations for those three domains.
-
-No speculative table, metadata schema, or new architecture is introduced until this question is resolved.
+The materialization transaction creates the Clone SH, ownership, clone provenance, Memory, Knowledge and agreement linkage atomically. Context / Reference / Traits use the initial inherited runtime-state semantics above.
 
 ---
 
@@ -204,14 +238,11 @@ Runtime boundary
 
 Do not implement Clone as a full SH copy.
 
-Do not copy arbitrary tables merely because they appear related to the source SH.
+Do not copy arbitrary tables merely because they appear related to the Source SH.
 
 Use existing domain storage and lifecycle semantics wherever a representation already exists.
 
-For domains without an existing representation, stop and obtain the minimum Owner decision needed to choose between:
-
-1. inherited runtime state, or
-2. a separately reconciled persistent representation.
+For Context / Reference / Traits, do not invent generic persistence solely for Clone. Realize the Owner-approved initial inherited runtime semantics through existing runtime/personality mechanisms and keep the Clone independent after materialization.
 
 ---
 
@@ -223,12 +254,17 @@ Clone PRIMARY SH                     🟢 RECONCILED
 Memory transfer semantics            🟢 OWNER LOCKED / SCHEMA EXISTS
 Memory Candidate → Memory            🟢 OWNER LOCKED
 Knowledge transfer semantics         🟢 OWNER LOCKED / SCHEMA EXISTS
-Knowledge Candidate → Knowledge     🟢 OWNER LOCKED
+Knowledge Candidate → Knowledge      🟢 OWNER LOCKED
+Context initial runtime state        🟢 OWNER RESOLVED / NO NEW TABLE
+Reference initial runtime state      🟢 OWNER RESOLVED / NO NEW TABLE
+Traits initial runtime state         🟢 OWNER RESOLVED / NO NEW TABLE
 Conversation exclusion               🟢 LOCKED
 Journey exclusion                    🟢 LOCKED
-Context materialization              🟡 OWNER CLARIFICATION REQUIRED
-Reference materialization            🟡 OWNER CLARIFICATION REQUIRED
-Traits materialization               🟡 OWNER CLARIFICATION REQUIRED
+Recipient registration trigger       🟢 IMPLEMENTED
+Transactional materialization        🟢 IMPLEMENTED
+Frontend manual materialization      🔴 MUST NOT BE USED
+
+Next gate: full backend ↔ frontend functional audit, then APK build.
 ```
 
 No P6 transition is implied by this document.
