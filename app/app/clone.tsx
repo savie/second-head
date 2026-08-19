@@ -5,7 +5,6 @@ import { useAuth } from '../state/auth-context';
 import {
   approveCloneAgreement,
   createCloneAgreement,
-  executeClone,
   listCloneAgreements,
   rejectCloneAgreement,
   type CloneAgreement,
@@ -26,8 +25,7 @@ export default function CloneScreen() {
   const { session, context } = useAuth();
   const [agreements, setAgreements] = useState<CloneAgreement[]>([]);
   const [sourceShId, setSourceShId] = useState('');
-  const [sourceAccountId, setSourceAccountId] = useState('');
-  const [cloneName, setCloneName] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,15 +68,15 @@ export default function CloneScreen() {
     try {
       const agreement = await createCloneAgreement({
         sourceShId,
-        sourceAccountId,
-        targetAccountId: currentAccountId,
+        sourceAccountId: currentAccountId,
+        targetEmail: recipientEmail,
       });
       setSourceShId('');
-      setSourceAccountId('');
-      setNotice(`Clone agreement created: ${agreement.agreement_id}`);
+      setRecipientEmail('');
+      setNotice(`Clone invitation created: ${agreement.agreement_id}`);
       await refresh();
     } catch (err) {
-      setError(describeError(err, 'Unable to create clone agreement'));
+      setError(describeError(err, 'Unable to create clone invitation'));
     } finally {
       setBusyId(null);
     }
@@ -89,10 +87,10 @@ export default function CloneScreen() {
     setError(null);
     try {
       await approveCloneAgreement(agreementId);
-      setNotice(`Agreement approved: ${agreementId}`);
+      setNotice(`Clone invitation approved: ${agreementId}`);
       await refresh();
     } catch (err) {
-      setError(describeError(err, 'Unable to approve agreement'));
+      setError(describeError(err, 'Unable to approve clone invitation'));
     } finally {
       setBusyId(null);
     }
@@ -103,25 +101,10 @@ export default function CloneScreen() {
     setError(null);
     try {
       await rejectCloneAgreement(agreementId);
-      setNotice(`Agreement rejected: ${agreementId}`);
+      setNotice(`Clone invitation rejected: ${agreementId}`);
       await refresh();
     } catch (err) {
-      setError(describeError(err, 'Unable to reject agreement'));
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function execute(agreementId: string) {
-    setBusyId(agreementId);
-    setError(null);
-    try {
-      const cloneShId = await executeClone(agreementId, cloneName);
-      setCloneName('');
-      setNotice(`Clone created: ${cloneShId}`);
-      await refresh();
-    } catch (err) {
-      setError(describeError(err, 'Unable to execute clone'));
+      setError(describeError(err, 'Unable to reject clone invitation'));
     } finally {
       setBusyId(null);
     }
@@ -130,50 +113,72 @@ export default function CloneScreen() {
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 16 }}>
       <Text style={{ fontSize: 28, fontWeight: '700' }}>Clone</Text>
-      <Text>Current account: {currentAccountId}</Text>
-      <Text>Create a clone agreement as the target account. The source account must approve it before execution.</Text>
+      <Text>Current source account: {currentAccountId}</Text>
+      <Text>Create a Clone invitation for a new recipient email. The recipient does not need an Account or SH yet.</Text>
 
       <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
-      <TextInput placeholder="Enter the SH ID owned by the source account" value={sourceShId} onChangeText={setSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <Text style={{ fontWeight: '600' }}>Source Account ID</Text>
-      <TextInput placeholder="Enter the account ID that owns the source SH" value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <Text style={{ fontSize: 12 }}>Target account is the currently authenticated account: {currentAccountId}</Text>
-      <Button title={busyId === 'create' ? 'Creating…' : 'Request clone'} onPress={() => void requestClone()} disabled={busyId !== null || !sourceShId || !sourceAccountId} />
+      <TextInput
+        placeholder="Enter the SH ID owned by this account"
+        value={sourceShId}
+        onChangeText={setSourceShId}
+        autoCapitalize="none"
+        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+      />
+
+      <Text style={{ fontWeight: '600' }}>Recipient email</Text>
+      <TextInput
+        placeholder="Enter the intended recipient email"
+        value={recipientEmail}
+        onChangeText={setRecipientEmail}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
+        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+      />
+
+      <Text style={{ fontSize: 12 }}>
+        After approval, the recipient registers with this email. Registration materializes the Clone as the recipient's PRIMARY SH.
+      </Text>
+
+      <Button
+        title={busyId === 'create' ? 'Creating…' : 'Create Clone invitation'}
+        onPress={() => void requestClone()}
+        disabled={busyId !== null || !sourceShId.trim() || !recipientEmail.trim()}
+      />
 
       {loading ? <ActivityIndicator /> : null}
       {notice ? <Text>{notice}</Text> : null}
       {error ? <Text>{error}</Text> : null}
 
-      <Text style={{ fontSize: 20, fontWeight: '700' }}>Incoming agreements</Text>
-      {incoming.length === 0 ? <Text>No incoming clone agreements.</Text> : incoming.map((agreement) => (
+      <Text style={{ fontSize: 20, fontWeight: '700' }}>Incoming Clone invitations</Text>
+      {incoming.length === 0 ? <Text>No incoming Clone invitations.</Text> : incoming.map((agreement) => (
         <View key={agreement.agreement_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 8 }}>
           <Text>Agreement: {agreement.agreement_id}</Text>
           <Text>Source SH: {agreement.source_sh_id}</Text>
           <Text>Source account: {agreement.source_account_id}</Text>
+          <Text>Recipient email: {agreement.target_email}</Text>
           <Text>Status: {agreement.status}</Text>
-          {agreement.status === 'PENDING' ? <Text>Waiting for the source account to approve this agreement.</Text> : null}
+          <Text>After registration, this Clone becomes the recipient's PRIMARY SH.</Text>
         </View>
       ))}
 
-      <Text style={{ fontSize: 20, fontWeight: '700' }}>Outgoing agreements</Text>
-      {outgoing.length === 0 ? <Text>No outgoing clone agreements.</Text> : outgoing.map((agreement) => (
+      <Text style={{ fontSize: 20, fontWeight: '700' }}>Outgoing Clone invitations</Text>
+      {outgoing.length === 0 ? <Text>No outgoing Clone invitations.</Text> : outgoing.map((agreement) => (
         <View key={agreement.agreement_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 8 }}>
           <Text>Agreement: {agreement.agreement_id}</Text>
-          <Text>Target account: {agreement.target_account_id}</Text>
+          <Text>Recipient email: {agreement.target_email}</Text>
+          <Text>Target account: {agreement.target_account_id ?? 'Not registered yet'}</Text>
           <Text>Status: {agreement.status}</Text>
-          {agreement.status === 'PENDING' ? <Text>Target requested this clone. Source approval is required.</Text> : null}
           {agreement.status === 'PENDING' ? (
             <View style={{ gap: 8 }}>
               <Button title={busyId === agreement.agreement_id ? 'Working…' : 'Approve'} onPress={() => void approve(agreement.agreement_id)} disabled={busyId !== null} />
               <Button title="Reject" onPress={() => void reject(agreement.agreement_id)} disabled={busyId !== null} />
             </View>
           ) : null}
-          {agreement.status === 'APPROVED' ? (
-            <View style={{ gap: 8 }}>
-              <TextInput placeholder="Optional clone name" value={cloneName} onChangeText={setCloneName} style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-              <Button title={busyId === agreement.agreement_id ? 'Creating…' : 'Create clone'} onPress={() => void execute(agreement.agreement_id)} disabled={busyId !== null} />
-            </View>
+          {agreement.status === 'APPROVED' && !agreement.target_account_id ? (
+            <Text>Approved. Waiting for the recipient to register with the intended email.</Text>
           ) : null}
+          {agreement.target_account_id ? <Text>Recipient registered and Clone materialization is linked to this Account.</Text> : null}
         </View>
       ))}
 
