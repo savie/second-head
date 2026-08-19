@@ -4,7 +4,10 @@ import { AuthProvider } from '../state/auth-context';
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <Stack />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+      </Stack>
     </AuthProvider>
   );
 }
