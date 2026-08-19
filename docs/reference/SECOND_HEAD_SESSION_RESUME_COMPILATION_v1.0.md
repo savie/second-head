@@ -43982,7 +43982,1657 @@ END OF SESSION RESUME 46
 
 ---
 
-SECOND HEAD — SESSION RESUME 47 (next)
+Nggak macet haha. Tadi gue sekalian tarik ulang compilation supaya Resume 47 benar-benar nyambung dari Resume 46, bukan cuma merangkum beberapa pesan terakhir.
+
+Dan iya, yang lu minta tepat: Resume 47 harus mencatat pekerjaan aktual sesi ini dari awal sampai posisi terakhir, termasuk koreksi semantics Clone, Owner Decisions, audit GitHub/Supabase, dan posisi tepat sebelum build APK.
+
+Di bawah ini versi yang siap lu copy ke compilation.
+
+---
+
+# SECOND HEAD — SESSION RESUME 47
+
+## Reconciled Continuation Checkpoint
+### Resume 46 → P5 Pre-Build Audit → Clone Semantics Recovery → Backend/Frontend Reconciliation → Current Pre-APK State
+
+**Project:** SECOND HEAD — SYSTEM BUILD  
+**Resume:** 47  
+**Resume Type:** Reconciled Current-State / Cross-Session Continuation Checkpoint  
+**Status:** ACTIVE  
+**Canonical Status:** NON-CANONICAL  
+**Purpose:** Mencatat seluruh pekerjaan aktual pada rangkaian sesi ini agar sesi berikutnya dapat melanjutkan tanpa mengulang audit, semantics recovery, Owner Decisions, atau implementation work yang sudah selesai.
+
+---
+
+# 0. ROLE OF THIS RESUME
+
+Resume 47 adalah continuity dan execution checkpoint.
+
+Resume ini BUKAN:
+
+- SH Core Canonical;
+- Frozen Baseline;
+- Build Scope;
+- Implementation Guide;
+- Implementation Contract;
+- Execution Strategy;
+- Phase -1;
+- source of truth untuk architecture.
+
+Resume ini hanya mencatat:
+
+- apa yang sudah diaudit;
+- apa yang ditemukan;
+- apa yang direconcile;
+- keputusan Owner yang sudah diberikan;
+- perubahan implementation yang sudah dilakukan;
+- posisi actual GitHub DEV / Supabase DEV yang sudah diperiksa;
+- apa yang masih harus dikerjakan.
+
+Working rule:
+
+Resume
+ ↓
+Authority
+ ↓
+Actual GitHub DEV
+ ↓
+Actual Supabase DEV
+ ↓
+Runtime / Evidence
+ ↓
+Reconcile
+ ↓
+Minimal Realization
+ ↓
+Verify
+ ↓
+Evidence
+ ↓
+DEV
+
+
+---
+
+1. PROJECT POSITION
+
+Project tidak boleh kembali ke awal.
+
+Current global position:
+
+Phase -1
+   ↓
+P1
+   ↓
+P2
+   ↓
+P3
+   ↓
+P4
+   ↓
+P5
+   ↓
+⑥ FINAL CROSS-PHASE ASSURANCE
+   ↓
+P6 hanya jika prerequisite + gate + authorization terpenuhi
+
+Current working position:
+
+PRE-P6 / P5±6
+
+P6 sempat terbawa dalam beberapa pembahasan sebelumnya, tetapi itu bukan berarti P6 otomatis dimulai.
+
+Current task tetap:
+
+P1–P5 residual audit
++
+P5 runtime/E2E closure
++
+frontend/backend reconciliation
++
+final integration
+↓
+APK
+↓
+full functional verification
+↓
+baru evaluasi readiness berikutnya
+
+Jangan melompat ke P6 hanya karena backend/schema sudah banyak yang selesai.
+
+
+---
+
+2. WORKING SOURCE HIERARCHY
+
+Untuk pekerjaan aktual digunakan:
+
+SH Core Canonical
+        ↓
+Build Scope
+        ↓
+Implementation Guide
+        ↓
+Implementation Contract
+        ↓
+Execution Strategy
+        ↓
+Phase -1
+        ↓
+P1 identity semantics
+        ↓
+P5/P5B/P5C semantics
+        ↓
+actual GitHub DEV
+        ↓
+actual Supabase DEV
+        ↓
+runtime / evidence
+
+Jika suatu jawaban tidak ditemukan secara eksplisit:
+
+authority
+ ↓
+implementation history
+ ↓
+actual schema/RPC/service
+ ↓
+existing semantics
+
+Jika setelah semua itu memang tidak ada jawabannya:
+
+→ Owner Decision.
+
+Prinsip penting:
+
+Jangan terus-menerus memutar audit terhadap sesuatu yang memang tidak pernah didefinisikan.
+
+Jika Owner memberikan keputusan yang:
+
+tidak merusak canonical;
+
+tidak melanggar identity invariant;
+
+tidak merusak ownership;
+
+tidak merusak privacy/security;
+
+tidak membutuhkan perubahan fundamental architecture;
+
+
+maka keputusan tersebut digunakan untuk practical implementation melalui reconciliation/minimal realization.
+
+
+---
+
+3. IMPORTANT EXECUTION PRINCIPLE
+
+Owner menegaskan:
+
+Kalau tidak ada jawabannya:
+→ jangan muter audit tanpa akhir.
+→ kasih Owner Decision.
+→ jika Owner memutuskan,
+→ langsung reconcile dan execute.
+
+Bahasa manusia/semantic interpretation boleh digunakan.
+
+Tidak semua terminology Owner harus sudah ada sebagai nama teknis di database.
+
+Contoh:
+
+"Clone belum punya akun"
+
+secara technical realization dapat menjadi:
+
+intended recipient email
+→ pending invitation
+→ registration
+→ account creation
+→ SH materialization
+
+Jangan memaksa terminology manusia menjadi schema terminology satu-per-satu.
+
+
+---
+
+4. INITIAL P5 PRE-P6 AUDIT
+
+Pada awal rangkaian sesi ini, P5B/P5C diaudit sebagai satu workstream:
+
+P5C Inheritance
+P5C Legacy
+P5C Succession
+P5B Clone
+
+Temuan awal:
+
+Inheritance
+
+generic frontend error masking;
+
+authorization creation workflow belum terbukti sehat;
+
+runtime inheritance belum diverifikasi penuh;
+
+provenance/event verification masih perlu;
+
+privacy/identity boundary masih perlu E2E.
+
+
+Legacy
+
+runtime owner enforcement sudah ada;
+
+runtime E2E masih perlu;
+
+retention/status behavior perlu diverifikasi;
+
+privacy boundary perlu diverifikasi.
+
+
+Succession
+
+rule foundation sudah ada;
+
+lifecycle consume/revoke perlu direconcile;
+
+successor boundary perlu diverifikasi.
+
+
+Clone
+
+agreement boundary ada;
+
+source approval ada;
+
+clone creation boundary ada;
+
+runtime E2E belum;
+
+provenance/audit linkage perlu;
+
+transfer semantics belum jelas pada implementation lama.
+
+
+Strategy yang dipilih:
+
+audit
+ ↓
+backend fixes
+ ↓
+frontend fixes
+ ↓
+migration/RPC reconciliation
+ ↓
+coherent patch
+ ↓
+build baru
+ ↓
+E2E
+
+APK lama #66 dipertahankan sebagai historical evidence.
+
+Tidak perlu build baru sebelum functional layer siap.
+
+
+---
+
+5. EXTERNAL AUDIT INPUT
+
+Audit eksternal kemudian menghasilkan:
+
+P1–P4        🟢
+P5A Journey  🟡 assurance
+P5B Clone    🔴 blocker
+P5C          🟡 assurance
+P5D Recovery 🟢 boundary
+P5E          🔵 pending
+
+Temuan utama external audit:
+
+runtime_create_clone()
+
+pernah membuat:
+
+is_primary = false
+
+untuk target yang belum memiliki SH.
+
+Audit menganggap ini bertentangan dengan:
+
+1 EMAIL
+=
+1 ACCOUNT
+=
+1 PRIMARY SH
+
+Temuan ini kemudian direview terhadap semantics Owner.
+
+
+---
+
+6. OWNER DECISION — CLONE IDENTITY MODEL
+
+Owner secara eksplisit memutuskan:
+
+MODEL B
+
+B
+↓
+belum punya SH
+↓
+Clone dibuat untuk email B
+↓
+B registration
+↓
+Clone menjadi satu-satunya / PRIMARY SH B
+
+Model sebelumnya yang sudah sempat diimplementasikan:
+
+B sudah memiliki Account/SH
+↓
+A membuat B menjadi Clone
+
+dinyatakan SALAH untuk semantics Clone.
+
+Owner menetapkan:
+
+Clone recipient
+≠
+existing SH user
+
+Clone recipient dapat berupa:
+
+email-only intended recipient
+
+
+---
+
+7. CLONE EMAIL-ONLY INVITATION / REGISTRATION SEMANTICS
+
+Owner menetapkan model:
+
+A
+↓
+create Clone invitation terhadap email B
+↓
+A approval
+↓
+B belum memiliki SH
+↓
+B register dengan email tersebut
+↓
+Account B dibuat
+↓
+Clone materialized
+↓
+Clone menjadi PRIMARY SH B
+
+B tidak perlu sudah memiliki SH sebelum invitation.
+
+Logika:
+
+> A dapat membuat seseorang menjadi Clone sebelum orang tersebut memiliki SH.
+
+
+
+B tidak dapat "memilih menjadi Clone" terlebih dahulu.
+
+B baru menjadi Clone ketika:
+
+approved invitation
++
+registration/claim
++
+materialization
+
+terpenuhi.
+
+
+---
+
+8. CLONE MATERIALIZATION MODEL
+
+Final model:
+
+A
+│
+├─ create invitation
+│
+├─ approve
+│
+└─ selesai
+       │
+       ▼
+B email
+│
+├─ register
+│
+├─ authenticated
+│
+├─ bootstrap
+│
+├─ detect approved Clone invitation
+│
+└─ materialize
+       │
+       ▼
+B Account
+       │
+       ▼
+B PRIMARY SH
+
+Tidak boleh ada dua competing lifecycle:
+
+A approve
+↓
+manual executeClone()
+
+dan:
+
+B register
+↓
+automatic materialization
+
+Lifecycle final harus menggunakan registration/claim sebagai trigger materialization.
+
+
+---
+
+9. CLONE STATE TRANSFER SEMANTICS
+
+Setelah membaca kembali Canonical, Scope, implementation artifacts, dan reconciliation document, semantics Clone berhasil dipulihkan.
+
+Clone B mendapatkan bekal awal, bukan salinan hidup Source A.
+
+Model:
+
+A
+↓
+Clone creation
+↓
+B initial state
+↓
+B hidup sebagai SH sendiri
+
+
+---
+
+10. WHAT IS TRANSFERRED
+
+Owner menetapkan:
+
+Memory
+
+Source Memory
+↓
+Clone Memory
+
+Memory Candidate:
+
+Candidate Memory
+↓
+Memory
+
+Candidate tidak dibuang hanya karena statusnya Candidate.
+
+
+---
+
+Knowledge
+
+Source Knowledge
+↓
+Clone Knowledge
+
+Knowledge Candidate:
+
+Candidate Knowledge
+↓
+Knowledge
+
+Ini sudah dianggap clear dan tidak perlu dibuka kembali.
+
+
+---
+
+Context
+
+Context ikut sebagai:
+
+initial Clone context / initial runtime state
+
+Bukan berarti:
+
+Source Context
+↓
+permanent copy of Source runtime
+
+Setelah Clone lahir, Context berkembang melalui mekanisme Context milik Clone sendiri.
+
+
+---
+
+Reference
+
+Reference ikut sebagai:
+
+initial reference/bekal
+
+bukan sebagai private live state milik Source.
+
+
+---
+
+Traits / Personality
+
+Traits ikut sebagai:
+
+initial traits / personality seed
+
+bukan berarti Clone dan Source memiliki personality state yang sama selamanya.
+
+Clone berkembang sendiri setelah lahir.
+
+
+---
+
+11. WHAT IS NOT TRANSFERRED
+
+Conversation
+
+Source chat
+↓
+❌ NOT TRANSFERRED
+
+Chat lama tidak otomatis masuk ke Clone.
+
+Alasan:
+
+Clone memiliki conversation sendiri.
+
+
+---
+
+Journey
+
+Source Journey
+↓
+❌ NOT TRANSFERRED
+
+Clone memiliki Journey sendiri.
+
+Original Journey tidak diwariskan sebagai Journey hidup Clone.
+
+
+---
+
+Live Source Runtime
+
+Source runtime/session
+↓
+❌ NOT TRANSFERRED
+
+
+---
+
+Credentials / ownership
+
+Source credentials
+↓
+❌ NOT TRANSFERRED
+
+Clone memiliki identity dan ownership sendiri.
+
+
+---
+
+12. IMPORTANT CLONE PRINCIPLE
+
+Final conceptual model:
+
+Clone
+=
+initially informed
+≠
+live copy
+
+atau:
+
+Clone
+↓
+bekal awal dari Source
+↓
+lahir
+↓
+hidup sebagai SH sendiri
+↓
+membangun Memory sendiri
+↓
+membangun Knowledge sendiri
+↓
+membangun Context sendiri
+↓
+membangun Reference usage sendiri
+↓
+mengembangkan Traits sendiri
+↓
+memiliki Conversation sendiri
+↓
+memiliki Journey sendiri
+
+
+---
+
+13. MEMORY / KNOWLEDGE / CANDIDATE RECONCILIATION
+
+Invariant:
+
+MEMORY
+≠
+KNOWLEDGE
+≠
+CONTEXT
+
+Candidate tetap merupakan lifecycle state/domain state yang valid.
+
+Owner menetapkan:
+
+Candidate Memory
+→ Memory
+
+Candidate Knowledge
+→ Knowledge
+
+Jangan menganggap:
+
+Candidate
+=
+discard
+
+dan jangan mengarang automatic promotion threshold baru.
+
+P3D sebelumnya juga sudah menunjukkan:
+
+knowledge_candidate
+
+bukan otomatis berarti trusted/ACTIVE Knowledge.
+
+Candidate semantics dan Clone transfer semantics adalah dua hal yang berbeda:
+
+candidate status
++
+clone destination domain
+
+dapat direconcile tanpa menghapus Candidate information secara destruktif.
+
+
+---
+
+14. ACTUAL MEMORY REPRESENTATION
+
+Audit menemukan existing Memory storage sudah ada.
+
+Representative fields:
+
+memory_id
+
+sh_id
+
+memory_type
+
+content
+
+source
+
+confidence
+
+scope
+
+visibility
+
+lifecycle
+
+occurrence_count
+
+timestamps
+
+superseded_by
+
+
+Memory owner isolation juga sudah tersedia.
+
+Tidak perlu membuat Memory table baru untuk Clone.
+
+
+---
+
+15. ACTUAL KNOWLEDGE REPRESENTATION
+
+Knowledge semantics juga sudah ada.
+
+Logical representation mencakup:
+
+knowledge_id
+
+content
+
+knowledge_class
+
+scope
+
+visibility
+
+source
+
+provenance
+
+confidence
+
+version
+
+lifecycle
+
+superseded_by
+
+timestamps
+
+
+Tidak perlu membuat Knowledge domain baru khusus Clone.
+
+Clone harus menggunakan domain Knowledge yang sudah ada.
+
+
+---
+
+16. CONTEXT RECONCILIATION
+
+Audit awal sempat mencari tabel:
+
+context
+
+dan tidak menemukannya sebagai persistent domain table.
+
+Setelah audit implementation, ditemukan bahwa Context memang dirancang sebagai runtime-composed mechanism.
+
+Conceptual flow:
+
+Clone SH
+ ↓
+assemble_context()
+ ↓
+Memory
++
+Knowledge
++
+Journey
++
+current state
++
+other relevant runtime inputs
+ ↓
+Clone Context
+
+Jadi:
+
+Context ≠ persistent copy of Source Context
+
+Context menjadi bekal awal dan kemudian dibangun melalui mekanisme runtime Clone sendiri.
+
+Tidak perlu membuat contexts table baru secara spekulatif.
+
+
+---
+
+17. REFERENCE RECONCILIATION
+
+Owner mengkonfirmasi Reference masuk sebagai:
+
+initial Clone state / initial reference bekal
+
+Reference tidak boleh menjadi mekanisme untuk memberikan Clone akses privat ke Source.
+
+Privacy boundary tetap:
+
+Source private data
+≠
+Clone accessible private data
+
+Reference transfer harus tetap mengikuti scope/provenance/visibility boundary yang sudah ada.
+
+Jika actual representation existing dapat digunakan:
+
+→ gunakan existing representation.
+
+Jangan membuat storage baru hanya untuk memenuhi istilah semantic.
+
+
+---
+
+18. TRAITS RECONCILIATION
+
+Owner mengkonfirmasi Traits juga merupakan:
+
+initial Clone trait/personality seed
+
+Traits tidak berarti:
+
+Clone = Source personality forever
+
+dan tidak boleh diimplementasikan sebagai live synchronization.
+
+Final model:
+
+Source Traits
+↓
+Clone initial Traits
+↓
+Clone evolves independently
+
+Jika existing runtime mechanism tersedia:
+
+→ gunakan mechanism tersebut.
+
+Tidak ada keputusan Owner untuk membuat tabel Traits baru.
+
+
+---
+
+19. P5B CLONE STATE TRANSFER RECONCILIATION
+
+Dokumen reconciliation P5B yang ditemukan di DEV sudah menetapkan state transfer boundary.
+
+Core mapping:
+
+Knowledge                → INCLUDE
+Knowledge Candidate      → INCLUDE
+Memory                   → INCLUDE
+Memory Candidate        → INCLUDE
+Context                  → INITIAL STATE
+Reference                → INCLUDE / INITIAL
+Traits                   → INCLUDE / INITIAL
+Conversation             → EXCLUDE
+Source Journey           → EXCLUDE
+Credentials              → EXCLUDE
+Source ownership         → EXCLUDE
+Live runtime             → EXCLUDE
+
+Remaining implementation work:
+
+domain-aware automatic transfer
++
+registration/claim materialization
++
+provenance
++
+frontend/backend wiring
+
+Semantics tidak perlu dibuka kembali.
+
+
+---
+
+20. CLONE PRIMARY SH CORRECTION
+
+Temuan:
+
+is_primary = false
+
+pada target baru.
+
+Owner Decision:
+
+B belum punya SH
+↓
+Clone menjadi satu-satunya SH
+↓
+Clone = PRIMARY SH
+
+Jadi:
+
+1 EMAIL
+=
+1 ACCOUNT
+=
+1 PRIMARY SH
+
+tetap dipertahankan.
+
+Model A yang sempat ada dinyatakan salah dan harus direconcile menjadi Model B.
+
+
+---
+
+21. REGISTRATION MATERIALIZATION
+
+Existing implementation sudah menyediakan direction untuk:
+
+runtime_materialize_registered_clone()
+
+Flow yang dituju:
+
+Authenticated B
+↓
+bootstrap
+↓
+find approved Clone invitation by intended recipient email
+↓
+bind invitation
+↓
+materialize Clone
+↓
+create B PRIMARY SH
+↓
+load normal SH context
+
+Frontend AuthProvider kemudian perlu memastikan materialization ini aman/idempotent.
+
+Tidak boleh setiap login normal dianggap sebagai Clone operation yang mengubah state secara tidak semestinya.
+
+
+---
+
+22. FRONTEND CLONE CORRECTION
+
+Frontend sebelumnya memiliki jalur manual:
+
+Become Clone
+
+yang memungkinkan user melakukan materialization secara langsung.
+
+Jalur tersebut bertentangan dengan Model B.
+
+Direction yang sudah direconcile:
+
+A approve
+↓
+UI tidak men-materialize Clone
+↓
+B register
+↓
+auth bootstrap
+↓
+automatic materialization
+
+Frontend message harus menjelaskan bahwa intended recipient perlu register menggunakan email invitation.
+
+
+---
+
+23. CLONE OWNER DECISIONS SUMMARY
+
+Owner Decisions yang sudah dianggap settled:
+
+DM #1
+
+Semua initial Clone state yang relevan ikut:
+
+Knowledge
+Memory
+Context
+Reference
+Traits
+
+dengan Candidate Memory/Knowledge menjadi destination-domain state.
+
+Tidak ikut:
+
+Conversation
+Journey
+
+
+---
+
+DM #2
+
+Clone tidak menunggu B memutuskan "saya mau jadi Clone".
+
+A yang membuat invitation/creation.
+
+B kemudian register/claim.
+
+
+---
+
+DM #3
+
+Registration menjadi mekanisme yang masuk akal untuk recipient yang sebelumnya belum memiliki SH.
+
+
+---
+
+DM #4
+
+Candidate Memory dan Candidate Knowledge tetap ikut.
+
+Candidate Memory → Memory
+Candidate Knowledge → Knowledge
+
+
+---
+
+24. RECOVERY SEMANTICS RECONCILIATION
+
+Recovery tetap:
+
+RECOVERY ≠ NEW SH
+
+Recovery menggunakan:
+
+snapshot
+↓
+restore
+↓
+same identity root
+↓
+same SH
+
+Chat baru setelah snapshot tidak boleh dianggap bagian dari snapshot lama secara retroaktif.
+
+Recovery dan Clone tetap berbeda:
+
+Recovery
+=
+restore same SH
+
+Clone
+=
+new SH based on initial transferred state
+
+Tidak boleh mencampurkan semantics keduanya.
+
+
+---
+
+25. INHERITANCE / LEGACY / SUCCESSION
+
+Inheritance tetap berbeda dari Clone.
+
+Inheritance
+≠
+Clone
+
+B sudah merupakan account/SH recipient dalam inheritance-style flows.
+
+Contoh:
+
+A
+↓
+authorization
+↓
+B existing SH
+↓
+inherit selected state
+
+Berbeda dengan Clone:
+
+A
+↓
+email-only intended recipient B
+↓
+B belum punya SH
+↓
+registration
+↓
+new Clone PRIMARY SH
+
+Legacy tetap preservation/record semantics dan tidak otomatis berarti full private state transfer.
+
+Succession tetap membutuhkan lifecycle verification sebelum dianggap fully E2E closed.
+
+
+---
+
+26. ERROR HANDLING RECONCILIATION
+
+Salah satu bug awal P5C:
+
+backend actual error
+↓
+frontend catch
+↓
+generic "operation failed"
+
+Frontend perlu menggunakan pola error description yang mempertahankan:
+
+message
+code
+details
+hint
+
+Tujuan:
+
+actual backend failure
+↓
+observable diagnostic error
+
+bukan:
+
+actual backend failure
+↓
+generic error
+
+Ini penting sebelum APK functional testing karena error observability diperlukan untuk debugging E2E.
+
+
+---
+
+27. BACKEND ↔ FRONTEND AUDIT
+
+Audit final mulai dilakukan terhadap seluruh vertical surface:
+
+Login
+ ↓
+Auth/session
+ ↓
+Account / SH context
+ ↓
+Home
+ ↓
+Chat
+ ↓
+Journey
+ ↓
+Clone
+ ↓
+Recovery
+ ↓
+Inheritance
+ ↓
+Legacy
+ ↓
+Succession
+ ↓
+Memory / Knowledge runtime
+ ↓
+Provenance
+ ↓
+Error handling
+
+Frontend route/feature coverage sudah ditemukan untuk domain utama.
+
+Home menyediakan entry surface untuk:
+
+Chat
+
+Journey
+
+Clone
+
+Recovery
+
+Inheritance / Legacy / Succession
+
+Runtime verification
+
+
+AuthProvider menjadi bootstrap point untuk authenticated context.
+
+
+---
+
+28. IMPORTANT FRONTEND FINDING
+
+Current AuthProvider memanggil:
+
+runtime_materialize_registered_clone()
+
+ketika authenticated context di-bootstrap.
+
+Ini secara architecture masuk akal sebagai hook untuk recipient Clone.
+
+Namun harus dipastikan:
+
+normal account login
+→ no unwanted mutation
+
+approved recipient login
+→ Clone materialization
+
+RPC harus idempotent dan tidak mengubah normal accounts tanpa matching approved invitation.
+
+Ini masuk final hardening sebelum APK.
+
+
+---
+
+29. CURRENT FRONTEND/BACKEND MATRIX
+
+Domain	Backend	Frontend	Wiring	Current
+
+Auth/Login	🟢	🟢	🟢	🟢
+Account/SH	🟢	🟢	🟢	🟢
+Chat	🟢	🟢	🟢	🟡 VERIFY
+Journey	🟢	🟢	🟢	🟡 VERIFY
+Clone	🟢	🟢	🟢	🟡 HARDEN/E2E
+Inheritance	🟢	🟢	🟢	🟡 E2E
+Legacy	🟢	🟢	🟢	🟡 E2E
+Succession	🟡	🟢	🟡	🟡 LIFECYCLE
+Recovery	🟢	🟢	🟢	🟡 E2E
+Memory	🟢	indirect/runtime	🟡	🟡 VERIFY
+Knowledge	🟢	indirect/runtime	🟡	🟡 VERIFY
+Provenance	🟢	indirect	🟢	🟡 VERIFY
+Error handling	🟢	🟡	🟡	🟡 HARDEN
+
+
+
+---
+
+30. BUILD #66 STATUS
+
+APK #66 tetap menjadi:
+
+historical runtime evidence
+
+Tidak perlu mengganti APK #66 hanya untuk mengulang test yang sudah dilakukan.
+
+Namun #66 bukan evidence untuk perubahan implementation yang dilakukan setelahnya.
+
+Rule:
+
+old APK
+=
+historical evidence
+
+new implementation
+=
+requires new build
+
+
+---
+
+31. CURRENT DELIVERY STRATEGY
+
+Owner menetapkan urutan:
+
+AUDIT ALL
+ ↓
+BACKEND ↔ FRONTEND RECONCILIATION
+ ↓
+COMPLETE MISSING FUNCTIONAL WIRING
+ ↓
+FINAL FUNCTIONAL AUDIT
+ ↓
+BUILD APK
+ ↓
+TEST ALL FEATURES
+ ↓
+FIX ERROR
+ ↓
+REBUILD / RETEST
+ ↓
+ALL FUNCTIONAL
+ ↓
+ONLY THEN UI / UX POLISH
+
+UI beautification bukan prioritas sekarang.
+
+Prioritas:
+
+FUNCTIONALITY
++
+BACKEND CORRECTNESS
++
+FRONTEND WIRING
++
+E2E
+
+
+---
+
+32. SINGLE-DEVICE E2E STRATEGY
+
+Owner hanya memiliki satu HP.
+
+Itu bukan blocker.
+
+Account dapat diganti pada device yang sama.
+
+Clone E2E target:
+
+DEVICE
+
+A login
+↓
+create Clone invitation for B email
+↓
+approve
+↓
+logout
+
+B register with invited email
+↓
+bootstrap
+↓
+automatic Clone materialization
+↓
+B PRIMARY SH
+↓
+verify initial state
+↓
+verify no Source chat
+↓
+verify no Source Journey
+↓
+verify transferred Memory
+↓
+verify transferred Knowledge
+↓
+verify Candidate mapping
+↓
+verify Context/Reference/Traits initial state
+↓
+verify provenance
+
+Kemudian:
+
+logout B
+↓
+login A
+↓
+verify Source unchanged
+
+Satu device tidak mengubah semantics.
+
+
+---
+
+33. FINAL FUNCTIONAL TESTING PRINCIPLE
+
+Untuk setiap domain:
+
+UI action
+ ↓
+service
+ ↓
+RPC / backend
+ ↓
+DB state
+ ↓
+RLS / authorization
+ ↓
+response
+ ↓
+UI state
+
+harus diuji.
+
+Tidak cukup:
+
+button exists
+
+dan tidak cukup:
+
+RPC exists
+
+Yang dicari:
+
+actual user action
+→ actual backend mutation
+→ actual expected result
+
+
+---
+
+34. CURRENT STATUS — PRE-APK
+
+Current position:
+
+Phase -1 → P5
+        ↓
+cross-phase / pre-P6 assurance
+        ↓
+P5 residual implementation audit
+        ↓
+frontend ↔ backend reconciliation
+        ↓
+[CURRENT]
+FINAL FUNCTIONAL CLOSURE
+        ↓
+BUILD APK
+        ↓
+E2E
+
+Current classification:
+
+P1–P4 foundations
+🟢 CLOSED / VERIFIED per existing evidence
+
+P5 implementation
+🟢 substantially implemented
+
+P5 runtime/E2E
+🟡 assurance / functional closure
+
+P5B Clone semantics
+🟢 OWNER-RESOLVED
+
+P5B Clone implementation
+🟡 final wiring/hardening/E2E
+
+P5C
+🟡 runtime/E2E verification
+
+P5D Recovery
+🟢 execution verified
+🟡 residual assurance as previously documented
+
+Frontend overall
+🟡 final backend/frontend closure
+
+APK
+⏳ NEXT AFTER FUNCTIONAL CLOSURE
+
+UI polish
+⏳ AFTER FUNCTIONAL PASS
+
+P6
+🔴 NOT STARTED / NOT AUTOMATICALLY AUTHORIZED
+
+
+---
+
+35. WHAT HAS BEEN RESOLVED IN THIS SESSION
+
+The following items MUST NOT be reopened without a material contradiction:
+
+1. Clone recipient can be email-only.
+2. Target B does not need an existing SH.
+3. B registration materializes the Clone.
+4. Clone becomes B PRIMARY SH.
+5. Clone is not the same identity as Source.
+6. Source Journey is not transferred.
+7. Source conversation/chat is not transferred.
+8. Memory is transferred.
+9. Memory Candidate becomes destination Memory.
+10. Knowledge is transferred.
+11. Knowledge Candidate becomes destination Knowledge.
+12. Context is initial Clone state.
+13. Reference is initial Clone state/bekal.
+14. Traits are initial Clone state/bekal.
+15. Clone lives independently after creation.
+16. Recovery remains same-SH restoration.
+17. Inheritance remains distinct from Clone.
+
+
+---
+
+36. WHAT MUST NOT BE DONE
+
+Do NOT:
+
+❌ create another Clone semantics model
+❌ require B to have an SH before Clone
+❌ make B choose to become Clone before registration
+❌ copy Source conversation
+❌ copy Source Journey
+❌ create live Source→Clone synchronization
+❌ create speculative Context table
+❌ create speculative Reference table
+❌ create speculative Traits table
+❌ reopen settled Candidate semantics
+❌ reopen P1–P4 without material regression
+❌ jump to P6
+❌ build APK before functional closure
+❌ polish UI before functionality is proven
+
+
+---
+
+37. CURRENT NEXT ACTION
+
+Continue:
+
+FINAL BACKEND ↔ FRONTEND AUDIT
+        ↓
+file-by-file service/RPC/UI mapping
+        ↓
+find missing/incorrect wiring
+        ↓
+fix deterministic issues
+        ↓
+verify
+        ↓
+reconcile GitHub DEV ↔ Supabase DEV
+        ↓
+cross-check migrations / PR state
+        ↓
+functional readiness matrix
+        ↓
+STOP AT BUILD POINT
+
+Then:
+
+BUILD APK
+
+Only after the functional closure point is reached.
+
+
+---
+
+38. IMPORTANT CONTINUITY RULE FOR NEXT SESSION
+
+If this session ends before APK build:
+
+Do NOT restart Clone semantics recovery.
+
+Do NOT ask again whether B already has SH.
+
+Do NOT ask again whether Conversation/Journey transfer.
+
+Do NOT ask again whether Candidate Memory/Knowledge transfer.
+
+Do NOT ask again whether Reference/Traits are initial bekal.
+
+Those are already Owner-resolved.
+
+Next session should start from:
+
+SECOND HEAD — SESSION RESUME 47
+
+CURRENT TARGET:
+FINAL BACKEND ↔ FRONTEND FUNCTIONAL AUDIT
+
+NOT:
+SEMANTICS RECOVERY
+NOT:
+P6
+NOT:
+UI POLISH
+
+
+---
+
+39. CONTINUATION COMMAND
+
+Use:
+
+> Continue SECOND HEAD from Session Resume 47.
+
+Do not restart Clone semantics.
+
+Do not reopen settled Owner Decisions.
+
+Current task is final backend ↔ frontend functional closure before APK.
+
+Audit:
+
+Phase -1 → latest Owner Decisions → Canonical → Build Scope → Implementation Guide → Implementation Contract → Execution Strategy → phase artifacts → GitHub DEV → Supabase DEV → frontend → service → RPC → DB/RLS
+
+For every domain:
+
+Login → Home → Chat → Journey → Clone → Recovery → Inheritance → Legacy → Succession → Memory → Knowledge → Provenance
+
+Find missing or incorrect wiring.
+
+If deterministic:
+
+fix → verify → evidence → DEV
+
+If a genuine Owner Decision is required:
+
+stop only there and ask in human language.
+
+Do not build APK until functional closure is reached.
+
+After functional closure:
+
+build APK → single-device E2E → fix errors → retest
+
+UI/UX polish comes only after all functionality is proven.
+
+
+
+
+---
+
+40. ONE-LINE CURRENT POSITION
+
+SECOND HEAD
+=
+PRE-P6 / FINAL P5 FUNCTIONAL CLOSURE
+
+Clone semantics
+🟢 OWNER-RESOLVED
+
+Clone implementation
+🟡 FINAL HARDENING / E2E
+
+Backend
+🟢 FOUNDATION
+
+Frontend
+🟡 FINAL FUNCTIONAL RECONCILIATION
+
+GitHub DEV ↔ Supabase DEV
+🟡 FINAL CROSS-CHECK
+
+APK
+⏳ NEXT AFTER FUNCTIONAL CLOSURE
+
+FULL E2E
+⏳ AFTER BUILD
+
+UI POLISH
+⏳ AFTER FUNCTIONAL PASS
+
+P6
+🔴 NOT STARTED / NOT AUTOMATICALLY AUTHORIZED
+
+
+---
+
+END OF SESSION RESUME 47
+
+Ini sudah gue buat dengan prinsip **Resume 47 meneruskan Resume 46**, bukan menggantikan atau mengulang seluruh compilation. Resume 46 memang berhenti di Recovery execution dan residual assurance; pekerjaan sesi ini kemudian membawa kita melewati **Clone semantics recovery → Owner decisions → state-transfer reconciliation → implementation/wiring audit → final backend/frontend audit**, sehingga titik handoff sekarang tepat di **functional closure sebelum APK**. 0 1
+
+Dan gue sengaja **tidak mengklaim semua backend/frontend sudah PASS**, karena dari pekerjaan terakhir kita justru baru sampai audit final dan masih ada item hardening/E2E yang harus diselesaikan sebelum build. Itu penting supaya sesi berikutnya nggak salah menganggap Resume 47 sebagai “semua sudah selesai”.
+
+
+---
+
+SECOND HEAD — SESSION RESUME 48 (next)
 
 
 
