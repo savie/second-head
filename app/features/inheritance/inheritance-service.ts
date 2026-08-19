@@ -1,5 +1,15 @@
 import { supabase } from '../../services/supabase';
 
+export type TransferSelection = {
+  memory_ids?: string[];
+  knowledge_ids?: string[];
+  experience_ids?: string[];
+  journey_event_ids?: string[];
+  reference_ids?: string[];
+  value_ids?: string[];
+  history_ids?: string[];
+};
+
 export type SuccessionRule = {
   succession_id: string;
   source_sh_id: string;
@@ -56,7 +66,7 @@ export async function listSuccessionRules() {
   return (data ?? []) as SuccessionRule[];
 }
 
-export async function createSuccessionRule(input: { sourceShId: string; successorAccountId: string; scope?: Record<string, unknown> }) {
+export async function createSuccessionRule(input: { sourceShId: string; successorAccountId: string; scope?: TransferSelection }) {
   const { data, error } = await supabase.from('succession_rules').insert({ source_sh_id: input.sourceShId.trim(), successor_account_id: input.successorAccountId.trim(), scope: input.scope ?? {} }).select('*').single();
   if (error) throw error;
   return data as SuccessionRule;
@@ -104,7 +114,7 @@ export async function listInheritanceAuthorizations() {
   return (data ?? []) as InheritanceAuthorization[];
 }
 
-export async function createInheritanceAuthorization(input: { sourceShId: string; targetShId: string; sourceAccountId: string; targetAccountId: string; scope?: Record<string, unknown> }) {
+export async function createInheritanceAuthorization(input: { sourceShId: string; targetShId: string; sourceAccountId: string; targetAccountId: string; scope?: TransferSelection }) {
   const { data, error } = await supabase.from('inheritance_authorizations').insert({ source_sh_id: input.sourceShId.trim(), target_sh_id: input.targetShId.trim(), source_account_id: input.sourceAccountId.trim(), target_account_id: input.targetAccountId.trim(), scope: input.scope ?? {} }).select('*').single();
   if (error) throw error;
   return data as InheritanceAuthorization;
@@ -117,7 +127,7 @@ export async function approveInheritance(authorizationId: string) {
 }
 
 export async function recordInheritance(authorizationId: string) {
-  const { data, error } = await supabase.rpc('runtime_record_inheritance', { p_authorization_id: authorizationId, p_payload: {}, p_provenance: { source: 'sh-app' } });
+  const { data, error } = await supabase.rpc('runtime_record_inheritance', { p_authorization_id: authorizationId.trim(), p_payload: {}, p_provenance: { source: 'sh-app' } });
   if (error) throw error;
   return data as string;
 }
@@ -130,6 +140,15 @@ export async function listLegacyRecords() {
 
 export async function recordLegacy(input: { sourceShId: string; legacyType: LegacyRecord['legacy_type']; retentionUntil?: string }) {
   const { data, error } = await supabase.rpc('runtime_record_legacy', { p_source_sh_id: input.sourceShId.trim(), p_legacy_type: input.legacyType, p_payload: {}, p_provenance: { source: 'sh-app' }, p_retention_until: input.retentionUntil || null });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function preserveSelectedTransferAsLegacy(input: { sourceShId: string; scope: TransferSelection }) {
+  const { data, error } = await supabase.rpc('runtime_preserve_selected_transfer_as_legacy', {
+    p_source_sh_id: input.sourceShId.trim(),
+    p_scope: input.scope,
+  });
   if (error) throw error;
   return data as string;
 }
