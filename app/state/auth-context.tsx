@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { getSession, onAuthStateChange, signOut } from '../services/auth';
 import { loadAuthenticatedContext } from '../services/account';
+import { supabase } from '../services/supabase';
 
 export type AuthContextValue = {
   session: Session | null;
@@ -30,7 +31,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       setLoading(true);
-      setContext(await loadAuthenticatedContext());
+      let nextContext = await loadAuthenticatedContext();
+
+      if (nextContext) {
+        const { error: cloneError } = await supabase.rpc('runtime_materialize_registered_clone');
+        if (cloneError) throw cloneError;
+        nextContext = await loadAuthenticatedContext();
+      }
+
+      setContext(nextContext);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load authenticated context');
       setContext(null);
