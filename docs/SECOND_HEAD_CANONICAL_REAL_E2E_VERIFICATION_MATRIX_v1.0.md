@@ -1,13 +1,13 @@
 # SECOND HEAD — CANONICAL REAL E2E VERIFICATION MATRIX v1.0
 
-**Status:** Initial blank execution matrix  
+**Status:** Active execution matrix  
 **Branch:** `dev`  
 **Runtime test vehicle:** APK #81  
 **Backend:** Supabase DEV  
 **Implementation source:** GitHub DEV  
 **Purpose:** Canonical, persistent master matrix for REAL E2E functional verification through Functional Closure and UI/UX.
 
-> This file is intentionally initialized as a blank execution matrix. Test results, findings, fixes, blockers, and dispositions are added incrementally. TC-ID assignments are locked once established and must never be reused with a different meaning.
+> TC-ID assignments are locked once established and must never be reused with a different meaning. This file is updated incrementally as domain verification progresses.
 
 ## Status Legend
 
@@ -30,15 +30,15 @@
 
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-AUTH-01 | Valid login → authenticated session | ⏳ | — |
-| TC-AUTH-02 | Invalid password → rejected | ⏳ | — |
-| TC-AUTH-03 | Logout → login kembali | ⏳ | — |
-| TC-AUTH-04 | Authenticated → force close → reopen | ⏳ | — |
-| TC-AUTH-05 | Signed-out → force close → reopen | ⏳ | — |
-| TC-AUTH-06 | Account identity consistency | ⏳ | — |
-| TC-AUTH-07 | SH resolution consistency | ⏳ | — |
-| TC-AUTH-08 | Unauthorized / invalid session access | ⏳ | — |
-| TC-AUTH-09 | Session expiration / invalidation handling | ⏳ | — |
+| TC-AUTH-01 | Valid login → authenticated session | 🟢 | Runtime proven on APK #81. |
+| TC-AUTH-02 | Invalid password → rejected | 🟢 | `Invalid login credentials` observed. |
+| TC-AUTH-03 | Logout → login kembali | 🟢 | Runtime proven. |
+| TC-AUTH-04 | Authenticated → force close → reopen | 🟢 | Session remained authenticated. |
+| TC-AUTH-05 | Signed-out → force close → reopen | 🟢 | Login screen returned. |
+| TC-AUTH-06 | Account identity consistency | 🟢 | Account `83c9f2a1-7617-471c-9c68-75e0003ea6ab` consistent. |
+| TC-AUTH-07 | SH resolution consistency | 🟢 | SH instances remained `1`. |
+| TC-AUTH-08 | Unauthorized / invalid session access | ⏳ | Not tested. |
+| TC-AUTH-09 | Session expiration / invalidation handling | ⏳ | Not tested. |
 
 # 2. ACCOUNT
 
@@ -334,18 +334,15 @@ FINAL BUILD
 1. TC-ID is permanent once assigned. Never reuse an existing TC-ID for a different test meaning.
 2. New uncovered tests receive a new TC-ID appended to the relevant domain.
 3. At least one domain-level progress update must update this file and create a new commit.
-4. Backend / Supabase defects are fixed directly when technically safe and within the DEV scope; then the affected TC is re-tested.
-5. Frontend defects are marked `FE / BUILD APK REQUIRED` and are not falsely marked PASS until a rebuilt APK is tested.
-6. Existing data is not treated as proof of a new E2E operation unless the test explicitly defines it as a read-only verification.
-7. Expected behavior is recorded as `🔵 EXPECTED / NOT A BUG` with the reason, rather than being treated as a defect.
-8. Functional Closure remains 🔴/not achieved until all required functional domains and negative authorization paths are proven.
+4. Backend / Supabase defects are fixed directly when technically safe and within DEV scope; then the affected TC is re-tested.
+5. Frontend defects are marked `FE / BUILD APK REQUIRED` and are not marked PASS until a rebuilt APK is tested.
+6. Existing data is not treated as proof of a new E2E operation unless the test explicitly defines it as read-only verification.
+7. Expected behavior is recorded as `🔵 EXPECTED / NOT A BUG` with the reason.
+8. Functional Closure remains unachieved until required functional domains and negative authorization paths are proven.
 9. UI/UX is audited after Functional Closure unless a UI defect blocks functional verification.
 
 # Current Test Vehicle / Environment
-
 - APK: **#81**
 - GitHub: **`savie/second-head` / `dev`**
 - Supabase: **SECOND HEAD DEV**
 - Current E2E phase: **REAL E2E FUNCTIONAL VERIFICATION**
-- Initial matrix state: **all tests NOT TESTED**
-
