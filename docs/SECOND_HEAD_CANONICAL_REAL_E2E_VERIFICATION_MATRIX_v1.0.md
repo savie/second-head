@@ -91,8 +91,8 @@
 | TC-JOURNEY-10 | Private Journey event enforcement | ⚠️ | BLOCKED — APK #81 exposes no PRIVATE Journey fixture/path for real-user execution. No failure observed. |
 | TC-JOURNEY-11 | Non-transferable Journey event enforcement | ⚠️ | BLOCKED — APK #81 exposes no NON_TRANSFERABLE Journey fixture/path for real-user execution. No failure observed. |
 | TC-JOURNEY-12 | Invalid Journey operation rejected | ⏳ | Not yet tested according to the locked canonical test definition. |
-| TC-JOURNEY-13 | Journey → Memory relationship | ⏳ | Not yet tested. |
-| TC-JOURNEY-14 | Journey → Knowledge relationship | ⏳ | Not yet tested. |
+| TC-JOURNEY-13 | Journey → Memory relationship | 🟢 | Chat-created Memory candidate produced a `MEMORY` Journey event with source `runtime:p5a:memory_candidate`; event observed in Journey and persisted after re-entry. |
+| TC-JOURNEY-14 | Journey → Knowledge relationship | 🟢 | Canonical Chat knowledge acquisition produced a `LEARNING` Journey event with source `runtime:p5a:knowledge_candidate`; event observed in Journey. |
 
 # 6. EXPERIENCE
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
