@@ -100,13 +100,13 @@
 | TC-EXP-01 | Create Experience through supported runtime path | 🟢 | Current explicit capture path proven. |
 | TC-EXP-02 | Experience persistence | 🟢 | Created event persisted in Journey. |
 | TC-EXP-03 | Experience payload integrity | 🟢 | Current explicit capture marker/source verified. |
-| TC-EXP-04 | Experience retrieval | ⏳ | Deeper retrieval semantics not yet tested. |
-| TC-EXP-05 | Experience continuity semantics | ⏳ | Not yet tested. |
-| TC-EXP-06 | Experience visibility | ⏳ | Not yet tested. |
-| TC-EXP-07 | Experience transfer eligibility | ⏳ | Not yet tested. |
-| TC-EXP-08 | Experience non-transferable enforcement | ⏳ | Not yet tested. |
-| TC-EXP-09 | Experience unauthorized access | ⏳ | Not yet tested. |
-| TC-EXP-10 | Experience usable by downstream Chat / context | ⏳ | Not yet tested. |
+| TC-EXP-04 | Experience retrieval | 🟢 | APK #85 retrieved the persisted Experience after the provider-adapter fix; SH returned the stored APK #85 runtime test vehicle statement without inventing additional details. |
+| TC-EXP-05 | Experience continuity semantics | ⏳ | Cross-runtime continuity observed after Chat → Home → force close → login → Chat; the persisted Experience was retrieved again. SH returned a paraphrased/re-save-style response rather than a clean factual recall. Recorded as observed evidence, not final PASS until canonical continuity semantics are explicitly satisfied. |
+| TC-EXP-06 | Experience visibility | ⏳ | Not tested. |
+| TC-EXP-07 | Experience transfer eligibility | ⏳ | Not tested. |
+| TC-EXP-08 | Experience non-transferable enforcement | ⏳ | Not tested. |
+| TC-EXP-09 | Experience unauthorized access | ⏳ | Not tested. |
+| TC-EXP-10 | Experience usable by downstream Chat / context | ⏳ | Not tested. |
 
 # 7. MEMORY
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
