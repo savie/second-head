@@ -71,9 +71,12 @@ export default function InheritanceScreen() {
   }
 
   function parseScope(value: string): TransferSelection {
-    const parsed = JSON.parse(value) as TransferSelection;
-    return parsed;
+    return JSON.parse(value) as TransferSelection;
   }
+
+  const inputStyle = { borderWidth: 1, padding: 12, borderRadius: 8, color: '#111827', borderColor: '#111827' };
+  const multilineStyle = { ...inputStyle, minHeight: 90, textAlignVertical: 'top' as const };
+  const placeholderTextColor = '#6B7280';
 
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 16 }}>
@@ -82,27 +85,41 @@ export default function InheritanceScreen() {
       <Text>Transfers are explicit selections. Private/non-transferable Journey events are rejected by the backend; Reference / Value / History source-domain IDs are not silently approximated.</Text>
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Succession rule</Text>
-      <TextInput placeholder="Source SH ID" value={successionSourceShId} onChangeText={setSuccessionSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Successor Account ID" value={successorAccountId} onChangeText={setSuccessorAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput multiline value={scopeJson} onChangeText={setScopeJson} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8, minHeight: 90 }} />
+      <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
+      <TextInput placeholder="Isi Source SH ID untuk aturan succession" placeholderTextColor={placeholderTextColor} value={successionSourceShId} onChangeText={setSuccessionSourceShId} autoCapitalize="none" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Successor Account ID</Text>
+      <TextInput placeholder="Isi Account ID penerus" placeholderTextColor={placeholderTextColor} value={successorAccountId} onChangeText={setSuccessorAccountId} autoCapitalize="none" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Succession scope JSON</Text>
+      <TextInput multiline placeholder="Isi scope JSON yang akan diwariskan" placeholderTextColor={placeholderTextColor} value={scopeJson} onChangeText={setScopeJson} autoCapitalize="none" style={multilineStyle} />
       <Button title="Create succession rule" disabled={busy || !successionSourceShId || !successorAccountId} onPress={() => void run(() => createSuccessionRule({ sourceShId: successionSourceShId, successorAccountId, scope: parseScope(scopeJson) }), v => `Succession created: ${String((v as SuccessionRule).succession_id)}`)} />
 
-      {loading ? <ActivityIndicator /> : null}{notice ? <Text>{notice}</Text> : null}{error ? <Text>{error}</Text> : null}
+      {loading ? <ActivityIndicator /> : null}
+      {notice ? <Text>{notice}</Text> : null}
+      {error ? <Text>{error}</Text> : null}
       {succession.map(item => <View key={item.succession_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 8 }}><Text>ID: {item.succession_id}</Text><Text>Status: {item.status}</Text><Text>Scope: {JSON.stringify(item.scope)}</Text>{item.status === 'ACTIVE' && item.successor_account_id === currentAccountId ? <Button title="Execute selected succession" disabled={busy} onPress={() => void run(() => executeSuccession(item.succession_id), v => `Succession executed: ${String(v)}`)} /> : null}</View>)}
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Inheritance authorization</Text>
-      <TextInput placeholder="Source SH ID" value={inheritanceSourceShId} onChangeText={setInheritanceSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Target SH ID" value={targetShId} onChangeText={setTargetShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Source Account ID" value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Target Account ID" value={targetAccountId} onChangeText={setTargetAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput multiline value={scopeJson} onChangeText={setScopeJson} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8, minHeight: 90 }} />
+      <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
+      <TextInput placeholder="Isi Source SH ID yang akan ditransfer" placeholderTextColor={placeholderTextColor} value={inheritanceSourceShId} onChangeText={setInheritanceSourceShId} autoCapitalize="none" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Target SH ID</Text>
+      <TextInput placeholder="Isi Target SH ID penerima" placeholderTextColor={placeholderTextColor} value={targetShId} onChangeText={setTargetShId} autoCapitalize="none" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Source Account ID</Text>
+      <TextInput placeholder="Isi Account ID pemilik Source SH" placeholderTextColor={placeholderTextColor} value={sourceAccountId} onChangeText={setSourceAccountId} autoCapitalize="none" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Target Account ID</Text>
+      <TextInput placeholder="Isi Account ID penerima" placeholderTextColor={placeholderTextColor} value={targetAccountId} onChangeText={setTargetAccountId} autoCapitalize="none" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Selected transfer scope JSON</Text>
+      <Text style={{ fontSize: 12 }}>Masukkan hanya domain/ID yang memang dipilih untuk transfer. Untuk Experience, gunakan experience_ids dari record Experience yang nyata.</Text>
+      <TextInput multiline placeholder="Isi scope JSON: memory_ids, knowledge_ids, experience_ids, journey_event_ids" placeholderTextColor={placeholderTextColor} value={scopeJson} onChangeText={setScopeJson} autoCapitalize="none" style={multilineStyle} />
       <Button title="Create authorization with selected scope" disabled={busy || !inheritanceSourceShId || !targetShId || !sourceAccountId || !targetAccountId} onPress={() => void run(() => createInheritanceAuthorization({ sourceShId: inheritanceSourceShId, targetShId, sourceAccountId, targetAccountId, scope: parseScope(scopeJson) }), v => `Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`)} />
       {authorizations.map(item => <View key={item.authorization_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 8 }}><Text>ID: {item.authorization_id}</Text><Text>Status: {item.status}</Text><Text>Scope: {JSON.stringify(item.scope)}</Text>{item.status === 'PENDING' && item.source_account_id === currentAccountId ? <Button title="Approve" disabled={busy} onPress={() => void run(() => approveInheritance(item.authorization_id), () => 'Inheritance approved')} /> : null}{item.status === 'APPROVED' && item.source_account_id === currentAccountId ? <Button title="Execute selected inheritance" disabled={busy} onPress={() => void run(() => recordInheritance(item.authorization_id), v => `Inheritance executed: ${String(v)}`)} /> : null}</View>)}
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Legacy</Text>
-      <TextInput placeholder="Source SH ID" value={legacySourceShId} onChangeText={setLegacySourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput placeholder="Legacy Type (for historical record path)" value={legacyType} onChangeText={v => setLegacyType(v.toUpperCase() as LegacyRecord['legacy_type'])} autoCapitalize="characters" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <TextInput multiline value={legacyScopeJson} onChangeText={setLegacyScopeJson} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8, minHeight: 90 }} />
+      <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
+      <TextInput placeholder="Isi Source SH ID untuk Legacy" placeholderTextColor={placeholderTextColor} value={legacySourceShId} onChangeText={setLegacySourceShId} autoCapitalize="none" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Legacy Type</Text>
+      <TextInput placeholder="Isi tipe Legacy, misalnya HISTORY" placeholderTextColor={placeholderTextColor} value={legacyType} onChangeText={v => setLegacyType(v.toUpperCase() as LegacyRecord['legacy_type'])} autoCapitalize="characters" style={inputStyle} />
+      <Text style={{ fontWeight: '600' }}>Legacy transfer scope JSON</Text>
+      <TextInput multiline placeholder="Isi scope JSON yang akan dipertahankan sebagai Legacy" placeholderTextColor={placeholderTextColor} value={legacyScopeJson} onChangeText={setLegacyScopeJson} autoCapitalize="none" style={multilineStyle} />
       <Button title="Preserve selected transfer as legacy" disabled={busy || !legacySourceShId} onPress={() => void run(() => preserveSelectedTransferAsLegacy({ sourceShId: legacySourceShId, scope: parseScope(legacyScopeJson) }), v => `Selected legacy preserved: ${String(v)}`)} />
       <Button title="Record legacy type" disabled={busy || !legacySourceShId || !legacyType} onPress={() => void run(() => recordLegacy({ sourceShId: legacySourceShId, legacyType }), v => `Legacy recorded: ${String(v)}`)} />
       {legacy.slice(0, 10).map(item => <View key={item.legacy_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}><Text>{item.legacy_id}</Text><Text>{item.legacy_type} · {item.status}</Text></View>)}
