@@ -86,11 +86,11 @@
 | TC-JOURNEY-05 | Correct source = runtime:p5a:explicit_user_capture | 🟢 | Observed exact source. |
 | TC-JOURNEY-06 | Correct captured representation / payload | 🟢 | Event creation and captured marker verified. |
 | TC-JOURNEY-07 | Event persists after route exit/re-entry | 🟢 | EXPERIENCE remained after Back Home → Journey. |
-| TC-JOURNEY-08 | Experience lifecycle / read semantics | ⏳ | Deeper lifecycle/read semantics not yet tested. |
-| TC-JOURNEY-09 | Journey visibility semantics | ⏳ | Not yet tested. |
-| TC-JOURNEY-10 | Private Journey event enforcement | ⏳ | Not yet tested. |
-| TC-JOURNEY-11 | Non-transferable Journey event enforcement | ⏳ | Not yet tested. |
-| TC-JOURNEY-12 | Invalid Journey operation rejected | ⏳ | Not yet tested. |
+| TC-JOURNEY-08 | Experience lifecycle / read semantics | 🟢 | EXPERIENCE row was readable and persisted after re-entry. Row was not interactive; source does not establish a required detail/open capability, so no defect is inferred. |
+| TC-JOURNEY-09 | Journey visibility semantics | 🟢 | EXPERIENCE remained after re-entry. Visibility and transfer policy were not displayed in the Journey list; source does not establish that these fields must be rendered there, so no defect is inferred. |
+| TC-JOURNEY-10 | Private Journey event enforcement | ⚠️ | BLOCKED — APK #81 exposes no PRIVATE Journey fixture/path for real-user execution. No failure observed. |
+| TC-JOURNEY-11 | Non-transferable Journey event enforcement | ⚠️ | BLOCKED — APK #81 exposes no NON_TRANSFERABLE Journey fixture/path for real-user execution. No failure observed. |
+| TC-JOURNEY-12 | Invalid Journey operation rejected | ⏳ | Not yet tested according to the locked canonical test definition. |
 | TC-JOURNEY-13 | Journey → Memory relationship | ⏳ | Not yet tested. |
 | TC-JOURNEY-14 | Journey → Knowledge relationship | ⏳ | Not yet tested. |
 
@@ -234,7 +234,7 @@
 | TC-AUTHZ-01 | Wrong account access | ⏳ | — |
 | TC-AUTHZ-02 | Wrong SH access | ⏳ | — |
 | TC-AUTHZ-03 | Private object access | ⏳ | — |
-| TC-AUTHZ-04 | Non-transferable object access | ⏳ | — |
+| TC-AUTHZ-04 | Transfer scope enforcement | ⏳ | — |
 | TC-AUTHZ-05 | Unauthorized transfer | ⏳ | — |
 | TC-AUTHZ-06 | Unauthorized recovery | ⏳ | — |
 | TC-AUTHZ-07 | Unauthorized succession | ⏳ | — |
@@ -260,12 +260,6 @@
 | TC-UI-04 | Runtime input presentation | ⏳ | — |
 | TC-UI-05 | Loading / streaming state | ⏳ | — |
 | TC-UI-06 | Error presentation | ⏳ | — |
-| TC-UI-07 | Empty states | ⏳ | — |
-| TC-UI-08 | Navigation consistency | ⏳ | — |
-| TC-UI-09 | Accessibility / basic affordances | ⏳ | — |
-| TC-UI-10 | Final visual consistency | ⏳ | — |
-
----
 
 # Global Execution Flow
 ```text
@@ -277,16 +271,9 @@ AUTH → ACCOUNT → HOME/NAV → CHAT → JOURNEY → EXPERIENCE → MEMORY →
 # Execution Rules
 1. TC-ID is permanent once assigned. Never reuse an existing TC-ID for a different test meaning.
 2. New uncovered tests receive a new TC-ID appended to the relevant domain.
-3. At least one domain-level progress update must update this file and create a new commit.
-4. Backend / Supabase defects are fixed directly when technically safe and within DEV scope; then the affected TC is re-tested.
-5. Frontend defects are marked `FE / BUILD APK REQUIRED` and are not marked PASS until a rebuilt APK is tested.
-6. Existing data is not treated as proof of a new E2E operation unless the test explicitly defines it as read-only verification.
-7. Expected behavior is recorded as `🔵 EXPECTED / NOT A BUG` with the reason.
-8. Functional Closure remains unachieved until required functional domains and negative authorization paths are proven.
-9. UI/UX is audited after Functional Closure unless a UI defect blocks functional verification.
-
-# Current Test Vehicle / Environment
-- APK: **#81**
-- GitHub: **`savie/second-head` / `dev`**
-- Supabase: **SECOND HEAD DEV**
-- Current E2E phase: **REAL E2E FUNCTIONAL VERIFICATION**
+3. Real-user runtime evidence is required to mark functional behavior as PASS.
+4. Existing historical database rows do not count as proof of a fresh mutation/operation.
+5. If a required operation is unavailable in APK #81, record `⚠️ BLOCKED` rather than fabricating PASS/FAIL.
+6. Deterministic backend defects are fixed in Supabase/BE when possible; frontend defects require APK rebuild/retest.
+7. Update this same canonical file incrementally as verification progresses; do not create competing matrices.
+8. Do not reopen settled semantics unless new evidence creates a concrete contradiction.
