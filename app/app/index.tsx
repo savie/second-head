@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { useAuth } from '../state/auth-context';
 
-function Section({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+function Section({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
