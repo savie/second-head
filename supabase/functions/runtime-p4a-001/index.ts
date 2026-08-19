@@ -34,6 +34,20 @@ function createRecorder(supabase: ReturnType<typeof createClient>) { return { as
   const { data, error } = await supabase.rpc("runtime_record_journey_event", { p_sh_id: input.sh_id, p_event_type: input.event_type, p_occurred_at: input.occurred_at ?? null, p_continuity_status: input.continuity_status ?? null, p_gap_code: input.gap_code ?? null, p_payload: input.payload, p_source_ref: input.source_ref ?? null });
   if (error) throw new Error(`JOURNEY_RECORD_FAILED: ${error.message}`); if (typeof data !== "string") throw new Error("JOURNEY_RECORD_FAILED: recorder returned no event id"); return data;
 } }; }
+async function recordExperience(supabase: ReturnType<typeof createClient>, identity: Identity, content: string) {
+  const { data, error } = await supabase.rpc("runtime_record_experience", {
+    p_sh_id: identity.sh_id,
+    p_experience_type: "EXPLICIT_USER_CAPTURE",
+    p_content: content,
+    p_scope: "PRIVATE",
+    p_visibility: "OWNER_ONLY",
+    p_source_ref: "runtime:p5a:explicit_user_capture",
+    p_provenance: { capture_mode: "EXPLICIT_USER", source_message: content },
+  });
+  if (error) throw new Error(`EXPERIENCE_RECORD_FAILED: ${error.message}`);
+  if (typeof data !== "string") throw new Error("EXPERIENCE_RECORD_FAILED: recorder returned no experience id");
+  return data;
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "METHOD_NOT_ALLOWED" }), { status: 405, headers: jsonHeaders });
@@ -46,11 +60,12 @@ Deno.serve(async (req: Request) => {
     if (body.explicit_journey_capture !== true) return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: explicit capture is required" }), { status: 400, headers: jsonHeaders });
     const representation = body.journey_representation?.trim(); if (!representation) return new Response(JSON.stringify({ error: "JOURNEY_REJECTED: representation is required" }), { status: 400, headers: jsonHeaders });
     try {
+      const experienceId = await recordExperience(supabase, identity, representation);
       const sink = createJourneySink(() => undefined, createRecorder(supabase));
       const decision = await sink.decideAndRecord({ sh_id: identity.sh_id, user_message: representation, response: null, explicit: true });
-      await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", { journey_only: true, explicit_journey_capture: true });
-      await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", { journey_only: true, journey_decision: decision.reason });
-      return new Response(JSON.stringify({ sh_id: identity.sh_id, journey_decision: decision.reason, event_id: decision.candidate ? "recorded" : null }), { status: 200, headers: jsonHeaders });
+      await recordAudit(supabase, identity.sh_id, "RUNTIME_REQUEST", { journey_only: true, explicit_journey_capture: true, experience_id: experienceId });
+      await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", { journey_only: true, journey_decision: decision.reason, experience_id: experienceId });
+      return new Response(JSON.stringify({ sh_id: identity.sh_id, journey_decision: decision.reason, experience_id: experienceId, event_id: decision.candidate ? "recorded" : null }), { status: 200, headers: jsonHeaders });
     } catch (error) { return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "JOURNEY_CAPTURE_FAILED" }), { status: 500, headers: jsonHeaders }); }
   }
 
@@ -67,17 +82,7 @@ Deno.serve(async (req: Request) => {
     const lifecycle = await recordSemanticLifecycle(supabase, identity.sh_id, userMessage, modelResponse);
     let knowledgeJourney = false;
     if (lifecycle.knowledge) {
-      await createRecorder(supabase).record({
-        sh_id: identity.sh_id,
-        event_type: "LEARNING",
-        continuity_status: "CONTINUOUS",
-        payload: {
-          knowledge_id: lifecycle.knowledge,
-          acquisition: "runtime:p4d:knowledge_candidate",
-          knowledge_decision: "ACQUIRED_CANDIDATE",
-        },
-        source_ref: "runtime:p5a:knowledge_candidate",
-      });
+      await createRecorder(supabase).record({ sh_id: identity.sh_id, event_type: "LEARNING", continuity_status: "CONTINUOUS", payload: { knowledge_id: lifecycle.knowledge, acquisition: "runtime:p4d:knowledge_candidate", knowledge_decision: "ACQUIRED_CANDIDATE" }, source_ref: "runtime:p5a:knowledge_candidate" });
       knowledgeJourney = true;
     }
     await recordAudit(supabase, identity.sh_id, "RUNTIME_RESPONSE", { stream: body.stream === true, response_length: output.length, journey_decision: decision.reason, memory_decision: lifecycle.memory ? "RECORDED" : "NONE", knowledge_decision: lifecycle.knowledge ? "ACQUIRED_CANDIDATE" : "NONE", knowledge_journey: knowledgeJourney ? "RECORDED" : "NONE", model_provider: modelProvider, model_id: modelId, cost_tier: routed.cost_tier, task, semantic_signals_present: modelResponse.semantic_signals !== undefined });
