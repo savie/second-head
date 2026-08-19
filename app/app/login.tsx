@@ -29,13 +29,15 @@ export default function LoginScreen() {
     }
   }
 
+  const inputStyle = { borderWidth: 1, borderRadius: 8, padding: 12, color: '#111827' };
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 12 }}>
       <Text style={{ fontSize: 28, fontWeight: '700' }}>Second Head</Text>
       <Text style={{ fontWeight: '600' }}>Email</Text>
-      <TextInput autoCapitalize="none" keyboardType="email-address" placeholder="Enter your account email" value={email} onChangeText={setEmail} />
+      <TextInput autoCapitalize="none" keyboardType="email-address" placeholder="Enter your account email" placeholderTextColor="#6B7280" value={email} onChangeText={setEmail} style={inputStyle} />
       <Text style={{ fontWeight: '600' }}>Password</Text>
-      <TextInput secureTextEntry placeholder="Enter your password" value={password} onChangeText={setPassword} />
+      <TextInput secureTextEntry placeholder="Enter your password" placeholderTextColor="#6B7280" value={password} onChangeText={setPassword} style={inputStyle} />
       {error ? <Text>{error}</Text> : null}
       {busy ? <ActivityIndicator /> : (
         <>
