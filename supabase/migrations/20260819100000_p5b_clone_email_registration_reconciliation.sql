@@ -53,7 +53,7 @@ CREATE POLICY clone_agreements_source_insert
   ON public.clone_agreements FOR INSERT
   WITH CHECK (
     source_account_id = current_account_id()
-    AND source_account_id <> coalesce(target_account_id, source_account_id)
+    AND (target_account_id IS NULL OR source_account_id <> target_account_id)
   );
 
 -- 3. Keep participant visibility after registration; an unregistered recipient has
