@@ -5,7 +5,7 @@ Document Type: P5B Clone Execution Reconciliation / Addendum
 Version: v1.0  
 Status: ACCEPTED FOR P5B RECONCILIATION & EXECUTION  
 Canonical Status: NON-CANONICAL  
-Mutation: NO CANONICAL MUTATION
+Canonical Mutation: NONE
 
 ## Authority Context
 
@@ -28,7 +28,7 @@ This document records the reconciliation of the current P5B Clone implementation
 
 ## 1. Reconciliation Trigger
 
-The current implementation realizes Clone using an existing target Account:
+The previous implementation realized Clone using an existing target Account:
 
 ```text
 A / Source
@@ -46,7 +46,7 @@ This realization is rejected by the Owner.
 
 It does not represent the intended P5B Clone semantics.
 
-The current implementation also represents the target through `target_account_id`, whereas the resolved semantics allow the target to begin as an email-only intended recipient.
+The previous implementation also represented the target through `target_account_id` as a prerequisite, whereas the resolved semantics allow the target to begin as an email-only intended recipient.
 
 ---
 
@@ -81,7 +81,7 @@ These are **OWNER DECISIONS recorded by this reconciliation**. They do not modif
 
 ## 3. Current Implementation vs Target Realization
 
-### 3.1 Current — REJECTED REALIZATION
+### 3.1 Previous — REJECTED REALIZATION
 
 ```text
 Target Account required
@@ -141,7 +141,7 @@ PRIMARY SH
 OWNER
 ```
 
-P5B Clone must reconcile with that identity lifecycle rather than create a second, non-primary SH for a newly registered recipient.
+P5B Clone now reconciles with that identity lifecycle rather than create a second, non-primary SH for a newly registered recipient.
 
 The intended Clone registration lifecycle is therefore:
 
@@ -150,6 +150,8 @@ INTENDED RECIPIENT
 (email only)
       ↓
 PENDING CLONE INVITATION
+      ↓
+Source approval
       ↓
 recipient registration
       ↓
@@ -166,45 +168,47 @@ The implementation must prevent duplicate Primary SH creation while preserving t
 
 ## 5. Clone Agreement / Target Representation
 
-The existing realization uses `target_account_id` as a prerequisite for Clone agreement creation. This is incompatible with the Owner-accepted email-only recipient model.
-
-The reconciled target representation must support, at minimum:
+The reconciled target representation supports:
 
 ```text
 target_email
 pending / intended-recipient state
-target_account_id only after registration/linkage
+target_account_id = NULL before registration
+
+target_account_id = B after successful registration linkage
 ```
 
-The exact schema shape, invitation-token mechanism, expiry/revocation details, and registration-claim mechanism are implementation details to be reconciled against the existing identity and authorization architecture before mutation.
+The current implementation uses a unique pending/approved email boundary so an unregistered recipient cannot have multiple active Clone intents competing for the same email.
 
-No unsupported mechanism is prescribed by this document.
+Invitation-token delivery, expiry, and external email delivery remain outside the present implementation claim unless separately defined by the applicable authority.
 
 ---
 
 ## 6. Clone Materialization Trigger
 
-Clone materialization must not depend on the target already having an SH.
+Clone materialization no longer depends on the target already having an SH.
 
-The intended lifecycle is:
+The implementation lifecycle is:
 
 ```text
 approved Clone intent
 ↓
-recipient claims / registers identity
+recipient registers with intended email
 ↓
-resolve intended recipient
+identity provisioning resolves approved Clone intent
 ↓
-create or link target Account
+create target Account
 ↓
 materialize Clone SH as target PRIMARY SH
 ↓
 create ownership
 ↓
 record Clone provenance
+↓
+link target_account_id to agreement
 ```
 
-The existing `runtime_create_clone()` path must therefore be reconciled. It may be replaced, narrowed to an internal materialization primitive, or otherwise adapted; no specific implementation choice is mandated until its current callers and dependency boundaries are verified.
+The old `runtime_create_clone()` path has been retained only as a compatibility symbol and now fails closed with the reconciled lifecycle message. It is no longer the materialization path.
 
 ---
 
@@ -229,13 +233,13 @@ B registers
 Clone becomes B's PRIMARY SH
 ```
 
-The implementation must preserve explicit authorization and must not silently grant the source permanent access to the target's private state.
+The implementation preserves explicit source authorization and does not grant the source permanent ownership of the target's private state.
 
 ---
 
 ## 8. Provenance and Privacy Boundary
 
-The following remain required:
+The following remain required and are represented by the implementation:
 
 ```text
 Clone SH != Source SH
@@ -245,7 +249,7 @@ Privacy remains default-deny
 Source authorization does not imply unrestricted access to target private state
 ```
 
-Existing provenance and RLS mechanisms should be reused or reconciled rather than duplicated without need.
+Existing provenance and RLS mechanisms are reused/reconciled rather than introducing a second ownership model.
 
 ---
 
@@ -273,7 +277,7 @@ The distinction between candidate state and promoted Knowledge/Memory must remai
 
 ## 10. Implementation Reconciliation Requirements
 
-The implementation workstream must reconcile at least:
+The implementation workstream has reconciled:
 
 - `clone_agreements` target representation
 - email-only intended recipient
@@ -289,41 +293,93 @@ The implementation workstream must reconcile at least:
 - Clone frontend flow
 - error and lifecycle observability
 
-The old existing-account / non-primary-Clone path must not remain the effective P5B semantics after reconciliation.
+The old existing-account / non-primary-Clone path is no longer the effective P5B semantics in the updated implementation.
 
 ---
 
-## 11. Migration / Compatibility Considerations
+## 11. Implementation Artifacts
 
-Current DEV is clean for the P5 tables according to the current audit evidence. The reconciliation therefore targets the implementation model rather than a migration of known production Clone records.
+The reconciliation implementation is committed on `dev` as:
 
-Any migration must be designed to be safe for the actual DEV schema and must preserve unrelated P1–P5 behavior.
+```text
+supabase/migrations/20260819100000_p5b_clone_email_registration_reconciliation.sql
+supabase/migrations/20260819110000_p5b_clone_email_invitation_hardening.sql
+app/features/clone/clone-service.ts
+app/app/clone.tsx
+```
 
-No data mutation is authorized by this document alone.
+The migration was applied to Supabase DEV.
+
+Implementation commits:
+
+```text
+8fed572d19281fe88391ddc35d53e879434aca4b
+337cb22465ea115d1b666153381e1a611f37e931
+9f53a937985b7aef8315a96a8b817fe44584340e
+edfba24516d5f795256159bfec9a639033988bb9
+```
+
+The reconciliation document itself was subsequently updated to record this implementation status.
 
 ---
 
-## 12. Acceptance Criteria
+## 12. Verification Performed
+
+Supabase DEV verification has confirmed:
+
+- `clone_agreements.target_email` exists and is required.
+- `target_account_id` is nullable before registration.
+- Pending/approved unregistered target emails have a uniqueness boundary.
+- Source-side insert policy now requires the authenticated source account and an email-only target.
+- The old direct Clone RPC no longer materializes the obsolete non-primary Clone path.
+- A transactional synthetic registration test successfully materialized:
+  - a new target Account,
+  - a `CLONE` SH,
+  - `is_primary = true`,
+  - OWNER ownership,
+  - `sh_clones` provenance,
+  - and `clone_agreements.target_account_id` linkage.
+- The same transactional test was rolled back; DEV contains no residual test rows.
+- A separate transactional normal-registration test still materialized a normal `PRIMARY` SH and was rolled back.
+
+Authenticated real-device multi-account E2E has **not** yet been claimed as PASS.
+
+---
+
+## 13. Migration / Compatibility Considerations
+
+Current DEV was clean for the P5 Clone tables before this reconciliation. No known production Clone records required migration.
+
+The new target lifecycle is designed to preserve the P1 identity invariant while changing the P5B realization from existing-account/non-primary to email-recipient/primary-Clone.
+
+The old `runtime_create_clone()` entry point is retained as a fail-closed compatibility symbol so stale clients cannot silently recreate the rejected semantics.
+
+No production data migration is authorized by this document.
+
+---
+
+## 14. Acceptance Criteria
 
 P5B Clone reconciliation is implementation-ready when:
 
-- [ ] Target may be represented without an existing Account.
-- [ ] Target identity is tied to intended-recipient email.
-- [ ] A pending Clone agreement/invitation can exist before registration.
-- [ ] Recipient registration can claim/link the intended Clone.
-- [ ] Account creation remains compliant with P1 identity semantics.
-- [ ] The resulting Clone SH is the target Account's PRIMARY SH.
-- [ ] No duplicate PRIMARY SH can be created.
-- [ ] Clone SH != Source SH.
-- [ ] Ownership is correctly established.
-- [ ] Provenance is preserved.
-- [ ] Privacy boundaries remain enforced.
-- [ ] The obsolete existing-account / non-primary Clone path is removed or fully reconciled.
+- [x] Target may be represented without an existing Account.
+- [x] Target identity is tied to intended-recipient email.
+- [x] A pending Clone agreement/invitation can exist before registration.
+- [x] Recipient registration can claim/link the intended Clone.
+- [x] Account creation remains compliant with P1 identity semantics.
+- [x] The resulting Clone SH is the target Account's PRIMARY SH.
+- [x] No duplicate PRIMARY SH can be created by the Clone registration path.
+- [x] Clone SH != Source SH.
+- [x] Ownership is correctly established.
+- [x] Provenance is preserved.
+- [x] Privacy boundaries remain enforced by the existing participant RLS model.
+- [x] The obsolete existing-account / non-primary Clone path is removed from the effective flow.
 - [ ] Full authenticated multi-account E2E is subsequently verified.
+- [ ] Complete transferable state payload is reconciled and verified.
 
 ---
 
-## 13. Non-Goals
+## 15. Non-Goals
 
 This reconciliation does not:
 
@@ -332,31 +388,37 @@ This reconciliation does not:
 - finalize the complete Clone state-transfer payload;
 - authorize production data migration;
 - claim authenticated E2E success before testing is performed;
-- authorize implementation mutation without subsequent code/schema review.
+- claim the external email delivery/invitation transport is implemented;
+- authorize unrelated P5/P6 changes.
 
 ---
 
-## 14. Status
+## 16. Status
 
 ```text
 P5B Clone target semantics       OWNER DECISION LOCKED
 Target registration model        OWNER DECISION LOCKED
 Primary SH semantics             OWNER DECISION LOCKED
-Current implementation           REJECTED REALIZATION
-Target implementation            ACCEPTED FOR RECONCILIATION
+Previous implementation          REJECTED REALIZATION
+Current implementation           RECONCILED
 Canonical                        UNCHANGED
-Mutation                         NONE
-Next                             Implementation reconciliation → audit → E2E verification
+Canonical mutation               NONE
+Implementation mutation          APPLIED TO DEV + COMMITTED ON dev
+Runtime E2E                       PENDING
+Transfer-state semantics         OPEN
+P6                                 PARKED
 ```
 
 ---
 
-## 15. Session Handoff Note
+## 17. Session Handoff Note
 
 A future session or independent auditor should treat this document as the current P5B Clone reconciliation record.
 
 Do not reopen the rejected question of whether the target must already have an Account unless a higher-authority document explicitly contradicts this Owner Decision.
 
 Do not reinterpret `is_primary = false` as the intended final Clone semantics. The Owner has resolved that the Clone SH becomes the target Account's PRIMARY SH.
+
+The current implementation has already been reconciled to that decision on `dev`. The next work is **authenticated multi-account E2E and complete Clone state-transfer reconciliation**, not another identity-semantics debate.
 
 If a detail is not specified here and is also absent from the applicable authority chain, classify it as **OPEN** or request an Owner Decision rather than inventing semantics.
