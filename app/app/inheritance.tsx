@@ -6,6 +6,7 @@ import {
   approveInheritance,
   createInheritanceAuthorization,
   createSuccessionRule,
+  executeSuccession,
   listInheritanceAuthorizations,
   listLegacyRecords,
   listSuccessionRules,
@@ -40,6 +41,7 @@ export default function InheritanceScreen() {
   const [sourceAccountId, setSourceAccountId] = useState('');
   const [targetAccountId, setTargetAccountId] = useState(context?.account.account_id ?? '');
   const [legacyType, setLegacyType] = useState<LegacyRecord['legacy_type']>('HISTORY');
+  const [scopeJson, setScopeJson] = useState('{"memory_ids":[],"knowledge_ids":[]}');
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
@@ -68,6 +70,11 @@ export default function InheritanceScreen() {
     finally { setBusy(false); }
   }
 
+  function parseScope() {
+    const parsed = JSON.parse(scopeJson) as Record<string, unknown>;
+    return parsed;
+  }
+
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 16 }}>
       <Text style={{ fontSize: 28, fontWeight: '700' }}>Inheritance / Legacy / Succession</Text>
@@ -79,7 +86,21 @@ export default function InheritanceScreen() {
       <TextInput placeholder="Enter the SH ID owned by the source account" value={successionSourceShId} onChangeText={setSuccessionSourceShId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Text style={{ fontWeight: '600' }}>Successor Account ID</Text>
       <TextInput placeholder="Enter the account ID that will become the successor" value={successorAccountId} onChangeText={setSuccessorAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
-      <Button title="Create succession rule" disabled={busy || !successionSourceShId || !successorAccountId} onPress={() => void run(() => createSuccessionRule({ sourceShId: successionSourceShId, successorAccountId }), (v) => `Succession created: ${String((v as SuccessionRule).succession_id)}`)} />
+      <Text style={{ fontWeight: '600' }}>Selected transfer scope JSON</Text>
+      <TextInput multiline value={scopeJson} onChangeText={setScopeJson} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8, minHeight: 80 }} />
+      <Button title="Create succession rule" disabled={busy || !successionSourceShId || !successorAccountId} onPress={() => void run(() => createSuccessionRule({ sourceShId: successionSourceShId, successorAccountId, scope: parseScope() }), (v) => `Succession created: ${String((v as SuccessionRule).succession_id)}`)} />
+
+      {loading ? <ActivityIndicator /> : null}
+      {notice ? <Text>{notice}</Text> : null}
+      {error ? <Text>{error}</Text> : null}
+
+      <Text style={{ fontSize: 20, fontWeight: '700' }}>Succession rules</Text>
+      {succession.length === 0 ? <Text>No succession rules.</Text> : succession.map((item) => (
+        <View key={item.succession_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 8 }}>
+          <Text>ID: {item.succession_id}</Text><Text>Status: {item.status}</Text><Text>Source SH: {item.source_sh_id}</Text><Text>Successor account: {item.successor_account_id}</Text><Text>Scope: {JSON.stringify(item.scope)}</Text>
+          {item.status === 'ACTIVE' && item.successor_account_id === currentAccountId ? <Button title="Execute selected succession" disabled={busy} onPress={() => void run(() => executeSuccession(item.succession_id), (v) => `Succession executed: ${String(v)}`)} /> : null}
+        </View>
+      ))}
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Inheritance authorization</Text>
       <Text style={{ fontWeight: '600' }}>Source SH ID</Text>
@@ -91,10 +112,6 @@ export default function InheritanceScreen() {
       <Text style={{ fontWeight: '600' }}>Target Account ID</Text>
       <TextInput placeholder="Enter the account ID that owns the target SH" value={targetAccountId} onChangeText={setTargetAccountId} autoCapitalize="none" style={{ borderWidth: 1, padding: 12, borderRadius: 8 }} />
       <Button title="Create authorization" disabled={busy || !inheritanceSourceShId || !targetShId || !sourceAccountId || !targetAccountId} onPress={() => void run(() => createInheritanceAuthorization({ sourceShId: inheritanceSourceShId, targetShId, sourceAccountId, targetAccountId }), (v) => `Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`)} />
-
-      {loading ? <ActivityIndicator /> : null}
-      {notice ? <Text>{notice}</Text> : null}
-      {error ? <Text>{error}</Text> : null}
 
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Authorizations</Text>
       {authorizations.length === 0 ? <Text>No inheritance authorizations.</Text> : authorizations.map((item) => (
