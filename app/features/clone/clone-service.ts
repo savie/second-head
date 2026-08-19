@@ -72,3 +72,13 @@ export async function rejectCloneAgreement(agreementId: string) {
   if (error) throw error;
   return data as CloneAgreement;
 }
+
+export async function executeClone(agreementId: string, cloneName?: string) {
+  const { data, error } = await supabase.rpc('runtime_create_clone', {
+    p_agreement_id: agreementId,
+    p_clone_name: cloneName?.trim() || null,
+  });
+  if (error) throw error;
+  if (!data) throw new Error('Clone materialization returned no SH ID');
+  return data as string;
+}
