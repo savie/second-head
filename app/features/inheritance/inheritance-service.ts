@@ -34,6 +34,22 @@ export type LegacyRecord = {
   created_at: string;
 };
 
+export type Experience = {
+  experience_id: string;
+  sh_id: string;
+  account_id: string;
+  experience_type: string;
+  content: string;
+  scope: 'PRIVATE' | 'GENERAL';
+  visibility: 'OWNER_ONLY' | 'SHARED';
+  source_ref: string | null;
+  provenance: Record<string, unknown>;
+  lifecycle: 'ACTIVE' | 'ARCHIVED' | 'DEACTIVATED';
+  occurred_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export async function listSuccessionRules() {
   const { data, error } = await supabase.from('succession_rules').select('*').order('created_at', { ascending: false });
   if (error) throw error;
@@ -48,6 +64,36 @@ export async function createSuccessionRule(input: { sourceShId: string; successo
 
 export async function executeSuccession(successionId: string) {
   const { data, error } = await supabase.rpc('runtime_execute_succession', { p_succession_id: successionId.trim() });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function listExperiences() {
+  const { data, error } = await supabase.from('experiences').select('*').order('occurred_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Experience[];
+}
+
+export async function recordExperience(input: {
+  shId: string;
+  experienceType: string;
+  content: string;
+  scope?: Experience['scope'];
+  visibility?: Experience['visibility'];
+  sourceRef?: string | null;
+  provenance?: Record<string, unknown>;
+  occurredAt?: string;
+}) {
+  const { data, error } = await supabase.rpc('runtime_record_experience', {
+    p_sh_id: input.shId.trim(),
+    p_experience_type: input.experienceType.trim(),
+    p_content: input.content,
+    p_scope: input.scope ?? 'PRIVATE',
+    p_visibility: input.visibility ?? 'OWNER_ONLY',
+    p_source_ref: input.sourceRef ?? null,
+    p_provenance: input.provenance ?? { source: 'sh-app' },
+    p_occurred_at: input.occurredAt ?? new Date().toISOString(),
+  });
   if (error) throw error;
   return data as string;
 }
