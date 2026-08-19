@@ -1,62 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 type Candidate = Record<string, unknown>;
-
-function objectValue(value: unknown): Candidate | undefined {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as Candidate : undefined;
-}
-
-export async function recordSemanticLifecycle(
-  supabase: ReturnType<typeof createClient>,
-  shId: string,
-  userMessage: string,
-  modelResponse: { semantic_signals?: Record<string, unknown> },
-) {
-  const signals = objectValue(modelResponse.semantic_signals);
-  if (!signals) return { memory: null, knowledge: null };
-
-  let memory: string | null = null;
-  let knowledge: string | null = null;
-
+function objectValue(value: unknown): Candidate | undefined { return value && typeof value === "object" && !Array.isArray(value) ? value as Candidate : undefined; }
+const KNOWLEDGE_ORIGINS = new Set(["MEMORY", "EXPLICIT_TEACHING", "EXTERNAL_REFERENCE"]);
+function normalizeKnowledgeOrigin(value: unknown): string { const raw = typeof value === "string" ? value.trim().toUpperCase().replace(/[ -]+/g, "_") : ""; if (KNOWLEDGE_ORIGINS.has(raw)) return raw; if (["USER_TEACHING", "OWNER_TEACHING", "EXPLICIT_USER_TEACHING", "TEACHING", "USER_INSTRUCTION", "OWNER_INSTRUCTION"].includes(raw)) return "EXPLICIT_TEACHING"; return ""; }
+export async function recordSemanticLifecycle(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string, modelResponse: { semantic_signals?: Record<string, unknown> }) {
+  const signals = objectValue(modelResponse.semantic_signals); if (!signals) return { memory: null, knowledge: null }; let memory: string | null = null; let knowledge: string | null = null;
   const memoryCandidate = objectValue(signals.memory_candidate);
-  if (memoryCandidate) {
-    const content = typeof memoryCandidate.content === "string" ? memoryCandidate.content.trim() : "";
-    if (content) {
-      const { data, error } = await supabase.rpc("runtime_record_memory", {
-        p_sh_id: shId,
-        p_content: content,
-        p_memory_type: memoryCandidate.memory_type ?? "LONG_TERM",
-        p_source: memoryCandidate.source ?? "runtime:p4d:memory_candidate",
-        p_confidence: memoryCandidate.confidence ?? null,
-        p_scope: memoryCandidate.scope ?? "PRIVATE",
-        p_visibility: memoryCandidate.visibility ?? "OWNER_ONLY",
-        p_lifecycle: memoryCandidate.lifecycle ?? "CANDIDATE",
-      });
-      if (error) throw new Error(`MEMORY_RECORD_FAILED: ${error.message}`);
-      memory = typeof data === "string" ? data : null;
-    }
-  }
-
+  if (memoryCandidate) { const content = typeof memoryCandidate.content === "string" ? memoryCandidate.content.trim() : ""; if (content) { const { data, error } = await supabase.rpc("runtime_record_memory", { p_sh_id: shId, p_content: content, p_memory_type: memoryCandidate.memory_type ?? "LONG_TERM", p_source: memoryCandidate.source ?? "runtime:p4d:memory_candidate", p_confidence: memoryCandidate.confidence ?? null, p_scope: memoryCandidate.scope ?? "PRIVATE", p_visibility: memoryCandidate.visibility ?? "OWNER_ONLY", p_lifecycle: memoryCandidate.lifecycle ?? "CANDIDATE" }); if (error) throw new Error(`MEMORY_RECORD_FAILED: ${error.message}`); memory = typeof data === "string" ? data : null; if (memory) { const { error: journeyError } = await supabase.rpc("runtime_record_journey_event", { p_sh_id: shId, p_event_type: "MEMORY", p_continuity_status: "CONTINUOUS", p_payload: { memory_id: memory, content, memory_type: memoryCandidate.memory_type ?? "LONG_TERM", scope: memoryCandidate.scope ?? "PRIVATE", visibility: memoryCandidate.visibility ?? "OWNER_ONLY", lifecycle: memoryCandidate.lifecycle ?? "CANDIDATE" }, p_source_ref: "runtime:p5a:memory_candidate" }); if (journeyError) throw new Error(`MEMORY_JOURNEY_SIGNAL_FAILED: ${journeyError.message}`); } } }
   const knowledgeCandidate = objectValue(signals.knowledge_candidate);
-  if (knowledgeCandidate) {
-    const content = typeof knowledgeCandidate.content === "string" ? knowledgeCandidate.content.trim() : "";
-    const source = typeof knowledgeCandidate.source === "string" ? knowledgeCandidate.source.trim() : "";
-    const origin = typeof knowledgeCandidate.origin === "string" ? knowledgeCandidate.origin : "";
-    if (content && source && origin) {
-      const { data, error } = await supabase.rpc("runtime_record_knowledge_candidate", {
-        p_sh_id: shId,
-        p_content: content,
-        p_source: source,
-        p_origin: origin,
-        p_provenance: knowledgeCandidate.provenance ?? { source_message: userMessage },
-        p_scope: knowledgeCandidate.scope ?? "PRIVATE",
-        p_visibility: knowledgeCandidate.visibility ?? "OWNER_ONLY",
-        p_confidence: knowledgeCandidate.confidence ?? null,
-      });
-      if (error) throw new Error(`KNOWLEDGE_ACQUISITION_FAILED: ${error.message}`);
-      knowledge = typeof data === "string" ? data : null;
-    }
-  }
-
+  if (knowledgeCandidate) { const content = typeof knowledgeCandidate.content === "string" ? knowledgeCandidate.content.trim() : ""; const source = typeof knowledgeCandidate.source === "string" ? knowledgeCandidate.source.trim() : ""; const origin = normalizeKnowledgeOrigin(knowledgeCandidate.origin); if (content && source && origin) { const { data, error } = await supabase.rpc("runtime_record_knowledge_candidate", { p_sh_id: shId, p_content: content, p_source: source, p_origin: origin, p_provenance: knowledgeCandidate.provenance ?? { source_message: userMessage }, p_scope: knowledgeCandidate.scope ?? "PRIVATE", p_visibility: knowledgeCandidate.visibility ?? "OWNER_ONLY", p_confidence: knowledgeCandidate.confidence ?? null }); if (error) throw new Error(`KNOWLEDGE_ACQUISITION_FAILED: ${error.message}`); knowledge = typeof data === "string" ? data : null; if (knowledge) { const { error: journeyError } = await supabase.rpc("runtime_record_journey_event", { p_sh_id: shId, p_event_type: "LEARNING", p_continuity_status: "CONTINUOUS", p_payload: { knowledge_id: knowledge, content, source, origin, scope: knowledgeCandidate.scope ?? "PRIVATE", visibility: knowledgeCandidate.visibility ?? "OWNER_ONLY" }, p_source_ref: "runtime:p5a:knowledge_candidate" }); if (journeyError) throw new Error(`KNOWLEDGE_JOURNEY_SIGNAL_FAILED: ${journeyError.message}`); } } }
   return { memory, knowledge };
 }
