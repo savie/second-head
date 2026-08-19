@@ -59,6 +59,7 @@ CREATE POLICY clone_agreements_source_insert
 -- 3. Keep participant visibility after registration; an unregistered recipient has
 -- no Account and therefore no authenticated row-level visibility yet.
 DROP POLICY IF EXISTS clone_agreements_source_select ON public.clone_agreements;
+DROP POLICY IF EXISTS clone_agreements_participant_select ON public.clone_agreements;
 CREATE POLICY clone_agreements_participant_select
   ON public.clone_agreements FOR SELECT
   USING (
@@ -82,6 +83,7 @@ DECLARE
   v_sh_id uuid;
   v_email text;
   v_clone_agreement clone_agreements%rowtype;
+  v_has_clone boolean := false;
 BEGIN
   SELECT account_id
     INTO v_account_id
@@ -124,6 +126,8 @@ BEGIN
    LIMIT 1
    FOR UPDATE;
 
+  v_has_clone := FOUND;
+
   INSERT INTO public.accounts (email, status)
   VALUES (v_email, 'created')
   RETURNING account_id INTO v_account_id;
@@ -136,9 +140,7 @@ BEGIN
       RAISE EXCEPTION 'IDENTITY_ESCALATION: auth subject link conflict';
   END;
 
-  IF FOUND THEN
-    -- The SELECT above populated v_clone_agreement. FOUND is evaluated from the
-    -- immediately preceding INSERT, so use the agreement identifier explicitly.
+  IF v_has_clone THEN
     INSERT INTO public.sh_instances (
       account_id,
       sh_type,
