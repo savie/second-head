@@ -18,14 +18,37 @@ export type JourneyEvent = {
   created_at: string;
 };
 
+const JOURNEY_EVENT_SELECT = 'event_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,visibility,transfer_policy,provenance,created_at';
+
 export async function loadJourneyEvents(shId: string, limit = 50): Promise<JourneyEvent[]> {
   if (!shId.trim()) throw new Error('JOURNEY_SH_ID_REQUIRED');
   const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 50);
 
   const { data, error } = await supabase
     .from('journey_events')
-    .select('event_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,visibility,transfer_policy,provenance,created_at')
+    .select(JOURNEY_EVENT_SELECT)
     .eq('sh_id', shId)
+    .order('occurred_at', { ascending: false })
+    .limit(safeLimit);
+
+  if (error) throw new Error(`JOURNEY_RETRIEVAL_FAILED: ${error.message}`);
+  return (data ?? []) as JourneyEvent[];
+}
+
+/**
+ * Load the Journey projection for the authenticated account.
+ *
+ * Do not add an SH filter here. The Journey visibility RLS policy is the
+ * canonical authorization boundary: it returns the caller's own SH events
+ * plus only GENERAL/SHARED underlying domain records from other SHs.
+ * PRIVATE/OWNER_ONLY records therefore remain excluded by the database.
+ */
+export async function loadJourneyEventsForAccount(limit = 50): Promise<JourneyEvent[]> {
+  const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 50);
+
+  const { data, error } = await supabase
+    .from('journey_events')
+    .select(JOURNEY_EVENT_SELECT)
     .order('occurred_at', { ascending: false })
     .limit(safeLimit);
 
