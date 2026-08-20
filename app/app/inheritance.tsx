@@ -16,7 +16,7 @@ export default function InheritanceScreen() {
   const refresh = useCallback(async () => { if (!context || !currentShId) return; setLoading(true); setError(null); try { const [journey, allExperiences, allMemories, allKnowledge, auths] = await Promise.all([loadJourneyEvents(currentShId), listExperiences(), listMemories(), listKnowledge(), listInheritanceAuthorizations()]); setEvents(journey); setExperiences(allExperiences.filter(v => v.sh_id === currentShId && v.lifecycle === 'ACTIVE')); setMemories(allMemories.filter(v => v.sh_id === currentShId && ['CANDIDATE','ACTIVE','UPDATED'].includes(v.lifecycle))); setKnowledge(allKnowledge.filter(v => v.sh_id === currentShId && ['CANDIDATE','ACTIVE'].includes(v.lifecycle))); setItems(auths); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to load inheritance data'); } finally { setLoading(false); } }, [context, currentShId]);
   useEffect(() => { void refresh(); }, [refresh]);
   if (!session) return <Redirect href="/login" />; if (!context) return <ActivityIndicator />;
-  const eligibleEvents = useMemo(() => events.filter(e => e.transfer_policy !== 'NON_TRANSFERABLE' && e.visibility !== 'PRIVATE' && e.transfer_policy !== 'PRIVATE'), [events]);
+  const eligibleEvents = useMemo(() => events.filter(e => e.transfer_policy !== 'NON_TRANSFERABLE' && e.visibility !== 'PRIVATE'), [events]);
   const eligibleExperiences = useMemo(() => experiences.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [experiences]);
   const eligibleMemories = useMemo(() => memories.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [memories]);
   const eligibleKnowledge = useMemo(() => knowledge.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [knowledge]);
