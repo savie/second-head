@@ -41,6 +41,7 @@ export default function JourneyScreen() {
   const { session, context } = useAuth();
   const primarySH = context?.shInstances.find((item) => item.is_primary) ?? context?.shInstances[0];
   const [events, setEvents] = useState<JourneyEvent[]>([]);
+  const [filter, setFilter] = useState<Filter>('All');
   const [selected, setSelected] = useState<JourneyEvent | null>(null);
   const [recordPolicy, setRecordPolicyState] = useState<JourneyRecordPolicy | null>(null);
   const [editingPolicy, setEditingPolicy] = useState(false);
@@ -218,15 +219,7 @@ export default function JourneyScreen() {
                 </View>
               ) : null}
 
-              {!loadingPolicy && !recordPolicy && ['Memory', 'Knowledge', 'Experience'].includes(category(selected)) ? (
-                <Text style={styles.note}>Event ini belum mempunyai link yang cukup jelas ke record Memory / Knowledge / Experience untuk diubah dari Journey.</Text>
-              ) : null}
-
-              <Text style={styles.label}>Journey visibility</Text><Text>{humanize(selected.visibility)}</Text>
-              <Text style={styles.label}>Journey policy</Text><Text>{humanize(selected.transfer_policy)}</Text>
-              {selected.source_ref ? <><Text style={styles.label}>Source</Text><Text selectable>{selected.source_ref}</Text></> : null}
-              {selected.gap_code ? <><Text style={styles.label}>Gap</Text><Text>{humanize(selected.gap_code)}</Text></> : null}
-              <View style={styles.modalActions}><Button title="Close" onPress={() => setSelected(null)} /></View>
+              <Button title="Close" onPress={() => setSelected(null)} />
             </View>
           </View>
         ) : null}
@@ -237,44 +230,42 @@ export default function JourneyScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#f7f7f7' },
-  content: { padding: 20, paddingBottom: 36 },
+  content: { padding: 16, paddingBottom: 32 },
   header: { marginBottom: 16 },
-  title: { fontSize: 32, fontWeight: '800', marginBottom: 4 },
-  subtitle: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
-  description: { fontSize: 14, color: '#555' },
-  hint: { marginTop: 10, fontSize: 14, color: '#333' },
+  title: { fontSize: 28, fontWeight: '700' },
+  subtitle: { marginTop: 4, fontSize: 14, fontWeight: '600' },
+  description: { marginTop: 4, color: '#555' },
+  hint: { marginTop: 10, color: '#666', lineHeight: 20 },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  filter: { borderWidth: 1, borderColor: '#bbb', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#fff' },
-  filterActive: { backgroundColor: '#111', borderColor: '#111' },
+  filter: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 18, backgroundColor: '#e7e7e7' },
+  filterActive: { backgroundColor: '#111' },
   filterText: { color: '#222' },
-  filterTextActive: { color: '#fff', fontWeight: '700' },
-  error: { marginTop: 12, color: '#a11' },
-  empty: { marginTop: 16, padding: 18, borderRadius: 12, backgroundColor: '#fff' },
-  emptyTitle: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
-  emptyText: { color: '#666' },
-  event: { flexDirection: 'row', marginBottom: 12, padding: 16, borderRadius: 12, backgroundColor: '#fff' },
-  marker: { width: 8, borderRadius: 4, marginRight: 12, backgroundColor: '#222' },
-  eventBody: { flex: 1, gap: 6 },
-  eventTop: { gap: 4 },
-  eventType: { fontSize: 16, fontWeight: '700' },
-  date: { fontSize: 12, color: '#666' },
-  status: { fontSize: 13, fontWeight: '600' },
-  preview: { color: '#333', lineHeight: 19 },
-  source: { fontSize: 12, color: '#666' },
-  view: { fontWeight: '700', marginTop: 2 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
+  filterTextActive: { color: '#fff' },
+  error: { marginTop: 10, color: '#b00020' },
+  empty: { padding: 16, borderRadius: 10, backgroundColor: '#eee' },
+  emptyTitle: { fontWeight: '700' },
+  emptyText: { marginTop: 4, color: '#555' },
+  event: { flexDirection: 'row', padding: 14, marginBottom: 10, borderRadius: 12, backgroundColor: '#fff' },
+  marker: { width: 8, borderRadius: 4, backgroundColor: '#111', marginRight: 12 },
+  eventBody: { flex: 1 },
+  eventTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+  eventType: { flex: 1, fontWeight: '700' },
+  date: { color: '#666', fontSize: 12 },
+  status: { marginTop: 4, color: '#555' },
+  preview: { marginTop: 8, lineHeight: 20 },
+  source: { marginTop: 8, color: '#666', fontSize: 12 },
+  view: { marginTop: 10, fontWeight: '600' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   loadingText: { marginTop: 8 },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
-  modalCard: { maxHeight: '90%', backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 22, gap: 8 },
-  modalTitle: { fontSize: 24, fontWeight: '800' },
-  modalDate: { color: '#666', marginBottom: 8 },
+  modalCard: { maxHeight: '90%', padding: 20, borderTopLeftRadius: 18, borderTopRightRadius: 18, backgroundColor: '#fff', gap: 8 },
+  modalTitle: { fontSize: 22, fontWeight: '700' },
+  modalDate: { color: '#666' },
   label: { marginTop: 8, fontWeight: '700' },
-  policyBlock: { marginTop: 4, padding: 12, borderWidth: 1, borderRadius: 10, gap: 6 },
-  editor: { gap: 8, marginTop: 4 },
+  policyBlock: { marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#ddd', gap: 6 },
+  editor: { gap: 8 },
   optionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   optionColumn: { gap: 8 },
-  option: { borderWidth: 1, borderRadius: 8, padding: 10, backgroundColor: '#fff' },
+  option: { paddingHorizontal: 12, paddingVertical: 9, borderRadius: 8, borderWidth: 1, borderColor: '#ccc', backgroundColor: '#fff' },
   optionActive: { backgroundColor: '#111', borderColor: '#111' },
-  note: { marginTop: 10, padding: 10, borderRadius: 8, backgroundColor: '#f1f1f1', color: '#555' },
-  modalActions: { marginTop: 12 },
 });
