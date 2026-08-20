@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Modal, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../state/auth-context';
-import { loadJourneyEvents, type JourneyEvent } from '../features/journey/journey-service';
+import { loadJourneyEventsForAccount, type JourneyEvent } from '../features/journey/journey-service';
 import { getJourneyRecordPolicy, setRecordPolicy, type JourneyRecordPolicy, type TransferPolicy, type RecordScope, type RecordVisibility } from '../features/inheritance/inheritance-service';
 
 const FILTERS = ['All', 'Memory', 'Knowledge', 'Experience', 'Lifecycle / Other'] as const;
@@ -58,7 +58,7 @@ export default function JourneyScreen() {
     if (!primarySH) return;
     try {
       setError(null);
-      setEvents(await loadJourneyEvents(primarySH.sh_id));
+      setEvents(await loadJourneyEventsForAccount());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load Journey');
     } finally {
