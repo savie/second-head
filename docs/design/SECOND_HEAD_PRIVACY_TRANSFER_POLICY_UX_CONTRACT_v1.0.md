@@ -63,17 +63,55 @@ No new top-level Memory management screen is required by this contract.
 
 Memory can be discovered through Journey and authorized runtime context. When an Owner-facing record detail exists, the policy block belongs there.
 
+The current implementation does not expose a Memory policy editor. No new navigation destination should be introduced solely to solve this gap.
+
 ### 4.3 Knowledge
 
 No new top-level Knowledge management screen is required by this contract.
 
 Knowledge can be discovered through Journey and authorized runtime context. When an Owner-facing record detail exists, the policy block belongs there.
 
+The current implementation does not expose a Knowledge policy editor. No new navigation destination should be introduced solely to solve this gap.
+
 ### 4.4 Experience
 
 Existing Experience detail/list presentation remains the base surface. Do not create a new primary Home/More destination solely for policy editing.
 
-## 5. Policy presentation
+The current implementation exposes the policy in the Experience list/detail and provides an Owner policy edit/save interaction through the existing backend policy-management capability.
+
+## 5. Creation versus post-creation policy control
+
+The current Chat capture flow is intentionally **not** a transfer-policy authoring surface.
+
+Chat explicit save exposes Experience capture scope/visibility (`PRIVATE/GENERAL` and `OWNER_ONLY/SHARED`) and saves the last message to Journey. It does not expose transfer policy selection.
+
+Therefore:
+
+```text
+Chat capture
+    ↓
+create/capture Experience
+    ↓
+default transfer policy remains backend-defined
+    ↓
+record-management/detail context
+    ↓
+Owner may explicitly edit transfer policy where a canonical/actual record detail surface exists
+```
+
+Do not add a transfer-policy selector to Chat merely because the backend service supports `transfer_policy`.
+
+This preserves the canonical separation between Journey capture and lifecycle transfer governance.
+
+For new records, the current DEV backend default remains:
+
+```text
+PRIVATE
+OWNER_ONLY
+NON_TRANSFERABLE
+```
+
+## 6. Policy presentation
 
 For an Owner-owned record, the detail context may show:
 
@@ -87,7 +125,7 @@ Non-transferable / Inheritable / Succession / Legacy
 
 Internal IDs must not be the primary mental model.
 
-## 6. Editability
+## 7. Editability
 
 Policy editing is an Owner-authorized record-management operation, not a lifecycle execution operation.
 
@@ -100,7 +138,7 @@ The policy may be edited only when:
 
 The client must not implement authorization or ownership decisions locally.
 
-## 7. No automatic policy change
+## 8. No automatic policy change
 
 The following transitions are prohibited as implicit side effects:
 
@@ -114,7 +152,7 @@ NON_TRANSFERABLE → LEGACY merely because Legacy screen is opened
 
 Lifecycle screens only consume already-authorized eligible policy states.
 
-## 8. Lifecycle separation
+## 9. Lifecycle separation
 
 Lifecycle is an action/process surface.
 
@@ -136,7 +174,7 @@ selected transfer executes
 
 Inheritance, Succession, and Legacy must not silently mutate a record's policy simply by selecting it.
 
-## 9. Eligibility presentation
+## 10. Eligibility presentation
 
 Lifecycle selection must filter by the relevant transfer policy, not by privacy scope.
 
@@ -152,7 +190,7 @@ A PRIVATE record with an applicable transfer policy remains eligible subject to 
 
 A SHARED/GENERAL record without an applicable transfer policy remains ineligible.
 
-## 10. Authorization separation
+## 11. Authorization separation
 
 Authorization is a separate concern from both visibility and transfer policy.
 
@@ -176,7 +214,7 @@ which eligible records are actually transferred
 
 No UI shortcut may collapse these into a single `Public/Private` switch.
 
-## 11. Domain options
+## 12. Domain options
 
 For Memory, Knowledge, and Experience the common transfer-policy vocabulary is:
 
@@ -191,7 +229,7 @@ The UI should present human-readable labels. Internal enum values remain impleme
 
 Domain-specific restrictions must be enforced by the backend contract; the FE must not invent additional policy semantics.
 
-## 12. Default state
+## 13. Default state
 
 Existing/new record defaults remain governed by the canonical/backend contract.
 
@@ -205,7 +243,7 @@ NON_TRANSFERABLE
 
 This contract does not authorize mass conversion of existing records to GENERAL/SHARED.
 
-## 13. UX anti-patterns
+## 14. UX anti-patterns
 
 Do not add:
 
@@ -213,9 +251,10 @@ Do not add:
 - a second `Open Experience` surface duplicating Journey unnecessarily;
 - policy controls inside lifecycle execution that silently change policy;
 - public/private as a proxy for transfer eligibility;
-- local FE authorization logic.
+- local FE authorization logic;
+- a transfer-policy selector in Chat capture solely to expose a backend capability.
 
-## 14. Minimal UI direction
+## 15. Minimal UI direction
 
 When a record detail surface supports editing, the minimal interaction is a compact policy section in that detail context:
 
@@ -231,7 +270,7 @@ Editing should expose only the supported policy choices and require an explicit 
 
 No new navigation destination is required by this contract.
 
-## 15. Backend contract boundary
+## 16. Backend contract boundary
 
 The FE may call the existing policy-management service/API capability, but backend remains authoritative for:
 
@@ -245,7 +284,7 @@ The FE may call the existing policy-management service/API capability, but backe
 
 The FE must treat backend rejection as authoritative.
 
-## 16. Verification contract
+## 17. Verification contract
 
 Before APK/Real E2E, verify at BE/DB level:
 
@@ -260,7 +299,7 @@ Before APK/Real E2E, verify at BE/DB level:
 9. Lifecycle selection does not mutate policy.
 10. Policy editing does not itself execute lifecycle transfer.
 
-## 17. Canonical / UX alignment
+## 18. Canonical / UX alignment
 
 The owner app remains capability-oriented:
 
@@ -272,7 +311,7 @@ Journey is the unified continuity/history viewer; Lifecycle is the action/proces
 
 This contract extends the existing canonical privacy/transfer semantics without changing the primary navigation model.
 
-## 18. Scope / contract / execution mapping
+## 19. Scope / contract / execution mapping
 
 ### Scope
 
@@ -289,7 +328,8 @@ This contract extends the existing canonical privacy/transfer semantics without 
 - use record detail as the policy presentation point when available;
 - do not create a new primary policy-management destination;
 - keep lifecycle screens action-only;
-- keep backend authoritative.
+- keep backend authoritative;
+- keep Chat capture focused on Journey/Experience capture rather than transfer-policy authoring.
 
 ### Executive Execution Strategy
 
@@ -317,7 +357,7 @@ This work is treated as planning/contract refinement before implementation, cons
 
 The implementation task should therefore be recorded as a scoped backlog item with dependencies and DoD before coding.
 
-## 19. Implementation status
+## 20. Implementation status
 
 - [x] Canonical baseline identified.
 - [x] Privacy/transfer addendum identified.
@@ -330,12 +370,27 @@ The implementation task should therefore be recorded as a scoped backlog item wi
 - [x] Supported policy options defined.
 - [x] Anti-patterns defined.
 - [x] Verification contract defined.
+- [x] Chat capture audited and confirmed as non-policy-authoring flow.
 - [x] BE migration exposes Experience transfer policy in existing owner retrieval.
 - [x] FE Experience detail supports policy presentation/edit/save.
 - [ ] Memory owner-facing record detail policy editor.
 - [ ] Knowledge owner-facing record detail policy editor.
+- [ ] BE/DB fixture path for controlled INHERITABLE/SUCCESSION/LEGACY verification.
 - [ ] CI verification.
 - [ ] Supabase DEV verification after implementation.
 - [ ] Real E2E evidence.
+
+## 21. Owner decision gate
+
+No Owner decision is required for Chat capture: it remains a scope/visibility capture flow.
+
+The remaining product decision is only this:
+
+```text
+Where should Owner-facing Memory and Knowledge record-detail management live
+when the canonical app has no dedicated Memory/Knowledge management screen?
+```
+
+Until that decision is made, do not invent a new top-level navigation destination or add policy editing to Chat/Lifecycle.
 
 END
