@@ -13,6 +13,38 @@ alter table public.knowledge add constraint knowledge_transfer_policy_check chec
 alter table public.experiences drop constraint if exists experiences_transfer_policy_check;
 alter table public.experiences add constraint experiences_transfer_policy_check check (transfer_policy in ('NON_TRANSFERABLE','INHERITABLE','SUCCESSION','LEGACY'));
 
+-- Experience creation now records transfer policy explicitly without changing privacy defaults.
+create or replace function public.runtime_record_experience(
+  p_sh_id uuid,
+  p_experience_type text,
+  p_content text,
+  p_scope text default 'PRIVATE',
+  p_visibility text default 'OWNER_ONLY',
+  p_transfer_policy text default 'NON_TRANSFERABLE',
+  p_source_ref text default null,
+  p_provenance jsonb default '{}'::jsonb,
+  p_occurred_at timestamptz default now()
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare v_account_id uuid; v_experience_id uuid;
+begin
+  if auth.uid() is null then raise exception 'EXPERIENCE_REJECTED: authentication required'; end if;
+  if p_transfer_policy not in ('NON_TRANSFERABLE','INHERITABLE','SUCCESSION','LEGACY') then raise exception 'EXPERIENCE_REJECTED: invalid transfer policy'; end if;
+  select s.account_id into v_account_id from public.sh_instances s where s.sh_id=p_sh_id and s.account_id=public.current_account_id() and s.status<>'deactivated';
+  if v_account_id is null then raise exception 'EXPERIENCE_REJECTED: SH not owned by current active account'; end if;
+  insert into public.experiences(sh_id,account_id,experience_type,content,scope,visibility,transfer_policy,source_ref,provenance,lifecycle,occurred_at,created_at,updated_at)
+  values(p_sh_id,v_account_id,p_experience_type,p_content,p_scope,p_visibility,p_transfer_policy,p_source_ref,coalesce(p_provenance,'{}'::jsonb),'ACTIVE',coalesce(p_occurred_at,now()),now(),now())
+  returning experience_id into v_experience_id;
+  return v_experience_id;
+end;
+$$;
+revoke all on function public.runtime_record_experience(uuid,text,text,text,text,text,text,jsonb,timestamptz) from public;
+grant execute on function public.runtime_record_experience(uuid,text,text,text,text,text,text,jsonb,timestamptz) to authenticated;
+
 -- Replace the old privacy-as-transfer gate with an explicit policy gate.
 create or replace function public.runtime_validate_selected_transfer_scope(p_source_sh_id uuid,p_scope jsonb,p_operation text)
 returns void
@@ -20,42 +52,33 @@ language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  v_scope jsonb := coalesce(p_scope, '{}'::jsonb);
-  v_requested integer;
-  v_matched integer;
-  v_eligible integer;
+declare v_scope jsonb:=coalesce(p_scope,'{}'::jsonb); v_requested integer; v_matched integer; v_eligible integer;
 begin
   if p_source_sh_id is null then raise exception '%_REJECTED: source SH is required', upper(p_operation); end if;
 
-  -- Memory
   v_requested := (select count(*) from (select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'memory_ids','[]'::jsonb))) x);
-  if v_requested > 0 then
+  if v_requested>0 then
     select count(*) into v_matched from public.memories m where m.sh_id=p_source_sh_id and m.memory_id=any(array(select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'memory_ids','[]'::jsonb))));
     if v_requested<>v_matched then raise exception '%_REJECTED: selected memory is not owned by source SH', upper(p_operation); end if;
     select count(*) into v_eligible from public.memories m where m.sh_id=p_source_sh_id and m.memory_id=any(array(select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'memory_ids','[]'::jsonb)))) and m.transfer_policy=upper(p_operation);
     if v_requested<>v_eligible then raise exception '%_REJECTED: selected memory is not eligible for this transfer operation', upper(p_operation); end if;
   end if;
 
-  -- Knowledge
   v_requested := (select count(*) from (select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'knowledge_ids','[]'::jsonb))) x);
-  if v_requested > 0 then
+  if v_requested>0 then
     select count(*) into v_matched from public.knowledge k where k.sh_id=p_source_sh_id and k.knowledge_id=any(array(select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'knowledge_ids','[]'::jsonb))));
     if v_requested<>v_matched then raise exception '%_REJECTED: selected knowledge is not owned by source SH', upper(p_operation); end if;
     select count(*) into v_eligible from public.knowledge k where k.sh_id=p_source_sh_id and k.knowledge_id=any(array(select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'knowledge_ids','[]'::jsonb)))) and k.transfer_policy=upper(p_operation);
     if v_requested<>v_eligible then raise exception '%_REJECTED: selected knowledge is not eligible for this transfer operation', upper(p_operation); end if;
   end if;
 
-  -- Experience
   v_requested := (select count(*) from (select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'experience_ids','[]'::jsonb))) x);
-  if v_requested > 0 then
+  if v_requested>0 then
     select count(*) into v_matched from public.experiences e where e.sh_id=p_source_sh_id and e.experience_id=any(array(select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'experience_ids','[]'::jsonb))));
     if v_requested<>v_matched then raise exception '%_REJECTED: selected experience is not owned by source SH', upper(p_operation); end if;
     select count(*) into v_eligible from public.experiences e where e.sh_id=p_source_sh_id and e.experience_id=any(array(select distinct value::uuid from jsonb_array_elements_text(coalesce(v_scope->'experience_ids','[]'::jsonb)))) and e.transfer_policy=upper(p_operation);
     if v_requested<>v_eligible then raise exception '%_REJECTED: selected experience is not eligible for this transfer operation', upper(p_operation); end if;
   end if;
-
-  -- Journey retains its existing transfer_policy enforcement.
 end;
 $$;
 revoke all on function public.runtime_validate_selected_transfer_scope(uuid,jsonb,text) from public;
