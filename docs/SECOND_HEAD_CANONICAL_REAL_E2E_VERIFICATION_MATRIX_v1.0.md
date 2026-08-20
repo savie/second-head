@@ -2,7 +2,7 @@
 
 **Status:** Active execution matrix  
 **Branch:** `dev`  
-**Runtime test vehicle:** APK #153  
+**Runtime test vehicle:** APK #155  
 **Backend:** Supabase DEV  
 **Implementation source:** GitHub DEV  
 **Purpose:** Canonical, persistent master matrix for REAL E2E functional verification through Functional Closure and UI/UX.
@@ -102,9 +102,9 @@
 | TC-EXP-03 | Experience payload integrity | 🟢 | Explicit capture marker/source observed. |
 | TC-EXP-04 | Experience retrieval | 🟢 | Persisted Experience retrieved previously. |
 | TC-EXP-05 | Experience continuity semantics | 🟢 | APK #150: follow-up Chat explicitly retrieved persisted Experience `c75fc10d-f12a-4567-ac52-4546a54a11ef` and explained that the stored Experience was used as the basis for the answer. |
-| TC-EXP-06 | Experience visibility | 🔴 | APK #153 retest: Account B → Journey → Experience returned `No events in this category` for the existing Account A Experience `TEST EXPERIENCE - PRIVATE LEGACY - E2E`, which is `GENERAL / SHARED` and `NON_TRANSFERABLE`. Supabase RLS/function fix was applied and verified, but actual FE path still filters Journey by the recipient's current `sh_id`; shared events from another SH therefore cannot enter the query. Fix disposition: `FE`. |
-| TC-EXP-07 | Experience transfer eligibility | ⏳ | Not tested. |
-| TC-EXP-08 | Experience non-transferable enforcement | ⏳ | Not tested. |
+| TC-EXP-06 | Experience visibility | 🟡 | APK #155: Account B → Journey → Experience now visibly includes the existing Account A `GENERAL / SHARED` Experience `TEST EXPERIENCE - PRIVATE LEGACY - E2E`; shared visibility is therefore proven. Opening the shared non-owner event still triggers `JOURNEY_RECORD_POLICY_FAILED: ... event not found or not owner-visible`, a minor FE policy-read bug because the owner-only policy RPC is still attempted for a shared projection. FE fix committed on DEV (`3d77b3715f93c815ab1e165ebbc92b98e623258d`, `0b380dd32e97493a3ca54a1ec94ad77464df0c78`) but APK rebuild/retest is still required. Supabase was not changed for this minor defect. |
+| TC-EXP-07 | Experience transfer eligibility | 🟢 | APK #155: dedicated Experience fixture showed `Visibility GENERAL / SHARED` and `Transfer policy INHERITABLE`; it appeared as an eligible Experience, was selected, and authorization `8978d126-9182-479b-bceb-6a7248aff05a` was created with status `PENDING` and selected scope containing `experience_ids = aaa42648-4218-41ff-9c89-d099ad99ee6e`. |
+| TC-EXP-08 | Experience non-transferable enforcement | 🟢 | APK #155: `TEST EXPERIENCE - PRIVATE LEGACY - E2E` remained visible in Account B Journey but did not appear in Inheritance Experience eligibility; UI reported `No Experience records are marked INHERITABLE.` This proves NON_TRANSFERABLE visibility remains separate from transfer eligibility. |
 | TC-EXP-09 | Experience unauthorized access | ⏳ | Not tested. |
 | TC-EXP-10 | Experience usable by downstream Chat / context | ⏳ | Not tested. |
 
@@ -173,7 +173,7 @@
 | TC-INH-01 | Inheritance screen / current account | 🟢 | Route/UI observed. |
 | TC-INH-02 | Explicit Memory selection | 🟢 | APK #150: Memory checklist selected. |
 | TC-INH-03 | Explicit Knowledge selection | ⏳ | No Knowledge record available for selection. |
-| TC-INH-04 | Explicit Experience selection | ⏳ | No Experience record marked INHERITABLE. |
+| TC-INH-04 | Explicit Experience selection | 🟢 | APK #155: dedicated Experience with `GENERAL / SHARED` + `INHERITABLE` appeared as eligible, was selected, and was included in authorization `8978d126-9182-479b-bceb-6a7248aff05a`. |
 | TC-INH-05 | Explicit Journey selection | ⏳ | No transferable Journey record available. |
 | TC-INH-06 | Create authorization with selected scope | 🟢 | APK #150 created authorization `dc8f020c-23ee-4711-a776-d2519477dd4c`, status `PENDING`, with selected scope containing the Memory ID. |
 | TC-INH-07 | Backend enforces selected scope | ⏳ | Creation succeeded; execution/enforcement not yet tested. |
