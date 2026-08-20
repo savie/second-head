@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput } from 'react-native';
+import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput, type ViewStyle } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../state/auth-context';
 import { approveInheritance, createInheritanceAuthorization, listExperiences, listInheritanceAuthorizations, listKnowledge, listMemories, recordInheritance, type Experience, type InheritanceAuthorization, type Knowledge, type Memory, type TransferSelection } from '../features/inheritance/inheritance-service';
@@ -25,7 +25,7 @@ export default function InheritanceScreen() {
   async function approve(id: string) { setBusy(true); setError(null); try { await approveInheritance(id); setNotice(`Inheritance approved: ${id}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to approve inheritance'); } finally { setBusy(false); } }
   async function execute(id: string) { setBusy(true); setError(null); try { await recordInheritance(id); setNotice(`Inheritance executed: ${id}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to execute inheritance'); } finally { setBusy(false); } }
   const totalSelected = selectedJourneyIds.length + selectedExperienceIds.length + selectedMemoryIds.length + selectedKnowledgeIds.length;
-  const card = (selected: boolean) => ({ borderWidth: 1, borderRadius: 10, padding: 12, borderColor: selected ? '#111827' : '#D1D5DB', backgroundColor: selected ? '#F3F4F6' : '#fff' });
+  const card = (selected: boolean): ViewStyle => ({ borderWidth: 1, borderRadius: 10, padding: 12, borderColor: selected ? '#111827' : '#D1D5DB', backgroundColor: selected ? '#F3F4F6' : '#fff' });
   return <ScrollView contentContainerStyle={{ padding: 24, gap: 14 }}>
     <Text style={{ fontSize: 28, fontWeight: '700' }}>Inheritance</Text><Text>Current account and SH are detected from the authenticated session. Only the target is entered here.</Text>
     <Text style={{ fontWeight: '600' }}>Current account</Text><Text>{currentAccountId}</Text><Text style={{ fontWeight: '600' }}>Current SH</Text><Text>{currentShId}</Text>
@@ -43,6 +43,6 @@ export default function InheritanceScreen() {
   </ScrollView>;
 }
 
-function TransferList({ title, empty, items, selected, onToggle, card }: { title: string; empty: string; items: { id: string; title: string; content: string; meta: string }[]; selected: string[]; onToggle: (id: string) => void; card: (selected: boolean) => object }) {
+function TransferList({ title, empty, items, selected, onToggle, card }: { title: string; empty: string; items: { id: string; title: string; content: string; meta: string }[]; selected: string[]; onToggle: (id: string) => void; card: (selected: boolean) => ViewStyle }) {
   return <><Text style={{ fontWeight: '600' }}>{title}</Text><Text>Only records that are not PRIVATE and not OWNER_ONLY are selectable. Selection is explicit.</Text>{items.length === 0 ? <Text>{empty}</Text> : null}{items.map(item => { const isSelected = selected.includes(item.id); return <Pressable key={item.id} onPress={() => onToggle(item.id)} style={card(isSelected)}><Text>{isSelected ? '☑' : '☐'} {item.title}</Text><Text>{item.content}</Text><Text>{item.meta}</Text></Pressable>; })}</>;
 }
