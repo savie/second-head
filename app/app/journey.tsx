@@ -40,6 +40,7 @@ function payloadText(payload: Record<string, unknown> | null) {
 export default function JourneyScreen() {
   const { session, context } = useAuth();
   const primarySH = context?.shInstances.find((item) => item.is_primary) ?? context?.shInstances[0];
+  const ownedShIds = useMemo(() => new Set((context?.shInstances ?? []).map((item) => item.sh_id)), [context?.shInstances]);
   const [events, setEvents] = useState<JourneyEvent[]>([]);
   const [filter, setFilter] = useState<Filter>('All');
   const [selected, setSelected] = useState<JourneyEvent | null>(null);
@@ -74,6 +75,11 @@ export default function JourneyScreen() {
     setRecordPolicyState(null);
     setError(null);
     if (!['Memory', 'Knowledge', 'Experience'].includes(category(event))) return;
+
+    // Policy management is owner-only. Shared Journey projections remain
+    // readable, but must not call the owner-scoped policy RPC.
+    if (!ownedShIds.has(event.sh_id)) return;
+
     setLoadingPolicy(true);
     try {
       const policy = await getJourneyRecordPolicy(event.event_id);
@@ -91,7 +97,7 @@ export default function JourneyScreen() {
   };
 
   const savePolicy = async () => {
-    if (!recordPolicy) return;
+    if (!recordPolicy || !selected || !ownedShIds.has(selected.sh_id)) return;
     setSavingPolicy(true);
     setError(null);
     try {
@@ -102,7 +108,7 @@ export default function JourneyScreen() {
         visibility: draftVisibility,
         transferPolicy: draftTransferPolicy,
       });
-      const refreshed = await getJourneyRecordPolicy(selected?.event_id ?? '');
+      const refreshed = await getJourneyRecordPolicy(selected.event_id);
       setRecordPolicyState(refreshed);
       if (refreshed) {
         setDraftScope(refreshed.scope);
