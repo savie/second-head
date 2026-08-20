@@ -47,37 +47,33 @@ The Owner must never be required to infer transfer eligibility from the word `Pr
 
 Policy is presented in the existing record/event detail context, not as a new primary navigation destination.
 
-Journey remains the unified discovery/history surface. Journey may display:
+**Journey is the unified owner-facing discovery/detail surface for Memory, Knowledge, and Experience.** The existing Journey filters remain:
 
-- meaningful content
-- source
-- visibility/scope
-- transfer policy
-- timestamp
+```text
+All | Memory | Knowledge | Experience | Lifecycle / Other
+```
 
-Journey remains read/discovery oriented and does not execute lifecycle actions.
+The Owner taps a relevant event/record and sees its detail. For owner-owned Memory, Knowledge, and Experience records, the detail includes the record's visibility/scope and transfer policy, with an explicit policy edit/save interaction.
+
+Journey remains a discovery/history surface and does not execute lifecycle transfers.
 
 ### 4.2 Memory
 
-No new top-level Memory management screen is required by this contract.
+No new top-level Memory management screen is required.
 
-Memory can be discovered through Journey and authorized runtime context. When an Owner-facing record detail exists, the policy block belongs there.
-
-The current implementation does not expose a Memory policy editor. No new navigation destination should be introduced solely to solve this gap.
+Memory is discovered through the existing Journey Memory filter. The selected Memory detail resolves the underlying Owner-owned Memory record and exposes its policy controls.
 
 ### 4.3 Knowledge
 
-No new top-level Knowledge management screen is required by this contract.
+No new top-level Knowledge management screen is required.
 
-Knowledge can be discovered through Journey and authorized runtime context. When an Owner-facing record detail exists, the policy block belongs there.
-
-The current implementation does not expose a Knowledge policy editor. No new navigation destination should be introduced solely to solve this gap.
+Knowledge is discovered through the existing Journey Knowledge filter. The selected Knowledge/learning detail resolves the underlying Owner-owned Knowledge record and exposes its policy controls.
 
 ### 4.4 Experience
 
-Existing Experience detail/list presentation remains the base surface. Do not create a new primary Home/More destination solely for policy editing.
+No new primary Experience navigation destination is required for policy editing.
 
-The current implementation exposes the policy in the Experience list/detail and provides an Owner policy edit/save interaction through the existing backend policy-management capability.
+Experience is discovered through the existing Journey Experience filter, and the existing Experience list/detail remains available as a compatible secondary surface. Journey detail also resolves the underlying Experience record and exposes the same policy controls.
 
 ## 5. Creation versus post-creation policy control
 
@@ -94,14 +90,14 @@ create/capture Experience
     ↓
 default transfer policy remains backend-defined
     ↓
-record-management/detail context
+Journey record detail
     ↓
-Owner may explicitly edit transfer policy where a canonical/actual record detail surface exists
+Owner may explicitly edit record policy
+    ↓
+Lifecycle consumes resulting eligibility
 ```
 
 Do not add a transfer-policy selector to Chat merely because the backend service supports `transfer_policy`.
-
-This preserves the canonical separation between Journey capture and lifecycle transfer governance.
 
 For new records, the current DEV backend default remains:
 
@@ -113,7 +109,7 @@ NON_TRANSFERABLE
 
 ## 6. Policy presentation
 
-For an Owner-owned record, the detail context may show:
+For an Owner-owned record, the detail context shows:
 
 ```text
 Visibility
@@ -121,6 +117,8 @@ Private / Shared
 
 Transfer policy
 Non-transferable / Inheritable / Succession / Legacy
+
+[Edit policy]
 ```
 
 Internal IDs must not be the primary mental model.
@@ -157,7 +155,7 @@ Lifecycle screens only consume already-authorized eligible policy states.
 Lifecycle is an action/process surface.
 
 ```text
-Record detail
+Journey record detail
     ↓
 policy is defined
     ↓
@@ -225,9 +223,9 @@ SUCCESSION
 LEGACY
 ```
 
-The UI should present human-readable labels. Internal enum values remain implementation vocabulary.
+The UI presents human-readable labels. Internal enum values remain implementation vocabulary.
 
-Domain-specific restrictions must be enforced by the backend contract; the FE must not invent additional policy semantics.
+Domain-specific restrictions are enforced by the backend contract; the FE does not invent additional policy semantics.
 
 ## 13. Default state
 
@@ -256,19 +254,21 @@ Do not add:
 
 ## 15. Minimal UI direction
 
-When a record detail surface supports editing, the minimal interaction is a compact policy section in that detail context:
+Journey detail uses one consistent policy block for Memory, Knowledge, and Experience:
 
 ```text
 Visibility
 Private
 
 Transfer policy
-Non-transferable   [edit]
+Non-transferable
+
+[Edit policy]
 ```
 
-Editing should expose only the supported policy choices and require an explicit save/confirmation path. Exact component styling is intentionally left to the existing owner-app design system.
+Editing exposes the supported scope/visibility and transfer-policy choices and requires an explicit save/cancel path. Exact component styling follows the existing owner-app design system.
 
-No new navigation destination is required by this contract.
+No new navigation destination is required.
 
 ## 16. Backend contract boundary
 
@@ -282,6 +282,8 @@ The FE may call the existing policy-management service/API capability, but backe
 - lifecycle execution
 - audit/provenance
 
+Journey uses a backend record-resolution bridge to map a Journey event to its underlying Owner-owned Memory, Knowledge, or Experience record. The bridge does not grant additional access and does not execute lifecycle operations.
+
 The FE must treat backend rejection as authoritative.
 
 ## 17. Verification contract
@@ -290,14 +292,18 @@ Before APK/Real E2E, verify at BE/DB level:
 
 1. Owner can read own PRIVATE record.
 2. Owner can read own SHARED/GENERAL record.
-3. PRIVATE + NON_TRANSFERABLE is rejected by transfer execution.
-4. PRIVATE + INHERITABLE can pass eligible inheritance selection when authorized.
-5. PRIVATE + SUCCESSION can pass eligible succession selection when authorized.
-6. PRIVATE + LEGACY can pass eligible legacy selection when authorized.
-7. SHARED/GENERAL without applicable transfer policy is not transferable.
-8. Unauthorized cross-SH access remains denied.
-9. Lifecycle selection does not mutate policy.
-10. Policy editing does not itself execute lifecycle transfer.
+3. Journey Memory detail resolves the underlying Owner Memory record.
+4. Journey Knowledge detail resolves the underlying Owner Knowledge record.
+5. Journey Experience detail resolves the underlying Owner Experience record.
+6. Owner policy edit persists through the backend policy service.
+7. PRIVATE + NON_TRANSFERABLE is rejected by transfer execution.
+8. PRIVATE + INHERITABLE can pass eligible inheritance selection when authorized.
+9. PRIVATE + SUCCESSION can pass eligible succession selection when authorized.
+10. PRIVATE + LEGACY can pass eligible legacy selection when authorized.
+11. SHARED/GENERAL without applicable transfer policy is not transferable.
+12. Unauthorized cross-SH access remains denied.
+13. Lifecycle selection does not mutate policy.
+14. Policy editing does not itself execute lifecycle transfer.
 
 ## 18. Canonical / UX alignment
 
@@ -307,7 +313,7 @@ The owner app remains capability-oriented:
 Chat | Journey | Lifecycle | More
 ```
 
-Journey is the unified continuity/history viewer; Lifecycle is the action/process surface; backend/runtime remains authoritative for governance, ownership, authorization, and lifecycle policy.
+Journey is the unified continuity/history viewer and now the common record-detail policy presentation point; Lifecycle is the action/process surface; backend/runtime remains authoritative for governance, ownership, authorization, and lifecycle policy.
 
 This contract extends the existing canonical privacy/transfer semantics without changing the primary navigation model.
 
@@ -325,7 +331,7 @@ This contract extends the existing canonical privacy/transfer semantics without 
 ### Implementation Contract
 
 - preserve existing canonical navigation;
-- use record detail as the policy presentation point when available;
+- use Journey detail as the common policy presentation/edit point;
 - do not create a new primary policy-management destination;
 - keep lifecycle screens action-only;
 - keep backend authoritative;
@@ -340,7 +346,7 @@ UX Contract
         ↓
 BE/DB/RLS contract validation
         ↓
-FE policy presentation/edit interaction
+FE Journey detail policy interaction
         ↓
 CI
         ↓
@@ -355,15 +361,14 @@ Real E2E
 
 This work is treated as planning/contract refinement before implementation, consistent with Phase -1's purpose. Phase -1 planning defines backlog, milestone mapping, task breakdown, risk register, architecture checklist, dependency map, and evidence; planning must not change architecture or requirements by itself.
 
-The implementation task should therefore be recorded as a scoped backlog item with dependencies and DoD before coding.
-
 ## 20. Implementation status
 
 - [x] Canonical baseline identified.
 - [x] Privacy/transfer addendum identified.
 - [x] Owner ratification completed by explicit Owner `GO`.
 - [x] Existing owner navigation preserved.
-- [x] Record-detail policy location defined.
+- [x] Journey filters preserved.
+- [x] Common Journey record-detail policy location defined.
 - [x] Memory/Knowledge/Experience surface strategy defined.
 - [x] Lifecycle separation defined.
 - [x] Authorization separation defined.
@@ -373,24 +378,33 @@ The implementation task should therefore be recorded as a scoped backlog item wi
 - [x] Chat capture audited and confirmed as non-policy-authoring flow.
 - [x] BE migration exposes Experience transfer policy in existing owner retrieval.
 - [x] FE Experience detail supports policy presentation/edit/save.
-- [ ] Memory owner-facing record detail policy editor.
-- [ ] Knowledge owner-facing record detail policy editor.
-- [ ] BE/DB fixture path for controlled INHERITABLE/SUCCESSION/LEGACY verification.
+- [x] Journey FE policy editor implemented for resolvable Memory/Knowledge/Experience records.
+- [x] BE Journey-to-record policy resolution bridge added.
+- [x] Supabase DEV migration applied.
+- [ ] Controlled INHERITABLE/SUCCESSION/LEGACY fixture verification.
 - [ ] CI verification.
-- [ ] Supabase DEV verification after implementation.
+- [ ] APK verification for Journey policy editor.
 - [ ] Real E2E evidence.
 
-## 21. Owner decision gate
+## 21. Current decision status
 
-No Owner decision is required for Chat capture: it remains a scope/visibility capture flow.
+No further Owner product decision is required for the policy-editor location.
 
-The remaining product decision is only this:
+Owner decision is:
 
 ```text
-Where should Owner-facing Memory and Knowledge record-detail management live
-when the canonical app has no dedicated Memory/Knowledge management screen?
+Journey
+  ↓
+Memory / Knowledge / Experience filter
+  ↓
+Record / Event Detail
+  ↓
+Visibility
+Transfer Policy
+  ↓
+Edit
 ```
 
-Until that decision is made, do not invent a new top-level navigation destination or add policy editing to Chat/Lifecycle.
+Implementation proceeds under this decision.
 
 END
