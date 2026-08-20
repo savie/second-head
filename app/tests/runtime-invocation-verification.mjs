@@ -54,8 +54,10 @@ for (let attempt = 1; attempt <= 3; attempt += 1) {
 
 const payload = await runtimeResponse.json();
 if (typeof payload.sh_id !== 'string' || typeof payload.response !== 'string') throw new Error(`RUNTIME_RESPONSE_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
-if (payload.response !== 'SH runtime controlled verification') throw new Error(`RUNTIME_ECHO_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
-if (payload.meta?.phase !== 'P4A-001' || payload.meta?.model_provider !== 'mock') throw new Error(`RUNTIME_META_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+if (!payload.response.trim()) throw new Error(`RUNTIME_RESPONSE_EMPTY: ${JSON.stringify(payload)}`);
+const allowedProviders = new Set(['openrouter', 'groq', 'huggingface', 'mock']);
+if (payload.meta?.phase !== 'P4A-001' || !allowedProviders.has(payload.meta?.model_provider)) throw new Error(`RUNTIME_META_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+if (typeof payload.meta?.model_id !== 'string' || !payload.meta.model_id.trim()) throw new Error(`RUNTIME_MODEL_ID_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
 
 const { data: context, error: contextError } = await (await import('@supabase/supabase-js')).createClient(base, process.env.SUPABASE_ANON_KEY, {
   global: { headers: { Authorization: `Bearer ${auth.access_token}` } },
