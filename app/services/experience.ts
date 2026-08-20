@@ -1,13 +1,18 @@
 import { supabase } from './supabase';
 
+export type ExperienceScope = 'PRIVATE' | 'GENERAL';
+export type ExperienceVisibility = 'OWNER_ONLY' | 'SHARED';
+export type ExperienceTransferPolicy = 'NON_TRANSFERABLE' | 'INHERITABLE' | 'SUCCESSION' | 'LEGACY';
+
 export type Experience = {
   experience_id: string;
   sh_id: string;
   account_id: string;
   experience_type: string;
   content: string;
-  scope: string;
-  visibility: string;
+  scope: ExperienceScope;
+  visibility: ExperienceVisibility;
+  transfer_policy: ExperienceTransferPolicy;
   source_ref: string | null;
   provenance: Record<string, unknown>;
   lifecycle: string;
@@ -32,4 +37,20 @@ export async function getExperience(experienceId: string): Promise<Experience> {
   if (error) throw new Error(`EXPERIENCE_RETRIEVAL_FAILED: ${error.message}`);
   if (!data || typeof data !== 'object') throw new Error('EXPERIENCE_RETRIEVAL_FAILED: empty result');
   return data as Experience;
+}
+
+export async function setExperiencePolicy(input: {
+  experienceId: string;
+  scope: ExperienceScope;
+  visibility: ExperienceVisibility;
+  transferPolicy: ExperienceTransferPolicy;
+}): Promise<void> {
+  const { error } = await supabase.rpc('runtime_set_record_policy', {
+    p_domain: 'EXPERIENCE',
+    p_record_id: input.experienceId.trim(),
+    p_scope: input.scope,
+    p_visibility: input.visibility,
+    p_transfer_policy: input.transferPolicy,
+  });
+  if (error) throw new Error(`EXPERIENCE_POLICY_UPDATE_FAILED: ${error.message}`);
 }
