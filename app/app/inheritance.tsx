@@ -1,78 +1,48 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../state/auth-context';
-import { approveInheritance, createInheritanceAuthorization, listExperiences, listInheritanceAuthorizations, recordInheritance, type Experience, type InheritanceAuthorization, type TransferSelection } from '../features/inheritance/inheritance-service';
+import { approveInheritance, createInheritanceAuthorization, listExperiences, listInheritanceAuthorizations, listKnowledge, listMemories, recordInheritance, type Experience, type InheritanceAuthorization, type Knowledge, type Memory, type TransferSelection } from '../features/inheritance/inheritance-service';
 import { loadJourneyEvents, type JourneyEvent } from '../features/journey/journey-service';
 
 export default function InheritanceScreen() {
   const { session, context } = useAuth();
   const currentShId = context?.shInstances[0]?.sh_id ?? '';
   const currentAccountId = context?.account.account_id ?? '';
-  const [targetShId, setTargetShId] = useState('');
-  const [targetAccountId, setTargetAccountId] = useState('');
-  const [events, setEvents] = useState<JourneyEvent[]>([]);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [selectedJourneyIds, setSelectedJourneyIds] = useState<string[]>([]);
-  const [selectedExperienceIds, setSelectedExperienceIds] = useState<string[]>([]);
-  const [items, setItems] = useState<InheritanceAuthorization[]>([]);
-  const [loading, setLoading] = useState(true); const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null); const [error, setError] = useState<string | null>(null);
-
-  const refresh = useCallback(async () => {
-    if (!context || !currentShId) return;
-    setLoading(true); setError(null);
-    try {
-      const [journey, allExperiences, auths] = await Promise.all([loadJourneyEvents(currentShId), listExperiences(), listInheritanceAuthorizations()]);
-      setEvents(journey);
-      setExperiences(allExperiences.filter(experience => experience.sh_id === currentShId && experience.lifecycle === 'ACTIVE'));
-      setItems(auths);
-    } catch (e) { setError(e instanceof Error ? e.message : 'Unable to load inheritance data'); }
-    finally { setLoading(false); }
-  }, [context, currentShId]);
+  const [targetShId, setTargetShId] = useState(''); const [targetAccountId, setTargetAccountId] = useState('');
+  const [events, setEvents] = useState<JourneyEvent[]>([]); const [experiences, setExperiences] = useState<Experience[]>([]); const [memories, setMemories] = useState<Memory[]>([]); const [knowledge, setKnowledge] = useState<Knowledge[]>([]);
+  const [selectedJourneyIds, setSelectedJourneyIds] = useState<string[]>([]); const [selectedExperienceIds, setSelectedExperienceIds] = useState<string[]>([]); const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]); const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<string[]>([]);
+  const [items, setItems] = useState<InheritanceAuthorization[]>([]); const [loading, setLoading] = useState(true); const [busy, setBusy] = useState(false); const [notice, setNotice] = useState<string | null>(null); const [error, setError] = useState<string | null>(null);
+  const refresh = useCallback(async () => { if (!context || !currentShId) return; setLoading(true); setError(null); try { const [journey, allExperiences, allMemories, allKnowledge, auths] = await Promise.all([loadJourneyEvents(currentShId), listExperiences(), listMemories(), listKnowledge(), listInheritanceAuthorizations()]); setEvents(journey); setExperiences(allExperiences.filter(v => v.sh_id === currentShId && v.lifecycle === 'ACTIVE')); setMemories(allMemories.filter(v => v.sh_id === currentShId && ['CANDIDATE','ACTIVE','UPDATED'].includes(v.lifecycle))); setKnowledge(allKnowledge.filter(v => v.sh_id === currentShId && ['CANDIDATE','ACTIVE'].includes(v.lifecycle))); setItems(auths); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to load inheritance data'); } finally { setLoading(false); } }, [context, currentShId]);
   useEffect(() => { void refresh(); }, [refresh]);
   if (!session) return <Redirect href="/login" />; if (!context) return <ActivityIndicator />;
-
-  const eligibleEvents = useMemo(() => events.filter(e => e.transfer_policy !== 'NON_TRANSFERABLE'), [events]);
+  const eligibleEvents = useMemo(() => events.filter(e => e.transfer_policy !== 'NON_TRANSFERABLE' && e.visibility !== 'PRIVATE' && e.transfer_policy !== 'PRIVATE'), [events]);
   const eligibleExperiences = useMemo(() => experiences.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [experiences]);
-  const toggleJourney = (id: string) => setSelectedJourneyIds(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
-  const toggleExperience = (id: string) => setSelectedExperienceIds(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
-
-  async function create() {
-    setBusy(true); setError(null); setNotice(null);
-    try {
-      const scope: TransferSelection = { memory_ids: [], knowledge_ids: [], experience_ids: selectedExperienceIds, journey_event_ids: selectedJourneyIds };
-      const v = await createInheritanceAuthorization({ sourceShId: currentShId, targetShId, sourceAccountId: currentAccountId, targetAccountId, scope });
-      setNotice(`Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`); await refresh();
-    } catch (e) { setError(e instanceof Error ? e.message : 'Unable to create inheritance authorization'); }
-    finally { setBusy(false); }
-  }
+  const eligibleMemories = useMemo(() => memories.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [memories]);
+  const eligibleKnowledge = useMemo(() => knowledge.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [knowledge]);
+  const toggle = (id: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => setter(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
+  async function create() { setBusy(true); setError(null); setNotice(null); try { const scope: TransferSelection = { memory_ids: selectedMemoryIds, knowledge_ids: selectedKnowledgeIds, experience_ids: selectedExperienceIds, journey_event_ids: selectedJourneyIds }; const v = await createInheritanceAuthorization({ sourceShId: currentShId, targetShId, sourceAccountId: currentAccountId, targetAccountId, scope }); setNotice(`Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to create inheritance authorization'); } finally { setBusy(false); } }
   async function approve(id: string) { setBusy(true); setError(null); try { await approveInheritance(id); setNotice(`Inheritance approved: ${id}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to approve inheritance'); } finally { setBusy(false); } }
   async function execute(id: string) { setBusy(true); setError(null); try { await recordInheritance(id); setNotice(`Inheritance executed: ${id}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to execute inheritance'); } finally { setBusy(false); } }
-
-  const input = { borderWidth: 1, borderRadius: 8, padding: 12, color: '#111827', borderColor: '#111827' };
-  const totalSelected = selectedJourneyIds.length + selectedExperienceIds.length;
+  const totalSelected = selectedJourneyIds.length + selectedExperienceIds.length + selectedMemoryIds.length + selectedKnowledgeIds.length;
+  const card = (selected: boolean) => ({ borderWidth: 1, borderRadius: 10, padding: 12, borderColor: selected ? '#111827' : '#D1D5DB', backgroundColor: selected ? '#F3F4F6' : '#fff' });
   return <ScrollView contentContainerStyle={{ padding: 24, gap: 14 }}>
-    <Text style={{ fontSize: 28, fontWeight: '700' }}>Inheritance</Text>
-    <Text>Current account and SH are detected from the authenticated session. Only the target is entered here.</Text>
-    <Text style={{ fontWeight: '600' }}>Current account</Text><Text>{currentAccountId}</Text>
-    <Text style={{ fontWeight: '600' }}>Current SH</Text><Text>{currentShId}</Text>
-    <Text style={{ fontWeight: '600' }}>Target account</Text><TextInput placeholder="Isi Account ID penerima" placeholderTextColor="#6B7280" value={targetAccountId} onChangeText={setTargetAccountId} style={input} />
-    <Text style={{ fontWeight: '600' }}>Target SH</Text><TextInput placeholder="Isi SH ID penerima" placeholderTextColor="#6B7280" value={targetShId} onChangeText={setTargetShId} style={input} />
-
-    <Text style={{ fontWeight: '600' }}>Experience records eligible for Inheritance</Text>
-    <Text>Eligible Experience records are shown from the current SH. Owner-only/private Experience is excluded from transfer selection.</Text>
+    <Text style={{ fontSize: 28, fontWeight: '700' }}>Inheritance</Text><Text>Current account and SH are detected from the authenticated session. Only the target is entered here.</Text>
+    <Text style={{ fontWeight: '600' }}>Current account</Text><Text>{currentAccountId}</Text><Text style={{ fontWeight: '600' }}>Current SH</Text><Text>{currentShId}</Text>
+    <Text style={{ fontWeight: '600' }}>Target account</Text><TextInput placeholder="Isi Account ID penerima" placeholderTextColor="#6B7280" value={targetAccountId} onChangeText={setTargetAccountId} style={{ borderWidth: 1, borderRadius: 8, padding: 12, color: '#111827', borderColor: '#111827' }} />
+    <Text style={{ fontWeight: '600' }}>Target SH</Text><TextInput placeholder="Isi SH ID penerima" placeholderTextColor="#6B7280" value={targetShId} onChangeText={setTargetShId} style={{ borderWidth: 1, borderRadius: 8, padding: 12, color: '#111827', borderColor: '#111827' }} />
     {loading ? <ActivityIndicator /> : null}
-    {!loading && eligibleExperiences.length === 0 ? <Text>No eligible Experience records are currently available.</Text> : null}
-    {eligibleExperiences.map(experience => { const selected = selectedExperienceIds.includes(experience.experience_id); return <Pressable key={experience.experience_id} onPress={() => toggleExperience(experience.experience_id)} style={{ borderWidth: 1, borderRadius: 10, padding: 12, borderColor: selected ? '#111827' : '#D1D5DB', backgroundColor: selected ? '#F3F4F6' : '#fff' }}><Text>{selected ? '☑' : '☐'} EXPERIENCE</Text><Text>{experience.content}</Text><Text>{experience.occurred_at}</Text><Text>Scope: {experience.scope} / Visibility: {experience.visibility}</Text></Pressable>; })}
-
-    <Text style={{ fontWeight: '600' }}>Journey records eligible for Inheritance</Text>
-    <Text>Select Journey records that should be included. NON_TRANSFERABLE records are excluded by policy.</Text>
-    {!loading && eligibleEvents.length === 0 ? <Text>No eligible Journey records are currently available.</Text> : null}
-    {eligibleEvents.map(event => { const selected = selectedJourneyIds.includes(event.event_id); return <Pressable key={event.event_id} onPress={() => toggleJourney(event.event_id)} style={{ borderWidth: 1, borderRadius: 10, padding: 12, borderColor: selected ? '#111827' : '#D1D5DB', backgroundColor: selected ? '#F3F4F6' : '#fff' }}><Text>{selected ? '☑' : '☐'} {event.event_type}</Text><Text>{event.occurred_at}</Text><Text>Policy: {event.transfer_policy}</Text></Pressable>; })}
+    <TransferList title="Memory records eligible for Inheritance" empty="No eligible Memory records are currently available." items={eligibleMemories.map(v => ({ id: v.memory_id, title: 'MEMORY', content: v.content, meta: `Scope: ${v.scope} / Visibility: ${v.visibility}` }))} selected={selectedMemoryIds} onToggle={id => toggle(id, setSelectedMemoryIds)} card={card} />
+    <TransferList title="Knowledge records eligible for Inheritance" empty="No eligible Knowledge records are currently available." items={eligibleKnowledge.map(v => ({ id: v.knowledge_id, title: 'KNOWLEDGE', content: v.content, meta: `Scope: ${v.scope} / Visibility: ${v.visibility}` }))} selected={selectedKnowledgeIds} onToggle={id => toggle(id, setSelectedKnowledgeIds)} card={card} />
+    <TransferList title="Experience records eligible for Inheritance" empty="No eligible Experience records are currently available." items={eligibleExperiences.map(v => ({ id: v.experience_id, title: 'EXPERIENCE', content: v.content, meta: `Scope: ${v.scope} / Visibility: ${v.visibility}` }))} selected={selectedExperienceIds} onToggle={id => toggle(id, setSelectedExperienceIds)} card={card} />
+    <TransferList title="Journey records eligible for Inheritance" empty="No eligible Journey records are currently available." items={eligibleEvents.map(v => ({ id: v.event_id, title: v.event_type, content: v.occurred_at, meta: `Policy: ${v.transfer_policy}` }))} selected={selectedJourneyIds} onToggle={id => toggle(id, setSelectedJourneyIds)} card={card} />
     <Button title={`Create inheritance authorization (${totalSelected} selected)`} disabled={busy || !targetShId.trim() || !targetAccountId.trim() || totalSelected === 0} onPress={() => void create()} />
     {notice ? <Text>{notice}</Text> : null}{error ? <Text>{error}</Text> : null}
-    {items.map(item => <View key={item.authorization_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 6 }}><Text>Authorization: {item.authorization_id}</Text><Text>Status: {item.status}</Text><Text>Selected Journey: {JSON.stringify(item.scope?.journey_event_ids ?? [])}</Text><Text>Selected Experience: {JSON.stringify(item.scope?.experience_ids ?? [])}</Text>{item.status === 'PENDING' && item.source_account_id === currentAccountId ? <Button title="Approve" disabled={busy} onPress={() => void approve(item.authorization_id)} /> : null}{item.status === 'APPROVED' && item.source_account_id === currentAccountId ? <Button title="Execute inheritance" disabled={busy} onPress={() => void execute(item.authorization_id)} /> : null}</View>)}
+    {items.map(item => <Pressable key={item.authorization_id} style={{ borderWidth: 1, padding: 12, borderRadius: 8, gap: 6 }}><Text>Authorization: {item.authorization_id}</Text><Text>Status: {item.status}</Text><Text>Selected scope: {JSON.stringify(item.scope)}</Text>{item.status === 'PENDING' && item.source_account_id === currentAccountId ? <Button title="Approve" disabled={busy} onPress={() => void approve(item.authorization_id)} /> : null}{item.status === 'APPROVED' && item.source_account_id === currentAccountId ? <Button title="Execute inheritance" disabled={busy} onPress={() => void execute(item.authorization_id)} /> : null}</Pressable>)}
     <Button title="Refresh" disabled={busy} onPress={() => void refresh()} />
   </ScrollView>;
+}
+
+function TransferList({ title, empty, items, selected, onToggle, card }: { title: string; empty: string; items: { id: string; title: string; content: string; meta: string }[]; selected: string[]; onToggle: (id: string) => void; card: (selected: boolean) => object }) {
+  return <><Text style={{ fontWeight: '600' }}>{title}</Text><Text>Only records that are not PRIVATE and not OWNER_ONLY are selectable. Selection is explicit.</Text>{items.length === 0 ? <Text>{empty}</Text> : null}{items.map(item => { const isSelected = selected.includes(item.id); return <Pressable key={item.id} onPress={() => onToggle(item.id)} style={card(isSelected)}><Text>{isSelected ? '☑' : '☐'} {item.title}</Text><Text>{item.content}</Text><Text>{item.meta}</Text></Pressable>; })}</>;
 }
