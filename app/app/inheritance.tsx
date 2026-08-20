@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput, type ViewStyle } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../state/auth-context';
@@ -20,7 +20,7 @@ export default function InheritanceScreen() {
   const eligibleExperiences = useMemo(() => experiences.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [experiences]);
   const eligibleMemories = useMemo(() => memories.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [memories]);
   const eligibleKnowledge = useMemo(() => knowledge.filter(e => e.scope !== 'PRIVATE' && e.visibility !== 'OWNER_ONLY'), [knowledge]);
-  const toggle = (id: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => setter(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
+  const toggle = (id: string, setter: Dispatch<SetStateAction<string[]>>) => setter(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
   async function create() { setBusy(true); setError(null); setNotice(null); try { const scope: TransferSelection = { memory_ids: selectedMemoryIds, knowledge_ids: selectedKnowledgeIds, experience_ids: selectedExperienceIds, journey_event_ids: selectedJourneyIds }; const v = await createInheritanceAuthorization({ sourceShId: currentShId, targetShId, sourceAccountId: currentAccountId, targetAccountId, scope }); setNotice(`Authorization created: ${String((v as InheritanceAuthorization).authorization_id)}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to create inheritance authorization'); } finally { setBusy(false); } }
   async function approve(id: string) { setBusy(true); setError(null); try { await approveInheritance(id); setNotice(`Inheritance approved: ${id}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to approve inheritance'); } finally { setBusy(false); } }
   async function execute(id: string) { setBusy(true); setError(null); try { await recordInheritance(id); setNotice(`Inheritance executed: ${id}`); await refresh(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to execute inheritance'); } finally { setBusy(false); } }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput, type ViewStyle } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../state/auth-context';
@@ -15,7 +15,7 @@ export default function SuccessionScreen() {
   const eligible = useMemo(() => events.filter(e => e.transfer_policy !== 'NON_TRANSFERABLE' && e.visibility !== 'PRIVATE' && e.transfer_policy !== 'PRIVATE'), [events]);
   const eligibleMemories = memories.filter(v => v.scope !== 'PRIVATE' && v.visibility !== 'OWNER_ONLY'); const eligibleKnowledge = knowledge.filter(v => v.scope !== 'PRIVATE' && v.visibility !== 'OWNER_ONLY'); const eligibleExperiences = experiences.filter(v => v.scope !== 'PRIVATE' && v.visibility !== 'OWNER_ONLY');
   const totalSelected = selectedJourneyIds.length + selectedMemoryIds.length + selectedKnowledgeIds.length + selectedExperienceIds.length;
-  const toggle = (id: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => setter(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
+  const toggle = (id: string, setter: Dispatch<SetStateAction<string[]>>) => setter(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
   async function create() { setBusy(true); setError(null); setNotice(null); try { const scope: TransferSelection = { memory_ids: selectedMemoryIds, knowledge_ids: selectedKnowledgeIds, experience_ids: selectedExperienceIds, journey_event_ids: selectedJourneyIds }; const value = await createSuccessionRule({ sourceShId: currentShId, successorAccountId, scope }); setNotice(`Succession rule created: ${String((value as { succession_id?: string }).succession_id ?? value)}`); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to create succession rule'); } finally { setBusy(false); } }
   const card = (selected: boolean): ViewStyle => ({ borderWidth: 1, borderRadius: 10, padding: 12, borderColor: selected ? '#111827' : '#D1D5DB', backgroundColor: selected ? '#F3F4F6' : '#fff' });
   return <ScrollView contentContainerStyle={{ padding: 24, gap: 14 }}><Text style={{ fontSize: 28, fontWeight: '700' }}>Succession</Text><Text>Succession is separate from Inheritance. The current account and SH are informational; only the successor is configured.</Text><Text style={{ fontWeight: '600' }}>Current account</Text><Text>{currentAccountId}</Text><Text style={{ fontWeight: '600' }}>Current SH</Text><Text>{currentShId}</Text><Text style={{ fontWeight: '600' }}>Successor account</Text><TextInput placeholder="Isi Account ID penerus" placeholderTextColor="#6B7280" value={successorAccountId} onChangeText={setSuccessorAccountId} style={{ borderWidth: 1, borderRadius: 8, padding: 12, color: '#111827', borderColor: '#111827' }} />
