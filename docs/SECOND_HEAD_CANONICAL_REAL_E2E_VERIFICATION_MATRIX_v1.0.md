@@ -2,7 +2,7 @@
 
 **Status:** Active execution matrix  
 **Branch:** `dev`  
-**Runtime test vehicle:** APK #150  
+**Runtime test vehicle:** APK #153  
 **Backend:** Supabase DEV  
 **Implementation source:** GitHub DEV  
 **Purpose:** Canonical, persistent master matrix for REAL E2E functional verification through Functional Closure and UI/UX.
@@ -102,7 +102,7 @@
 | TC-EXP-03 | Experience payload integrity | 🟢 | Explicit capture marker/source observed. |
 | TC-EXP-04 | Experience retrieval | 🟢 | Persisted Experience retrieved previously. |
 | TC-EXP-05 | Experience continuity semantics | 🟢 | APK #150: follow-up Chat explicitly retrieved persisted Experience `c75fc10d-f12a-4567-ac52-4546a54a11ef` and explained that the stored Experience was used as the basis for the answer. |
-| TC-EXP-06 | Experience visibility | ⏳ | **Next target.** Canonical visibility behavior not yet tested as a dedicated TC. |
+| TC-EXP-06 | Experience visibility | 🔴 | APK #153 retest: Account B → Journey → Experience returned `No events in this category` for the existing Account A Experience `TEST EXPERIENCE - PRIVATE LEGACY - E2E`, which is `GENERAL / SHARED` and `NON_TRANSFERABLE`. Supabase RLS/function fix was applied and verified, but actual FE path still filters Journey by the recipient's current `sh_id`; shared events from another SH therefore cannot enter the query. Fix disposition: `FE`. |
 | TC-EXP-07 | Experience transfer eligibility | ⏳ | Not tested. |
 | TC-EXP-08 | Experience non-transferable enforcement | ⏳ | Not tested. |
 | TC-EXP-09 | Experience unauthorized access | ⏳ | Not tested. |
