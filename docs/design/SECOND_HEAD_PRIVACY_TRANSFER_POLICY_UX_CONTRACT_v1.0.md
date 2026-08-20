@@ -1,16 +1,17 @@
 # SECOND HEAD — Privacy / Transfer Policy UX Contract v1.0
 
-Status: DESIGN / PRE-CODE CONTRACT
+Status: RATIFIED / IMPLEMENTATION IN PROGRESS
 Branch: `dev`
 Authority baseline: SH Core Canonical at `a60eb3237f1bee48e050bc1d869e955a8d07337e`
-Related canonical extension: Privacy / Transfer Policy Addendum `6a307f20684bbc10bf0fef4660ede588c9b0c00e`
+Related canonical extension: Privacy / Transfer Policy Addendum `6a307f20684bbc10f0ef4660ede588c9b0c00e`
 Related UX baseline: `docs/SH_APP_OWNER_UX_STRUCTURE_v1.1.md`
+Owner decision status: RATIFIED by explicit Owner `GO` after contract review.
 
 ## 1. Purpose
 
 Define the exact owner-facing UX contract for Memory, Knowledge, and Experience privacy and transfer policy before further FE implementation.
 
-This document is a design contract. It does not itself authorize database, backend, lifecycle, or authorization changes.
+This document is the ratified design contract for the implementation work below. It does not authorize changes that conflict with the Core Canonical or Addendum.
 
 ## 2. Core semantic rule
 
@@ -316,10 +317,11 @@ This work is treated as planning/contract refinement before implementation, cons
 
 The implementation task should therefore be recorded as a scoped backlog item with dependencies and DoD before coding.
 
-## 19. Definition of Done for this UX contract
+## 19. Implementation status
 
 - [x] Canonical baseline identified.
 - [x] Privacy/transfer addendum identified.
+- [x] Owner ratification completed by explicit Owner `GO`.
 - [x] Existing owner navigation preserved.
 - [x] Record-detail policy location defined.
 - [x] Memory/Knowledge/Experience surface strategy defined.
@@ -328,8 +330,10 @@ The implementation task should therefore be recorded as a scoped backlog item wi
 - [x] Supported policy options defined.
 - [x] Anti-patterns defined.
 - [x] Verification contract defined.
-- [ ] Owner ratification of exact UI wording/interaction.
-- [ ] FE implementation.
+- [x] BE migration exposes Experience transfer policy in existing owner retrieval.
+- [x] FE Experience detail supports policy presentation/edit/save.
+- [ ] Memory owner-facing record detail policy editor.
+- [ ] Knowledge owner-facing record detail policy editor.
 - [ ] CI verification.
 - [ ] Supabase DEV verification after implementation.
 - [ ] Real E2E evidence.
