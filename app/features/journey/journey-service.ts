@@ -6,6 +6,7 @@ export type JourneyTransferOperation = 'CLONE' | 'INHERITANCE' | 'SUCCESSION';
 
 export type JourneyEvent = {
   event_id: string;
+  sh_id: string;
   event_type: string;
   occurred_at: string;
   continuity_status: string;
@@ -18,7 +19,7 @@ export type JourneyEvent = {
   created_at: string;
 };
 
-const JOURNEY_EVENT_SELECT = 'event_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,visibility,transfer_policy,provenance,created_at';
+const JOURNEY_EVENT_SELECT = 'event_id,sh_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,visibility,transfer_policy,provenance,created_at';
 
 export async function loadJourneyEvents(shId: string, limit = 50): Promise<JourneyEvent[]> {
   if (!shId.trim()) throw new Error('JOURNEY_SH_ID_REQUIRED');
@@ -103,7 +104,7 @@ export async function preserveSelectedJourneyAsLegacy(
   if (eventIds.length === 0) throw new Error('JOURNEY_EVENT_SELECTION_REQUIRED');
 
   const { data, error } = await supabase.rpc('runtime_preserve_selected_journey_as_legacy', {
-    p_source_sh_id: sourceShId,
+    p_source_sh_id: sourceShId.trim(),
     p_event_ids: eventIds,
   });
 
