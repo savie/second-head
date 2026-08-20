@@ -4,10 +4,10 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 const actions = [
   ['Clone', '/clone', 'Create a separate SH through the Clone workflow.'],
   ['Recovery', '/recovery', 'Restore through the Recovery workflow.'],
-  ['Inheritance', '/inheritance', 'Configure and execute inheritance transfer.'],
-  ['Succession', '/succession', 'Configure succession and successor settings.'],
-  ['End-of-Life', '/end-of-life', 'Open the dedicated End-of-Life action surface.'],
-  ['Legacy', '/legacy', 'Preserve or record selected Legacy information.'],
+  ['Inheritance', '/inheritance', 'Select eligible Journey records and configure inheritance.'],
+  ['Succession', '/succession', 'Configure succession separately and select eligible Journey records.'],
+  ['Legacy', '/legacy', 'Preserve eligible Journey history as Legacy.'],
+  ['End-of-Life', '/end-of-life', 'Review the current account and SH, then explicitly confirm End-of-Life.'],
 ] as const;
 
 export default function LifecycleScreen() {
