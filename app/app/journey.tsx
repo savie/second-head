@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Modal, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { Redirect, router } from 'expo-router';
+import { Redirect } from 'expo-router';
 import { useAuth } from '../state/auth-context';
 import { loadJourneyEvents, type JourneyEvent } from '../features/journey/journey-service';
+import { getJourneyRecordPolicy, setRecordPolicy, type JourneyRecordPolicy, type TransferPolicy, type RecordScope, type RecordVisibility } from '../features/inheritance/inheritance-service';
 
 const FILTERS = ['All', 'Memory', 'Knowledge', 'Experience', 'Lifecycle / Other'] as const;
 type Filter = typeof FILTERS[number];
+const TRANSFER_POLICIES: TransferPolicy[] = ['NON_TRANSFERABLE', 'INHERITABLE', 'SUCCESSION', 'LEGACY'];
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -20,14 +22,14 @@ function category(item: JourneyEvent): Filter {
   const type = item.event_type.toUpperCase();
   const source = (item.source_ref ?? '').toUpperCase();
   if (type.includes('MEMORY') || source.includes('MEMORY')) return 'Memory';
-  if (type.includes('KNOWLEDGE') || source.includes('KNOWLEDGE')) return 'Knowledge';
+  if (type.includes('KNOWLEDGE') || source.includes('KNOWLEDGE') || type === 'LEARNING') return 'Knowledge';
   if (type.includes('EXPERIENCE') || source.includes('EXPERIENCE')) return 'Experience';
   return 'Lifecycle / Other';
 }
 
 function payloadText(payload: Record<string, unknown> | null) {
   if (!payload) return 'Tidak ada isi tambahan pada event ini.';
-  const candidates = ['content', 'text', 'message', 'captured_text', 'summary'];
+  const candidates = ['content', 'text', 'message', 'captured_text', 'representation', 'summary'];
   for (const key of candidates) {
     const value = payload[key];
     if (typeof value === 'string' && value.trim()) return value;
@@ -40,7 +42,13 @@ export default function JourneyScreen() {
   const primarySH = context?.shInstances.find((item) => item.is_primary) ?? context?.shInstances[0];
   const [events, setEvents] = useState<JourneyEvent[]>([]);
   const [selected, setSelected] = useState<JourneyEvent | null>(null);
-  const [filter, setFilter] = useState<Filter>('All');
+  const [recordPolicy, setRecordPolicyState] = useState<JourneyRecordPolicy | null>(null);
+  const [editingPolicy, setEditingPolicy] = useState(false);
+  const [draftScope, setDraftScope] = useState<RecordScope>('PRIVATE');
+  const [draftVisibility, setDraftVisibility] = useState<RecordVisibility>('OWNER_ONLY');
+  const [draftTransferPolicy, setDraftTransferPolicy] = useState<TransferPolicy>('NON_TRANSFERABLE');
+  const [savingPolicy, setSavingPolicy] = useState(false);
+  const [loadingPolicy, setLoadingPolicy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +67,55 @@ export default function JourneyScreen() {
 
   useEffect(() => { void load(); }, [load]);
 
+  const openEvent = async (event: JourneyEvent) => {
+    setSelected(event);
+    setEditingPolicy(false);
+    setRecordPolicyState(null);
+    setError(null);
+    if (!['Memory', 'Knowledge', 'Experience'].includes(category(event))) return;
+    setLoadingPolicy(true);
+    try {
+      const policy = await getJourneyRecordPolicy(event.event_id);
+      setRecordPolicyState(policy);
+      if (policy) {
+        setDraftScope(policy.scope);
+        setDraftVisibility(policy.visibility);
+        setDraftTransferPolicy(policy.transfer_policy);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to load record policy');
+    } finally {
+      setLoadingPolicy(false);
+    }
+  };
+
+  const savePolicy = async () => {
+    if (!recordPolicy) return;
+    setSavingPolicy(true);
+    setError(null);
+    try {
+      await setRecordPolicy({
+        domain: recordPolicy.domain,
+        recordId: recordPolicy.record_id,
+        scope: draftScope,
+        visibility: draftVisibility,
+        transferPolicy: draftTransferPolicy,
+      });
+      const refreshed = await getJourneyRecordPolicy(selected?.event_id ?? '');
+      setRecordPolicyState(refreshed);
+      if (refreshed) {
+        setDraftScope(refreshed.scope);
+        setDraftVisibility(refreshed.visibility);
+        setDraftTransferPolicy(refreshed.transfer_policy);
+      }
+      setEditingPolicy(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Record policy update failed');
+    } finally {
+      setSavingPolicy(false);
+    }
+  };
+
   const filteredEvents = useMemo(
     () => filter === 'All' ? events : events.filter((item) => category(item) === filter),
     [events, filter],
@@ -69,7 +126,7 @@ export default function JourneyScreen() {
       <Text style={styles.title}>Journey</Text>
       <Text style={styles.subtitle}>{primarySH?.canonical_name ?? primarySH?.sh_id ?? 'SH'}</Text>
       <Text style={styles.description}>Continuity and lifecycle history for this Second Head.</Text>
-      <Text style={styles.hint}>Pilih kategori lalu ketuk event untuk melihat isi sebenarnya.</Text>
+      <Text style={styles.hint}>Pilih kategori lalu ketuk event untuk melihat detail dan, untuk Memory / Knowledge / Experience milik Owner, mengatur policy record.</Text>
       <View style={styles.filters}>
         {FILTERS.map((item) => (
           <Pressable key={item} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}>
@@ -96,7 +153,7 @@ export default function JourneyScreen() {
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
         renderItem={({ item }) => (
-          <Pressable style={styles.event} onPress={() => setSelected(item)}>
+          <Pressable style={styles.event} onPress={() => void openEvent(item)}>
             <View style={styles.marker} />
             <View style={styles.eventBody}>
               <View style={styles.eventTop}><Text style={styles.eventType}>{humanize(item.event_type)}</Text><Text style={styles.date}>{formatDate(item.occurred_at)}</Text></View>
@@ -117,8 +174,56 @@ export default function JourneyScreen() {
               <Text style={styles.modalDate}>{formatDate(selected.occurred_at)}</Text>
               <Text style={styles.label}>What happened</Text><Text selectable>{payloadText(selected.payload)}</Text>
               <Text style={styles.label}>Status</Text><Text>{humanize(selected.continuity_status)}</Text>
-              <Text style={styles.label}>Visibility</Text><Text>{humanize(selected.visibility)}</Text>
-              <Text style={styles.label}>Policy</Text><Text>{humanize(selected.transfer_policy)}</Text>
+
+              {loadingPolicy ? <ActivityIndicator /> : null}
+              {recordPolicy ? (
+                <View style={styles.policyBlock}>
+                  <Text style={styles.label}>Visibility</Text>
+                  <Text>{humanize(recordPolicy.scope)} / {humanize(recordPolicy.visibility)}</Text>
+                  <Text style={styles.label}>Transfer policy</Text>
+                  <Text>{humanize(recordPolicy.transfer_policy)}</Text>
+
+                  {!editingPolicy ? (
+                    <Button title="Edit policy" onPress={() => setEditingPolicy(true)} />
+                  ) : (
+                    <View style={styles.editor}>
+                      <Text style={styles.label}>Scope</Text>
+                      <View style={styles.optionRow}>
+                        {(['PRIVATE', 'GENERAL'] as RecordScope[]).map((value) => (
+                          <Pressable key={value} onPress={() => setDraftScope(value)} style={[styles.option, draftScope === value && styles.optionActive]}>
+                            <Text style={{ color: draftScope === value ? '#fff' : '#111' }}>{humanize(value)}</Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      <Text style={styles.label}>Visibility</Text>
+                      <View style={styles.optionRow}>
+                        {(['OWNER_ONLY', 'SHARED'] as RecordVisibility[]).map((value) => (
+                          <Pressable key={value} onPress={() => setDraftVisibility(value)} style={[styles.option, draftVisibility === value && styles.optionActive]}>
+                            <Text style={{ color: draftVisibility === value ? '#fff' : '#111' }}>{humanize(value)}</Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      <Text style={styles.label}>Transfer policy</Text>
+                      <View style={styles.optionColumn}>
+                        {TRANSFER_POLICIES.map((value) => (
+                          <Pressable key={value} onPress={() => setDraftTransferPolicy(value)} style={[styles.option, draftTransferPolicy === value && styles.optionActive]}>
+                            <Text style={{ color: draftTransferPolicy === value ? '#fff' : '#111' }}>{humanize(value)}</Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      <Button title={savingPolicy ? 'Saving…' : 'Save policy'} disabled={savingPolicy} onPress={() => void savePolicy()} />
+                      <Button title="Cancel" disabled={savingPolicy} onPress={() => { setEditingPolicy(false); if (recordPolicy) { setDraftScope(recordPolicy.scope); setDraftVisibility(recordPolicy.visibility); setDraftTransferPolicy(recordPolicy.transfer_policy); } }} />
+                    </View>
+                  )}
+                </View>
+              ) : null}
+
+              {!loadingPolicy && !recordPolicy && ['Memory', 'Knowledge', 'Experience'].includes(category(selected)) ? (
+                <Text style={styles.note}>Event ini belum mempunyai link yang cukup jelas ke record Memory / Knowledge / Experience untuk diubah dari Journey.</Text>
+              ) : null}
+
+              <Text style={styles.label}>Journey visibility</Text><Text>{humanize(selected.visibility)}</Text>
+              <Text style={styles.label}>Journey policy</Text><Text>{humanize(selected.transfer_policy)}</Text>
               {selected.source_ref ? <><Text style={styles.label}>Source</Text><Text selectable>{selected.source_ref}</Text></> : null}
               {selected.gap_code ? <><Text style={styles.label}>Gap</Text><Text>{humanize(selected.gap_code)}</Text></> : null}
               <View style={styles.modalActions}><Button title="Close" onPress={() => setSelected(null)} /></View>
@@ -160,9 +265,16 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
   loadingText: { marginTop: 8 },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
-  modalCard: { maxHeight: '85%', backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 22, gap: 8 },
+  modalCard: { maxHeight: '90%', backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 22, gap: 8 },
   modalTitle: { fontSize: 24, fontWeight: '800' },
   modalDate: { color: '#666', marginBottom: 8 },
   label: { marginTop: 8, fontWeight: '700' },
+  policyBlock: { marginTop: 4, padding: 12, borderWidth: 1, borderRadius: 10, gap: 6 },
+  editor: { gap: 8, marginTop: 4 },
+  optionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  optionColumn: { gap: 8 },
+  option: { borderWidth: 1, borderRadius: 8, padding: 10, backgroundColor: '#fff' },
+  optionActive: { backgroundColor: '#111', borderColor: '#111' },
+  note: { marginTop: 10, padding: 10, borderRadius: 8, backgroundColor: '#f1f1f1', color: '#555' },
   modalActions: { marginTop: 12 },
 });
