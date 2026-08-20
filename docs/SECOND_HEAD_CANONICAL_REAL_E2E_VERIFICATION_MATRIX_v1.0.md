@@ -101,8 +101,8 @@
 | TC-EXP-02 | Experience persistence | 🟢 | Created Experience remained in Journey. |
 | TC-EXP-03 | Experience payload integrity | 🟢 | Explicit capture marker/source observed. |
 | TC-EXP-04 | Experience retrieval | 🟢 | Persisted Experience retrieved previously. |
-| TC-EXP-05 | Experience continuity semantics | ⏳ | **Next target.** Prior cross-runtime retrieval evidence exists, but canonical continuity semantics are not yet fully satisfied. |
-| TC-EXP-06 | Experience visibility | ⏳ | Not tested as a canonical TC. |
+| TC-EXP-05 | Experience continuity semantics | 🟢 | APK #150: follow-up Chat explicitly retrieved persisted Experience `c75fc10d-f12a-4567-ac52-4546a54a11ef` and explained that the stored Experience was used as the basis for the answer. |
+| TC-EXP-06 | Experience visibility | ⏳ | **Next target.** Canonical visibility behavior not yet tested as a dedicated TC. |
 | TC-EXP-07 | Experience transfer eligibility | ⏳ | Not tested. |
 | TC-EXP-08 | Experience non-transferable enforcement | ⏳ | Not tested. |
 | TC-EXP-09 | Experience unauthorized access | ⏳ | Not tested. |
