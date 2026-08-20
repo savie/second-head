@@ -1,7 +1,10 @@
 -- SECOND HEAD — expose Experience transfer policy in the existing owner detail/list retrieval path.
 -- Privacy/visibility and transfer policy remain independent semantics.
+-- PostgreSQL requires replacement of the existing function because the OUT parameter shape changes.
 
-create or replace function public.list_experiences(
+drop function if exists public.list_experiences(uuid,integer);
+
+create function public.list_experiences(
   p_sh_id uuid default null,
   p_limit integer default 50
 )
