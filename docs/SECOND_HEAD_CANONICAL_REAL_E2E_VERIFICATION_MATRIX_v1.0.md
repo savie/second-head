@@ -2,7 +2,7 @@
 
 **Status:** Active execution matrix  
 **Branch:** `dev`  
-**Runtime test vehicle:** APK #81  
+**Runtime test vehicle:** APK #150  
 **Backend:** Supabase DEV  
 **Implementation source:** GitHub DEV  
 **Purpose:** Canonical, persistent master matrix for REAL E2E functional verification through Functional Closure and UI/UX.
@@ -79,30 +79,30 @@
 # 5. JOURNEY
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-JOURNEY-01 | Open Journey for current SH | 🟢 | Journey opened for SH `78965d6c-33c2-45f1-9177-bd57b59eadf2`. |
-| TC-JOURNEY-02 | Existing Journey events readable | 🟢 | Existing RECOVERY events displayed. |
+| TC-JOURNEY-01 | Open Journey for current SH | 🟢 | Journey opened for current SH. |
+| TC-JOURNEY-02 | Existing Journey events readable | 🟢 | Existing events displayed. |
 | TC-JOURNEY-03 | Chat explicit capture creates EXPERIENCE | 🟢 | Explicit save created EXPERIENCE event. |
 | TC-JOURNEY-04 | Correct event type = EXPERIENCE | 🟢 | Observed `EXPERIENCE`. |
 | TC-JOURNEY-05 | Correct source = runtime:p5a:explicit_user_capture | 🟢 | Observed exact source. |
 | TC-JOURNEY-06 | Correct captured representation / payload | 🟢 | Event creation and captured marker verified. |
-| TC-JOURNEY-07 | Event persists after route exit/re-entry | 🟢 | EXPERIENCE remained after Back Home → Journey. |
-| TC-JOURNEY-08 | Experience lifecycle / read semantics | 🟢 | EXPERIENCE row was readable and persisted after re-entry. Row was not interactive; source does not establish a required detail/open capability, so no defect is inferred. |
-| TC-JOURNEY-09 | Journey visibility semantics | 🟢 | EXPERIENCE remained after re-entry. Visibility and transfer policy were not displayed in the Journey list; source does not establish that these fields must be rendered there, so no defect is inferred. |
-| TC-JOURNEY-10 | Private Journey event enforcement | ⚠️ | BLOCKED — APK #81 exposes no PRIVATE Journey fixture/path for real-user execution. No failure observed. |
-| TC-JOURNEY-11 | Non-transferable Journey event enforcement | ⚠️ | BLOCKED — APK #81 exposes no NON_TRANSFERABLE Journey fixture/path for real-user execution. No failure observed. |
-| TC-JOURNEY-12 | Invalid Journey operation rejected | ⏳ | Not yet tested according to the locked canonical test definition. |
-| TC-JOURNEY-13 | Journey → Memory relationship | 🟢 | Chat-created Memory candidate produced a `MEMORY` Journey event with source `runtime:p5a:memory_candidate`; event observed in Journey and persisted after re-entry. |
-| TC-JOURNEY-14 | Journey → Knowledge relationship | 🟢 | Canonical Chat knowledge acquisition produced a `LEARNING` Journey event with source `runtime:p5a:knowledge_candidate`; event observed in Journey. |
+| TC-JOURNEY-07 | Event persists after route exit/re-entry | 🟢 | EXPERIENCE remained after re-entry. |
+| TC-JOURNEY-08 | Experience lifecycle / read semantics | 🟢 | EXPERIENCE row was readable and persisted after re-entry. |
+| TC-JOURNEY-09 | Journey visibility semantics | 🟢 | Visibility/transfer policy controls are now available from Journey record detail; creation and policy-management path proven separately. |
+| TC-JOURNEY-10 | Private Journey event enforcement | ⚠️ | BLOCKED — no dedicated private Journey fixture/path established. |
+| TC-JOURNEY-11 | Non-transferable Journey event enforcement | ⚠️ | BLOCKED — no dedicated NON_TRANSFERABLE Journey fixture/path established. |
+| TC-JOURNEY-12 | Invalid Journey operation rejected | ⏳ | Not yet tested. |
+| TC-JOURNEY-13 | Journey → Memory relationship | 🟢 | Memory Journey event observed and persisted. |
+| TC-JOURNEY-14 | Journey → Knowledge relationship | 🟢 | Knowledge Journey event observed. |
 
 # 6. EXPERIENCE
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-EXP-01 | Create Experience through supported runtime path | 🟢 | Current explicit capture path proven. |
-| TC-EXP-02 | Experience persistence | 🟢 | Created event persisted in Journey. |
-| TC-EXP-03 | Experience payload integrity | 🟢 | Current explicit capture marker/source verified. |
-| TC-EXP-04 | Experience retrieval | 🟢 | APK #85 retrieved the persisted Experience after the provider-adapter fix; SH returned the stored APK #85 runtime test vehicle statement without inventing additional details. |
-| TC-EXP-05 | Experience continuity semantics | ⏳ | Cross-runtime continuity observed after Chat → Home → force close → login → Chat; the persisted Experience was retrieved again. SH returned a paraphrased/re-save-style response rather than a clean factual recall. Recorded as observed evidence, not final PASS until canonical continuity semantics are explicitly satisfied. |
-| TC-EXP-06 | Experience visibility | ⏳ | Not tested. |
+| TC-EXP-01 | Create Experience through supported runtime path | 🟢 | APK #150 creation path proven. |
+| TC-EXP-02 | Experience persistence | 🟢 | Created Experience remained in Journey. |
+| TC-EXP-03 | Experience payload integrity | 🟢 | Explicit capture marker/source observed. |
+| TC-EXP-04 | Experience retrieval | 🟢 | Persisted Experience retrieved previously. |
+| TC-EXP-05 | Experience continuity semantics | ⏳ | **Next target.** Prior cross-runtime retrieval evidence exists, but canonical continuity semantics are not yet fully satisfied. |
+| TC-EXP-06 | Experience visibility | ⏳ | Not tested as a canonical TC. |
 | TC-EXP-07 | Experience transfer eligibility | ⏳ | Not tested. |
 | TC-EXP-08 | Experience non-transferable enforcement | ⏳ | Not tested. |
 | TC-EXP-09 | Experience unauthorized access | ⏳ | Not tested. |
@@ -111,14 +111,14 @@
 # 7. MEMORY
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-MEM-01 | Memory creation / acquisition through supported path | ⏳ | Not tested. |
+| TC-MEM-01 | Memory creation / acquisition through supported path | ⏳ | Not tested as canonical creation TC. |
 | TC-MEM-02 | Memory persistence | ⏳ | Not tested. |
 | TC-MEM-03 | Memory retrieval | ⏳ | Not tested. |
 | TC-MEM-04 | Memory continuity | ⏳ | Not tested. |
 | TC-MEM-05 | Memory visibility / privacy | ⏳ | Not tested. |
 | TC-MEM-06 | Memory authorization | ⏳ | Not tested. |
-| TC-MEM-07 | Memory transfer selection | ⏳ | Not tested. |
-| TC-MEM-08 | Memory transfer enforcement | ⏳ | Not tested. |
+| TC-MEM-07 | Memory transfer selection | 🟢 | APK #150: Memory selected in Inheritance checklist. |
+| TC-MEM-08 | Memory transfer enforcement | ⏳ | Authorization creation succeeded; actual execution/enforcement not tested. |
 | TC-MEM-09 | Memory usable through Chat / context | ⏳ | Not tested. |
 
 # 8. KNOWLEDGE
@@ -130,14 +130,14 @@
 | TC-KNOW-04 | Knowledge continuity | ⏳ | Not tested. |
 | TC-KNOW-05 | Knowledge visibility | ⏳ | Not tested. |
 | TC-KNOW-06 | Knowledge authorization | ⏳ | Not tested. |
-| TC-KNOW-07 | Knowledge transfer selection | ⏳ | Not tested. |
+| TC-KNOW-07 | Knowledge transfer selection | ⏳ | No Knowledge record was available in APK #150 Inheritance eligibility. |
 | TC-KNOW-08 | Knowledge transfer enforcement | ⏳ | Not tested. |
 | TC-KNOW-09 | Knowledge usable through Chat / context | ⏳ | Not tested. |
 
 # 9. CLONE
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-CLONE-01 | Clone screen / current implementation | 🟢 | Route/UI observed; current APK uses older Clone implementation. |
+| TC-CLONE-01 | Clone screen / current implementation | 🟢 | Route/UI observed. |
 | TC-CLONE-02 | Create invitation | ⏳ | — |
 | TC-CLONE-03 | Invitation persisted | ⏳ | — |
 | TC-CLONE-04 | Recipient approval | ⏳ | — |
@@ -149,74 +149,74 @@
 | TC-CLONE-10 | Non-transferable content excluded | ⏳ | — |
 | TC-CLONE-11 | Source / recipient isolation | ⏳ | — |
 | TC-CLONE-12 | Unauthorized clone operation | ⏳ | — |
-| TC-CLONE-13 | Current APK matches latest Clone contract | ⏳ | Potential FE/build blocker because observed APK is older Clone UI. |
+| TC-CLONE-13 | Current APK matches latest Clone contract | ⏳ | Current Clone contract still requires later verification. |
 
 # 10. RECOVERY
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-REC-01 | Recovery screen / current SH resolution | 🟢 | Route and SH resolution observed. |
-| TC-REC-02 | Create new FULL snapshot | ⏳ | Existing snapshots are historical data, not new-operation proof. |
+| TC-REC-02 | Create new FULL snapshot | ⏳ | Existing snapshots are historical data, not fresh-operation proof. |
 | TC-REC-03 | Snapshot persists | ⏳ | — |
 | TC-REC-04 | Snapshot contains expected domains | ⏳ | — |
 | TC-REC-05 | Restore same SH | ⏳ | — |
-| TC-REC-06 | Recovery event generated | ⏳ | Historical events observed; fresh operation not yet tested. |
-| TC-REC-07 | Continuity becomes RECOVERED | ⏳ | Historical state observed; fresh operation not yet tested. |
+| TC-REC-06 | Recovery event generated | ⏳ | Fresh operation not yet tested. |
+| TC-REC-07 | Continuity becomes RECOVERED | ⏳ | Fresh operation not yet tested. |
 | TC-REC-08 | Post-recovery Chat | ⏳ | — |
 | TC-REC-09 | Post-recovery Journey | ⏳ | — |
 | TC-REC-10 | Post-recovery Memory / Knowledge / Experience | ⏳ | — |
 | TC-REC-11 | Unauthorized restore rejected | ⏳ | — |
-| TC-REC-12 | JSON portability export | ⏳ | Existing READY exports observed; fresh export not yet tested. |
+| TC-REC-12 | JSON portability export | ⏳ | Fresh export not yet tested. |
 
 # 11. INHERITANCE
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-INH-01 | Inheritance screen / current account | 🟢 | Route/UI observed. |
-| TC-INH-02 | Explicit Memory selection | ⏳ | — |
-| TC-INH-03 | Explicit Knowledge selection | ⏳ | — |
-| TC-INH-04 | Explicit Experience selection | ⏳ | — |
-| TC-INH-05 | Explicit Journey selection | ⏳ | — |
-| TC-INH-06 | Create authorization with selected scope | ⏳ | — |
-| TC-INH-07 | Backend enforces selected scope | ⏳ | — |
-| TC-INH-08 | Private events rejected | ⏳ | — |
-| TC-INH-09 | Non-transferable events rejected | ⏳ | — |
-| TC-INH-10 | No silent approximation of source-domain IDs | ⏳ | — |
-| TC-INH-11 | Unauthorized inheritance rejected | ⏳ | — |
+| TC-INH-02 | Explicit Memory selection | 🟢 | APK #150: Memory checklist selected. |
+| TC-INH-03 | Explicit Knowledge selection | ⏳ | No Knowledge record available for selection. |
+| TC-INH-04 | Explicit Experience selection | ⏳ | No Experience record marked INHERITABLE. |
+| TC-INH-05 | Explicit Journey selection | ⏳ | No transferable Journey record available. |
+| TC-INH-06 | Create authorization with selected scope | 🟢 | APK #150 created authorization `dc8f020c-23ee-4711-a776-d2519477dd4c`, status `PENDING`, with selected scope containing the Memory ID. |
+| TC-INH-07 | Backend enforces selected scope | ⏳ | Creation succeeded; execution/enforcement not yet tested. |
+| TC-INH-08 | Private events rejected | ⏳ | Not tested; selected Memory was PRIVATE but INHERITABLE, which is explicitly eligible under the ratified policy semantics. |
+| TC-INH-09 | Non-transferable events rejected | ⏳ | Not tested. |
+| TC-INH-10 | No silent approximation of source-domain IDs | 🟢 | Authorization response preserved the selected Memory ID in `memory_ids`. |
+| TC-INH-11 | Unauthorized inheritance rejected | ⏳ | Not tested. |
 
 # 12. SUCCESSION
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-SUC-01 | Create succession rule | ⏳ | — |
-| TC-SUC-02 | Explicit succession scope | ⏳ | — |
-| TC-SUC-03 | Authorization enforcement | ⏳ | — |
-| TC-SUC-04 | Successor resolution | ⏳ | — |
-| TC-SUC-05 | Succession activation | ⏳ | — |
-| TC-SUC-06 | Correct transferable content | ⏳ | — |
-| TC-SUC-07 | Private exclusion | ⏳ | — |
-| TC-SUC-08 | Non-transferable exclusion | ⏳ | — |
-| TC-SUC-09 | Continuity / lifecycle event | ⏳ | — |
-| TC-SUC-10 | Unauthorized succession | ⏳ | — |
+| TC-SUC-01 | Create succession rule | 🟢 | APK #150 created rule `07cc54fb-48b1-49f7-a80a-6dd32f8eaba7` from one selected record. |
+| TC-SUC-02 | Explicit succession scope | ⏳ | Creation with one selected record observed; canonical scope semantics not yet fully verified. |
+| TC-SUC-03 | Authorization enforcement | ⏳ | Not tested. |
+| TC-SUC-04 | Successor resolution | ⏳ | Not tested. |
+| TC-SUC-05 | Succession activation | ⏳ | Not tested. |
+| TC-SUC-06 | Correct transferable content | ⏳ | Not tested. |
+| TC-SUC-07 | Private exclusion | ⏳ | Not tested. |
+| TC-SUC-08 | Non-transferable exclusion | ⏳ | Not tested. |
+| TC-SUC-09 | Continuity / lifecycle event | ⏳ | Not tested. |
+| TC-SUC-10 | Unauthorized succession | ⏳ | Not tested. |
 
 # 13. END-OF-LIFE
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-EOL-01 | Enter EOL lifecycle condition | ⏳ | — |
-| TC-EOL-02 | Correct state transition | ⏳ | — |
-| TC-EOL-03 | Access after EOL | ⏳ | — |
-| TC-EOL-04 | Transfer eligibility after EOL | ⏳ | — |
-| TC-EOL-05 | Protected / private content remains protected | ⏳ | — |
-| TC-EOL-06 | Journey lifecycle record | ⏳ | — |
-| TC-EOL-07 | Unauthorized EOL action | ⏳ | — |
+| TC-EOL-01 | Enter EOL lifecycle condition | ⏳ | Not tested. |
+| TC-EOL-02 | Correct state transition | ⏳ | Not tested. |
+| TC-EOL-03 | Access after EOL | ⏳ | Not tested. |
+| TC-EOL-04 | Transfer eligibility after EOL | ⏳ | Not tested. |
+| TC-EOL-05 | Protected / private content remains protected | ⏳ | Not tested. |
+| TC-EOL-06 | Journey lifecycle record | ⏳ | Not tested. |
+| TC-EOL-07 | Unauthorized EOL action | ⏳ | Not tested. |
 
 # 14. LEGACY
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
-| TC-LEG-01 | Select transfer for Legacy | ⏳ | — |
-| TC-LEG-02 | Preserve selected transfer as Legacy | ⏳ | — |
-| TC-LEG-03 | Record Legacy type | ⏳ | — |
-| TC-LEG-04 | Legacy persistence | ⏳ | — |
-| TC-LEG-05 | Legacy visibility | ⏳ | — |
-| TC-LEG-06 | Private / non-transferable exclusion | ⏳ | — |
-| TC-LEG-07 | Unauthorized Legacy operation | ⏳ | — |
+| TC-LEG-01 | Select transfer for Legacy | 🟢 | APK #150 selected one record for Legacy preservation. |
+| TC-LEG-02 | Preserve selected transfer as Legacy | 🟢 | APK #150: `Legacy preserved: 939b8387-29d3-4099-9caf-2947b91b24a8`. |
+| TC-LEG-03 | Record Legacy type | ⏳ | Result ID created; explicit type verification not separately tested. |
+| TC-LEG-04 | Legacy persistence | ⏳ | Not yet verified after reload. |
+| TC-LEG-05 | Legacy visibility | ⏳ | Not yet verified after preservation in this run. |
+| TC-LEG-06 | Private / non-transferable exclusion | ⏳ | Not tested. |
+| TC-LEG-07 | Unauthorized Legacy operation | ⏳ | Not tested. |
 
 # 15. ERROR
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
