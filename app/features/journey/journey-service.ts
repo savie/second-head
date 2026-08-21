@@ -3,112 +3,11 @@ import { supabase } from '../../services/supabase';
 export type JourneyVisibility = 'PRIVATE' | 'SHARED' | 'PUBLIC';
 export type JourneyTransferPolicy = 'NON_TRANSFERABLE' | 'TRANSFERABLE' | 'EXPLICIT_ONLY';
 export type JourneyTransferOperation = 'CLONE' | 'INHERITANCE' | 'SUCCESSION';
-
-export type JourneyEvent = {
-  event_id: string;
-  sh_id: string;
-  event_type: string;
-  occurred_at: string;
-  continuity_status: string;
-  gap_code: string | null;
-  payload: Record<string, unknown> | null;
-  source_ref: string | null;
-  visibility: JourneyVisibility;
-  transfer_policy: JourneyTransferPolicy;
-  provenance: Record<string, unknown> | null;
-  created_at: string;
-};
-
+export type JourneyEvent = { event_id: string; sh_id: string; event_type: string; occurred_at: string; continuity_status: string; gap_code: string | null; payload: Record<string, unknown> | null; source_ref: string | null; visibility: JourneyVisibility; transfer_policy: JourneyTransferPolicy; provenance: Record<string, unknown> | null; created_at: string };
 const JOURNEY_EVENT_SELECT = 'event_id,sh_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,visibility,transfer_policy,provenance,created_at';
-
-export async function loadJourneyEvents(shId: string, limit = 50): Promise<JourneyEvent[]> {
-  if (!shId.trim()) throw new Error('JOURNEY_SH_ID_REQUIRED');
-  const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 50);
-
-  const { data, error } = await supabase
-    .from('journey_events')
-    .select(JOURNEY_EVENT_SELECT)
-    .eq('sh_id', shId)
-    .order('occurred_at', { ascending: false })
-    .limit(safeLimit);
-
-  if (error) throw new Error(`JOURNEY_RETRIEVAL_FAILED: ${error.message}`);
-  return (data ?? []) as JourneyEvent[];
-}
-
-/**
- * Load the Journey projection for the authenticated account.
- *
- * Do not add an SH filter here. The Journey visibility RLS policy is the
- * canonical authorization boundary: it returns the caller's own SH events
- * plus only GENERAL/SHARED underlying domain records from other SHs.
- * PRIVATE/OWNER_ONLY records therefore remain excluded by the database.
- */
-export async function loadJourneyEventsForAccount(limit = 50): Promise<JourneyEvent[]> {
-  const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 50);
-
-  const { data, error } = await supabase
-    .from('journey_events')
-    .select(JOURNEY_EVENT_SELECT)
-    .order('occurred_at', { ascending: false })
-    .limit(safeLimit);
-
-  if (error) throw new Error(`JOURNEY_RETRIEVAL_FAILED: ${error.message}`);
-  return (data ?? []) as JourneyEvent[];
-}
-
-export async function classifyJourneyEvent(
-  eventId: string,
-  visibility: JourneyVisibility,
-  transferPolicy: JourneyTransferPolicy,
-  provenance: Record<string, unknown> = {},
-): Promise<void> {
-  if (!eventId.trim()) throw new Error('JOURNEY_EVENT_ID_REQUIRED');
-
-  const { error } = await supabase.rpc('runtime_classify_journey_event', {
-    p_event_id: eventId,
-    p_visibility: visibility,
-    p_transfer_policy: transferPolicy,
-    p_provenance: provenance,
-  });
-
-  if (error) throw new Error(`JOURNEY_CLASSIFY_FAILED: ${error.message}`);
-}
-
-export async function transferSelectedJourneyEvents(
-  operation: JourneyTransferOperation,
-  sourceShId: string,
-  targetShId: string,
-  eventIds: string[],
-): Promise<number> {
-  if (!sourceShId.trim()) throw new Error('JOURNEY_SOURCE_SH_ID_REQUIRED');
-  if (!targetShId.trim()) throw new Error('JOURNEY_TARGET_SH_ID_REQUIRED');
-  if (eventIds.length === 0) throw new Error('JOURNEY_EVENT_SELECTION_REQUIRED');
-
-  const { data, error } = await supabase.rpc('runtime_transfer_selected_journey_events', {
-    p_operation: operation,
-    p_source_sh_id: sourceShId,
-    p_target_sh_id: targetShId,
-    p_event_ids: eventIds,
-  });
-
-  if (error) throw new Error(`JOURNEY_TRANSFER_FAILED: ${error.message}`);
-  return Number(data ?? 0);
-}
-
-export async function preserveSelectedJourneyAsLegacy(
-  sourceShId: string,
-  eventIds: string[],
-): Promise<string> {
-  if (!sourceShId.trim()) throw new Error('JOURNEY_SOURCE_SH_ID_REQUIRED');
-  if (eventIds.length === 0) throw new Error('JOURNEY_EVENT_SELECTION_REQUIRED');
-
-  const { data, error } = await supabase.rpc('runtime_preserve_selected_journey_as_legacy', {
-    p_source_sh_id: sourceShId.trim(),
-    p_event_ids: eventIds,
-  });
-
-  if (error) throw new Error(`JOURNEY_LEGACY_PRESERVE_FAILED: ${error.message}`);
-  if (!data) throw new Error('JOURNEY_LEGACY_PRESERVE_FAILED: legacy record was not created');
-  return String(data);
-}
+export async function loadJourneyEvents(shId: string, limit = 50): Promise<JourneyEvent[]> { if (!shId.trim()) throw new Error('JOURNEY_SH_ID_REQUIRED'); const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 50); const { data, error } = await supabase.from('journey_events').select(JOURNEY_EVENT_SELECT).eq('sh_id', shId).order('occurred_at', { ascending: false }).limit(safeLimit); if (error) throw new Error(`JOURNEY_RETRIEVAL_FAILED: ${error.message}`); return (data ?? []) as JourneyEvent[]; }
+export async function loadJourneyEventsForAccount(limit = 50): Promise<JourneyEvent[]> { const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 50); const { data, error } = await supabase.from('journey_events').select(JOURNEY_EVENT_SELECT).order('occurred_at', { ascending: false }).limit(safeLimit); if (error) throw new Error(`JOURNEY_RETRIEVAL_FAILED: ${error.message}`); return (data ?? []) as JourneyEvent[]; }
+export async function classifyJourneyEvent(eventId: string, visibility: JourneyVisibility, transferPolicy: JourneyTransferPolicy, provenance: Record<string, unknown> = {}): Promise<void> { if (!eventId.trim()) throw new Error('JOURNEY_EVENT_ID_REQUIRED'); const { error } = await supabase.rpc('runtime_classify_journey_event', { p_event_id: eventId, p_visibility: visibility, p_transfer_policy: transferPolicy, p_provenance: provenance }); if (error) throw new Error(`JOURNEY_CLASSIFY_FAILED: ${error.message}`); }
+export async function deleteJourneyEvent(eventId: string): Promise<void> { if (!eventId.trim()) throw new Error('JOURNEY_EVENT_ID_REQUIRED'); const { error } = await supabase.rpc('runtime_delete_journey_event', { p_event_id: eventId.trim() }); if (error) throw new Error(`JOURNEY_DELETE_FAILED: ${error.message}`); }
+export async function transferSelectedJourneyEvents(operation: JourneyTransferOperation, sourceShId: string, targetShId: string, eventIds: string[]): Promise<number> { if (!sourceShId.trim()) throw new Error('JOURNEY_SOURCE_SH_ID_REQUIRED'); if (!targetShId.trim()) throw new Error('JOURNEY_TARGET_SH_ID_REQUIRED'); if (eventIds.length === 0) throw new Error('JOURNEY_EVENT_SELECTION_REQUIRED'); const { data, error } = await supabase.rpc('runtime_transfer_selected_journey_events', { p_operation: operation, p_source_sh_id: sourceShId, p_target_sh_id: targetShId, p_event_ids: eventIds }); if (error) throw new Error(`JOURNEY_TRANSFER_FAILED: ${error.message}`); return Number(data ?? 0); }
+export async function preserveSelectedJourneyAsLegacy(sourceShId: string, eventIds: string[]): Promise<string> { if (!sourceShId.trim()) throw new Error('JOURNEY_SOURCE_SH_ID_REQUIRED'); if (eventIds.length === 0) throw new Error('JOURNEY_EVENT_SELECTION_REQUIRED'); const { data, error } = await supabase.rpc('runtime_preserve_selected_journey_as_legacy', { p_source_sh_id: sourceShId.trim(), p_event_ids: eventIds }); if (error) throw new Error(`JOURNEY_LEGACY_PRESERVE_FAILED: ${error.message}`); if (!data) throw new Error('JOURNEY_LEGACY_PRESERVE_FAILED: legacy record was not created'); return String(data); }
