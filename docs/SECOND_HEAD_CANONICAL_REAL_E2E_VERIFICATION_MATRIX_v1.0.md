@@ -2,7 +2,7 @@
 
 **Status:** Active execution matrix  
 **Branch:** `dev`  
-**Runtime test vehicle:** APK #155  
+**Runtime test vehicle:** APK #159  
 **Backend:** Supabase DEV  
 **Implementation source:** GitHub DEV  
 **Purpose:** Canonical, persistent master matrix for REAL E2E functional verification through Functional Closure and UI/UX.
@@ -105,8 +105,8 @@
 | TC-EXP-06 | Experience visibility | 🟡 | APK #155: Account B → Journey → Experience now visibly includes the existing Account A `GENERAL / SHARED` Experience `TEST EXPERIENCE - PRIVATE LEGACY - E2E`; shared visibility is therefore proven. Opening the shared non-owner event still triggers `JOURNEY_RECORD_POLICY_FAILED: ... event not found or not owner-visible`, a minor FE policy-read bug because the owner-only policy RPC is still attempted for a shared projection. FE fix committed on DEV (`3d77b3715f93c815ab1e165ebbc92b98e623258d`, `0b380dd32e97493a3ca54a1ec94ad77464df0c78`) but APK rebuild/retest is still required. Supabase was not changed for this minor defect. |
 | TC-EXP-07 | Experience transfer eligibility | 🟢 | APK #155: dedicated Experience fixture showed `Visibility GENERAL / SHARED` and `Transfer policy INHERITABLE`; it appeared as an eligible Experience, was selected, and authorization `8978d126-9182-479b-bceb-6a7248aff05a` was created with status `PENDING` and selected scope containing `experience_ids = aaa42648-4218-41ff-9c89-d099ad99ee6e`. |
 | TC-EXP-08 | Experience non-transferable enforcement | 🟢 | APK #155: `TEST EXPERIENCE - PRIVATE LEGACY - E2E` remained visible in Account B Journey but did not appear in Inheritance Experience eligibility; UI reported `No Experience records are marked INHERITABLE.` This proves NON_TRANSFERABLE visibility remains separate from transfer eligibility. |
-| TC-EXP-09 | Experience unauthorized access | ⏳ | Not tested. |
-| TC-EXP-10 | Experience usable by downstream Chat / context | ⏳ | Not tested. |
+| TC-EXP-09 | Experience unauthorized access | 🟢 | APK #155: Account A created an `EXPERIENCE` with `Visibility PRIVATE / OWNER ONLY` and `Transfer policy NON TRANSFERABLE`; Account B Journey did not show the private owner-only Experience. This proves unauthorized cross-account Journey visibility is rejected. |
+| TC-EXP-10 | Experience usable by downstream Chat / context | 🟢 | APK #159 + Supabase `runtime-p4a-001` v42: Account B could see Experience `aaa42648-4218-41ff-9c89-d099ad99ee6e` in Journey, then Chat was explicitly asked to use that Experience ID as context. SH returned the correct recorded core: the user wanted to create an Experience specifically for transfer-eligibility testing and asked that the conversation be marked as an explicit Experience storable in Journey. No unsupported detail was added. Chat Verification CI #167 was PASS before APK #159. |
 
 # 7. MEMORY
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
