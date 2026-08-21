@@ -4,6 +4,11 @@ type Candidate = Record<string, unknown>;
 function objectValue(value: unknown): Candidate | undefined { return value && typeof value === "object" && !Array.isArray(value) ? value as Candidate : undefined; }
 const KNOWLEDGE_ORIGINS = new Set(["MEMORY", "EXPLICIT_TEACHING", "EXTERNAL_REFERENCE"]);
 function normalizeKnowledgeOrigin(value: unknown): string { const raw = typeof value === "string" ? value.trim().toUpperCase().replace(/[ -]+/g, "_") : ""; if (KNOWLEDGE_ORIGINS.has(raw)) return raw; if (["USER_TEACHING", "OWNER_TEACHING", "EXPLICIT_USER_TEACHING", "TEACHING", "USER_INSTRUCTION", "OWNER_INSTRUCTION"].includes(raw)) return "EXPLICIT_TEACHING"; return ""; }
+function replacementRequest(userMessage: string): { newContent: string; oldPattern: string } | undefined {
+  const m = userMessage.match(/\b(APK\s*#?\d+)\b.*?\b(?:sebagai\s+pengganti|menggantikan|replace(?:\s+with)?|replacing)\b.*?\b(APK\s*#?\d+)\b/i);
+  if (!m) return undefined;
+  return { newContent: `${m[1]} menggantikan ${m[2]} sebagai runtime test vehicle.`, oldPattern: m[2] };
+}
 function explicitPersistenceFallback(userMessage: string): { memory?: Candidate; knowledge?: Candidate } | undefined {
   const text = userMessage.trim();
   if (!/\b(simpan|simpanlah|ingat|ingatlah|remember|save|store|learn|pelajari|catat|jadikan|tetapkan|ganti|pengganti|replace|update)\b/i.test(text)) return undefined;
@@ -12,6 +17,16 @@ function explicitPersistenceFallback(userMessage: string): { memory?: Candidate;
 }
 export async function recordSemanticLifecycle(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string, modelResponse: { semantic_signals?: Record<string, unknown> }) {
   const signals = objectValue(modelResponse.semantic_signals) ?? {};
+  const replacement = replacementRequest(userMessage);
+  if (replacement) {
+    const { data, error } = await supabase.rpc("runtime_replace_memory", { p_sh_id: shId, p_new_content: replacement.newContent, p_old_pattern: replacement.oldPattern, p_source: "runtime:p5a:explicit_user_request", p_scope: "PRIVATE", p_visibility: "OWNER_ONLY" });
+    if (error) throw new Error(`MEMORY_REPLACEMENT_FAILED: ${error.message}`);
+    const memory = typeof data === "string" ? data : null;
+    if (!memory) throw new Error("MEMORY_REPLACEMENT_FAILED: recorder returned no memory id");
+    const { error: journeyError } = await supabase.rpc("runtime_record_journey_event", { p_sh_id: shId, p_event_type: "MEMORY", p_continuity_status: "CONTINUOUS", p_payload: { memory_id: memory, content: replacement.newContent, supersedes_pattern: replacement.oldPattern, acquisition: "EXPLICIT_USER_REQUEST" }, p_source_ref: "runtime:p5a:explicit_user_request" });
+    if (journeyError) throw new Error(`MEMORY_JOURNEY_SIGNAL_FAILED: ${journeyError.message}`);
+    return { memory, knowledge: null };
+  }
   const fallback = explicitPersistenceFallback(userMessage);
   let memory: string | null = null; let knowledge: string | null = null;
   const memoryCandidate = objectValue(signals.memory_candidate) ?? fallback?.memory;
