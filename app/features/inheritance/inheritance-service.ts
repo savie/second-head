@@ -1,6 +1,6 @@
 import { supabase } from '../../services/supabase';
 
-export type TransferPolicy = 'NON_TRANSFERABLE' | 'INHERITABLE' | 'SUCCESSION' | 'LEGACY';
+export type TransferPolicy = 'NON_TRANSFERABLE' | 'INHERITANCE' | 'SUCCESSION' | 'LEGACY';
 export type RecordScope = 'PRIVATE' | 'GENERAL';
 export type RecordVisibility = 'OWNER_ONLY' | 'SHARED';
 export type TransferSelection = { memory_ids?: string[]; knowledge_ids?: string[]; experience_ids?: string[]; journey_event_ids?: string[]; reference_ids?: string[]; value_ids?: string[]; history_ids?: string[] };
