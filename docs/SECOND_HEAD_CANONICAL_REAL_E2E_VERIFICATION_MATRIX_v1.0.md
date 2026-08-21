@@ -138,18 +138,18 @@
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
 |---|---|---|---|
 | TC-CLONE-01 | Clone screen / current implementation | 🟢 | Route/UI observed. |
-| TC-CLONE-02 | Create invitation | ⏳ | — |
-| TC-CLONE-03 | Invitation persisted | ⏳ | — |
-| TC-CLONE-04 | Recipient approval | ⏳ | — |
-| TC-CLONE-05 | Recipient registration / session bootstrap | ⏳ | — |
-| TC-CLONE-06 | Clone materialization | ⏳ | — |
-| TC-CLONE-07 | Clone becomes recipient PRIMARY SH | ⏳ | — |
-| TC-CLONE-08 | Correct transferable content | ⏳ | — |
-| TC-CLONE-09 | Private content excluded | ⏳ | — |
-| TC-CLONE-10 | Non-transferable content excluded | ⏳ | — |
-| TC-CLONE-11 | Source / recipient isolation | ⏳ | — |
-| TC-CLONE-12 | Unauthorized clone operation | ⏳ | — |
-| TC-CLONE-13 | Current APK matches latest Clone contract | ⏳ | Current Clone contract still requires later verification. |
+| TC-CLONE-02 | Create invitation | 🟢 | APK #159: Account A created Clone invitation `4cdfdabc-da6f-4ad4-aaa6-f41f0243da67` for recipient `sh-clone@banned.idn`; status initially `PENDING`. |
+| TC-CLONE-03 | Invitation persisted | 🟢 | Same invitation remained visible in Account A outgoing invitations and Account B incoming invitations with the same agreement ID. |
+| TC-CLONE-04 | Recipient approval | 🟢 | Account A approved invitation `4cdfdabc-da6f-4ad4-aaa6-f41f0243da67`; status became `APPROVED` and UI stated it was waiting for recipient registration. |
+| TC-CLONE-05 | Recipient registration / session bootstrap | 🟢 | Account B was created by registering with the intended recipient email rather than signing into a pre-existing account; the incoming invitation then showed `Recipient account linked: e12520d2-8aaa-4522-80cd-c3d7fa72a8cc`. |
+| TC-CLONE-06 | Clone materialization | 🟢 | After recipient registration, Account B resolved a distinct SH and its Journey route identified the SH as `SH Clone`, with transferred Journey content present. |
+| TC-CLONE-07 | Clone becomes recipient PRIMARY SH | ⏳ | No explicit `PRIMARY` label/assertion was displayed in the observed runtime evidence. The recipient SH is shown as `SH Clone`, but PRIMARY status is not claimed without an explicit UI/database assertion. |
+| TC-CLONE-08 | Correct transferable content | 🟢 | Account A had a `GENERAL / SHARED` + `INHERITABLE` Experience for transfer testing; Account B received that same Experience content in its Journey. |
+| TC-CLONE-09 | Private content excluded | 🟢 | Account A had PRIVATE / OWNER ONLY Memory, Knowledge, and Experience records; none of those private records appeared in Account B Journey. Runtime evidence supports exclusion, although this run did not independently query a database-level clone manifest. |
+| TC-CLONE-10 | Non-transferable content excluded | 🔴 | Account A had `TEST EXPERIENCE - PRIVATE LEGACY - E2E` with `GENERAL / SHARED` + `NON TRANSFERABLE`; the same Experience appeared in Account B Journey. This is a direct runtime manifestation that NON_TRANSFERABLE content was included by Clone. |
+| TC-CLONE-11 | Source / recipient isolation | ⏳ | Separate Account B/SH identity was established and private source records were not exposed, but a dedicated wrong-account/source-mutation isolation assertion was not executed. |
+| TC-CLONE-12 | Unauthorized clone operation | ⏳ | Not tested. No unauthorized-operation attempt was performed; this TC remains open. |
+| TC-CLONE-13 | Current APK matches latest Clone contract | ⏳ | APK #159 was used for this run, but current Clone contract/source traceability still requires separate verification. |
 
 # 10. RECOVERY
 | TC-ID | Aktivitas / Test | Status | Fix / Keterangan |
@@ -176,7 +176,7 @@
 | TC-INH-04 | Explicit Experience selection | 🟢 | APK #155: dedicated Experience with `GENERAL / SHARED` + `INHERITABLE` appeared as eligible, was selected, and was included in authorization `8978d126-9182-479b-bceb-6a7248aff05a`. |
 | TC-INH-05 | Explicit Journey selection | ⏳ | No transferable Journey record available. |
 | TC-INH-06 | Create authorization with selected scope | 🟢 | APK #150 created authorization `dc8f020c-23ee-4711-a776-d2519477dd4c`, status `PENDING`, with selected scope containing the Memory ID. |
-| TC-INH-07 | Backend enforces selected scope | ⏳ | Creation succeeded; execution/enforcement not yet tested. |
+| TC-INH-07 | Backend enforces selected scope | 🔴 | APK #159: authorization `78f312f0-1afc-479c-9d11-8a77c20c1979` was created and approved for one selected Memory, but one execution attempt returned `Unable to execute inheritance`. This is the observed runtime manifestation; no fix was applied. |
 | TC-INH-08 | Private events rejected | ⏳ | Not tested; selected Memory was PRIVATE but INHERITABLE, which is explicitly eligible under the ratified policy semantics. |
 | TC-INH-09 | Non-transferable events rejected | ⏳ | Not tested. |
 | TC-INH-10 | No silent approximation of source-domain IDs | 🟢 | Authorization response preserved the selected Memory ID in `memory_ids`. |
