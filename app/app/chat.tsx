@@ -200,6 +200,17 @@ export default function ChatScreen() {
     });
   }
 
+  function openMessageActions(message: Message) {
+    const actions = [
+      { text: 'Copy', onPress: () => void copyMessage(message) },
+      ...(message.role === 'user' ? [{ text: 'Edit', onPress: () => editMessage(message) }] : []),
+      { text: 'Delete', style: 'destructive' as const, onPress: () => deleteMessage(message.id) },
+      ...(message.role === 'assistant' ? [{ text: 'Regenerate', onPress: regenerateResponse }] : []),
+      { text: 'Cancel', style: 'cancel' as const },
+    ];
+    Alert.alert(message.role === 'user' ? 'Your message' : 'SH response', undefined, actions);
+  }
+
   function handleAttachment(kind: string) {
     setAttachmentName(`${kind} ready`);
     Alert.alert(kind, 'UI attachment sudah siap. Penyimpanan/upload BE akan di-wire berikutnya.');
@@ -259,12 +270,7 @@ export default function ChatScreen() {
           <View style={{ maxWidth: '88%', borderRadius: 16, padding: 12, backgroundColor: message.role === 'user' ? '#E0F2FE' : '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB' }}>
             <Text style={{ fontSize: 12, fontWeight: '700', color: '#6B7280', marginBottom: 5 }}>{message.role === 'user' ? 'You' : message.role === 'assistant' ? 'SH' : 'System'}</Text>
             {editingId === message.id ? <View style={{ gap: 8 }}><TextInput value={editingText} onChangeText={setEditingText} multiline style={inputStyle} /><View style={{ flexDirection: 'row', gap: 8 }}><Button title="Save" onPress={saveEditedMessage} /><Button title="Cancel" onPress={() => { setEditingId(null); setEditingText(''); }} /></View></View> : <Text style={{ color: '#111827', lineHeight: 21 }}>{message.text || (sending && message.role === 'assistant' ? 'SH is thinking…' : '')}</Text>}
-            {!editingId && message.text ? <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
-              <Button title="Copy" onPress={() => void copyMessage(message)} />
-              {message.role === 'user' ? <Button title="Edit" onPress={() => editMessage(message)} /> : null}
-              <Button title="Delete" onPress={() => deleteMessage(message.id)} />
-              {message.role === 'assistant' ? <Button title="Regenerate" onPress={regenerateResponse} /> : null}
-            </View> : null}
+            {!editingId && message.text ? <View style={{ alignItems: 'flex-end', marginTop: 6 }}><Button title="⋮" onPress={() => openMessageActions(message)} /></View> : null}
           </View>
         </View>)}
         {pendingConfirmation ? <View style={{ borderWidth: 1, borderRadius: 12, padding: 12, backgroundColor: '#FFFFFF', gap: 8 }}><Text style={{ fontSize: 18, fontWeight: '700' }}>{pendingConfirmation.title}</Text><Text>{pendingConfirmation.description}</Text><Text>Action: {pendingConfirmation.action_id}</Text><View style={{ flexDirection: 'row', gap: 8 }}><Button title="Cancel" onPress={cancelConfirmation} /><Button title="Confirm" onPress={confirmConfirmation} /></View></View> : null}
