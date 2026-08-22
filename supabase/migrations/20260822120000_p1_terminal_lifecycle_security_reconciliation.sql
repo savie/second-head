@@ -26,11 +26,7 @@ begin
   if auth.uid() is null then
     raise exception '%_REJECTED: authentication required', upper(p_role);
   end if;
-  if not exists (
-    select 1 from public.sh_instances s
-    where s.sh_id = p_sh_id
-      and s.status <> 'deactivated'
-  ) then
+  if not exists (select 1 from public.sh_instances s where s.sh_id = p_sh_id and s.status <> 'deactivated') then
     raise exception '%_REJECTED: SH is deactivated or unavailable', upper(p_role);
   end if;
 end;
@@ -38,8 +34,8 @@ $$;
 
 grant execute on function public.runtime_assert_active_sh(uuid,text) to authenticated;
 revoke execute on function public.runtime_assert_active_sh(uuid,text) from anon;
+revoke execute on function public.runtime_assert_active_sh(uuid,text) from public;
 
--- Existing canonical transfer-scope signature retained; source SH must be active.
 create or replace function public.runtime_validate_selected_transfer_scope(p_source_sh_id uuid, p_scope jsonb, p_operation text)
 returns void
 language plpgsql
@@ -75,7 +71,6 @@ begin
 end;
 $$;
 
--- Journey transfer explicitly checks both endpoints because both SH ids are inputs.
 create or replace function public.runtime_transfer_selected_journey_events(p_operation text, p_source_sh_id uuid, p_target_sh_id uuid, p_event_ids uuid[])
 returns integer
 language plpgsql
@@ -109,11 +104,20 @@ end;
 $$;
 
 revoke execute on function public.list_experience_context(uuid,integer) from anon;
+revoke execute on function public.list_experience_context(uuid,integer) from public;
 revoke execute on function public.list_experiences(uuid,integer) from anon;
+revoke execute on function public.list_experiences(uuid,integer) from public;
 revoke execute on function public.runtime_classify_experience(uuid,text,text) from anon;
+revoke execute on function public.runtime_classify_experience(uuid,text,text) from public;
 revoke execute on function public.runtime_create_inheritance_authorization(uuid,uuid,uuid,uuid,jsonb) from anon;
+revoke execute on function public.runtime_create_inheritance_authorization(uuid,uuid,uuid,uuid,jsonb) from public;
 revoke execute on function public.runtime_execute_succession(uuid) from anon;
+revoke execute on function public.runtime_execute_succession(uuid) from public;
 revoke execute on function public.runtime_get_journey_record_policy(uuid) from anon;
+revoke execute on function public.runtime_get_journey_record_policy(uuid) from public;
 revoke execute on function public.runtime_journey_event_is_shared(uuid) from anon;
+revoke execute on function public.runtime_journey_event_is_shared(uuid) from public;
 revoke execute on function public.runtime_preserve_selected_transfer_as_legacy(uuid,jsonb) from anon;
+revoke execute on function public.runtime_preserve_selected_transfer_as_legacy(uuid,jsonb) from public;
 revoke execute on function public.runtime_record_inheritance(uuid,jsonb,jsonb) from anon;
+revoke execute on function public.runtime_record_inheritance(uuid,jsonb,jsonb) from public;
