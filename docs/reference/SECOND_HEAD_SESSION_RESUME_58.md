@@ -5,9 +5,9 @@
 This resume continues the audit requested from commit `a1862392d1675eace336e75646d4d1da485a8467` through the current DEV head.
 
 - Audit base: `a1862392d1675eace336e75646d4d1da485a8467`
-- Pre-audit checkpoint: `a5f09b8a9c1b8d01a927d50263249c6bb77846c2`
 - Backend: Supabase DEV `pkhkgvsrqeupvwoqjwmd`
 - GitHub branch: `dev`
+- Current continuity checkpoint: this file
 
 ## 1. Authority
 
@@ -35,11 +35,9 @@ No Canonical concept was silently changed.
 
 ## 2. Audit scope
 
-The GitHub comparison from `a186239...` to the pre-resume-57 head contained 105 commits. The audit cross-checked the commit history, Session Resume 55, Session Resume 56, Session Resume 57, the current Canonical Matrix, the Privacy/Transfer Canonical Addendum, lifecycle reconciliation documents, Supabase DEV function definitions, privileges, and live data semantics.
+The audit covers the GitHub DEV implementation history from `a1862392d1675eace336e75646d4d1da485a8467` through the current DEV head, cross-checked against Session Resumes 55–58, Canonical/architecture/scope material, lifecycle reconciliation, Supabase DEV migration history, live function definitions, privileges, and live data semantics.
 
 ## 3. Confirmed lifecycle model
-
-The current implementation and the Owner clarification are reconciled as:
 
 ```text
 INHERITANCE
@@ -53,88 +51,110 @@ SUCCESSION
 LEGACY
   source SH = END-OF-LIFE / DEACTIVATED
   preservation only; no target SH is created
+
+DEACTIVATED = END OF LIFE
+  → no recovery restore
+  → no record-policy mutation
 ```
 
-The Resume 57 implementation already explicitly recorded Inheritance as active-source → active-target and Succession as deactivated-source → active-target. The Owner clarification in this session establishes the same EOL rule for Legacy.
+## 4. Deterministic BE fixes completed
 
-## 4. Deterministic BE fixes in this pass
+### 4.1 Recovery restore terminal guard
 
-### 4.1 Recovery restore on terminal SH
+`runtime_restore_recovery_snapshot()` rejects restore when the snapshot SH is `DEACTIVATED`.
 
-`runtime_restore_recovery_snapshot()` now rejects restore when the snapshot's SH is `DEACTIVATED`.
+### 4.2 Terminal record-policy guard
 
-Result:
+`runtime_set_record_policy()` rejects policy mutation when the owning SH is `DEACTIVATED`.
+
+### 4.3 Inherited policy immutability
+
+Records carrying `inheritance_origin` cannot have their source-controlled transfer policy rewritten by the target SH.
+
+### 4.4 Transfer Memory provenance
+
+`memories.provenance` enables deterministic source/authorization tracing for transferred Memory.
+
+### 4.5 Inheritance revoke/release
+
+`runtime_revoke_inheritance_authorization(uuid)` is authenticated and source-owner controlled. Revocation removes only target-derived records tied to the authorization and retains source/original records.
+
+The cleanup covers:
 
 ```text
-DEACTIVATED / EOL
-  ↓
-restore snapshot
-  ↓
-REJECTED
+Memory
+Knowledge
+Experience
+Journey
 ```
 
-No reactivation semantics were introduced.
+Journey provenance includes the Inheritance authorization ID, and cleanup is performed by that deterministic identifier rather than content heuristics.
 
-### 4.2 Record policy mutation on terminal SH
+### 4.6 Clone revoke/release
 
-`runtime_set_record_policy()` now rejects policy mutation when the owning SH is `DEACTIVATED`.
+`runtime_revoke_clone_agreement(uuid)` is authenticated and source-owner controlled. It revokes the Clone agreement/clone state and removes only Clone-derived Memory/Knowledge/Experience tied to the agreement provenance. Source records remain retained.
 
-### 4.3 Inherited record policy
+Clone currently does not materialize Journey as part of its derived-information path, so no artificial Journey cleanup rule was added.
 
-`runtime_set_record_policy()` now rejects policy mutation for records carrying `inheritance_origin` provenance.
+### 4.7 Legacy EOL enforcement
 
-The inherited target therefore follows the source SH's transfer policy; the target cannot rewrite the source-controlled inheritance policy.
+Legacy preservation/transfer paths require an EOL/deactivated source SH. Legacy is not treated as an active operational transfer to a target SH.
 
-### 4.4 Memory provenance
+### 4.8 Transfer-policy vocabulary
 
-`memories.provenance` was added so transferred Memory rows can be traced deterministically. Inheritance-created Memory records carry `inheritance_origin` including the source SH and authorization ID. Clone/Succession Memory materialization is also provenance-traceable.
+`INHERITANCE` is the established semantic value. `INHERITABLE` is retained only as a compatibility alias at the policy RPC boundary and normalized to `INHERITANCE`.
 
-### 4.5 Inheritance release/revoke
+### 4.9 Journey lifecycle eligibility
 
-Added authenticated owner-authorized `runtime_revoke_inheritance_authorization(uuid)`.
+Inheritance and Succession Journey transfers require lifecycle-matching transfer policy and reject `NON_TRANSFERABLE` selections.
 
-For an APPROVED or CONSUMED authorization, it removes only target-derived Memory, Knowledge, and Experience rows whose provenance points to that authorization, then marks the authorization `REVOKED` with `revoked_at`.
+## 5. Supabase ↔ GitHub migration parity
 
-The source records remain untouched.
-
-Privileges:
+Live Supabase DEV migration history contains the P1 tail through:
 
 ```text
-anon = false
-public = false
-
- authenticated = true
+20260822033444 p1_terminal_lifecycle_security_reconciliation
+20260822033544 p1_close_public_security_definer_grants
+20260822033920 p1_journey_lifecycle_and_internal_runtime_acl
+20260822033930 p1_revoke_client_event_trigger_execute
+20260822035431 20260822110000_scope_experience_context_by_sh
+20260822050952 inheritance_authorization_consume_on_success
+20260822051302 p1_transfer_lifecycle_reconciliation_20260822050000
+20260822051357 p1_clone_terminal_account_guard_20260822053000
+20260822051922 p1_revoke_client_event_trigger_execute_final
+20260822052048 p1_recovery_restore_idempotency
+20260822055203 p1_lifecycle_transfer_policy_and_recovery_reconciliation
+20260822055238 fix_legacy_eol_transfer_guard_v2
+20260822055314 p1_reconcile_transfer_policy_vocabulary_and_journey_eligibility
+20260822065752 p1_inheritance_revoke_journey_provenance_cleanup
+20260822070005 p1_clone_revoke_release_cleanup
 ```
 
-### 4.6 Legacy EOL enforcement
+GitHub DEV carries the final two implementations as later reconciliation filenames:
 
-Both Journey-based Legacy preservation and transfer-based Legacy validation now require the source SH to be `DEACTIVATED` / EOL. Transfer-based Legacy also explicitly checks source ownership.
+```text
+20260822142000_p1_inheritance_revoke_journey_provenance_cleanup.sql
+20260822143000_p1_clone_revoke_release_cleanup.sql
+```
 
-### 4.7 Transfer-policy vocabulary
+This is intentional traceability reconciliation; historical Supabase migration versions are not fabricated or duplicated in GitHub merely to imitate past execution timestamps.
 
-The established semantic value is `INHERITANCE`. `INHERITABLE` is accepted only as a compatibility alias and normalized to `INHERITANCE` by the policy mutation RPC.
+A dedicated parity note is tracked at:
 
-### 4.8 Journey lifecycle eligibility
+`docs/reference/SECOND_HEAD_GITHUB_SUPABASE_MIGRATION_PARITY.md`
 
-Inheritance and Succession Journey transfer now require the selected Journey event's `transfer_policy` to match the lifecycle operation. `NON_TRANSFERABLE` remains rejected.
+Status:
 
-## 5. Existing reconciled fixes carried forward
+```text
+Live Supabase runtime              🟢
+GitHub semantic implementation     🟢 reconciled
+Historical migration identity      🟡 intentionally not fabricated
+Clean-room fresh replay            🟡 open evidence
+```
 
-From Resume 57:
+## 6. Runtime/E2E evidence remains separate from BE closure
 
-- terminal account/session lifecycle hardening;
-- Succession source/target lifecycle reconciliation;
-- terminal account Clone materialization guard;
-- SH-scoped Experience context retrieval;
-- Inheritance authorization consumption on success;
-- operational conversation deactivation guard;
-- `rls_auto_enable()` client execution closure;
-- Recovery restore idempotency;
-- remaining security-definer privilege hardening.
-
-## 6. Canonical/E2E status remains separate from BE closure
-
-The Canonical Matrix still contains open runtime evidence, including:
+Still not promoted to PASS without authenticated runtime evidence:
 
 - cross-account Experience visibility final fresh proof;
 - authenticated Memory/Knowledge/Replacement roundtrip;
@@ -144,11 +164,9 @@ The Canonical Matrix still contains open runtime evidence, including:
 - unauthorized lifecycle attempts;
 - remaining Memory/Knowledge canonical verification.
 
-No source inspection is promoted to Real E2E PASS.
+No device or authenticated E2E PASS is claimed from source inspection.
 
-## 7. Owner Decision recorded in this resume
-
-Owner explicitly clarified during this session:
+## 7. Owner decisions recorded
 
 ```text
 DEACTIVATED = END OF LIFE
@@ -169,13 +187,13 @@ Inherited information at SH-B
 → SH-B does not rewrite that inherited policy
 
 If SH-A releases/revokes an active Inheritance authorization
-→ derived Memory / Knowledge / Experience at SH-B must be removed
+→ derived Memory / Knowledge / Experience / Journey at SH-B must be removed
 → SH-A originals remain
 ```
 
-This is an Owner decision recorded here because the available source material did not explicitly define every one of these lifecycle/release details.
+These are Owner decisions recorded because the available source material did not explicitly define every one of these lifecycle/release details.
 
-## 8. Next execution rule
+## 8. Execution rule
 
 Continue:
 
