@@ -31,7 +31,8 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
   if (memoryCandidate) {
     const content = typeof memoryCandidate.content === "string" ? memoryCandidate.content.trim() : "";
     if (content) {
-      const { data, error } = await supabase.rpc("runtime_record_memory_with_journey", { p_sh_id: shId, p_content: content, p_memory_type: memoryCandidate.memory_type ?? "LONG_TERM", p_source: memoryCandidate.source ?? "runtime:p4d:memory_candidate", p_confidence: memoryCandidate.confidence ?? null, p_scope: memoryCandidate.scope ?? "PRIVATE", p_visibility: memoryCandidate.visibility ?? "OWNER_ONLY", p_lifecycle: memoryCandidate.lifecycle ?? "CANDIDATE" });
+      const isExplicitFallback = Boolean(fallback?.memory && memoryCandidate === fallback.memory);
+      const { data, error } = await supabase.rpc("runtime_record_memory_with_journey", { p_sh_id: shId, p_content: content, p_memory_type: memoryCandidate.memory_type ?? "LONG_TERM", p_source: isExplicitFallback ? "runtime:p5a:explicit_user_request" : "runtime:p4d:memory_candidate", p_confidence: memoryCandidate.confidence ?? null, p_scope: "PRIVATE", p_visibility: "OWNER_ONLY", p_lifecycle: "CANDIDATE" });
       if (error) throw new Error(`MEMORY_RECORD_FAILED: ${error.message}`);
       memory = typeof data === "string" ? data : null;
       if (!memory) throw new Error("MEMORY_RECORD_FAILED: recorder returned no memory id");
@@ -43,7 +44,8 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
     const source = typeof knowledgeCandidate.source === "string" ? knowledgeCandidate.source.trim() : "";
     const origin = normalizeKnowledgeOrigin(knowledgeCandidate.origin);
     if (content && source && origin) {
-      const { data, error } = await supabase.rpc("runtime_record_knowledge_with_journey", { p_sh_id: shId, p_content: content, p_source: source, p_origin: origin, p_provenance: knowledgeCandidate.provenance ?? { source_message: userMessage }, p_scope: knowledgeCandidate.scope ?? "PRIVATE", p_visibility: knowledgeCandidate.visibility ?? "OWNER_ONLY", p_confidence: knowledgeCandidate.confidence ?? null });
+      const isExplicitFallback = Boolean(fallback?.knowledge && knowledgeCandidate === fallback.knowledge);
+      const { data, error } = await supabase.rpc("runtime_record_knowledge_with_journey", { p_sh_id: shId, p_content: content, p_source: isExplicitFallback ? "runtime:p5a:explicit_user_request" : "runtime:p4d:knowledge_candidate", p_origin: origin, p_provenance: knowledgeCandidate.provenance ?? { source_message: userMessage }, p_scope: "PRIVATE", p_visibility: "OWNER_ONLY", p_confidence: knowledgeCandidate.confidence ?? null });
       if (error) throw new Error(`KNOWLEDGE_ACQUISITION_FAILED: ${error.message}`);
       knowledge = typeof data === "string" ? data : null;
       if (!knowledge) throw new Error("KNOWLEDGE_ACQUISITION_FAILED: recorder returned no knowledge id");
