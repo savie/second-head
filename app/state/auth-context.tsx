@@ -33,6 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       let nextContext = await loadAuthenticatedContext();
 
+      if (nextContext?.account.status === 'deactivated') {
+        await signOut();
+        setSession(null);
+        setContext(null);
+        setError('ACCOUNT_DEACTIVATED: this account is permanently deactivated and cannot sign in.');
+        return;
+      }
+
       if (nextContext) {
         const { error: cloneError } = await supabase.rpc('runtime_materialize_registered_clone');
         if (cloneError) throw cloneError;
