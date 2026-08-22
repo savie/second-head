@@ -4,9 +4,24 @@
 
 This document records migration-history reconciliation without fabricating historical Supabase migration versions.
 
-## Current state
+## Canonical repository rule
 
-Supabase DEV migration history contains the live P1 tail through:
+```text
+database/migrations/
+    = ONLY canonical application migration source
+
+Supabase DEV migration catalog
+    = immutable evidence of what was actually applied
+
+supabase/migrations/
+    = historical/non-canonical artifacts only
+```
+
+New application migrations must be authored under `database/migrations/`. The repository must not create a second active migration source under `supabase/migrations/`.
+
+## Current live P1 tail
+
+Supabase DEV currently ends with:
 
 ```text
 20260822033444 p1_terminal_lifecycle_security_reconciliation
@@ -24,16 +39,48 @@ Supabase DEV migration history contains the live P1 tail through:
 20260822055314 p1_reconcile_transfer_policy_vocabulary_and_journey_eligibility
 20260822065752 p1_inheritance_revoke_journey_provenance_cleanup
 20260822070005 p1_clone_revoke_release_cleanup
+20260822091610 p1_normalize_inheritance_transfer_policy_alias
+20260822092029 p1_hide_internal_active_sh_assertion
+20260822092412 p1_hide_internal_journey_shared_helper
+20260822092425 reconcile_journey_shared_helper_rls_execution
+20260822092516 reconcile_journey_shared_helper_execution
 ```
 
-GitHub DEV intentionally contains later reconciliation filenames for the last two P1 implementations rather than pretending those exact historical filenames were present in GitHub at the time they ran:
+## Canonical GitHub reconciliation
+
+The following current live semantics are now represented under `database/migrations/`:
 
 ```text
 20260822142000_p1_inheritance_revoke_journey_provenance_cleanup.sql
 20260822143000_p1_clone_revoke_release_cleanup.sql
+20260822150000_p1_normalize_inheritance_transfer_policy_alias.sql
+20260822151000_p1_hide_internal_active_sh_assertion.sql
+20260822153000_reconcile_journey_shared_helper_execution.sql
 ```
 
-The GitHub inheritance migration contains the same live Journey provenance and revoke cleanup behavior, including deletion by `authorization_id` and retention of source records. The live Supabase function definition was verified to contain the same Journey cleanup.
+The final Journey shared-helper ACL is intentionally:
+
+```text
+runtime_journey_event_is_shared(uuid)
+    authenticated  = EXECUTE
+    anon/public     = no EXECUTE
+```
+
+because the helper is a dependency of the authenticated `journey_events` visibility RLS policy.
+
+The final internal active-SH assertion ACL is:
+
+```text
+runtime_assert_active_sh(uuid,text)
+    authenticated  = no EXECUTE
+    anon/public     = no EXECUTE
+```
+
+The `INHERITABLE` compatibility alias is normalized to canonical persisted `INHERITANCE` in `runtime_record_experience()`.
+
+The non-canonical duplicate copies of the four individually represented P1 migrations were removed from `supabase/migrations/`. No Supabase migration was replayed or rewritten.
+
+The three historical Journey shared-helper ACL migrations were not fabricated as separate historical GitHub migrations. Their final live semantics are represented by the canonical final-state reconciliation migration above.
 
 ## Reconciliation rule
 
@@ -57,7 +104,7 @@ Until that replay exists, status is:
 
 ```text
 Live Supabase runtime          PASS
-GitHub source semantic parity  RECONCILED
+GitHub source semantic parity  RECONCILED for current P1 tail
 Historical version identity    INTENTIONALLY NOT FABRICATED
 Clean-room replay              OPEN EVIDENCE
 ```
