@@ -4,8 +4,9 @@
 
 This resume supersedes Session Resume 55 as the latest continuity checkpoint.
 
-- Previous checkpoint: `756240e454391db831b19dcaeb7c2403aafa0381`
-- Current DEV branch checkpoint: `9a84b021d2269a852a22a1ba21e3c71007140055`
+- Previous implementation checkpoint: `756240e454391db831b19dcaeb7c2403aafa0381`
+- Reconciliation implementation checkpoint: `9a84b021d2269a852a22a1ba21e3c71007140055`
+- Resume 56 artifact commit: `c57682323844a1817c3b93ebe8bddb03ac6e010a`
 - Backend: Supabase DEV `pkhkgvsrqeupvwoqjwmd`
 - Current Supabase migration tail:
   - `20260822021005` `explicit_memory_replacement`
@@ -86,7 +87,15 @@ The authoritative DEV tail is now represented in GitHub as:
 20260822021134_revoke_anon_semantic_mutation_execute.sql
 ```
 
-## 6. Remaining P1 / evidence work
+## 6. Fresh DEV verification performed after Resume 56
+
+Live Supabase DEV confirms the three semantic mutation functions and Journey delete are `SECURITY DEFINER` with `authenticated` execution only; `public` and `anon` execution are false.
+
+Unauthenticated direct probes were also rejected by all three semantic mutation functions with their expected authentication-required errors.
+
+Full authenticated roundtrip is still not claimed as PASS because this management-session SQL context has no authenticated user/session. That requires an authenticated runtime/E2E path.
+
+## 7. Remaining P1 / evidence work
 
 The following items remain OPEN and are not claimed as PASS by this resume:
 
@@ -95,9 +104,9 @@ The following items remain OPEN and are not claimed as PASS by this resume:
 3. Recovery duplicate `RECOVERY` / `RESTORED` records remain an open integrity investigation until fresh evidence closes them.
 4. Experience → Memory semantic promotion remains an open behavior contract/evidence item.
 5. Full authenticated semantic Memory/Knowledge/Replacement roundtrip still needs fresh runtime E2E proof against the reconciled DEV database.
-6. The new `SECURITY DEFINER` functions require final privilege and authenticated-path regression evidence; privilege state is reconciled, but runtime E2E is not yet a PASS claim.
+6. The new `SECURITY DEFINER` functions require authenticated-path regression evidence; privilege state and unauthenticated rejection are now verified, but authenticated runtime E2E is not yet a PASS claim.
 
-## 7. Explicit non-goals of this checkpoint
+## 8. Explicit non-goals of this checkpoint
 
 No new product feature was introduced.
 
@@ -107,7 +116,7 @@ No Owner decision was invented.
 
 No FE feature was marked complete merely because UI code exists.
 
-## 8. Next execution gate
+## 9. Next execution gate
 
 Before feature expansion, run fresh authenticated verification for:
 
