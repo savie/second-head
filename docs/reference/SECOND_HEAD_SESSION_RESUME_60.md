@@ -1,123 +1,53 @@
 # SECOND HEAD — SESSION RESUME 60
 
-## Session checkpoint
+## Checkpoint
 
-This resume closes the migration-source reconciliation pass performed after the audit from `a60eb32` through the current DEV state.
+This checkpoint continues the BE-only audit/fix/reconcile pass from the `a60eb32` audit baseline through the current DEV state.
 
-## Authority
+## Closed in this pass
 
-No Canonical decision was changed.
+- Canonical migration source remains `database/migrations/`.
+- Supabase migration history remains immutable evidence; historical versions were not rewritten.
+- Live P1 tail was rechecked against the actual Supabase catalog.
+- `runtime_record_experience()` canonicalizes compatibility input `INHERITABLE` to persisted `INHERITANCE`.
+- `runtime_assert_active_sh(uuid,text)` is not directly executable by authenticated/anon/public clients.
+- `runtime_journey_event_is_shared(uuid)` retains authenticated execution because it is an RLS visibility dependency; anon/public execution is denied.
+- Inheritance revoke cleanup is provenance-scoped and includes Journey.
+- Clone revoke cleanup is provenance-scoped and idempotent at the agreement level.
+- Legacy selected preservation now requires the source SH to be `deactivated` / End-of-Life, matching the ratified lifecycle semantics.
 
-Frozen rule remains:
+## Canonical repository reconciliation
 
-```text
-database/migrations/
-    = ONE canonical application migration source
-
-Supabase DEV migration catalog
-    = immutable applied-state evidence
-
-supabase/migrations/
-    = historical / non-canonical artifacts only
-```
-
-## Work completed
-
-### 1. Live Supabase tail re-audited
-
-Current DEV migration tail was verified through:
+New replay-oriented canonical migration artifacts are recorded under `database/migrations/`:
 
 ```text
-20260822091610 p1_normalize_inheritance_transfer_policy_alias
-20260822092029 p1_hide_internal_active_sh_assertion
-20260822092412 p1_hide_internal_journey_shared_helper
-20260822092425 reconcile_journey_shared_helper_rls_execution
-20260822092516 reconcile_journey_shared_helper_execution
+20260822170000_p1_legacy_end_of_life_guard.sql
+20260822170001_p1_current_p1_tail_semantic_reconciliation.sql
 ```
 
-### 2. Canonical migration source repaired
+These do not fabricate historical Supabase migration IDs. They represent the audited final semantics for future clean-room reconstruction.
 
-Current live P1 semantics are now represented under `database/migrations/`:
+## Explicit semantic boundary
 
 ```text
-20260822142000_p1_inheritance_revoke_journey_provenance_cleanup.sql
-20260822143000_p1_clone_revoke_release_cleanup.sql
-20260822150000_p1_normalize_inheritance_transfer_policy_alias.sql
-20260822151000_p1_hide_internal_active_sh_assertion.sql
-20260822153000_reconcile_journey_shared_helper_execution.sql
+Inheritance = authorized transfer while source may be active
+Succession  = selected transfer after source End-of-Life
+Legacy      = selected preservation after End-of-Life
+Clone       = separate initial-state creation mechanism
 ```
 
-The first four were moved from their accidental non-canonical `supabase/migrations/` location. The Journey shared-helper historical sequence was not fabricated; its final live ACL semantics were captured in one canonical final-state reconciliation migration.
+No Owner Decision was introduced in this checkpoint. The Legacy End-of-Life requirement was already explicitly established by Owner in the active session context and by the P5C reconciliation.
 
-### 3. Non-canonical duplicates removed
-
-Removed from `supabase/migrations/`:
+## Evidence-open items
 
 ```text
-20260822142000_p1_inheritance_revoke_journey_provenance_cleanup.sql
-20260822143000_p1_clone_revoke_release_cleanup.sql
-20260822150000_p1_normalize_inheritance_transfer_policy_alias.sql
-20260822151000_p1_hide_internal_active_sh_assertion.sql
+clean-room replay of full canonical migration chain   🟡
+authenticated multi-account E2E                         🟡
+device/UI verification                                 🟡
 ```
 
-No Supabase migration history was deleted, renamed, replayed, or rewritten.
+These are not claimed PASS from static inspection.
 
-### 4. Runtime semantics verified
+## Next BE pass
 
-Live Supabase definitions confirm:
-
-```text
-INHERITABLE input
-    ↓
-INHERITANCE persisted
-```
-
-```text
-runtime_assert_active_sh(uuid,text)
-    authenticated EXECUTE = NO
-    anon/public EXECUTE    = NO
-```
-
-```text
-runtime_journey_event_is_shared(uuid)
-    authenticated EXECUTE = YES
-    anon/public EXECUTE    = NO
-```
-
-The latter is intentional because it is used by the authenticated `journey_events` visibility RLS policy.
-
-### 5. No new Owner decision required
-
-All changes above are deterministic reconciliation of the existing SH Core rules. No Canonical semantics were invented or changed.
-
-## Remaining evidence-open items
-
-```text
-clean-room replay of full GitHub migration chain   🟡
-authenticated runtime/E2E gates                      🟡
-full runtime atomicity/idempotency proof            🟡
-```
-
-These are evidence gates, not confirmed defects.
-
-## Current state
-
-```text
-Canonical / Architecture / Scope / Phase -1   🟢
-Execution strategy / Resume continuity        🟢
-Supabase live P1 semantics                    🟢
-GitHub canonical migration source              🟢 reconciled
-Migration historical identity                  🟢 preserved / not fabricated
-Clean-room replay                              🟡 open evidence
-Authenticated E2E                              🟡 open evidence
-```
-
-## Next execution rule
-
-Continue BE-only audit. If a deterministic defect is found:
-
-```text
-FIX → RECONCILE → RE-AUDIT → UPDATE RESUME
-```
-
-If only runtime evidence is missing, mark it evidence-open and do not claim PASS. If source/Canonical semantics are genuinely ambiguous, stop for Owner decision.
+Continue audit of deterministic ownership, lifecycle, mutation atomicity/idempotency, RLS/function privilege interaction, and canonical/source parity. Fix and reconcile directly when semantics are already established. Stop only when the remaining item requires an Owner decision or runtime evidence that cannot be honestly produced from the available BE environment.
