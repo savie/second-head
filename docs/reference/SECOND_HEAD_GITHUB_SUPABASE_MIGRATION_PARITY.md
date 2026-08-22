@@ -1,27 +1,16 @@
 # SECOND HEAD — GITHUB ↔ SUPABASE MIGRATION PARITY
 
-## Purpose
-
-This document records migration-history reconciliation without fabricating historical Supabase migration versions.
-
-## Canonical repository rule
+## Canonical rule
 
 ```text
-database/migrations/
-    = ONLY canonical application migration source
-
-Supabase DEV migration catalog
-    = immutable evidence of what was actually applied
-
-supabase/migrations/
-    = historical/non-canonical artifacts only
+database/migrations/  = only canonical application migration source
+Supabase DEV catalog  = immutable applied-state evidence
+supabase/migrations/  = historical/non-canonical artifacts
 ```
 
-New application migrations must be authored under `database/migrations/`. The repository must not create a second active migration source under `supabase/migrations/`.
+## Audited live tail
 
-## Current live state
-
-Supabase DEV currently ends with:
+Supabase DEV now contains the historical P1 tail through the two canonical replay reconciliations and the Legacy guards:
 
 ```text
 20260822091610 p1_normalize_inheritance_transfer_policy_alias
@@ -30,43 +19,42 @@ Supabase DEV currently ends with:
 20260822092425 reconcile_journey_shared_helper_rls_execution
 20260822092516 reconcile_journey_shared_helper_execution
 20260822170000 p1_legacy_end_of_life_guard
+20260822170001 p1_current_p1_tail_semantic_reconciliation
+20260822170002 p1_legacy_record_eol_guard
 ```
 
-The historical versions remain immutable evidence. They are not renamed or replayed merely to match repository filenames.
+The historical migration versions remain immutable evidence. The later `170000`–`170002` migrations are new canonical reconciliation executions and are represented under `database/migrations/`.
 
-## Canonical replay reconciliation
-
-The repository now records the current semantic end state through canonical migrations under `database/migrations/`:
+## Canonical replay artifacts
 
 ```text
-20260822170000_p1_legacy_end_of_life_guard.sql
-20260822170001_p1_current_p1_tail_semantic_reconciliation.sql
+database/migrations/20260822170000_p1_legacy_end_of_life_guard.sql
+database/migrations/20260822170001_p1_current_p1_tail_semantic_reconciliation.sql
+database/migrations/20260822170002_p1_legacy_record_eol_guard.sql
 ```
 
-These are **replay artifacts**, not fabricated copies of the historical Supabase migration versions.
+These reconstruct the audited current semantics without fabricating historical migration IDs.
 
-The reconciliation migration captures the current live semantics for:
+## Audited semantic state
 
-- `INHERITABLE` compatibility input → canonical persisted `INHERITANCE`;
-- internal `runtime_assert_active_sh(uuid,text)` → no authenticated/anon/public execute;
-- `runtime_journey_event_is_shared(uuid)` → authenticated execute retained because it is an RLS visibility dependency; anon/public denied;
-- inheritance revoke provenance cleanup including Journey;
-- clone revoke provenance cleanup and idempotent already-revoked response.
+- `INHERITABLE` compatibility input is normalized to persisted `INHERITANCE`.
+- Internal `runtime_assert_active_sh(uuid,text)` has no client execute privilege.
+- `runtime_journey_event_is_shared(uuid)` remains executable by authenticated because it is required by the authenticated Journey visibility RLS policy; anon/public are denied.
+- Inheritance revoke removes provenance-linked Memory, Knowledge, Experience, and Journey derived records.
+- Clone revoke is source-owner scoped and idempotent for already-revoked agreements.
+- Selected Legacy preservation requires the source SH to be End-of-Life/deactivated.
+- Generic `runtime_record_legacy()` now also requires the source SH to be End-of-Life/deactivated.
 
-Legacy preservation now has an explicit End-of-Life guard and rejects active SHs.
+## Non-goals
 
-## Important historical rule
+No historical Supabase migration was renamed, rewritten, or replayed merely to match GitHub filenames. No canonical architecture/scope/contract decision was changed.
 
-The repository does **not** claim that historical migration timestamps and canonical replay filenames are identical. Historical Supabase migration history is immutable evidence; canonical GitHub migration files are the source used to reconstruct equivalent SH Core semantics.
-
-## Remaining verification
-
-A clean-room replay of the entire canonical GitHub migration chain is still an execution/evidence task. It is not claimed PASS from source inspection alone.
+## Remaining evidence gates
 
 ```text
-Live Supabase runtime          PASS for audited live state
-Canonical source               RECONCILED for audited P1 tail
-Historical version identity    PRESERVED
-Clean-room replay              OPEN EVIDENCE
-Authenticated E2E              OPEN EVIDENCE
+Full clean-room replay of canonical chain   🟡
+Authenticated multi-account E2E               🟡
+Device/UI regression                         🟡
 ```
+
+These are evidence gates, not claimed defects.
