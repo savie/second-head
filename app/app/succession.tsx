@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
-import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Button, Pressable, ScrollView, Text, TextInput, View, type ViewStyle } from 'react-native';
 import { Redirect } from 'expo-router';
 import { createSuccessionRule, executeSuccession, listExperiences, listKnowledge, listMemories, listSuccessionRules, type Experience, type Knowledge, type Memory, type SuccessionRule, type TransferSelection } from '../features/inheritance/inheritance-service';
 import { loadJourneyEvents, type JourneyEvent } from '../features/journey/journey-service';
+import { useAuth } from '../state/auth-context';
+
+type ShInstance = { is_primary?: boolean; sh_id: string };
 
 export default function SuccessionScreen() {
-  const { session, context } = useAuth(); const current = context?.shInstances.find(v => v.is_primary) ?? context?.shInstances[0]; const currentShId = current?.sh_id ?? ''; const currentAccountId = context?.account.account_id ?? '';
+  const { session, context } = useAuth(); const current = (context?.shInstances as ShInstance[] | undefined)?.find((v: ShInstance) => v.is_primary) ?? (context?.shInstances as ShInstance[] | undefined)?.[0]; const currentShId = current?.sh_id ?? ''; const currentAccountId = context?.account.account_id ?? '';
   const [successorAccountId, setSuccessorAccountId] = useState(''); const [events, setEvents] = useState<JourneyEvent[]>([]); const [memories, setMemories] = useState<Memory[]>([]); const [knowledge, setKnowledge] = useState<Knowledge[]>([]); const [experiences, setExperiences] = useState<Experience[]>([]); const [rules, setRules] = useState<SuccessionRule[]>([]);
   const [selectedJourneyIds, setSelectedJourneyIds] = useState<string[]>([]); const [selectedMemoryIds, setSelectedMemoryIds] = useState<string[]>([]); const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<string[]>([]); const [selectedExperienceIds, setSelectedExperienceIds] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null); const [error, setError] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [busy, setBusy] = useState(false);
