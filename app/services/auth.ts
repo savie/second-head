@@ -1,7 +1,25 @@
 import { supabase } from './supabase';
 
 export async function signInWithPassword(email: string, password: string) {
-  return supabase.auth.signInWithPassword({ email, password });
+  const result = await supabase.auth.signInWithPassword({ email, password });
+  if (result.error) return result;
+
+  const { data: account, error: accountError } = await supabase
+    .from('accounts')
+    .select('status')
+    .maybeSingle();
+
+  if (accountError) {
+    await supabase.auth.signOut();
+    throw accountError;
+  }
+
+  if (!account || account.status === 'deactivated') {
+    await supabase.auth.signOut();
+    throw new Error('ACCOUNT_DEACTIVATED: this account is permanently deactivated and cannot sign in.');
+  }
+
+  return result;
 }
 
 export async function signUpWithPassword(email: string, password: string) {
