@@ -2,6 +2,9 @@ name: SH Runtime Controlled Verification
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - dev
 
 jobs:
   runtime-verification:
