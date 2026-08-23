@@ -41,13 +41,15 @@ export async function loadAuthenticatedContext() {
   if (ownershipError) throw ownershipError;
 
   const roles = new Map((ownershipRows ?? []).map((row) => [row.sh_id, row.role]));
+  const shInstances = (shRows ?? []).map((row) => ({
+    ...row,
+    role: roles.get(row.sh_id) ?? 'unknown',
+  })) as AuthenticatedSH[];
 
   return {
     userId: authData.user.id,
     account: account as AuthenticatedAccount,
-    shInstances: (shRows ?? []).map((row) => ({
-      ...row,
-      role: roles.get(row.sh_id) ?? 'unknown',
-    })) as AuthenticatedSH[],
+    shInstances,
+    sh_id: shInstances[0]?.sh_id ?? null,
   };
 }
