@@ -31,7 +31,7 @@ async function invokeRuntime(accessToken) {
   return fetch(`${base}/functions/v1/runtime-p4a-001`, {
     method: 'POST',
     headers: { ...headers, Authorization: `Bearer ${accessToken}` },
-    body: JSON.stringify({ user_message: 'SH runtime controlled verification' }),
+    body: JSON.stringify({ user_message: 'SH runtime controlled verification', verification_only: true }),
   });
 }
 
@@ -57,6 +57,7 @@ if (typeof payload.sh_id !== 'string' || typeof payload.response !== 'string') t
 if (!payload.response.trim()) throw new Error(`RUNTIME_RESPONSE_EMPTY: ${JSON.stringify(payload)}`);
 const allowedProviders = new Set(['openrouter', 'groq', 'huggingface', 'mock']);
 if (payload.meta?.phase !== 'P4A-001' || !allowedProviders.has(payload.meta?.model_provider)) throw new Error(`RUNTIME_META_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
+if (payload.meta?.persistence !== 'verification-only') throw new Error(`RUNTIME_PERSISTENCE_MODE_FAILED: ${JSON.stringify(payload)}`);
 if (typeof payload.meta?.model_id !== 'string' || !payload.meta.model_id.trim()) throw new Error(`RUNTIME_MODEL_ID_ASSERTION_FAILED: ${JSON.stringify(payload)}`);
 
 const { data: context, error: contextError } = await (await import('@supabase/supabase-js')).createClient(base, process.env.SUPABASE_ANON_KEY, {
@@ -93,6 +94,7 @@ console.log(JSON.stringify({
     `runtime-p4a-001 accepts authenticated request${runtimeFailure ? ` after auth retry (${runtimeFailure})` : ''}`,
     'runtime resolves and returns SH identity',
     'runtime response contract is valid',
+    'verification-only persistence isolation is active',
     'bounded context assembly returns memory and knowledge arrays',
     'journey retrieval is bounded to the authenticated SH and RLS',
     sessionAlreadyGone ? 'logout session was already absent; no active session remained' : 'logout succeeds',
