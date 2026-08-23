@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, ScrollView, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AppState } from 'react-native';
-import { loadConversationHistory, streamSHRuntime } from '../services/runtime-stream';
+import { streamSHRuntime } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
@@ -11,14 +11,6 @@ type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string
 
 function makeMessage(role: Message['role'], text: string): Message {
   return { id: `${Date.now()}-${Math.random()}`, role, text };
-}
-
-function parseHistory(rows: string[]): Message[] {
-  return rows.map((row, index) => {
-    if (row.startsWith('You: ')) return { id: `history-${index}`, role: 'user', text: row.slice(5) };
-    if (row.startsWith('SH: ')) return { id: `history-${index}`, role: 'assistant', text: row.slice(4) };
-    return { id: `history-${index}`, role: 'system', text: row };
-  });
 }
 
 export default function ChatScreen() {
@@ -41,11 +33,6 @@ export default function ChatScreen() {
 
   useEffect(() => {
     mountedRef.current = true;
-    void loadConversationHistory()
-      .then(history => {
-        if (mountedRef.current) setMessages(parseHistory(history));
-      })
-      .catch(() => {});
     const subscription = AppState.addEventListener('change', nextState => {
       if (!mountedRef.current) return;
       if (nextState === 'active') {
