@@ -1,359 +1,315 @@
 # SECOND HEAD — SESSION RESUME 51
 
-## Melanjutkan dari
+## Continuation point
 
-Session Resume 50 pada commit:
-`a1862392d1675eace336e75646d4d1da485a8467`
+This Resume 51 is refreshed to reflect the latest verified state on `dev` after the runtime-verification persistence isolation and historical-artifact cleanup work.
 
-Reference utama:
-- Canonical Matrix: `docs/SECOND_HEAD_CANONICAL_REAL_E2E_VERIFICATION_MATRIX_v1.0.md`
-- Branch: `dev`
-- Repository: `savie/second-head`
-- Runtime test vehicle terakhir: APK #153
-- Backend: Supabase DEV
+Primary evidence:
+`docs/evidence/EV-P6E-010_RUNTIME_VERIFICATION_PERSISTENCE_ISOLATION_RECONCILIATION_2026-08-23.md`
+
+Latest documentation commit before this refresh:
+`e16f27e53c11c86835fad8e103c521f95fa40a0f`
+
+Branch: `dev`
+Repository: `savie/second-head`
 
 ---
 
-# 1. ATURAN KERJA YANG TETAP
+# 1. AUTHORITY / WORKING ORDER
+
+Continue to use the Canonical REAL E2E Verification Matrix and existing project contracts as authority.
+
+Working order:
 
 ```text
 CANONICAL
    ↓
 AUDIT GITHUB + SUPABASE
    ↓
-BE/DB atau FE sesuai sumber defect
+BE / DB or FE according to actual defect source
    ↓
-CI
+CI / smoke verification
    ↓
-APK baru bila diperlukan
+APK only when required
    ↓
 REAL E2E
    ↓
-update Matrix
+update evidence / Matrix / Resume
 ```
 
-Aturan penting:
+Actual CI error/output remains authoritative when debugging CI.
 
-- Canonical Matrix adalah authority untuk TC-ID dan status.
-- Jangan membuat TC-ID baru jika TC yang ada masih dapat menampung evidence.
-- Actual CI error adalah authority saat debugging CI.
-- Code existence ≠ E2E PASS.
-- Historical DB row ≠ fresh mutation proof.
-- Journey signal ≠ proof bahwa underlying domain retrieval sudah benar.
-- Jangan mengubah lifecycle data secara irreversible tanpa evidence dan keputusan owner.
+Do not mix Chat history, verification persistence, Recovery, Journey semantics, and Memory/Knowledge/Experience retrieval into one defect.
 
 ---
 
-# 2. HASIL SEJAK RESUME 50
+# 2. RUNTIME VERIFICATION — PASS
 
-Resume 50 berakhir pada BE recovery alignment dan kemudian pekerjaan berlanjut ke policy/transfer UX serta REAL E2E Experience.
+GitHub Actions workflow:
 
-Commit penting yang teraudit dari GitHub DEV:
+```text
+SH Runtime Controlled Verification #3
+commit: 33e450d6bb00ffd897d636e802ebe90500845492
+status: PASS
+```
 
-- `cacc00f` — restore Journey filter state.
-- `66e23ae` — remove legacy Experience recorder overload.
-- `24fb11c` — resolve Journey policy UUID without `max(uuid)`.
-- `9383006` — route inheritance authorization through owner RPC.
-- `c5930fb` — track owner inheritance authorization RPC.
-- `21add32` / `088da01` — align and track applied inheritance RPC migration.
-- `57ce0d1` — record APK #150 Experience continuity evidence.
-- `a1d4ab0` — add Journey visibility bridge for GENERAL/SHARED underlying records.
-- `38daa4e` — update canonical Matrix with TC-EXP-06 result on APK #153.
+Passed checks included:
+
+```text
+authenticated session obtained
+runtime-p4a-001 accepts authenticated request
+runtime resolves and returns SH identity
+runtime response contract is valid
+verification-only persistence isolation is active
+bounded context assembly returns memory and knowledge arrays
+journey retrieval is bounded to authenticated SH and RLS
+logout succeeds
+```
+
+Observed context counts:
+
+```text
+Memory    = 5
+Knowledge = 0
+Journey   = 10
+```
+
+Conclusion:
+
+```text
+verification-only runtime path is isolated from ordinary persistence
+```
+
+This is a CI/runtime proof, not by itself a proof of every Android E2E surface.
 
 ---
 
-# 3. JOURNEY POLICY / LIFECYCLE UX
+# 3. CHAT HISTORY CONTINUITY
 
-Journey sekarang menjadi detail surface untuk Memory / Knowledge / Experience milik Owner.
-
-Flow yang terbukti di APK sebelumnya:
+Current intended owner behavior:
 
 ```text
-Journey
- ↓
-Memory / Knowledge / Experience
- ↓
-Detail
- ↓
-Visibility
-Transfer Policy
- ↓
-Edit
+Open Chat
+   ↓
+recent real conversation may appear
+   ↓
+verification/test artifacts must not appear
 ```
 
-Evidence user:
+Recent FE commits:
 
-- Memory policy edit: PASS.
-- Memory after reload: PASS.
-- Memory inheritance checklist: muncul.
-- Knowledge policy edit: PASS.
-- Knowledge after reload: PASS.
-- Knowledge succession: muncul.
-- Knowledge checklist: ada.
-- Experience policy edit sebelumnya gagal dan kemudian backend/UX recorder path diperbaiki.
-- Legacy Experience record akhirnya dapat muncul dan policy dapat diedit.
+- `1e077ab018c0b916e5b52be959f5435bf0ed41ed` — restore filtered recent chat continuity.
+- `47e5e22e9ad66fc2c2449cff370d5eb1546c2b5d` — expose primary SH id for chat history.
 
-Journey filter state juga sudah dipulihkan melalui `cacc00f`.
+`New Chat` may still start empty; this is currently accepted.
+
+The key invariant is:
+
+```text
+real user conversation       → may persist / reappear
+verification-only test data  → must not persist / reappear
+```
 
 ---
 
-# 4. EXPERIENCE REAL E2E
+# 4. HISTORICAL VERIFICATION CHAT POLLUTION — CLEANED
 
-Experience test record yang dipakai:
-
-```text
-TEST EXPERIENCE - PRIVATE LEGACY - E2E
-```
-
-Pada test terakhir record domain Experience di Supabase DEV adalah:
+APK #190 still showed one old assistant response:
 
 ```text
-scope: GENERAL
-visibility: SHARED
-transfer_policy: NON_TRANSFERABLE
-source_ref: runtime:p5a:explicit_user_capture
+I can assist with runtime verification. Please let me know what you'd like to verify or any details you have in mind.
 ```
 
-Experience ID aktual yang ditemukan di Supabase DEV:
-
-`a5692b47-616f-4560-bfe3-d9921b97b981`
-
-Source SH:
-
-`78965d6c-33c2-45f1-9177-bd57b59eadf2`
-
-Account owner:
-
-`83c9f2a1-7617-471c-9c68-75e0003ea6ab`
-
-## Canonical Experience status
+Database audit identified the polluted verification rows as historical rows carrying:
 
 ```text
-TC-EXP-01  🟢 Create Experience
-TC-EXP-02  🟢 Experience persistence
-TC-EXP-03  🟢 Experience payload integrity
-TC-EXP-04  🟢 Experience retrieval
-TC-EXP-05  🟢 Experience continuity semantics
-TC-EXP-06  🔴 Experience visibility
-TC-EXP-07  ⏳ Experience transfer eligibility
-TC-EXP-08  ⏳ Experience non-transferable enforcement
-TC-EXP-09  ⏳ Experience unauthorized access
-TC-EXP-10  ⏳ Experience usable by downstream Chat/context
+metadata.source      = runtime-p4a-001
+metadata.persistence = P4A-005
 ```
 
-TC-EXP-05 sudah PASS berdasarkan APK #150: follow-up Chat mengambil Experience persisted dengan ID `c75fc10d-f12a-4567-ac52-4546a54a11ef` dan menjelaskan bahwa pengalaman tersebut dipakai sebagai dasar jawaban.
+Those historical verification rows were removed from the E2E SH.
+
+Post-cleanup database check:
+
+```text
+verification Chat rows with source runtime-p4a-001 + P4A-005 = 0
+```
+
+Therefore the remaining APK #190 message was **historical persisted test data**, not proof that the current verification-only runtime path was still writing new Chat rows.
 
 ---
 
-# 5. TC-EXP-06 — HASIL TERAKHIR
+# 5. RECOVERY — CLEAN
 
-APK #150 dan APK #152 sudah dipakai untuk retest visibility.
-
-Perbaikan backend `a1d4ab0` kemudian dibuat dan migration terkait diterapkan ke Supabase DEV. Chat Verification untuk `a1d4ab0` juga PASS sebagai #158.
-
-APK #153 kemudian di-install dan TC-EXP-06 diulang hanya pada bagian yang gagal:
+For the E2E SH after cleanup:
 
 ```text
-Account B
- ↓
-Journey
- ↓
-Experience
- ↓
-No events in this category
+recovery_snapshots = 0
+recovery_events    = 0
 ```
+
+The previously observed phantom Recovery state is not present in the cleaned database.
+
+Do not merge Recovery state into the Chat/Journey finding unless a fresh mutation is observed.
+
+---
+
+# 6. JOURNEY / OTHER — CLEAN EXCEPT VALID EVOLUTION
+
+Previously observed verification/test pollution included:
+
+```text
+LIFECYCLE — SH runtime controlled verification
+LEGACY    — APK #85 runtime-test artifact
+```
+
+Those records were removed.
+
+Current relevant `runtime:p4d:journey_candidate` records include:
+
+```text
+EVOLUTION
+  APK #175 replaced APK #85
+
+EXPERIENCE
+  APK #174 replaced APK #85
+
+EXPERIENCE
+  explicit transfer eligibility test
+```
+
+The `EVOLUTION` record is intentionally retained because it is a valid semantic Journey change.
+
+Do not disable Evolution.
+Do not treat every `runtime:p4d:journey_candidate` as junk.
+Only verification/test artifacts should be isolated or cleaned.
+
+---
+
+# 7. VERIFICATION HARNESS / TEST CLEANUP
+
+Relevant commits:
+
+- `83f9625fb89be65e16aec514b97728b6bc845cb0` — isolate verification harness artifacts.
+- `6f44808833f681559f2f6fd5c71047e5c8a372d2` — isolate runtime verification persistence.
+- `3588cfc8bd64d042be5b1b305d667aaaf9c3e47d` — runtime invocation verification non-persistent.
+- `8239f86c43bc2e840b72841e0e00284b079d73f4` — runtime streaming verification non-persistent.
+- `4249a220bacb269afe57f316208b36970b14e218` — recovery roundtrip artifact cleanup.
+- `1eaf16d3c8f2bc2e2e16e081e746fd340e1b4145` — recovery journey artifact cleanup.
+- `31bea45c9cb828b4a436bd048a06682ae8838071` — install runtime verification dependency in CI.
+- `33e450d6bb00ffd897d636e802ebe90500845492` — run runtime verification automatically on `dev` pushes.
+
+The verification workflow is now a proper CI gate rather than an artifact-producing owner-chat test.
+
+---
+
+# 8. APK #190 REAL E2E CHECKPOINT
+
+User-observed state on APK #190:
+
+```text
+New Conversation             clean / acceptable
+Memory                       visible
+Knowledge                    visible
+Experience                   visible
+Recovery                     clean
+Journey Evolution            remains
+Journey test pollution       identified and cleaned
+Chat verification artifact  identified as historical and cleaned
+```
+
+No new APK is required merely for the historical DB cleanup.
+
+---
+
+# 9. CURRENT GATE BEFORE NEXT TEST
+
+Before moving to another semantic/lifecycle test, recheck APK #190 after the DB cleanup:
+
+### A — Chat
+
+Reload/reopen Chat.
 
 Expected:
 
 ```text
-Account A Experience
-GENERAL / SHARED
-        ↓
-Account B Journey
-        ↓
-Experience terlihat
+last real conversation may appear
+old verification response must be gone
 ```
 
-Hasil APK #153: **FAIL**.
+### B — Normal message
+
+Send one ordinary message.
+
+Expected:
+
+```text
+one user message
+one SH response
+no SH runtime verification message
+no streaming verification message
+```
+
+### C — Recovery
+
+Open Recovery.
+
+Expected:
+
+```text
+no phantom snapshot
+no phantom recovery event
+```
+
+### D — Journey / Other
+
+Expected:
+
+```text
+valid Evolution may remain
+verification LIFECYCLE/LEGACY junk must not return
+```
+
+Only after A–D are confirmed should the next semantic/lifecycle test begin.
 
 ---
 
-# 6. AUDIT GITHUB + SUPABASE SETELAH APK #153
+# 10. SEPARATION RULE
 
-## Supabase
-
-Migration berikut sudah ada di DEV:
-
-`20260820134854 — fix_journey_shared_experience_visibility`
-
-Function aktual di DEV:
-
-`public.runtime_journey_event_is_shared(uuid)`
-
-Status:
-
-- SECURITY DEFINER: aktif.
-- `authenticated` memiliki EXECUTE.
-- RLS `journey_events` memakai `journey_events_visibility_select`.
-- Policy owner tetap memberi akses untuk SH milik account sendiri.
-- Policy shared memanggil `runtime_journey_event_is_shared(event_id)`.
-
-Function memang memeriksa underlying Memory / Knowledge / Experience dan hanya membuka `GENERAL + SHARED`.
-
-## Data aktual
-
-Journey Experience event untuk record test lama masih memiliki payload:
+Keep these dimensions separate:
 
 ```text
-capture_mode: EXPLICIT_USER
-representation: TEST EXPERIENCE - PRIVATE LEGACY - E2E
+Chat history continuity
+        ≠
+verification persistence isolation
+        ≠
+Recovery snapshot lifecycle
+        ≠
+Journey semantic candidate recording
+        ≠
+Memory / Knowledge / Experience retrieval
 ```
 
-Payload event tersebut **tidak membawa `experience_id`**.
-
-Migration sudah memiliki backward-compatible fallback yang mencocokkan:
-
-```text
-source_ref = runtime:p5a:explicit_user_capture
-content = representation
-```
-
-Dengan data DEV saat ini, underlying Experience yang cocok adalah satu record dan sudah `GENERAL / SHARED`.
-
-## Sumber defect yang ditemukan
-
-Audit source menunjukkan FE masih melakukan:
-
-```text
-loadJourneyEvents(primarySH.sh_id)
-```
-
-dan `journey-service.ts` menjalankan query:
-
-```text
-.from('journey_events')
-.select(...)
-.eq('sh_id', shId)
-```
-
-Artinya saat Account B membuka Journey, query sudah lebih dulu dibatasi ke **SH milik Account B**.
-
-RLS shared visibility tidak dapat menambahkan row dari SH Account A karena row tersebut sudah dibuang oleh filter `.eq('sh_id', B_SH_ID)`.
-
-Jadi defect TC-EXP-06 sekarang terlokalisasi sebagai **FE/read-path defect**, bukan migration/RLS defect.
-
-Belum ada fix FE pada Resume 51. Jangan membuat APK baru sebelum source fix dibuat dan CI PASS.
+A PASS in one dimension is not proof of another.
 
 ---
 
-# 7. INHERITANCE / SUCCESSION / LEGACY
-
-Evidence APK #150 yang sudah terbukti:
+# 11. CURRENT PROJECT CHECKPOINT
 
 ```text
-Inheritance authorization created:
-dc8f020c-23ee-4711-a776-d2519477dd4c
-status: PENDING
-selected Memory preserved in memory_ids
+CI runtime verification                  🟢 PASS
+Verification-only persistence isolation  🟢 PASS
+Historical verification Chat cleanup     🟢 CLEAN
+Recovery phantom artifacts               🟢 CLEAN
+Journey verification pollution           🟢 CLEAN
+Valid Evolution                           🟢 RETAINED
+Memory                                    🟢 observed
+Knowledge                                 🟢 observed
+Experience                                🟢 observed
+
+NEXT ACTION:
+recheck APK #190 after DB cleanup
+then continue with the next REAL E2E surface
 ```
 
-Succession:
-
-```text
-07cc54fb-48b1-49f7-a80a-6dd32f8eaba7
-```
-
-Legacy:
-
-```text
-939b8387-29d3-4099-9caf-2947b91b24a8
-```
-
-Kesalahan target account/SH sebelumnya sudah dilacak dan kemudian target valid berhasil digunakan sampai authorization creation sukses.
-
-Jangan menganggap creation = enforcement. TC enforcement masih terbuka.
-
----
-
-# 8. CI / APK STATE
-
-Workflow Chat Verification sudah berhasil menjalankan commit `a1d4ab0`:
-
-```text
-SH App Chat Verification #158
-commit a1d4ab0
-🟢 PASS
-```
-
-Android Build #152 masih dipakai sebelum DB visibility fix efektif untuk retest.
-
-Android Build #153 sudah di-install dan menjadi runtime evidence terakhir.
-
-Hasil #153 tetap:
-
-```text
-TC-EXP-06 = 🔴 FAIL
-```
-
-Jangan menganggap CI PASS sebagai E2E PASS.
-
----
-
-# 9. CURRENT POSITION
-
-```text
-TC-EXP-01..05     🟢 PASS
-TC-EXP-06         🔴 FAIL
-                    ↓
-          FE Journey read-path defect
-                    ↓
-        remove/reshape current-SH filter
-                    ↓
-              CI verification
-                    ↓
-                APK baru
-                    ↓
-          retest hanya TC-EXP-06
-```
-
-TC berikutnya **belum boleh dilanjutkan** sebelum TC-EXP-06 selesai atau owner memutuskan disposition lain.
-
----
-
-# 10. NEXT SESSION INSTRUCTION
-
-Lanjut dari commit terakhir Resume 51.
-
-Prioritas tunggal:
-
-```text
-Audit + fix FE Journey read path untuk TC-EXP-06.
-```
-
-Jangan mengubah Canonical semantics.
-Jangan membuat TC baru.
-Jangan mengubah data lifecycle secara manual.
-
-Fix harus membuat Account B dapat membaca `GENERAL / SHARED` Experience dari Account A melalui Journey, sementara `PRIVATE / OWNER_ONLY` tetap tidak bocor.
-
-Audit actual source dulu. Setelah fix:
-
-```text
-GitHub commit
- ↓
-Chat Verification
- ↓
-🟢
- ↓
-Android Build
- ↓
-APK baru
- ↓
-install
- ↓
-TC-EXP-06 retest
- ↓
-update Matrix + Resume berikutnya
-```
-
-Jika test masih gagal, audit actual query/RLS lagi; jangan menebak.
+Do not build a new APK solely because historical rows were cleaned. Build only if the next check demonstrates an actual code regression or a required FE change.
