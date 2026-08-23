@@ -4,13 +4,26 @@ import * as Clipboard from 'expo-clipboard';
 import { AppState } from 'react-native';
 import { streamSHRuntime } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
+import { supabase } from '../services/supabase';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
 type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string };
+type ConversationRow = { id: string; role: Message['role']; content: string; created_at: string; metadata?: Record<string, unknown> | null };
 
-function makeMessage(role: Message['role'], text: string): Message {
-  return { id: `${Date.now()}-${Math.random()}`, role, text };
+function makeMessage(role: Message['role'], text: string, id?: string): Message {
+  return { id: id ?? `${Date.now()}-${Math.random()}`, role, text };
+}
+
+function isVerificationArtifact(row: ConversationRow): boolean {
+  const metadata = row.metadata;
+  if (metadata && (metadata.persistence === 'verification-only' || metadata.verification_only === true)) return true;
+  const text = row.content.trim().toLowerCase();
+  return [
+    'sh runtime controlled verification',
+    'streaming verification',
+    'runtime controlled verification',
+  ].some(marker => text.includes(marker));
 }
 
 export default function ChatScreen() {
@@ -52,6 +65,25 @@ export default function ChatScreen() {
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadRecentConversation() {
+      if (!context?.sh_id) return;
+      const { data, error } = await supabase.rpc('runtime_load_conversation', { p_limit: 30 });
+      if (cancelled || error || !Array.isArray(data)) return;
+      const rows = (data as ConversationRow[])
+        .filter(row => row?.content && !isVerificationArtifact(row))
+        .slice(-14)
+        .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+      if (!rows.length) return;
+      setMessages(rows.map(row => makeMessage(row.role, row.content, row.id)));
+      const firstUser = rows.find(row => row.role === 'user');
+      if (firstUser) setConversationTitle(firstUser.content.slice(0, 42));
+    }
+    void loadRecentConversation();
+    return () => { cancelled = true; };
+  }, [context?.sh_id]);
 
   const canSend = lifecycleState === 'active' && !sending && !pendingConfirmation && !!draft.trim();
   const visibleMatches = useMemo(() => {
