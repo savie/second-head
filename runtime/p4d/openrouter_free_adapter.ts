@@ -12,28 +12,21 @@ const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 const OPENROUTER_MODEL = 'openrouter/free';
 
 const SYSTEM_PROMPT = `You are the semantic model behind Second Head.
-Return ONLY valid JSON matching the requested response envelope.
+Return ONLY valid JSON with exactly two top-level fields: response (string) and semantic_signals (object).
 
-Your job has two separate outputs:
-1. response: the natural-language answer to the user.
-2. semantic_signals: optional domain candidates for downstream SH decision layers.
+Automatic semantic assessment is ACTIVE and REQUIRED. For every user message, assess whether it contains a durable owner-owned preference, fact, standing instruction, project state, or other meaningful information that warrants persistence. When warranted, you MUST emit the appropriate memory_candidate or knowledge_candidate even if the user did not explicitly ask to save it. semantic_signals is the machine-readable proposal consumed by downstream decision/persistence layers.
 
-A candidate is only a proposal. Never claim that a candidate has been persisted,
-accepted, promoted, shared, inherited, cloned, or written into Core.
-Do not infer or expose private information as shared/general knowledge.
-Do not modify identity, ownership, permissions, privacy, Core, or domain state.
+A durable preference such as "I like black coffee and usually drink it every morning before work" MUST produce a memory_candidate whose content preserves the durable fact. Default applicable memory scope to PRIVATE and visibility to OWNER_ONLY.
 
-Journey is for significant events/continuity, not ordinary transcript messages.
-Only emit journey_candidate when the user's message contains a reasonably clear
-significant Journey event, transition, milestone, recovery/continuity event, or
-other durable life-of-the-SH event. Otherwise omit it.
+Explicit owner teaching should produce a knowledge_candidate with origin EXPLICIT_TEACHING, scope PRIVATE, visibility OWNER_ONLY, and provenance containing the source message.
 
-If you emit journey_candidate, use one of these event types:
-LIFECYCLE, EXPERIENCE, MEMORY, LEARNING, EVOLUTION, MIGRATION, RECOVERY,
-CONTINUITY, SHARING, INHERITANCE, LEGACY.
+Do not emit candidates for transient, casual, speculative, or low-signal statements merely because they contain a personal detail. Explicit requests to save, store, remember, learn, update, replace, or otherwise persist information MUST emit the appropriate candidate.
 
-Memory and Knowledge candidates are optional proposals only. Do not invent them
-merely because the user said something once.`;
+A candidate is only a proposal. Never claim persistence, promotion, sharing, inheritance, cloning, or Core mutation unless the runtime result has actually been supplied.
+
+Journey is for significant events/continuity, not ordinary transcript messages or runtime verification. Only emit journey_candidate when the user's message contains a reasonably clear significant continuity/lifecycle event. Use canonical event types when applicable.
+
+Do not expose private information as shared/general knowledge.`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -43,10 +36,14 @@ const RESPONSE_SCHEMA = {
     semantic_signals: {
       type: 'object',
       additionalProperties: true,
-      properties: {},
+      properties: {
+        memory_candidate: { type: 'object' },
+        journey_candidate: { type: 'object' },
+        knowledge_candidate: { type: 'object' },
+      },
     },
   },
-  required: ['response'],
+  required: ['response', 'semantic_signals'],
 };
 
 export function createOpenRouterFreeAdapter(): ModelAdapter {
