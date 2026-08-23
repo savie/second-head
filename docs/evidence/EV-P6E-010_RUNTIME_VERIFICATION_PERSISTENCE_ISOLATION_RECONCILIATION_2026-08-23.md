@@ -19,7 +19,7 @@ Observed Journey pollution included test-derived `LIFECYCLE` / `LEGACY` records.
 
 ## 2. Root cause
 
-The polluted Chat rows were persisted historical verification artifacts in `public.conversations` with:
+The polluted Chat rows were historical verification/test rows in `public.conversations` with:
 
 ```text
 metadata.source      = runtime-p4a-001
@@ -82,26 +82,32 @@ The controlled runtime verification test returned:
 
 Therefore the current runtime verification path is not allowed to persist through the ordinary conversation/semantic persistence path.
 
-## 5. Historical artifact cleanup
+## 5. Historical artifact cleanup — IMPORTANT CORRECTION
 
-For the authenticated E2E SH used by the verification workflow, historical rows matching:
+A cleanup query was executed against the E2E SH using the historical verification metadata pair:
 
 ```text
 source      = runtime-p4a-001
 persistence = P4A-005
 ```
 
-were removed from `public.conversations`.
+The predicate was broader than intended and removed **all conversation rows carrying that historical metadata pair**, not only the single visible verification message.
 
-Post-cleanup verification:
+The deletion result included multiple old test conversations and historical owner/test conversation rows from the same P4A-005 persistence era. After the cleanup, the current `public.conversations` query for the E2E SH returned zero rows.
+
+Therefore:
 
 ```text
-verification_chat     = 0
-recovery_snapshot     = 0
-recovery_event        = 0
+verification Chat pollution = cleaned
+BUT
+historical conversation continuity = currently empty for this SH
 ```
 
-This cleanup is data cleanup only; it does not disable normal owner conversation persistence.
+This is a **cleanup-scope mistake**, not a runtime-isolation failure.
+
+No claim should be made that the user's previous Chat history is fully preserved until it is restored/reconstructed from an authoritative backup or another authoritative source.
+
+The cleanup did not modify Memory, Knowledge, Experience, Journey, Recovery, or Auth tables.
 
 ## 6. Journey cleanup status
 
@@ -124,16 +130,27 @@ The `EVOLUTION` record is intentionally retained because it represents a valid s
 
 The previously observed verification `LIFECYCLE` record and APK #85 test-vehicle `LEGACY` artifact were removed.
 
-## 7. Frontend behavior
+## 7. Recovery cleanup status
 
-The owner Chat FE now supports recent real conversation continuity while filtering known verification artifacts before rendering history.
+Post-cleanup verification for the E2E SH:
+
+```text
+recovery_snapshot = 0
+recovery_event    = 0
+```
+
+Recovery tables were not affected by the conversation cleanup query.
+
+## 8. Frontend behavior
+
+The owner Chat FE supports recent conversation continuity while filtering known verification artifacts before rendering history.
 
 Relevant FE commits:
 
 - `1e077ab018c0b916e5b52be959f5435bf0ed41ed` — restore filtered recent chat continuity
 - `47e5e22e9ad66fc2c2449cff370d5eb1546c2b5d` — expose primary SH id for chat history
 
-Desired owner behavior:
+Desired owner behavior remains:
 
 ```text
 Open Chat
@@ -143,11 +160,11 @@ recent real conversation may appear
 verification/test artifacts must not appear
 ```
 
-`New Chat` may still start empty; this is currently acceptable and is not a blocker for the persistence-isolation finding.
+`New Chat` may still start empty and is currently accepted.
 
-## 8. APK #190 REAL E2E checkpoint
+## 9. APK #190 REAL E2E checkpoint
 
-APK #190 observations:
+Before the broad cleanup, APK #190 observations were:
 
 ```text
 Chat normal response              PASS
@@ -156,36 +173,44 @@ Knowledge                         PASS / visible
 Experience                        PASS / visible
 Recovery                          PASS / no phantom snapshot
 Journey Evolution                 PASS / valid Evolution visible
-Journey verification pollution   FIXED / historical artifacts removed
+Journey verification pollution   identified
 ```
 
-One remaining Chat verification response visible before cleanup was confirmed as a historical `P4A-005` artifact, not a newly generated verification-only record.
+The remaining visible Chat verification response was confirmed as historical P4A-005 data.
 
-## 9. Gate before next testing
+After cleanup, the historical verification rows are gone, but Chat continuity must now be re-established/verified because the cleanup predicate removed the full P4A-005 conversation class.
 
-Do not mix this finding with downstream semantic testing.
+## 10. Gate before next testing
 
-Current gate:
+Do not proceed to another semantic/lifecycle test yet.
+
+First resolve the Chat-history cleanup consequence:
 
 ```text
-Runtime verification isolation   PASS
-Historical recovery pollution    CLEAN
-Historical Journey pollution     CLEAN
-Historical verification Chat     CLEAN
-Valid Evolution                  RETAINED
-
-NEXT:
-reload/reopen APK #190 and confirm the old verification message is gone
-then continue with the next REAL E2E test surface
+1. preserve the runtime verification isolation fix
+2. recover/reconstruct authoritative recent owner Chat history
+3. verify verification-only artifacts remain excluded
+4. reload APK #190
+5. confirm real recent chat can appear without test junk
 ```
 
-## 10. Reconciliation conclusion
+Only after that should the next REAL E2E surface continue.
 
-The observed verification/test pollution was a combination of:
+## 11. Reconciliation conclusion
 
-1. historical persisted test artifacts from the pre-isolation period, and
-2. missing cleanup of those artifacts after verification runs.
+The current verification-only runtime path is **CI-proven isolated**.
 
-The current verification path is now isolated and CI-proven. Existing polluted rows have been cleaned. The valid semantic Journey Evolution record remains intact.
+The Journey verification pollution is cleaned while valid Evolution remains.
 
-This evidence supersedes any earlier assumption that Recovery/Chat/Journey pollution seen on APK #190 necessarily represented fresh runtime mutations after the isolation fix.
+The Recovery pollution is cleaned.
+
+However, the historical Chat cleanup was broader than intended and emptied the E2E SH's `conversations` table. That consequence is now explicitly recorded and must be resolved before claiming Chat continuity PASS.
+
+This evidence therefore distinguishes:
+
+```text
+RUNTIME ISOLATION          = PASS
+HISTORICAL JUNK CLEANUP   = PASS
+CLEANUP SCOPE             = ERROR / RECOVERY REQUIRED
+CHAT CONTINUITY            = OPEN
+```
