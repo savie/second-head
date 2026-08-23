@@ -24,7 +24,7 @@ const runtimeResponse = await fetch(`${baseUrl}/functions/v1/runtime-p4a-001`, {
     'Content-Type': 'application/json',
     Accept: 'text/event-stream',
   },
-  body: JSON.stringify({ user_message: 'streaming verification', stream: true }),
+  body: JSON.stringify({ user_message: 'streaming verification', stream: true, verification_only: true }),
 });
 if (!runtimeResponse.ok) throw new Error(`Streaming runtime failed: ${await runtimeResponse.text()}`);
 if (!runtimeResponse.body) throw new Error('Streaming runtime returned no body');
@@ -42,6 +42,13 @@ while (true) {
 
 if (!raw.includes('event: token')) throw new Error('Missing token event');
 if (!raw.includes('event: complete')) throw new Error('Missing complete event');
+
+const responseBlock = raw.split('\n\n').find((block) => block.includes('event: response'));
+if (!responseBlock) throw new Error('Missing response event');
+const responseData = responseBlock.split('\n').find((line) => line.startsWith('data: '))?.slice(6);
+if (!responseData) throw new Error('Missing response payload');
+const responsePayload = JSON.parse(responseData);
+if (responsePayload.meta?.persistence !== 'verification-only') throw new Error(`Expected verification-only persistence mode: ${JSON.stringify(responsePayload)}`);
 
 const tokenPayloads = raw
   .split('\n\n')
@@ -61,4 +68,5 @@ console.log(JSON.stringify({
   token_event: true,
   token_payloads: tokenPayloads.length,
   complete_event: true,
+  persistence: 'verification-only',
 }, null, 2));
