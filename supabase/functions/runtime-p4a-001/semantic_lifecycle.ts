@@ -41,11 +41,12 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
   const knowledgeCandidate = objectValue(signals.knowledge_candidate) ?? fallback?.knowledge;
   if (knowledgeCandidate) {
     const content = typeof knowledgeCandidate.content === "string" ? knowledgeCandidate.content.trim() : "";
-    const source = typeof knowledgeCandidate.source === "string" ? knowledgeCandidate.source.trim() : "";
-    const origin = normalizeKnowledgeOrigin(knowledgeCandidate.origin);
+    const candidateSource = typeof knowledgeCandidate.source === "string" ? knowledgeCandidate.source.trim() : "";
+    const origin = normalizeKnowledgeOrigin(knowledgeCandidate.origin) || (fallback?.knowledge ? "EXPLICIT_TEACHING" : "");
+    const source = candidateSource || (fallback?.knowledge ? "runtime:p5a:explicit_user_request" : "runtime:p4d:knowledge_candidate");
     if (content && source && origin) {
       const isExplicitFallback = Boolean(fallback?.knowledge && knowledgeCandidate === fallback.knowledge);
-      const { data, error } = await supabase.rpc("runtime_record_knowledge_with_journey", { p_sh_id: shId, p_content: content, p_source: isExplicitFallback ? "runtime:p5a:explicit_user_request" : "runtime:p4d:knowledge_candidate", p_origin: origin, p_provenance: knowledgeCandidate.provenance ?? { source_message: userMessage }, p_scope: "PRIVATE", p_visibility: "OWNER_ONLY", p_confidence: knowledgeCandidate.confidence ?? null });
+      const { data, error } = await supabase.rpc("runtime_record_knowledge_with_journey", { p_sh_id: shId, p_content: content, p_source: isExplicitFallback ? "runtime:p5a:explicit_user_request" : source, p_origin: origin, p_provenance: knowledgeCandidate.provenance ?? { source_message: userMessage }, p_scope: "PRIVATE", p_visibility: "OWNER_ONLY", p_confidence: knowledgeCandidate.confidence ?? null });
       if (error) throw new Error(`KNOWLEDGE_ACQUISITION_FAILED: ${error.message}`);
       knowledge = typeof data === "string" ? data : null;
       if (!knowledge) throw new Error("KNOWLEDGE_ACQUISITION_FAILED: recorder returned no knowledge id");
