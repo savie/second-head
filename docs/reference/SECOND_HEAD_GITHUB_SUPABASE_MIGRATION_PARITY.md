@@ -8,53 +8,52 @@ Supabase DEV catalog  = immutable applied-state evidence
 supabase/migrations/  = historical/non-canonical artifacts
 ```
 
-## Audited live tail
+## Current DEV reconciliation
 
-Supabase DEV now contains the historical P1 tail through the two canonical replay reconciliations and the Legacy guards:
-
-```text
-20260822091610 p1_normalize_inheritance_transfer_policy_alias
-20260822092029 p1_hide_internal_active_sh_assertion
-20260822092412 p1_hide_internal_journey_shared_helper
-20260822092425 reconcile_journey_shared_helper_rls_execution
-20260822092516 reconcile_journey_shared_helper_execution
-20260822170000 p1_legacy_end_of_life_guard
-20260822170001 p1_current_p1_tail_semantic_reconciliation
-20260822170002 p1_legacy_record_eol_guard
-```
-
-The historical migration versions remain immutable evidence. The later `170000`–`170002` migrations are new canonical reconciliation executions and are represented under `database/migrations/`.
-
-## Canonical replay artifacts
+Supabase DEV is the applied-state authority. The current remote tail is:
 
 ```text
-database/migrations/20260822170000_p1_legacy_end_of_life_guard.sql
-database/migrations/20260822170001_p1_current_p1_tail_semantic_reconciliation.sql
-database/migrations/20260822170002_p1_legacy_record_eol_guard.sql
+20260824134827  finalize_memory_relevance_token_filter
+20260824134839  fix_memory_relevance_token_split
+20260824134925  reconcile_recovery_experience_restore
+20260824201714  20260824140000_reconcile_dev_db_functional_state
 ```
 
-These reconstruct the audited current semantics without fabricating historical migration IDs.
+`20260824201714` is the remote migration version generated when the current DEV functional-state reconciliation was applied. Its migration name records the originating reconciliation name `20260824140000_reconcile_dev_db_functional_state`.
 
-## Audited semantic state
+## Canonical Git representation
 
-- `INHERITABLE` compatibility input is normalized to persisted `INHERITANCE`.
-- Internal `runtime_assert_active_sh(uuid,text)` has no client execute privilege.
-- `runtime_journey_event_is_shared(uuid)` remains executable by authenticated because it is required by the authenticated Journey visibility RLS policy; anon/public are denied.
-- Inheritance revoke removes provenance-linked Memory, Knowledge, Experience, and Journey derived records.
-- Clone revoke is source-owner scoped and idempotent for already-revoked agreements.
-- Selected Legacy preservation requires the source SH to be End-of-Life/deactivated.
-- Generic `runtime_record_legacy()` now also requires the source SH to be End-of-Life/deactivated.
-
-## Non-goals
-
-No historical Supabase migration was renamed, rewritten, or replayed merely to match GitHub filenames. No canonical architecture/scope/contract decision was changed.
-
-## Remaining evidence gates
+The current functional-state reconciliation is now represented in the canonical location:
 
 ```text
-Full clean-room replay of canonical chain   🟡
-Authenticated multi-account E2E               🟡
-Device/UI regression                         🟡
+database/migrations/20260824201714_reconcile_current_dev_functional_state.sql
 ```
 
-These are evidence gates, not claimed defects.
+That file contains the current verified implementations for:
+
+- `memory_relevance_score(text,text)` — current token filtering and OR-style term construction;
+- `runtime_create_recovery_snapshot(uuid)` — owner-scoped recovery snapshot including Experience;
+- `runtime_restore_recovery_snapshot(uuid)` — idempotent owner-scoped restore including Experience and recovery Journey recording;
+- required anonymous execute revocations.
+
+The remote migration was applied before this canonical replay artifact was committed. No historical Supabase migration was rewritten or replayed.
+
+## Migration-history disposition
+
+Historical timestamp aliases, non-canonical `supabase/migrations/` artifacts, and unrecovered historical source gaps remain immutable historical facts. They are not rewritten merely for cosmetic timestamp equality.
+
+The canonical repository source is `database/migrations/`; Supabase DEV is the applied runtime state. New forward changes must be represented in `database/migrations/` first and then applied through the controlled migration workflow.
+
+## Current status
+
+```text
+Canonical migration source        🟢
+Current remote functional state   🟢
+Current reconciliation represented 🟢
+Historical aliases                🟢 documented/accepted
+Historical source gaps            🟡 documented; no fabrication
+Clean-room replay                 🟡 separate evidence gate
+Device/UI regression              🟡 separate evidence gate
+```
+
+No Phase 1–5 migration replay is required merely to normalize historical timestamps or locations.
