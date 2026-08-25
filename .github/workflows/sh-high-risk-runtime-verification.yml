@@ -5,7 +5,7 @@ on:
   push:
     branches: [dev]
     paths:
-      - 'supabase/functions/runtime-p4f-006/**'
+      - 'functions/runtime-p4f-006/**'
       - 'supabase/migrations/20260814103000_p4f_006_high_risk_runtime_confirmation.sql'
       - 'supabase/migrations/20260814110000_p4a_004_audit_identity_policy_fix.sql'
       - 'app/tests/high-risk-runtime-roundtrip.mjs'
