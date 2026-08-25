@@ -15,7 +15,7 @@ The concrete action used for this proof is `RECOVERY_RESTORE`, operating on an a
 
 ## 2. Implementation Surface
 
-- `supabase/functions/runtime-p4f-006/index.ts`
+- `functions/runtime-p4f-006/index.ts`
 - `supabase/migrations/20260814103000_p4f_006_high_risk_runtime_confirmation.sql`
 - `supabase/migrations/20260814110000_p4a_004_audit_identity_policy_fix.sql`
 - `app/tests/high-risk-runtime-roundtrip.mjs`
