@@ -24,7 +24,7 @@ GitHub:
 - `runtime/p4a/runtime_audit_persistence.ts`
 - `runtime/p4a/runtime_audit_persistence.test.ts`
 - `database/migrations/20260812090000_p4a_004_runtime_audit_persistence.sql`
-- `supabase/functions/runtime-p4a-004/index.ts`
+- `functions/runtime-p4a-004/index.ts`
 
 Supabase DEV:
 - `audit_events` exists.
