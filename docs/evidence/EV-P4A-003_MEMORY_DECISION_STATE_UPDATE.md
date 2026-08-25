@@ -22,7 +22,7 @@ GitHub:
 - `runtime/p4a/memory_decision.ts`
 - `runtime/p4a/memory_decision.test.ts`
 - `supabase/migrations/20260812100000_p4a_003_runtime_memory_decision.sql`
-- `supabase/functions/runtime-p4a-003/index.ts`
+- `functions/runtime-p4a-003/index.ts`
 
 Supabase DEV:
 - `runtime-p4a-003` is ACTIVE with JWT verification enabled.
