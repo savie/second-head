@@ -15,6 +15,13 @@ export function hasExplicitMemoryOptOut(userMessage: string): boolean {
     || /(?:do not|don't|dont|jangan|tidak|tak)\s+(?:meminta|minta|ingin|mau|want|ask).{0,80}(?:simpan|save|store|remember).{0,80}(?:memory|memori)/i.test(text);
 }
 
+export function hasExplicitMemoryOptIn(userMessage: string): boolean {
+  const text = userMessage.trim();
+  if (!text) return false;
+  return /(?:tolong\s+)?(?:simpan|ingat|remember|save|store|catat|keep|retain)\b.{0,160}(?:sebagai|as|ke|into|in)?\s*(?:memory|memori)\b/i.test(text)
+    || /\b(?:jadikan|tetapkan)\b.{0,160}(?:memory|memori)\b/i.test(text);
+}
+
 function replacementRequest(userMessage: string): { newContent: string; oldPattern: string } | undefined {
   const m = userMessage.match(/\b(APK\s*#?\d+)\b.*?\b(?:sebagai\s+pengganti|menggantikan|replace(?:\s+with)?|replacing)\b.*?\b(APK\s*#?\d+)\b/i);
   if (!m) return undefined;
@@ -37,12 +44,13 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
     return { memory, knowledge: null };
   }
 
-  // Current-message opt-out is a runtime authority boundary: conversation context may
-  // still be used for the response, but this turn must not create a Memory candidate.
   const memoryOptOut = hasExplicitMemoryOptOut(userMessage);
+  const memoryOptIn = hasExplicitMemoryOptIn(userMessage);
   const fallback = explicitPersistenceFallback(userMessage);
+  // Memory is explicit opt-in. A model-proposed memory_candidate is never persisted
+  // unless the current user message explicitly asks for Memory persistence.
+  const memoryCandidate = (!memoryOptOut && memoryOptIn) ? (objectValue(signals.memory_candidate) ?? fallback?.memory) : undefined;
   let memory: string | null = null; let knowledge: string | null = null;
-  const memoryCandidate = memoryOptOut ? undefined : (objectValue(signals.memory_candidate) ?? fallback?.memory);
   if (memoryCandidate) {
     const content = typeof memoryCandidate.content === "string" ? memoryCandidate.content.trim() : "";
     if (content) {
