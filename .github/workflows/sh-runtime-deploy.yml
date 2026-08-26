@@ -26,6 +26,17 @@ jobs:
         with:
           version: latest
 
+      - name: Stage runtime function for Supabase CLI
+        run: |
+          set -euo pipefail
+          test -f functions/runtime-p4a-001/index.ts
+          test -f functions/runtime-p4a-001/sh_runtime_bundle.ts
+          test -f functions/runtime-p4a-001/semantic_lifecycle.ts
+          rm -rf supabase/functions/runtime-p4a-001
+          mkdir -p supabase/functions
+          cp -R functions/runtime-p4a-001 supabase/functions/runtime-p4a-001
+          test -f supabase/functions/runtime-p4a-001/index.ts
+
       - name: Deploy runtime-p4a-001
         run: supabase functions deploy runtime-p4a-001 --project-ref pkhkgvsrqeupvwoqjwmd
 
