@@ -22,6 +22,15 @@ export function hasExplicitMemoryOptIn(userMessage: string): boolean {
     || /\b(?:jadikan|tetapkan)\b.{0,160}(?:memory|memori)\b/i.test(text);
 }
 
+function extractExplicitMemoryContent(userMessage: string): string {
+  const text = userMessage.trim();
+  const saveMatch = text.match(/^(?:tolong\s+)?(?:simpan(?:lah)?|save|store|remember|ingat(?:lah)?|catat|keep|retain)\b\s*(?:bahwa|that|:)?\s*(.*?)\s*(?:(?:sebagai|as|ke|into|in)\s+(?:memory|memori))?\s*\.?$/i);
+  if (saveMatch?.[1]?.trim()) return saveMatch[1].trim();
+  const designateMatch = text.match(/^\s*(?:jadikan|tetapkan)\b\s*(.*?)\s+(?:sebagai|as)\s+(?:memory|memori)\s*\.?$/i);
+  if (designateMatch?.[1]?.trim()) return designateMatch[1].trim();
+  return text;
+}
+
 function replacementRequest(userMessage: string): { newContent: string; oldPattern: string } | undefined {
   const m = userMessage.match(/\b(APK\s*#?\d+)\b.*?\b(?:sebagai\s+pengganti|menggantikan|replace(?:\s+with)?|replacing)\b.*?\b(APK\s*#?\d+)\b/i);
   if (!m) return undefined;
@@ -31,7 +40,7 @@ function explicitPersistenceFallback(userMessage: string): { memory?: Candidate;
   const text = userMessage.trim();
   if (!/^(?:tolong\s+)?(?:simpan|ingat|remember|save|store|catat|jadikan|tetapkan|pelajari|learn)\b/i.test(text)) return undefined;
   if (/\b(?:knowledge|pengetahuan|pelajari|learn|teaching|ajarkan)\b/i.test(text)) return { knowledge: { content: text, source: "runtime:p5a:explicit_user_request", origin: "EXPLICIT_TEACHING", scope: "PRIVATE", visibility: "OWNER_ONLY", provenance: { source_message: text, capture_mode: "EXPLICIT_USER_REQUEST" } } };
-  return { memory: { content: text, memory_type: "LONG_TERM", source: "runtime:p5a:explicit_user_request", scope: "PRIVATE", visibility: "OWNER_ONLY", lifecycle: "CANDIDATE" } };
+  return { memory: { content: extractExplicitMemoryContent(text), memory_type: "LONG_TERM", source: "runtime:p5a:explicit_user_request", scope: "PRIVATE", visibility: "OWNER_ONLY", lifecycle: "CANDIDATE" } };
 }
 export async function recordSemanticLifecycle(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string, modelResponse: { semantic_signals?: Record<string, unknown> }) {
   const signals = objectValue(modelResponse.semantic_signals) ?? {};
@@ -47,9 +56,10 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
   const memoryOptOut = hasExplicitMemoryOptOut(userMessage);
   const memoryOptIn = hasExplicitMemoryOptIn(userMessage);
   const fallback = explicitPersistenceFallback(userMessage);
-  // Memory is explicit opt-in. A model-proposed memory_candidate is never persisted
-  // unless the current user message explicitly asks for Memory persistence.
-  const memoryCandidate = (!memoryOptOut && memoryOptIn) ? (objectValue(signals.memory_candidate) ?? fallback?.memory) : undefined;
+  // Memory is explicit opt-in. For an explicit persistence request, prefer the
+  // user-derived payload over a model paraphrase so semantically identical saves
+  // converge on the same canonical content and database deduplication boundary.
+  const memoryCandidate = (!memoryOptOut && memoryOptIn) ? (fallback?.memory ?? objectValue(signals.memory_candidate)) : undefined;
   let memory: string | null = null; let knowledge: string | null = null;
   if (memoryCandidate) {
     const content = typeof memoryCandidate.content === "string" ? memoryCandidate.content.trim() : "";
