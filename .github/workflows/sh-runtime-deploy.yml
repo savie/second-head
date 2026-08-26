@@ -42,9 +42,13 @@ jobs:
 
       - name: Verify deployed function is reachable
         run: |
-          curl --fail --silent --show-error \
+          set -euo pipefail
+          status=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
             -X OPTIONS \
-            "https://pkhkgvsrqeupvwoqjwmd.supabase.co/functions/v1/runtime-p4a-001" \
-            >/dev/null
+            "https://pkhkgvsrqeupvwoqjwmd.supabase.co/functions/v1/runtime-p4a-001")
+          echo "OPTIONS status: $status"
+          # runtime-p4a-001 intentionally accepts POST only; a 405 here proves
+          # the deployed function was reached rather than failing at routing.
+          test "$status" = "405"
 
       # Deployment trigger re-run after secret provisioning.
