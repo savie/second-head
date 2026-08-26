@@ -4,6 +4,17 @@ type Candidate = Record<string, unknown>;
 function objectValue(value: unknown): Candidate | undefined { return value && typeof value === "object" && !Array.isArray(value) ? value as Candidate : undefined; }
 const KNOWLEDGE_ORIGINS = new Set(["MEMORY", "EXPLICIT_TEACHING", "EXTERNAL_REFERENCE"]);
 function normalizeKnowledgeOrigin(value: unknown): string { const raw = typeof value === "string" ? value.trim().toUpperCase().replace(/[ -]+/g, "_") : ""; if (KNOWLEDGE_ORIGINS.has(raw)) return raw; if (["USER_TEACHING", "OWNER_TEACHING", "EXPLICIT_USER_TEACHING", "TEACHING", "USER_INSTRUCTION", "OWNER_INSTRUCTION"].includes(raw)) return "EXPLICIT_TEACHING"; return ""; }
+
+export function hasExplicitMemoryOptOut(userMessage: string): boolean {
+  const text = userMessage.trim();
+  if (!text) return false;
+  const memoryTerm = "(?:memory|memori)";
+  const deny = "(?:tidak|tak|jangan|don't|do not|dont|not|never|no)";
+  const persistence = "(?:simpan|menyimpan|simpanlah|ingat|mengingat|save|store|remember|retain|keep)";
+  return new RegExp(`(?:${deny}).{0,80}${persistence}.{0,80}(?:sebagai|as|ke|into|in)?\\s*${memoryTerm}|(?:${persistence}).{0,80}(?:${deny}).{0,80}${memoryTerm}`, "i").test(text)
+    || /(?:do not|don't|dont|jangan|tidak|tak)\s+(?:meminta|minta|ingin|mau|want|ask).{0,80}(?:simpan|save|store|remember).{0,80}(?:memory|memori)/i.test(text);
+}
+
 function replacementRequest(userMessage: string): { newContent: string; oldPattern: string } | undefined {
   const m = userMessage.match(/\b(APK\s*#?\d+)\b.*?\b(?:sebagai\s+pengganti|menggantikan|replace(?:\s+with)?|replacing)\b.*?\b(APK\s*#?\d+)\b/i);
   if (!m) return undefined;
@@ -25,9 +36,13 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
     if (!memory) throw new Error("MEMORY_REPLACEMENT_FAILED: recorder returned no memory id");
     return { memory, knowledge: null };
   }
+
+  // Current-message opt-out is a runtime authority boundary: conversation context may
+  // still be used for the response, but this turn must not create a Memory candidate.
+  const memoryOptOut = hasExplicitMemoryOptOut(userMessage);
   const fallback = explicitPersistenceFallback(userMessage);
   let memory: string | null = null; let knowledge: string | null = null;
-  const memoryCandidate = objectValue(signals.memory_candidate) ?? fallback?.memory;
+  const memoryCandidate = memoryOptOut ? undefined : (objectValue(signals.memory_candidate) ?? fallback?.memory);
   if (memoryCandidate) {
     const content = typeof memoryCandidate.content === "string" ? memoryCandidate.content.trim() : "";
     if (content) {
