@@ -35,3 +35,5 @@ jobs:
             -X OPTIONS \
             "https://pkhkgvsrqeupvwoqjwmd.supabase.co/functions/v1/runtime-p4a-001" \
             >/dev/null
+
+      # Deployment trigger re-run after secret provisioning.
