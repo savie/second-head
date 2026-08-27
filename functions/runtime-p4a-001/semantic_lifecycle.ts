@@ -50,7 +50,7 @@ function memoryDeleteRequest(userMessage: string): boolean {
 function deletionTokens(text: string): string[] {
   return text.toLowerCase().normalize('NFKC').split(/[^a-z0-9\u00c0-\u024f]+/i).filter(x => x.length >= 4 && !['memory','memori','tentang','about','hapus','delete','remove','hilangkan','buang'].includes(x));
 }
-async function deleteRequestedMemory(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ memory: string; memory_id: string } | null> {
+export async function deleteRequestedMemory(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ memory: string; memory_id: string } | null> {
   if (!memoryDeleteRequest(userMessage)) return null;
   const { data, error } = await supabase.from('memories').select('memory_id,content').eq('sh_id', shId).limit(100);
   if (error) throw new Error('MEMORY_DELETE_LOOKUP_FAILED: ' + error.message);
