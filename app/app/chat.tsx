@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, ScrollView, Share, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Modal, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AppState } from 'react-native';
 import { deleteConversation as deletePersistedConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation as renamePersistedConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow } from '../services/runtime-stream';
@@ -69,6 +69,8 @@ export default function ChatScreen() {
   const [findQuery, setFindQuery] = useState('');
   const [findIndex, setFindIndex] = useState(0);
   const [conversationTitle, setConversationTitle] = useState('New conversation');
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameText, setRenameText] = useState('');
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -206,7 +208,7 @@ export default function ChatScreen() {
       Alert.alert('New chat', 'Mulai sesi chat baru?', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'New chat', onPress: start },
-      ]);
+      ], { cancelable: false });
       return;
     }
     start();
@@ -237,14 +239,14 @@ export default function ChatScreen() {
     Alert.alert('Clear chat', 'Semua history pada sesi chat ini akan hilang dari sesi.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Clear', style: 'destructive', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setCurrentConversationId(null); setMenuOpen(false); } },
-    ]);
+    ], { cancelable: false });
   }
 
   function deleteConversation() {
     Alert.alert('Delete conversation', 'Percakapan ini akan dihapus dari daftar chat.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setCurrentConversationId(null); setMenuOpen(false); } },
-    ]);
+    ], { cancelable: false });
   }
 
   function deleteConversationAction() {
@@ -264,29 +266,27 @@ export default function ChatScreen() {
           Alert.alert('Delete failed', error instanceof Error ? error.message : 'Conversation deletion failed');
         }
       } },
-    ]);
+    ], { cancelable: false });
   }
 
   function renameConversationAction() {
-    if (!currentConversationId) return Alert.alert('Rename conversation', 'Belum ada conversation yang tersimpan.');
+    if (!currentConversationId) return Alert.alert('Rename conversation', 'Belum ada conversation yang tersimpan.', [{ text: 'OK' }], { cancelable: false });
     setMenuOpen(false);
-    Alert.prompt?.(
-      'Rename conversation',
-      'Enter a new name for this conversation:',
-      async text => {
-        const title = text?.trim();
-        if (!title) return;
-        try {
-          await renamePersistedConversation(currentConversationId, title);
-          setConversationTitle(title);
-          setHistorySessions(current => current.map(session => session.id === currentConversationId ? { ...session, title } : session));
-        } catch (error) {
-          Alert.alert('Rename failed', error instanceof Error ? error.message : 'Conversation rename failed');
-        }
-      },
-      'plain-text',
-      conversationTitle === 'New conversation' ? '' : conversationTitle
-    );
+    setRenameText(conversationTitle === 'New conversation' ? '' : conversationTitle);
+    setRenameOpen(true);
+  }
+
+  async function saveRename() {
+    const title = renameText.trim();
+    if (!currentConversationId || !title) return;
+    try {
+      await renamePersistedConversation(currentConversationId, title);
+      setConversationTitle(title);
+      setHistorySessions(current => current.map(session => session.id === currentConversationId ? { ...session, title } : session));
+      setRenameOpen(false);
+    } catch (error) {
+      Alert.alert('Rename failed', error instanceof Error ? error.message : 'Conversation rename failed', [{ text: 'OK' }], { cancelable: false });
+    }
   }
 
   async function copyConversation() {
@@ -334,7 +334,7 @@ export default function ChatScreen() {
           Alert.alert('Delete failed', error instanceof Error ? error.message : 'Message deletion failed');
         }
       } },
-    ]);
+    ], { cancelable: false });
   }
 
   async function regenerateResponse() {
@@ -406,7 +406,7 @@ export default function ChatScreen() {
       ...(message.role === 'assistant' ? [{ text: 'Regenerate', onPress: regenerateResponse }] : []),
       { text: 'Cancel', style: 'cancel' as const },
     ];
-    Alert.alert(message.role === 'user' ? 'Your message' : 'SH response', undefined, actions);
+    Alert.alert(message.role === 'user' ? 'Your message' : 'SH response', undefined, actions, { cancelable: false });
   }
 
   function handleAttachment(kind: string) {
@@ -436,6 +436,25 @@ export default function ChatScreen() {
   const inputStyle = { minHeight: 52, borderWidth: 1, borderRadius: 14, padding: 12, color: '#111827', borderColor: '#D1D5DB', backgroundColor: '#FFFFFF' };
 
   return (
+      <Modal visible={renameOpen} transparent animationType="fade" onRequestClose={() => {}}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <View style={{ borderRadius: 16, padding: 16, backgroundColor: '#FFFFFF', gap: 12 }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: '#111827' }}>Rename conversation</Text>
+            <TextInput
+              value={renameText}
+              onChangeText={setRenameText}
+              autoFocus
+              placeholder="New conversation name"
+              placeholderTextColor="#6B7280"
+              style={inputStyle}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
+              <Button title="Cancel" onPress={() => setRenameOpen(false)} />
+              <Button title="Rename" onPress={() => void saveRename()} disabled={!renameText.trim()} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     <View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
