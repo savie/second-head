@@ -6,7 +6,8 @@ type Response = { output: unknown; semantic_signals?: Signals };
 type RuntimeExperience = { experience_id?: string; experience_type?: string; content: string; occurred_at?: string; source_ref?: string; provenance?: Record<string, unknown>; lifecycle?: string };
 type RuntimeMemory = { memory_id?: string; memory_type?: string; content: string; source?: string; confidence?: number | null; scope?: string; visibility?: string; lifecycle?: string; occurrence_count?: number; created_at?: string; updated_at?: string; superseded_by?: string | null; relevance_score?: number };
 type RuntimeConversation = { conversation_id?: string; role: 'user' | 'assistant' | 'system'; content: string; created_at?: string; metadata?: Record<string, unknown> };
-type RuntimeContext = { user_message: string; conversation_context?: RuntimeConversation[]; experiences?: RuntimeExperience[]; memories?: RuntimeMemory[] };
+type RuntimeAttachment = { uri?: string; name?: string; mimeType?: string; base64?: string };
+type RuntimeContext = { user_message: string; conversation_context?: RuntimeConversation[]; experiences?: RuntimeExperience[]; memories?: RuntimeMemory[]; attachment?: RuntimeAttachment };
 type Adapter = { generate(request: { capability: Capability; context: RuntimeContext }): Promise<Response> };
 type Candidate = { id: string; capability: Capability; cost_tier: CostTier; adapter: Adapter; tasks?: readonly Task[]; priority?: number };
 
@@ -82,7 +83,15 @@ function conversationContext(c: RuntimeContext) {
 }
 
 function contextText(c: RuntimeContext) {
-  return JSON.stringify({ user_message: c.user_message, authorized_conversation_context: conversationContext(c), authorized_memory_context: memoryContext(c), authorized_experience_context: experienceContext(c) });
+  return JSON.stringify({ user_message: c.user_message, authorized_conversation_context: conversationContext(c), authorized_memory_context: memoryContext(c), authorized_experience_context: experienceContext(c), attachment: c.attachment ? { name: c.attachment.name, mimeType: c.attachment.mimeType, uri: c.attachment.uri } : undefined });
+}
+function modelUserContent(c: RuntimeContext): unknown {
+  if (!c.attachment?.base64) return contextText(c);
+  const mime = c.attachment.mimeType || 'image/jpeg';
+  return [
+    { type: 'text', text: contextText(c) },
+    { type: 'image_url', image_url: { url: `data:${mime};base64,${c.attachment.base64}` } }
+  ];
 }
 
 function experienceSystemText(c: RuntimeContext) {
@@ -93,7 +102,7 @@ const RESPONSE_SCHEMA = { type: 'object', additionalProperties: false, propertie
 
 async function provider(url: string, key: string, model: string, c: RuntimeContext, headers: Record<string, string>) {
   const combinedSystem = `${SYSTEM_PROMPT}\n\n${experienceSystemText(c)}`;
-  const payload = { model, messages: [{ role: 'system', content: combinedSystem }, { role: 'user', content: contextText(c) }], temperature: 0.2, max_tokens: 1200, response_format: { type: 'json_schema', json_schema: { name: 'second_head_response', strict: false, schema: RESPONSE_SCHEMA } } };
+  const payload = { model, messages: [{ role: 'system', content: combinedSystem }, { role: 'user', content: modelUserContent(c) }], temperature: 0.2, max_tokens: 1200, response_format: { type: 'json_schema', json_schema: { name: 'second_head_response', strict: false, schema: RESPONSE_SCHEMA } } };
   const r = await fetch(url, { method: 'POST', headers: { ...headers, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload) });
   const raw = await r.text();
   if (!r.ok) throw new Error(`MODEL_PROVIDER_FAILED: ${url} ${r.status}: ${raw.slice(0, 500)}`);
@@ -103,19 +112,21 @@ async function provider(url: string, key: string, model: string, c: RuntimeConte
 }
 
 function openRouter(): Adapter { return { generate: async request => { const c = request.context; const k = Deno.env.get('OPENROUTER_API_KEY'); if (!k) throw new Error('MODEL_CONFIGURATION_ERROR: OPENROUTER_API_KEY is not configured'); if (typeof c.user_message !== 'string' || c.user_message.trim() === '') throw new Error('MODEL_REJECTED: user_message is required'); return provider('https://openrouter.ai/api/v1/chat/completions', k, 'openrouter/free', c, { 'X-Title': 'SECOND HEAD' }); } }; }
+function openRouterVision(): Adapter { return { generate: async request => { const c = request.context; const k = Deno.env.get('OPENROUTER_API_KEY'); if (!k) throw new Error('MODEL_CONFIGURATION_ERROR: OPENROUTER_API_KEY is not configured'); return provider('https://openrouter.ai/api/v1/chat/completions', k, 'qwen/qwen2.5-vl-32b-instruct:free', c, { 'X-Title': 'SECOND HEAD' }); } }; }
 function groq(): Adapter { return { generate: async request => { const c = request.context; const k = Deno.env.get('GROQ_API_KEY'); if (!k) throw new Error('MODEL_CONFIGURATION_ERROR: GROQ_API_KEY is not configured'); return provider('https://api.groq.com/openai/v1/chat/completions', k, 'openai/gpt-oss-20b', c, {}); } }; }
 function huggingFace(): Adapter { return { generate: async request => { const c = request.context; const k = Deno.env.get('HUGGINGFACE_API_KEY'); if (!k) throw new Error('MODEL_CONFIGURATION_ERROR: HUGGINGFACE_API_KEY is not configured'); return provider('https://router.huggingface.co/v1/chat/completions', k, 'openai/gpt-oss-20b:groq', c, {}); } }; }
 function taskFor(m: string): Task { const t = m.toLowerCase(); if (/\b(draw|image|gambar|generate (an )?image|buat gambar|ilustrasi|foto)\b/.test(t)) return 'image'; if (/\b(analy[sz]e|reason|reasoning|deep dive|compare|bandingkan|jelaskan mendalam|debug|architecture|arsitektur)\b/.test(t)) return 'reasoning'; return 'conversation'; }
 function select(cs: Candidate[], cap: Capability, task: Task) { const eligible = cs.filter(c => c.capability === cap && c.cost_tier === 'ZERO_BUDGET'); eligible.sort((a, b) => (a.tasks?.includes(task) ? 0 : 1) - (b.tasks?.includes(task) ? 0 : 1) || (a.priority ?? 0) - (b.priority ?? 0)); const c = eligible[0]; if (!c) throw new Error('MODEL_SELECTION_FAILED: no zero-budget model available for capability/task'); return c; }
 
 export async function executeModel(userMessage: string, context?: { conversation_context?: RuntimeConversation[]; experiences?: RuntimeExperience[]; memories?: RuntimeMemory[] }): Promise<{ response: Response; task: Task; model_id: string; provider: string; cost_tier: CostTier; context_entries: number; memory_context_entries: number; conversation_context_entries: number }> {
-  const task = taskFor(userMessage), cap: Capability = task === 'image' ? 'image' : 'text';
+  const task = taskFor(userMessage), cap: Capability = context?.attachment?.base64 ? 'vision' : (task === 'image' ? 'image' : 'text');
   const candidates: Candidate[] = [
+    ...(cap === 'vision' ? [{ id: 'openrouter/qwen2.5-vl-32b-instruct:free', capability: 'vision' as Capability, cost_tier: 'ZERO_BUDGET' as CostTier, adapter: openRouterVision(), tasks: ['vision', 'conversation', 'reasoning'] as Task[], priority: 0 }] : []),
     { id: 'openrouter/free', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter: openRouter(), tasks: ['conversation', 'reasoning', 'semantic'], priority: 0 },
     { id: 'groq/openai/gpt-oss-20b', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter: groq(), tasks: ['conversation', 'reasoning'], priority: 1 },
     { id: 'huggingface/openai/gpt-oss-20b:groq', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter: huggingFace(), tasks: ['conversation', 'semantic'], priority: 2 }
   ];
-  const runtimeContext: RuntimeContext = { user_message: userMessage, conversation_context: context?.conversation_context ?? [], experiences: context?.experiences ?? [], memories: context?.memories ?? [] };
+  const runtimeContext: RuntimeContext = { user_message: userMessage, conversation_context: context?.conversation_context ?? [], experiences: context?.experiences ?? [], memories: context?.memories ?? [], attachment: context?.attachment };
   const failures: string[] = [];
   while (candidates.length) {
     let candidate: Candidate;
