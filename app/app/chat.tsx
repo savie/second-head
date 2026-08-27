@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AppState } from 'react-native';
-import { deleteConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow } from '../services/runtime-stream';
+import { deleteConversation as deletePersistedConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation as renamePersistedConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
 import { supabase } from '../services/supabase';
 
@@ -12,8 +12,8 @@ type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string
 type ConversationRow = { id: string; role: Message['role']; content: string; created_at: string; metadata?: Record<string, unknown> | null };
 type ConversationSession = { id: string; title: string; startedAt: string; endedAt: string; rows: ConversationHistoryRow[] };
 
-function makeMessage(role: Message['role'], text: string, id?: string): Message {
-  return { id: id ?? `${Date.now()}-${Math.random()}`, role, text };
+function makeMessage(role: Message['role'], text: string, id?: string, conversationId?: string, createdAt?: string): Message {
+  return { id: id ?? `${Date.now()}-${Math.random()}`, role, text, conversationId, createdAt };
 }
 
 function messageFromRow(row: ConversationHistoryRow): Message { return makeMessage(row.role, row.content, `${row.conversation_id}:${row.created_at}`, row.conversation_id, row.created_at); }
@@ -252,7 +252,7 @@ export default function ChatScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
         try {
-          await deleteConversation(id);
+          await deletePersistedConversation(id);
           setMessages([]);
           setConversationTitle('New conversation');
           setCurrentConversationId(null);
@@ -271,7 +271,7 @@ export default function ChatScreen() {
       const title = text?.trim();
       if (!title) return;
       try {
-        await renameConversation(currentConversationId, title);
+        await renamePersistedConversation(currentConversationId, title);
         setConversationTitle(title);
         setMenuOpen(false);
       } catch (error) {
