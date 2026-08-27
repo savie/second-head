@@ -18,17 +18,17 @@ export function hasExplicitMemoryOptOut(userMessage: string): boolean {
 export function hasExplicitExperienceRequest(userMessage: string): boolean {
   const text = userMessage.trim();
   if (!text) return false;
-  const persistence = /^(?:tolong\s+)?(?:simpan(?:lah)?|save|store|remember|ingat(?:lah)?|catat|keep|retain)\\b/i.test(text);
-  const designate = /^(?:jadikan|tetapkan)\\b/i.test(text);
-  const experience = /\\b(?:experience|pengalaman)\\b/i.test(text);
+  const persistence = /^(?:tolong\s+)?(?:simpan(?:lah)?|save|store|remember|ingat(?:lah)?|catat|keep|retain)\b/i.test(text);
+  const designate = /^(?:jadikan|tetapkan)\b/i.test(text);
+  const experience = /\b(?:experience|pengalaman)\b/i.test(text);
   return experience && (persistence || designate);
 }
 
 function extractExplicitExperienceContent(userMessage: string): string {
   const text = userMessage.trim();
-  const afterDomain = text.match(/\\b(?:sebagai|as)\s+(?:an?\s+)?(?:experience|pengalaman)\s*:?\s*(.*?)\s*\\.?$/i);
+  const afterDomain = text.match(/\b(?:sebagai|as)\s+(?:an?\s+)?(?:experience|pengalaman)\s*:?\s*(.*?)\s*\.?$/i);
   if (afterDomain?.[1]?.trim()) return afterDomain[1].trim();
-  const designate = text.match(/^\s*(?:jadikan|tetapkan)\\b\s*(.*?)\s+(?:sebagai|as)\s+(?:an?\s+)?(?:experience|pengalaman)\s*\\.?$/i);
+  const designate = text.match(/^\s*(?:jadikan|tetapkan)\b\s*(.*?)\s+(?:sebagai|as)\s+(?:an?\s+)?(?:experience|pengalaman)\s*\.?$/i);
   if (designate?.[1]?.trim()) return designate[1].trim();
   return text;
 }
