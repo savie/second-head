@@ -89,7 +89,7 @@ export async function deleteRequestedMemory(supabase: ReturnType<typeof createCl
 }
 
 export async function deleteRequestedKnowledge(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ knowledge: string; knowledge_id: string } | null> {
-  if (!/(?:\\b(?:hapus|delete|remove|hilangkan|buang)\\b).{0,160}\\b(?:knowledge|pengetahuan|learning|pembelajaran)\\b/i.test(userMessage) && !/\\b(?:knowledge|pengetahuan|learning|pembelajaran)\\b.{0,160}\\b(?:hapus|delete|remove|hilangkan|buang)\\b/i.test(userMessage)) return null;
+  if (!/(?:\b(?:hapus|delete|remove|hilangkan|buang)\b).{0,160}\b(?:knowledge|pengetahuan|learning|pembelajaran)\b/i.test(userMessage) && !/\b(?:knowledge|pengetahuan|learning|pembelajaran)\b.{0,160}\\b(?:hapus|delete|remove|hilangkan|buang)\\b/i.test(userMessage)) return null;
   const { data, error } = await supabase.from('knowledge').select('knowledge_id,content').eq('sh_id', shId).limit(100);
   if (error) throw new Error('KNOWLEDGE_DELETE_LOOKUP_FAILED: ' + error.message);
   const tokens = deletionTokens(userMessage).filter(x => !['knowledge','pengetahuan','learning','pembelajaran'].includes(x));
@@ -109,7 +109,7 @@ export async function deleteRequestedKnowledge(supabase: ReturnType<typeof creat
 }
 
 export async function deleteRequestedExperience(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ experience: string; experience_id: string } | null> {
-  if (!/(?:\\b(?:hapus|delete|remove|hilangkan|buang)\\b).{0,160}\\b(?:experience|pengalaman)\\b/i.test(userMessage) && !/\\b(?:experience|pengalaman)\\b.{0,160}\\b(?:hapus|delete|remove|hilangkan|buang)\\b/i.test(userMessage)) return null;
+  if (!/(?:\b(?:hapus|delete|remove|hilangkan|buang)\b).{0,160}\b(?:experience|pengalaman)\b/i.test(userMessage) && !/\b(?:experience|pengalaman)\b.{0,160}\\b(?:hapus|delete|remove|hilangkan|buang)\\b/i.test(userMessage)) return null;
   const { data, error } = await supabase.from('experiences').select('experience_id,content').eq('sh_id', shId).eq('account_id', (await supabase.rpc('current_account_id')).data).limit(100);
   if (error) throw new Error('EXPERIENCE_DELETE_LOOKUP_FAILED: ' + error.message);
   const tokens = deletionTokens(userMessage).filter(x => !['experience','pengalaman'].includes(x));
