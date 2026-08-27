@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Modal, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import { AppState } from 'react-native';
-import { deleteConversation as deletePersistedConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation as renamePersistedConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow } from '../services/runtime-stream';
+import { deleteConversation as deletePersistedConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation as renamePersistedConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow, type ChatAttachment } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
 import { supabase } from '../services/supabase';
 
@@ -76,6 +79,7 @@ export default function ChatScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
   const [attachmentName, setAttachmentName] = useState<string | null>(null);
+  const [attachment, setAttachment] = useState<ChatAttachment | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
 
@@ -140,6 +144,7 @@ export default function ChatScreen() {
     abortControllerRef.current = controller;
     setDraft('');
     setAttachmentName(null);
+    setAttachment(null);
     setSending(true);
     setLifecycleState('streaming');
     setConfirmationState('idle');
@@ -169,7 +174,7 @@ export default function ChatScreen() {
           setConfirmationState('idle');
         }
         if (event.type === 'complete') setLifecycleState('active');
-      }, controller.signal);
+      }, controller.signal, attachment);
       const rows = await loadConversationHistoryRows(100);
       const sessions = buildVirtualSessions(rows.filter(row => row?.content && !isVerificationArtifact(row)));
       const latest = sessions[0];
@@ -407,9 +412,39 @@ export default function ChatScreen() {
     setMessageActionTarget(null);
   }
 
-  function handleAttachment(kind: string) {
-    setAttachmentName(`${kind} ready`);
-    Alert.alert(kind, 'UI attachment sudah siap. Penyimpanan/upload BE akan di-wire berikutnya.');
+  async function handleAttachment(kind: 'File' | 'Photo' | 'Camera') {
+    try {
+      if (kind === 'Photo') {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) return Alert.alert('Photo', 'Izin galeri diperlukan untuk memilih foto.');
+        const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], base64: true, quality: 0.85, selectionLimit: 1 });
+        if (result.canceled || !result.assets?.[0]) return;
+        const asset = result.assets[0];
+        if (!asset.base64) throw new Error('Photo data could not be read.');
+        setAttachment({ uri: asset.uri, name: asset.fileName ?? 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 });
+        setAttachmentName(asset.fileName ?? 'Photo');
+        return;
+      }
+      if (kind === 'Camera') {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) return Alert.alert('Camera', 'Izin kamera diperlukan untuk mengambil foto.');
+        const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], base64: true, quality: 0.85 });
+        if (result.canceled || !result.assets?.[0]) return;
+        const asset = result.assets[0];
+        if (!asset.base64) throw new Error('Camera image data could not be read.');
+        setAttachment({ uri: asset.uri, name: asset.fileName ?? 'camera.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 });
+        setAttachmentName(asset.fileName ?? 'Camera photo');
+        return;
+      }
+      const result = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true, multiple: false });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: FileSystem.EncodingType.Base64 });
+      setAttachment({ uri: asset.uri, name: asset.name, mimeType: asset.mimeType ?? 'application/octet-stream', base64 });
+      setAttachmentName(asset.name);
+    } catch (error) {
+      Alert.alert('Attachment failed', error instanceof Error ? error.message : 'Attachment could not be prepared.');
+    }
   }
 
   function cancelStreaming() {
@@ -524,11 +559,11 @@ export default function ChatScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
           <View style={{ gap: 4 }}>
             <Button title="＋" onPress={() => Alert.alert('Attach', 'Pilih attachment', [
-              { text: 'File', onPress: () => handleAttachment('File') },
-              { text: 'Photo', onPress: () => handleAttachment('Photo') },
-              { text: 'Camera', onPress: () => handleAttachment('Camera') },
+              { text: 'File', onPress: () => void handleAttachment('File') },
+              { text: 'Photo', onPress: () => void handleAttachment('Photo') },
+              { text: 'Camera', onPress: () => void handleAttachment('Camera') },
               { text: 'Cancel', style: 'cancel' },
-            ])} />
+            ], { cancelable: false })} />
           </View>
           <TextInput value={draft} onChangeText={setDraft} placeholder="Message SH…" placeholderTextColor="#6B7280" multiline editable={!sending && lifecycleState === 'active'} style={[inputStyle, { flex: 1, maxHeight: 130 }]} />
           {sending ? <Button title="Stop" onPress={cancelStreaming} /> : <Button title="Send" onPress={() => void onSend()} disabled={!canSend} />}
