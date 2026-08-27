@@ -92,13 +92,17 @@ export async function deleteRequestedKnowledge(supabase: ReturnType<typeof creat
   if (!/(?:\b(?:hapus|delete|remove|hilangkan|buang)\b).{0,160}\b(?:knowledge|pengetahuan|learning|pembelajaran)\b/i.test(userMessage) && !/\b(?:knowledge|pengetahuan|learning|pembelajaran)\b.{0,160}\b(?:hapus|delete|remove|hilangkan|buang)\b/i.test(userMessage)) return null;
   const { data, error } = await supabase.from('knowledge').select('knowledge_id,content').eq('sh_id', shId).limit(100);
   if (error) throw new Error('KNOWLEDGE_DELETE_LOOKUP_FAILED: ' + error.message);
+  const normalizedMessage = userMessage.toLowerCase().normalize('NFKC');
+  const explicitCodes = [...normalizedMessage.matchAll(/(?:chat[-_ ]?)?kng[-_ ]?\d+(?:[-_ ]?\d+)+/gi)].map(m => m[0].replace(/[_ ]+/g,'-'));
   const tokens = deletionTokens(userMessage).filter(x => !['knowledge','pengetahuan','learning','pembelajaran'].includes(x));
   const codeTokens = tokens.filter(x => /[0-9]/.test(x));
   const scored = (data ?? []).map((row: {knowledge_id: string; content: string}) => {
     const content = String(row.content ?? '').toLowerCase().normalize('NFKC');
+    const compactContent = content.replace(/[_ ]+/g,'-');
     let score = 0;
     for (const token of tokens) if (content.includes(token)) score += /[0-9]/.test(token) || token.length >= 7 ? 3 : 1;
     if (codeTokens.length && codeTokens.every(t => content.includes(t))) score += 10;
+    if (explicitCodes.some(code => compactContent.includes(code))) score += 100;
     return { row, score };
   }).filter(x => x.score > 0).sort((a,b) => b.score-a.score);
   if (!scored.length || (scored.length > 1 && scored[0].score === scored[1].score)) throw new Error('KNOWLEDGE_DELETE_REJECTED: target knowledge could not be uniquely identified');
