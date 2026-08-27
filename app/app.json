@@ -7,11 +7,7 @@
     "scheme": "secondhead",
     "userInterfaceStyle": "automatic",
     "plugins": ["expo-router"],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "android": {
-      "package": "com.secondhead.app"
-    }
+    "experiments": { "typedRoutes": true },
+    "android": { "package": "com.secondhead.app" }
   }
 }
