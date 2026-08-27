@@ -92,8 +92,23 @@ export async function deleteRequestedKnowledge(supabase: ReturnType<typeof creat
   if (!/(?:\b(?:hapus|delete|remove|hilangkan|buang)\b).{0,160}\b(?:knowledge|pengetahuan|learning|pembelajaran)\b/i.test(userMessage) && !/\b(?:knowledge|pengetahuan|learning|pembelajaran)\b.{0,160}\b(?:hapus|delete|remove|hilangkan|buang)\b/i.test(userMessage)) return null;
   const { data, error } = await supabase.from('knowledge').select('knowledge_id,content').eq('sh_id', shId).limit(100);
   if (error) throw new Error('KNOWLEDGE_DELETE_LOOKUP_FAILED: ' + error.message);
+  // Prefer an explicit regression/test code when the user supplies one.
+  // Journey represents Knowledge as LEARNING, but the source record remains KNOWLEDGE.
   const normalizedMessage = userMessage.toLowerCase().normalize('NFKC');
   const explicitCodes = [...normalizedMessage.matchAll(/(?:chat[-_ ]?)?kng[-_ ]?\d+(?:[-_ ]?\d+)+/gi)].map(m => m[0].replace(/[_ ]+/g,'-'));
+  if (explicitCodes.length) {
+    const exact = (data ?? []).filter((row: {knowledge_id: string; content: string}) => {
+      const compact = String(row.content ?? '').toLowerCase().normalize('NFKC').replace(/[_ ]+/g,'-');
+      return explicitCodes.some(code => compact.includes(code));
+    });
+    if (exact.length === 1) {
+      const target = exact[0];
+      const { error: deleteError } = await supabase.rpc('runtime_delete_record_with_journey', { p_domain: 'KNOWLEDGE', p_record_id: target.knowledge_id });
+      if (deleteError) throw new Error('KNOWLEDGE_DELETE_FAILED: ' + deleteError.message);
+      return { knowledge: String(target.content), knowledge_id: String(target.knowledge_id) };
+    }
+    if (exact.length > 1) throw new Error('KNOWLEDGE_DELETE_REJECTED: target knowledge code is not unique');
+  }
   const tokens = deletionTokens(userMessage).filter(x => !['knowledge','pengetahuan','learning','pembelajaran'].includes(x));
   const codeTokens = tokens.filter(x => /[0-9]/.test(x));
   const scored = (data ?? []).map((row: {knowledge_id: string; content: string}) => {
