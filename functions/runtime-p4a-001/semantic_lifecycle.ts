@@ -88,6 +88,56 @@ export async function deleteRequestedMemory(supabase: ReturnType<typeof createCl
   return { memory: String(target.content), memory_id: String(target.memory_id) };
 }
 
+export async function deleteRequestedKnowledge(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ knowledge: string; knowledge_id: string } | null> {
+  if (!/(?:\\b(?:hapus|delete|remove|hilangkan|buang)\\b).{0,160}\\b(?:knowledge|pengetahuan|learning|pembelajaran)\\b/i.test(userMessage) && !/\\b(?:knowledge|pengetahuan|learning|pembelajaran)\\b.{0,160}\\b(?:hapus|delete|remove|hilangkan|buang)\\b/i.test(userMessage)) return null;
+  const { data, error } = await supabase.from('knowledge').select('knowledge_id,content').eq('sh_id', shId).limit(100);
+  if (error) throw new Error('KNOWLEDGE_DELETE_LOOKUP_FAILED: ' + error.message);
+  const tokens = deletionTokens(userMessage).filter(x => !['knowledge','pengetahuan','learning','pembelajaran'].includes(x));
+  const codeTokens = tokens.filter(x => /[0-9]/.test(x));
+  const scored = (data ?? []).map((row: {knowledge_id: string; content: string}) => {
+    const content = String(row.content ?? '').toLowerCase().normalize('NFKC');
+    let score = 0;
+    for (const token of tokens) if (content.includes(token)) score += /[0-9]/.test(token) || token.length >= 7 ? 3 : 1;
+    if (codeTokens.length && codeTokens.every(t => content.includes(t))) score += 10;
+    return { row, score };
+  }).filter(x => x.score > 0).sort((a,b) => b.score-a.score);
+  if (!scored.length || (scored.length > 1 && scored[0].score === scored[1].score)) throw new Error('KNOWLEDGE_DELETE_REJECTED: target knowledge could not be uniquely identified');
+  const target = scored[0].row;
+  const { error: deleteError } = await supabase.rpc('runtime_delete_record_with_journey', { p_domain: 'KNOWLEDGE', p_record_id: target.knowledge_id });
+  if (deleteError) throw new Error('KNOWLEDGE_DELETE_FAILED: ' + deleteError.message);
+  return { knowledge: String(target.content), knowledge_id: String(target.knowledge_id) };
+}
+
+export async function deleteRequestedExperience(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ experience: string; experience_id: string } | null> {
+  if (!/(?:\\b(?:hapus|delete|remove|hilangkan|buang)\\b).{0,160}\\b(?:experience|pengalaman)\\b/i.test(userMessage) && !/\\b(?:experience|pengalaman)\\b.{0,160}\\b(?:hapus|delete|remove|hilangkan|buang)\\b/i.test(userMessage)) return null;
+  const { data, error } = await supabase.from('experiences').select('experience_id,content').eq('sh_id', shId).eq('account_id', (await supabase.rpc('current_account_id')).data).limit(100);
+  if (error) throw new Error('EXPERIENCE_DELETE_LOOKUP_FAILED: ' + error.message);
+  const tokens = deletionTokens(userMessage).filter(x => !['experience','pengalaman'].includes(x));
+  const codeTokens = tokens.filter(x => /[0-9]/.test(x));
+  const scored = (data ?? []).map((row: {experience_id: string; content: string}) => {
+    const content = String(row.content ?? '').toLowerCase().normalize('NFKC');
+    let score = 0;
+    for (const token of tokens) if (content.includes(token)) score += /[0-9]/.test(token) || token.length >= 7 ? 3 : 1;
+    if (codeTokens.length && codeTokens.every(t => content.includes(t))) score += 10;
+    return { row, score };
+  }).filter(x => x.score > 0).sort((a,b) => b.score-a.score);
+  if (!scored.length || (scored.length > 1 && scored[0].score === scored[1].score)) throw new Error('EXPERIENCE_DELETE_REJECTED: target experience could not be uniquely identified');
+  const target = scored[0].row;
+  const { error: deleteError } = await supabase.rpc('runtime_delete_record_with_journey', { p_domain: 'EXPERIENCE', p_record_id: target.experience_id });
+  if (deleteError) throw new Error('EXPERIENCE_DELETE_FAILED: ' + deleteError.message);
+  return { experience: String(target.content), experience_id: String(target.experience_id) };
+}
+
+export async function deleteRequestedRecord(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ domain: 'MEMORY'|'KNOWLEDGE'|'EXPERIENCE'; content: string; record_id: string } | null> {
+  const experience = await deleteRequestedExperience(supabase, shId, userMessage);
+  if (experience) return { domain: 'EXPERIENCE', content: experience.experience, record_id: experience.experience_id };
+  const knowledge = await deleteRequestedKnowledge(supabase, shId, userMessage);
+  if (knowledge) return { domain: 'KNOWLEDGE', content: knowledge.knowledge, record_id: knowledge.knowledge_id };
+  const memory = await deleteRequestedMemory(supabase, shId, userMessage);
+  if (memory) return { domain: 'MEMORY', content: memory.memory, record_id: memory.memory_id };
+  return null;
+}
+
 export async function recordSemanticLifecycle(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string, modelResponse: { semantic_signals?: Record<string, unknown> }) {
   const deletion = await deleteRequestedMemory(supabase, shId, userMessage);
   if (deletion) return { memory: null, knowledge: null, experience: null, deletedMemory: deletion };
