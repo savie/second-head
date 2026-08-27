@@ -25,7 +25,7 @@ function buildVirtualSessions(rows: ConversationHistoryRow[]): ConversationSessi
     if (!previous || gap > gapSeconds) {
       sessions.push({
         id: row.conversation_id,
-        title: row.role === 'user' ? row.content.slice(0, 42) : 'Conversation',
+        title: typeof row.metadata?.conversation_title === 'string' && row.metadata.conversation_title.trim() ? row.metadata.conversation_title : (row.role === 'user' ? row.content.slice(0, 42) : 'Conversation'),
         startedAt: row.created_at,
         endedAt: row.created_at,
         rows: [row],
@@ -34,6 +34,7 @@ function buildVirtualSessions(rows: ConversationHistoryRow[]): ConversationSessi
       previous.rows.push(row);
       previous.endedAt = row.created_at;
       if (previous.title === 'Conversation' && row.role === 'user') previous.title = row.content.slice(0, 42);
+      if (typeof row.metadata?.conversation_title === 'string' && row.metadata.conversation_title.trim()) previous.title = row.metadata.conversation_title;
     }
   }
   return sessions.reverse();
@@ -162,6 +163,14 @@ export default function ChatScreen() {
         }
         if (event.type === 'complete') setLifecycleState('active');
       }, controller.signal);
+      const rows = await loadConversationHistoryRows(100);
+      const sessions = buildVirtualSessions(rows.filter(row => row?.content && !isVerificationArtifact(row)));
+      const latest = sessions[0];
+      if (latest) {
+        setCurrentConversationId(latest.id);
+        setConversationTitle(latest.title || conversationTitle);
+        setMessages(latest.rows.map(messageFromRow));
+      }
     } catch (error) {
       if (!mountedRef.current) return;
       if (controller.signal.aborted) {
