@@ -1,222 +1,258 @@
-# SESSION RESUME 68 — BUG-004 CLOSED / NEXT BUG-005
+# SESSION RESUME 68 — COMPLETE POST-FROZEN BUG AUDIT
 
 ## Project
 SECOND HEAD — SYSTEM BUILD
 
-## Basis
-Melanjutkan Session Resume 67, dengan baseline commit yang disebut pada resume:
-38dda6f8081dc215d9410c12cd1d803dfa13ec7a
+## Audit basis
+- Frozen final-gate baseline: `c44b2bc311baea5a46d0acb957049eb3c8307817`
+- Frozen implementation candidate: `40a8772e3c79e17de77c7581048620286ff638a9`
+- Frozen APK: #194
+- APK SHA-256: `bc53e9ebfe6c3fc92ec1e675998cbd774a97b5f51184e51c95236b97eb6690d4`
+- Audit continued through current DEV maintenance history after the freeze.
+- Current DEV HEAD at this resume update: `5444e180cde293d1692958cef6efa9b0a2201802`
 
-## Current State
-- GitHub: DEV branch `savie/second-head`
-- Supabase: DEV project `pkhkgvsrqeupvwoqjwmd`
-- APK terakhir yang sudah diuji: Build #199
-- BUG-003: CLOSED / PASS
-- BUG-004: CLOSED / PASS
-- BUG-005: NEXT — Conversation History
+> Frozen baseline remains immutable. All items below are post-baseline maintenance history.
+
+---
+
+# BUG-001 — IMMEDIATE / SHORT-TERM CONVERSATIONAL RECALL
+
+## Problem
+Conversation messages were already persisted and visible in the UI, but the runtime model request did not receive recent conversation history.
+
+Therefore SH could not reliably answer using immediately preceding conversation messages.
+
+## Root cause
+The missing link was:
+
+```
+conversation persistence
+        ↓
+runtime-owned retrieval
+        ↓
+active-SH scope
+        ↓
+bounded recent window
+        ↓
+conversation_context
+        ↓
+model request
+```
+
+Memory and Experience were separate persistence/context domains and were not supposed to become transcript storage.
+
+## Fix
+A runtime-owned conversation-context retrieval path was added using the existing `conversations` persistence.
+
+The DB function bounds the recent window and verifies the requested `sh_id` against the authenticated active SH identity.
+
+## Verification
+Device verification demonstrated that SH could refer to prior conversation messages without relying on Memory or Experience.
+
+## Status
+**🟢 FIXED + DEVICE VERIFIED**
+
+Relevant implementation started with Build #195 / migration:
+`20260826050000_bug_001_short_term_conversation_context`
+
+---
+
+# BUG-002 — MEMORY PERSISTENCE POLICY / DUPLICATE PREVENTION
+
+## Problem
+Ordinary conversation could previously result in unwanted automatic Memory persistence.
+
+The required behavior is:
+
+```
+ordinary conversation
+        ↓
+NO automatic Memory persistence
+
+explicit "remember/save as Memory"
+        ↓
+Memory may be persisted
+
+explicit opt-out
+        ↓
+hard boundary / do not persist
+```
+
+## Additional historical issue
+Earlier implementation could create duplicate Memory records for repeated explicit saves.
+
+Those historical duplicates are evidence/history and must not be deleted merely to make current state look clean.
+
+## Fix / reconciliation
+The persistence and deduplication behavior was corrected.
+
+Current expected behavior:
+
+- ordinary statement does not create Memory/Experience
+- explicit Memory request creates Memory
+- Memory recall works
+- repeated explicit save against the same Memory does not create a new duplicate
+- ordinary paraphrase does not create Memory
+- retrieval does not create Memory
+
+## Verification
+These behaviors were verified on device.
+
+## Status
+**🟢 FIXED + VERIFIED**
+
+Historical duplicate Memory records remain preserved as evidence.
+
+---
+
+# BUG-003 — MEMORY LISTING RESPONSE FORMATTING
+
+## Problem
+Memory retrieval itself was working, but a request to list all Memory one-per-line with blank lines produced concatenated output.
+
+Observed pattern:
+
+```
+1. ...
+2. ...3. ...
+```
+
+The underlying retrieval returned all expected Memory records, so this was not initially classified as a retrieval failure.
+
+## Trace / diagnosis
+The audit followed:
+
+```
+authorized_memory_context
+        ↓
+context assembly
+        ↓
+model request
+        ↓
+runtime SSE serialization
+        ↓
+natural-language response
+```
+
+Two relevant defects were addressed:
+
+1. Explicit response-formatting instructions were not sufficiently enforced in the semantic model prompt.
+2. Runtime SSE chunk handling could collapse/preserve line breaks incorrectly.
+
+## Fixes
+- Explicit formatting instructions are now passed as a hard response-formatting requirement.
+- Runtime SSE handling was corrected to preserve newline characters.
+
+Relevant commits include:
+
+- `93bf3f8c3911592de9bc92deb7c6cb9d4938c018` — honor explicit response formatting instructions
+- `945b659fd5e28ef48bc8130029f81d1b6f80d171` — preserve newlines in runtime SSE chunks
+
+## Important distinction
+The Memory inventory/retrieval itself was already passing:
+
+- all Memory retrieval: PASS
+- no new Memory during retrieval: PASS
+- no new duplicate: PASS
+
+The defect was response presentation/serialization.
+
+## Status
+**🟢 FIXED**
 
 ---
 
 # BUG-004 — SYNCHRONIZED LIFECYCLE DELETION
 
 ## Scope
-
-BUG-004 diperluas dari kasus Memory menjadi synchronized lifecycle deletion untuk domain Journey yang mempunyai source record:
+BUG-004 expanded from Memory-only deletion into synchronized lifecycle deletion for domains that actually have source-record deletion semantics:
 
 - MEMORY
 - KNOWLEDGE
 - EXPERIENCE
 
-Target UX/application behavior:
+Target principle:
 
 ```
-JOURNEY
-├── MEMORY
-├── KNOWLEDGE
-├── EXPERIENCE
-└── OTHER
-    └── LIFECYCLE
-        ├── RECOVERY
-        └── EVOLUTION
+delete from Journey
+        ↕
+delete source record
+        ↓
+Journey representation/event synchronized
 ```
 
-Prinsip utama:
+Recovery/Evolution were not forced into delete semantics without implementation evidence.
 
-> Delete dari Journey dan delete dari source record harus sinkron.
-
-Artinya bila source record dihapus, representation/event Journey terkait juga hilang. Sebaliknya, delete dari Journey harus menghapus source record melalui lifecycle deletion mechanism yang sama.
-
-Recovery dan Evolution tidak dipaksa menjadi deletion semantics. Keduanya harus mengikuti semantics implementation aktual masing-masing.
-
----
-
-## BUG-004A — JOURNEY → MEMORY
-
-### Result
+## BUG-004A — Journey → Memory
 PASS.
 
-Sudah diuji dengan:
-1. `E2E_TEST@SH.COM` — single Memory deletion.
-2. `sh-dev-test@banned.idn` — Memory dengan 2 Journey Events.
+Tests included:
+- single Memory deletion
+- Memory with multiple Journey events
 
-Hasil:
-- Memory source hilang.
-- Journey events ikut hilang.
-- Setelah refresh tetap hilang.
+Results:
+- source Memory removed
+- associated Journey events removed
+- refresh remained clean
 
-Kesimpulan:
-Journey-side deletion untuk Memory terbukti synchronized.
+## BUG-004B — Chat → Memory
+Initial failure:
+SH reported Memory deleted, but the source and Journey representation remained.
 
----
+Root cause:
+Chat deletion was not routed through the synchronized lifecycle deletion mechanism.
 
-## BUG-004B — CHAT → MEMORY
-
-### Initial Failure
-
-Test awal menggunakan Memory:
+Fix:
+Chat Memory deletion was routed through:
 
 ```
-Saya sedang melakukan test delete memory via chat dengan kode DELMEM-001.
+runtime_delete_record_with_journey(domain, record_id)
 ```
 
-Source:
-`runtime:p5a:explicit_user_request`
+Final result:
+**PASS**
 
-Chat delete:
-```
-Hapus Memory tentang test delete memory via chat dengan kode DELMEM-001.
-```
-
-SH menyatakan Memory telah dihapus, tetapi Memory masih muncul di Journey.
-
-DB membuktikan source record dan Journey event masih ada:
-- memory_id:
-  `2cdb1302-1870-4b6b-b72f-7617183250c6`
-- Journey event:
-  `19fcf6eb-1457-49f5-80bf-6ca94c9518c3`
-
-Record `DELMEM-001` dipertahankan sebagai regression evidence dan tidak dihapus manual selama fase debugging.
-
-### Root Cause / Fix
-
-Chat runtime `runtime-p4a-001` belum menggunakan synchronized lifecycle deletion untuk Chat → Memory.
-
-Database sudah mempunyai:
-`runtime_delete_record_with_journey(domain, record_id)`
-
-Runtime kemudian diarahkan menggunakan mechanism tersebut.
-
-### Final Result
+## BUG-004C — Journey → Knowledge
 PASS.
 
-Memory dapat dihapus melalui Chat dan Journey menjadi bersih.
+Important semantic distinction:
 
----
+```
+source domain = KNOWLEDGE
+Journey representation = LEARNING
+```
 
-# BUG-004C — JOURNEY → KNOWLEDGE
+`LEARNING` does not mean the source became another domain.
 
-### Result
+## BUG-004D — Chat → Knowledge
+Initial failure:
+Chat Knowledge deletion did not reliably resolve the target source record.
+
+Fix:
+- Chat deletion routing added for Knowledge.
+- Knowledge matching corrected.
+- Explicit regression codes are prioritized for deterministic target resolution.
+- Deletion uses the synchronized lifecycle mechanism.
+
+Final result:
+**PASS**
+
+## BUG-004E — Journey → Experience
 PASS.
 
-Knowledge yang tampil pada Journey menggunakan representation:
+Experience source and Journey representation are synchronized on deletion.
 
-```
-KNOWLEDGE domain
-↓
-LEARNING Journey representation
-```
+## BUG-004F — Chat → Experience
+Initial failure:
+Chat Experience deletion was not fully connected to synchronized lifecycle deletion.
 
-Jadi label `LEARNING` pada Journey bukan berarti source record tersebut berubah menjadi domain lain. Source tetap KNOWLEDGE.
+Fix:
+Chat Experience deletion routed through the common deletion path.
 
-Journey-side deletion berhasil menghapus representation Journey dan source yang terkait.
+Final result:
+**PASS**
 
----
-
-# BUG-004D — CHAT → KNOWLEDGE
-
-### Initial Failure
-
-Chat deletion untuk Knowledge gagal walaupun Experience dan Memory sudah mempunyai jalur yang benar.
-
-Salah satu test evidence menggunakan kode:
-`CHAT-KNG-004-001`
-
-Masalah utama yang ditemukan adalah resolver Chat delete Knowledge tidak cukup deterministic dalam menghubungkan request user ke source Knowledge record. Selain itu, Journey representation memakai `LEARNING`, sehingga mapping domain harus dibedakan dengan benar:
-
-```
-Chat request
-↓
-KNOWLEDGE source domain
-↓
-LEARNING Journey representation
-↓
-runtime_delete_record_with_journey()
-↓
-source + Journey event synchronized
-```
-
-### Fix
-
-Resolver Knowledge diperbaiki agar explicit Knowledge regression code diprioritaskan dan target source record dapat diidentifikasi secara deterministic.
-
-Fix kemudian dideploy bersama source runtime DEV ke Supabase DEV.
-
-### Final Result
-PASS.
-
-Setelah Chat delete Knowledge, Journey pada device menjadi bersih.
-
----
-
-# BUG-004E — JOURNEY → EXPERIENCE
-
-### Result
-PASS.
-
-Experience source record dan Journey representation dapat dihapus melalui Journey.
-
----
-
-# BUG-004F — CHAT → EXPERIENCE
-
-### Initial Failure
-
-Chat delete Experience sebelumnya belum tersambung ke synchronized lifecycle deletion.
-
-### Fix
-
-Chat Experience deletion diarahkan ke lifecycle deletion mechanism yang sama.
-
-### Final Result
-PASS.
-
-Regression:
-
-```
-Hapus Experience tentang regression BUG-004 Chat Delete Experience dengan kode CHAT-EXP-004-001.
-```
-
-SH menyatakan berhasil dan Experience tersebut hilang dari Journey.
-
----
-
-# FINAL BUG-004 ACCEPTANCE
-
-Acceptance account:
-`E2E_TEST@SH.COM`
-
-User kemudian menghapus seluruh Journey Memory, Knowledge, dan Experience pada account tersebut untuk final cleanliness check.
-
-Final Journey check:
-
-- Memory: tidak ada
-- Knowledge / LEARNING: tidak ada
-- Private test Experience yang ditargetkan: tidak ada
-- Journey events untuk tested deletion records: bersih
-
-Experience bawaan General Shared dikecualikan dari acceptance berdasarkan aturan test.
-
-## Final Status
+## Final BUG-004 acceptance
 
 ```
 Journey → Memory       PASS
@@ -226,87 +262,177 @@ Journey → Experience   PASS
 Chat → Memory          PASS
 Chat → Knowledge       PASS
 Chat → Experience      PASS
-
-BUG-004 = CLOSED / PASS
 ```
 
-Tidak ada deletion semantics fiktif yang diterapkan ke Recovery/Evolution.
+Final E2E account cleanliness check was performed on:
+`E2E_TEST@SH.COM`
 
----
+Journey was clean of the tested Memory/Knowledge/Experience records. General Shared Experience records were not treated as private E2E leakage in the acceptance check.
 
-# IMPLEMENTATION / PROVENANCE
-
-BUG-004 menggunakan lifecycle deletion mechanism database:
+## DB / provenance
+BUG-004 uses the database lifecycle mechanism:
 
 ```
 runtime_delete_record_with_journey(domain, record_id)
 ```
 
-Runtime Chat deletion diperbaiki di:
+Relevant migration lineage includes:
 
-```
-functions/runtime-p4a-001/semantic_lifecycle.ts
-```
+- `20260827020203`
+- `20260827074749_bug004_sync_journey_source_delete_v2`
+- `20260827120000_bug004_synchronized_journey_source_delete`
 
-Penting:
-- DB migration tidak ditambah secara spekulatif untuk runtime-only fixes.
-- Supabase DEV deployment dilakukan dari source yang diambil dari GitHub DEV.
-- Migration provenance BUG-004 yang relevan:
-  - `20260827020203`
-  - `20260827074749_bug004_sync_journey_source_delete_v2`
-- GitHub dan Supabase harus tetap dianggap satu provenance chain: GitHub DEV sebagai source, Supabase DEV sebagai deployed runtime/database state.
+Runtime fixes were committed to GitHub DEV and deployed to Supabase DEV from the corresponding DEV source.
+
+## Status
+**🟢 CLOSED / PASS**
 
 ---
 
-# IMPORTANT TEST LESSONS
+# BUG-005 — CONVERSATION HISTORY
 
-1. Jangan menganggap Journey label `LEARNING` sebagai source domain berbeda. Untuk deletion semantics, source domain tetap KNOWLEDGE.
-2. Jangan membuat regression record baru bila existing regression evidence masih valid.
-3. Jangan melakukan manual DB deletion untuk acceptance evidence kecuali memang diperintahkan.
-4. Destructive operation harus selalu diverifikasi pada:
-   - source record
-   - Journey representation/event
-   - refresh/UI state
-5. Jangan menyatakan PASS hanya berdasarkan jawaban SH; DB verification adalah bagian dari acceptance.
-6. Jangan membuat migration baru untuk masalah runtime TypeScript.
+## Position
+BUG-005 is the **next functional area after BUG-004**.
+
+Do not confuse it with BUG-001.
+
+### BUG-001
+Short-term conversation context **inside the active conversation/runtime model context**.
+
+### BUG-005
+Persisted **Conversation History / conversation navigation and continuity as a product feature**.
+
+The repository already contains a conversation-history implementation lineage, including authenticated history read/load and subsequent corrections to keep a newly created chat empty rather than hydrating account-wide history.
+
+Relevant historical implementation commits include:
+
+- `1483d14a896f0aeaf72d6360656c3e1a6e11649f` — authenticated conversation history read function
+- `f25b9471e2b179e114b1b89fd3b7d32a38286c84` — authenticated conversation history read
+- `70504ba8a0d9cc1ca7a6c61c6ed7b6c1a4d993e9` — authenticated conversation history loader
+- `054a42c3997ec4d600829d7175dbfe740e292eb4` — load persisted conversation history on chat open
+- `ab67a4148ab6a21ca2c488b54a554d7471564e18` — keep new chat empty; remove account-wide history hydration
+
+## Required next audit
+
+Before changing code:
+
+1. Trace persisted conversation records.
+2. Trace authenticated history read.
+3. Trace history loader and chat-open behavior.
+4. Trace active conversation vs newly created conversation.
+5. Verify account/S H isolation.
+6. Determine exact expected UX from current implementation and project contract.
+7. Reproduce current behavior on `E2E_TEST@SH.COM`.
+8. Only then classify the actual BUG-005 defect.
+9. Fix minimally.
+10. Commit + push DEV.
+11. Deploy through the official path.
+12. Verify CI.
+13. Device-test.
+14. Verify DB and UI.
+
+**Do not invent a BUG-005 acceptance result before this audit.**
+
+## Status
+**🟡 NEXT / AUDIT REQUIRED**
 
 ---
 
-# NEXT — BUG-005 CONVERSATION HISTORY
-
-Setelah BUG-004 CLOSED/PASS, fokus berikutnya adalah:
+# COMPLETE POST-FROZEN BUG CHAIN
 
 ```
-BUG-005 — Conversation History
+Frozen v1.0
+APK #194
+c44b2bc...
+        ↓
+BUG-001
+Immediate Conversational Recall
+        ↓
+FIXED + DEVICE VERIFIED
+
+        ↓
+BUG-002
+Memory Persistence Policy
+        ↓
+FIXED + VERIFIED
+
+        ↓
+BUG-003
+Memory Listing Response Formatting
+        ↓
+FIXED
+
+        ↓
+BUG-004
+Synchronized Lifecycle Deletion
+        ↓
+CLOSED / PASS
+
+        ↓
+BUG-005
+Conversation History
+        ↓
+NEXT / AUDIT REQUIRED
 ```
 
-Next work:
+---
 
-1. Audit implementation Conversation History di GitHub DEV.
-2. Trace source data, DB tables/functions/RPC, runtime, dan Journey/UI boundary yang relevan.
-3. Tentukan expected behavior dan acceptance criteria sebelum patch.
-4. Bedakan current conversation runtime dengan persisted Conversation History.
-5. Audit deletion/retention semantics jika BUG-005 menyentuh lifecycle data.
-6. Jangan patch berdasarkan asumsi.
-7. Pastikan GitHub DEV dan Supabase DEV tetap synchronized/provenance-consistent sebelum testing.
-8. Setelah fix:
-   - deploy melalui jalur resmi,
-   - tunggu CI/workflow GREEN,
-   - test di APK yang sesuai,
-   - verify DB + UI,
-   - lalu close BUG-005 hanya setelah acceptance terpenuhi.
+# CURRENT DEV / SUPABASE TRACEABILITY
 
-## Working Principle
+GitHub DEV:
+`savie/second-head`
+
+Supabase DEV:
+`pkhkgvsrqeupvwoqjwmd`
+
+Frozen final-gate record:
+`c44b2bc311baea5a46d0acb957049eb3c8307817`
+
+Frozen implementation:
+`40a8772e3c79e17de77c7581048620286ff638a9`
+
+Frozen APK:
+`#194`
+
+Latest documented DEV commit before this resume update:
+`5444e180cde293d1692958cef6efa9b0a2201802`
+
+**Important:** `5444e18...` is the current documentation commit for this Resume 68 update; the next implementation commit must be based on the actual DEV HEAD, not assumed from an older resume.
+
+---
+
+# WORKING RULE
 
 ```
-TRACE ONCE
-→ DESIGN ONE CONSISTENT MECHANISM
-→ IMPLEMENT
-→ DEPLOY ONCE
-→ VERIFY CI
-→ TEST
-→ VERIFY DB
-→ CLOSE
+TRACE ACTUAL STATE
+        ↓
+COMPARE WITH CONTRACT
+        ↓
+IDENTIFY EXACT GAP
+        ↓
+MINIMAL FIX
+        ↓
+COMMIT + PUSH DEV
+        ↓
+DEPLOY
+        ↓
+CI GREEN
+        ↓
+DEVICE TEST
+        ↓
+DB + UI VERIFICATION
+        ↓
+CLOSE ONLY WITH EVIDENCE
 ```
 
-Efisiensi tetap menjadi prioritas: jangan mengulang test yang sudah PASS tanpa alasan regression yang jelas.
+Historical evidence must be preserved.
+Frozen APK #194 must not be mutated.
+No speculative migration.
+No manual deletion of regression evidence.
+GitHub DEV and Supabase DEV must remain provenance-consistent.
+
+## NEXT ACTION
+
+**BUG-005 Conversation History — audit first, implementation second.**
+
+---
