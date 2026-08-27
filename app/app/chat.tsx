@@ -436,6 +436,7 @@ export default function ChatScreen() {
   const inputStyle = { minHeight: 52, borderWidth: 1, borderRadius: 14, padding: 12, color: '#111827', borderColor: '#D1D5DB', backgroundColor: '#FFFFFF' };
 
   return (
+    <>
       <Modal visible={renameOpen} transparent animationType="fade" onRequestClose={() => {}}>
         <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.35)' }}>
           <View style={{ borderRadius: 16, padding: 16, backgroundColor: '#FFFFFF', gap: 12 }}>
@@ -455,7 +456,7 @@ export default function ChatScreen() {
           </View>
         </View>
       </Modal>
-    <View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
+      <View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flex: 1, marginRight: 12 }}>
