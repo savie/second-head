@@ -12,7 +12,12 @@ SECOND HEAD — SYSTEM BUILD
 - Frozen APK: #194 (hanya frozen baseline)
 - APK SHA-256: `bc53e9ebfe6c3fc92ec1e675998cbd774a97b5f51184e51c95236b97eb6690d4`
 - Audit dilanjutkan melalui seluruh riwayat maintenance DEV setelah freeze.
-- DEV HEAD aktual saat Resume 68 diperbaiki: `d17a556e101fea2b13747c65c64d3bc4ae708cd2`
+- DEV HEAD aktual saat Resume 68 diperbarui: `4c9146f3a059891c93edc2e60828c837337219f2`
+- **APK regression terakhir yang digunakan untuk pengujian BUG-004: #199**
+- Workflow Android Build #199: run `33032370331`
+- Commit source Build #199: `393f7e770b6108f394410bd3885024ca686430e9`
+- Status Build #199: **success**
+- Artifact APK: `sh-app-release-apk` (artifact ID `9630932207`)
 
 > Frozen baseline tetap tidak berubah. Seluruh bug di bawah adalah maintenance setelah baseline.
 
@@ -142,7 +147,7 @@ Dua defect terkait ditemukan dan diperbaiki:
 1. Instruksi format respons eksplisit belum cukup ditegakkan pada semantic model prompt.
 2. Penanganan chunk SSE runtime dapat menyebabkan line break tidak dipertahankan dengan benar.
 
-## Perbaikanes
+## Perbaikan
 - Instruksi format eksplisit sekarang diteruskan sebagai persyaratan format respons.
 - Penanganan SSE runtime diperbaiki agar karakter newline tetap dipertahankan.
 
@@ -189,11 +194,11 @@ Recovery/Evolution tidak dipaksa menjadi delete semantics tanpa evidence dari im
 ## BUG-004A — Journey → Memory
 PASS.
 
-Tests included:
+Pengujian mencakup:
 - single Memory deletion
 - Memory with multiple Journey events
 
-Results:
+Hasil:
 - source Memory removed
 - associated Journey events removed
 - refresh remained clean
@@ -203,7 +208,7 @@ Kegagalan awal:
 SH reported Memory deleted, but the source and Journey representation remained.
 
 Akar masalah:
-Chat deletion was not routed through the synchronized lifecycle deletion mechanism.
+Chat deletion belum diarahkan ke mekanisme synchronized lifecycle deletion.
 
 Perbaikan:
 Chat Memory deletion was routed through:
@@ -232,10 +237,10 @@ Kegagalan awal:
 Chat Knowledge deletion did not reliably resolve the target source record.
 
 Perbaikan:
-- Chat deletion routing added for Knowledge.
+- Routing Chat deletion untuk Knowledge ditambahkan.
 - Knowledge matching corrected.
-- Explicit regression codes are prioritized for deterministic target resolution.
-- Deletion uses the synchronized lifecycle mechanism.
+- Regression code eksplisit diprioritaskan untuk resolusi target yang deterministik.
+- Deletion menggunakan synchronized lifecycle mechanism.
 
 Hasil akhir:
 **PASS**
@@ -250,7 +255,7 @@ Kegagalan awal:
 Chat Experience deletion belum sepenuhnya terhubung ke synchronized lifecycle deletion.
 
 Perbaikan:
-Chat Experience deletion routed through the common deletion path.
+Chat Experience deletion diarahkan melalui common deletion path.
 
 Hasil akhir:
 **PASS**
@@ -279,7 +284,7 @@ BUG-004 menggunakan mekanisme database lifecycle:
 runtime_delete_record_with_journey(domain, record_id)
 ```
 
-Relevant migration lineage includes:
+Riwayat migration terkait:
 
 - `20260827020203`
 - `20260827074749_bug004_sync_journey_source_delete_v2`
@@ -303,11 +308,11 @@ Jangan menyamakannya dengan BUG-001.
 Short-term conversation context **inside the active conversation/runtime model context**.
 
 ### BUG-005
-Persisted **Conversation History / navigasi dan continuity percakapan sebagai fitur produk**.
+Persisted **Riwayat Percakapan / navigasi dan continuity percakapan sebagai fitur produk**.
 
 Repository sudah memiliki lineage implementasi Conversation History, termasuk authenticated history read/load dan perbaikan agar chat baru tetap kosong, bukan mengisi history seluruh account.
 
-Relevant historical implementation commits include:
+Commit historis terkait:
 
 - `1483d14a896f0aeaf72d6360656c3e1a6e11649f` — authenticated conversation history read function
 - `f25b9471e2b179e114b1b89fd3b7d32a38286c84` — authenticated conversation history read
@@ -349,25 +354,25 @@ APK #194
 c44b2bc...
         ↓
 BUG-001
-Immediate Conversational Recall
+Short-term Conversational Recall
         ↓
 FIXED + DEVICE VERIFIED
 
         ↓
 BUG-002
-Memory Persistence Policy
+Kebijakan Persistence Memory
         ↓
 FIXED + VERIFIED
 
         ↓
 BUG-003
-Memory Listing Response Formatting
+Format Respons Daftar Memory
         ↓
 FIXED
 
         ↓
 BUG-004
-Synchronized Lifecycle Deletion
+Penghapusan Lifecycle Tersinkronisasi
         ↓
 CLOSED / PASS
 
