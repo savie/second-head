@@ -42,7 +42,37 @@ function explicitPersistenceFallback(userMessage: string): { memory?: Candidate;
   if (/\b(?:knowledge|pengetahuan|pelajari|learn|teaching|ajarkan)\b/i.test(text)) return { knowledge: { content: text, source: "runtime:p5a:explicit_user_request", origin: "EXPLICIT_TEACHING", scope: "PRIVATE", visibility: "OWNER_ONLY", provenance: { source_message: text, capture_mode: "EXPLICIT_USER_REQUEST" } } };
   return { memory: { content: extractExplicitMemoryContent(text), memory_type: "LONG_TERM", source: "runtime:p5a:explicit_user_request", scope: "PRIVATE", visibility: "OWNER_ONLY", lifecycle: "CANDIDATE" } };
 }
+
+function memoryDeleteRequest(userMessage: string): boolean {
+  return /(?:\b(?:hapus|delete|remove|hilangkan|buang)\b).{0,160}\b(?:memory|memori)\b/i.test(userMessage)
+    || /\b(?:memory|memori)\b.{0,160}\b(?:hapus|delete|remove|hilangkan|buang)\b/i.test(userMessage);
+}
+function deletionTokens(text: string): string[] {
+  return text.toLowerCase().normalize('NFKC').split(/[^a-z0-9\u00c0-\u024f]+/i).filter(x => x.length >= 4 && !['memory','memori','tentang','about','hapus','delete','remove','hilangkan','buang'].includes(x));
+}
+async function deleteRequestedMemory(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string): Promise<{ memory: string; memory_id: string } | null> {
+  if (!memoryDeleteRequest(userMessage)) return null;
+  const { data, error } = await supabase.from('memories').select('memory_id,content').eq('sh_id', shId).limit(100);
+  if (error) throw new Error('MEMORY_DELETE_LOOKUP_FAILED: ' + error.message);
+  const tokens = deletionTokens(userMessage);
+  const codeTokens = tokens.filter(x => /[0-9]/.test(x));
+  const scored = (data ?? []).map((row: {memory_id: string; content: string}) => {
+    const content = String(row.content ?? '').toLowerCase().normalize('NFKC');
+    let score = 0;
+    for (const token of tokens) if (content.includes(token)) score += /[0-9]/.test(token) || token.length >= 7 ? 3 : 1;
+    if (codeTokens.length && codeTokens.every(t => content.includes(t))) score += 10;
+    return { row, score };
+  }).filter(x => x.score > 0).sort((a,b) => b.score-a.score);
+  if (!scored.length || (scored.length > 1 && scored[0].score === scored[1].score)) throw new Error('MEMORY_DELETE_REJECTED: target memory could not be uniquely identified');
+  const target = scored[0].row;
+  const { error: deleteError } = await supabase.rpc('runtime_delete_record_with_journey', { p_domain: 'MEMORY', p_record_id: target.memory_id });
+  if (deleteError) throw new Error('MEMORY_DELETE_FAILED: ' + deleteError.message);
+  return { memory: String(target.content), memory_id: String(target.memory_id) };
+}
+
 export async function recordSemanticLifecycle(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string, modelResponse: { semantic_signals?: Record<string, unknown> }) {
+  const deletion = await deleteRequestedMemory(supabase, shId, userMessage);
+  if (deletion) return { memory: null, knowledge: null, deletedMemory: deletion };
   const signals = objectValue(modelResponse.semantic_signals) ?? {};
   const replacement = replacementRequest(userMessage);
   if (replacement) {
@@ -85,5 +115,5 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
       if (!knowledge) throw new Error("KNOWLEDGE_ACQUISITION_FAILED: recorder returned no knowledge id");
     }
   }
-  return { memory, knowledge };
+  return { memory, knowledge, deletedMemory: null };
 }
