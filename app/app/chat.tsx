@@ -174,7 +174,7 @@ export default function ChatScreen() {
           setConfirmationState('idle');
         }
         if (event.type === 'complete') setLifecycleState('active');
-      }, controller.signal, attachment);
+      }, controller.signal, attachment ?? undefined);
       const rows = await loadConversationHistoryRows(100);
       const sessions = buildVirtualSessions(rows.filter(row => row?.content && !isVerificationArtifact(row)));
       const latest = sessions[0];
