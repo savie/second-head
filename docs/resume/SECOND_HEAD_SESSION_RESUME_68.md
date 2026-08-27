@@ -311,50 +311,119 @@ Perbaikan runtime di-commit ke GitHub DEV dan di-deploy ke Supabase DEV dari sou
 
 # BUG-005 — RIWAYAT PERCAKAPAN
 
-## Posisi
-BUG-005 adalah **area fungsional berikutnya setelah BUG-004**.
+## Audit result
 
-Jangan menyamakannya dengan BUG-001.
+BUG-005 **memang memiliki gap implementation aktual**.
+
+Pembedaan tetap:
 
 ### BUG-001
 Short-term conversation context **inside the active conversation/runtime model context**.
 
 ### BUG-005
-Persisted **Riwayat Percakapan / navigasi dan continuity percakapan sebagai fitur produk**.
+Persisted **Conversation History / navigasi dan continuity percakapan sebagai fitur produk**.
 
-Repository sudah memiliki lineage implementasi Conversation History, termasuk authenticated history read/load dan perbaikan agar chat baru tetap kosong, bukan mengisi history seluruh account.
+## Audit trace
 
-Commit historis terkait:
+### Persistence
 
-- `1483d14a896f0aeaf72d6360656c3e1a6e11649f` — authenticated conversation history read function
-- `f25b9471e2b179e114b1b89fd3b7d32a38286c84` — authenticated conversation history read
-- `70504ba8a0d9cc1ca7a6c61c6ed7b6c1a4d993e9` — authenticated conversation history loader
-- `054a42c3997ec4d600829d7175dbfe740e292eb4` — load persisted conversation history on chat open
-- `ab67a4148ab6a21ca2c488b54a554d7471564e18` — keep new chat empty; remove account-wide history hydration
+`public.conversations` menyimpan persisted conversation rows dengan:
 
-## Audit berikutnya yang wajib dilakukan
+- `conversation_id`
+- `account_id`
+- `sh_id`
+- `role`
+- `content`
+- `created_at`
+- `metadata`
 
-Sebelum mengubah code:
+Runtime chat menulis melalui `runtime_record_conversation(...)`.
 
-1. Trace record Conversation yang tersimpan.
-2. Trace authenticated history read.
-3. Trace history loader dan behavior saat chat dibuka.
-4. Trace perbedaan active conversation dan conversation baru.
-5. Verifikasi isolasi account/SH.
-6. Tentukan UX yang benar berdasarkan implementation aktual dan project contract.
-7. Reproduce behavior saat ini pada `E2E_TEST@SH.COM`.
-8. Setelah itu baru klasifikasikan defect BUG-005 yang sebenarnya.
-9. Lakukan fix minimal.
-10. Commit + push DEV.
-11. Deploy melalui jalur resmi.
-12. Verifikasi CI.
-13. Uji pada perangkat.
-14. Verifikasi DB dan UI.
+### Authenticated read
 
-**Jangan membuat hasil acceptance BUG-005 sebelum audit ini dilakukan.**
+`runtime_load_conversation(p_limit)` menggunakan `resolve_identity()` dan membatasi hasil ke authenticated account + primary SH.
+
+Current DEV privileges:
+
+- authenticated: execute = TRUE
+- anon: execute = FALSE
+- direct authenticated table access ke `public.conversations`: tidak diberikan
+
+### Loader
+
+Implementation lineage Conversation History memang ada.
+
+Namun active Chat implementation sebelumnya hanya memuat recent rows ke Chat screen.
+
+Tidak ada product-level history navigation yang mengenumerasi persisted conversation groups dan membuka kembali group tertentu.
+
+### Active conversation vs new conversation
+
+Current Chat mempunyai local `New chat` clearing.
+
+Tetapi tidak ada persisted conversation/session selector untuk membedakan dan membuka kembali conversation history sebagai daftar product-level.
+
+Akibatnya persisted history ada di DB tetapi belum menjadi fitur navigasi yang lengkap.
+
+### Account / SH isolation
+
+DEV database menggunakan identity resolution untuk account + primary SH scoping.
+
+Untuk `e2e_test@sh.com`:
+
+- account: `047927de-576b-4df1-9d82-4a02f0d5a932`
+- primary SH: `e9f3e857-df6b-479b-a5df-09563b118604`
+- persisted conversation rows: 104
+
+Dengan virtual-session boundary 3600 detik, data E2E saat ini membentuk 9 virtual conversation groups.
+
+### Contract / UX
+
+Architecture contract menempatkan ConversationState dan navigation pada App, sementara server state tetap authoritative.
+
+Implementation Contract mempertahankan continuity/history dan menyatakan continuity gap tidak boleh disamarkan.
+
+Actual gap: persisted history tersedia tetapi belum mempunyai navigable product surface.
+
+## Minimal fix
+
+Tidak dibuat migration baru.
+
+Existing P4A-005 design memang menggunakan `conversations` persistence + computed virtual-session boundary dan tidak membutuhkan dedicated `sessions` table.
+
+Perubahan DEV:
+
+1. `d129d2a96e2c6d0a4354b12adea677ebe6d2300e`
+   - expose authenticated persisted conversation history rows melalui App service.
+
+2. `125baf05793e16194b82eea6bf5083a32859ad2b`
+   - add `Conversation history` navigation;
+   - group persisted rows memakai existing 3600-second virtual-session rule;
+   - reopen selected persisted conversation group;
+   - preserve local `New chat` empty behavior.
+
+Evidence:
+`docs/evidence/EV-BUG-005_CONVERSATION_HISTORY.md`
 
 ## Status
-**🟡 NEXT / AUDIT REQUIRED**
+
+**🟡 FIXED IN DEV / VERIFICATION PENDING**
+
+Belum boleh CLOSED.
+
+Yang masih wajib:
+
+1. GitHub Android CI/build result untuk App commit.
+2. APK baru jika build berhasil — build number wajib naik dari #199.
+3. Install APK terbaru.
+4. Device verification:
+   - persisted history appears;
+   - history group can be opened;
+   - selected history content is correct;
+   - New chat starts empty;
+   - switching between history and New chat does not leak content.
+5. DB + UI regression verification.
+6. Hanya setelah evidence lengkap BUG-005 dapat ditutup.
 
 ---
 
