@@ -15,6 +15,7 @@ jobs:
     env:
       EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SH_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SH_SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_BUILD_NUMBER: ${{ github.run_number }}
 
     defaults:
       run:
