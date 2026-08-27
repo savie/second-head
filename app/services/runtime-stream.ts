@@ -15,12 +15,35 @@ type RuntimeStreamEvent =
   | { type: 'complete'; sh_id: string }
   | { type: 'error'; message: string };
 
-export async function loadConversationHistory(limit = 50): Promise<string[]> {
-  const { data, error } = await supabase.auth.getSession(); if (error) throw error; const token = data.session?.access_token; if (!token) throw new Error('Authenticated session required for conversation history');
-  const response = await fetch(`${CONVERSATION_URL}?limit=${encodeURIComponent(String(limit))}`, { method: 'GET', headers: { ...authHeaders(token), Accept: 'application/json' } });
-  if (!response.ok) throw new Error(`SH_CONVERSATION_HISTORY_FAILED: ${await response.text()}`);
-  const payload = (await response.json()) as { conversations?: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> };
-  return (payload.conversations ?? []).map(row => row.role === 'user' ? `You: ${row.content}` : row.role === 'assistant' ? `SH: ${row.content}` : `System: ${row.content}`);
+export type ConversationHistoryRow = {
+  conversation_id: string;
+  sh_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  created_at: string;
+  metadata?: Record<string, unknown> | null;
+};
+
+export async function loadConversationHistoryRows(limit = 100): Promise<ConversationHistoryRow[]> {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Authenticated session required for conversation history');
+  const response = await fetch(CONVERSATION_URL + '?limit=' + encodeURIComponent(String(limit)), {
+    method: 'GET',
+    headers: { ...authHeaders(token), Accept: 'application/json' },
+  });
+  if (!response.ok) throw new Error('SH_CONVERSATION_HISTORY_FAILED: ' + await response.text());
+  const payload = (await response.json()) as { conversations?: ConversationHistoryRow[] };
+  return (payload.conversations ?? []).slice().sort((a, b) => {
+    const time = Date.parse(a.created_at) - Date.parse(b.created_at);
+    return time || a.conversation_id.localeCompare(b.conversation_id);
+  });
+}
+
+export async function loadConversationHistory(limit = 100): Promise<string[]> {
+  const rows = await loadConversationHistoryRows(limit);
+  return rows.map(row => row.role === 'user' ? 'You: ' + row.content : row.role === 'assistant' ? 'SH: ' + row.content : 'System: ' + row.content);
 }
 function parseSseText(text: string, onEvent: (event: RuntimeStreamEvent) => void) { for (const frame of text.split(/\r?\n\r?\n/)) { const lines = frame.split(/\r?\n/); const eventName = lines.find(line => line.startsWith('event: '))?.slice(7).trim(); const dataLine = lines.find(line => line.startsWith('data: '))?.slice(6); if (!eventName || dataLine === undefined) continue; const payload = JSON.parse(dataLine) as Record<string, unknown>; if (eventName === 'response') onEvent({ type: 'response', sh_id: String(payload.sh_id ?? ''), text: String(payload.text ?? '') }); else if (eventName === 'token') onEvent({ type: 'token', text: String(payload.text ?? '') }); else if (eventName === 'confirmation') onEvent({ type: 'confirmation', confirmation_id: String(payload.confirmation_id ?? ''), action_id: String(payload.action_id ?? ''), title: String(payload.title ?? 'Confirmation required'), description: String(payload.description ?? 'This action requires your explicit confirmation.') }); else if (eventName === 'complete') onEvent({ type: 'complete', sh_id: String(payload.sh_id ?? '') }); } }
 async function getAccessToken() {
