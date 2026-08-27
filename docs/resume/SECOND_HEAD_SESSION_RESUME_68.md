@@ -7,6 +7,18 @@
 SECOND HEAD — SYSTEM BUILD
 
 ## Dasar audit
+
+### Status APK — frozen baseline dan APK aktif
+- **APK #194** adalah **frozen baseline saja** dan tetap immutable.
+- **APK aktif untuk regression saat ini: #199**.
+- Build #199 dibuat setelah frozen baseline dan digunakan untuk pengujian BUG-004.
+- Workflow Android Build #199: run `33032370331` — **success**.
+- Source commit Build #199: `393f7e770b6108f394410bd3885024ca686430e9`.
+- Artifact: `sh-app-release-apk` — artifact ID `9630932207`.
+- Jika perubahan berikutnya membutuhkan APK baru, build number **wajib meningkat** (mis. #200), dan APK baru tersebut menjadi **APK aktif/regression terbaru**.
+- Setelah APK baru tersedia dan digunakan untuk regression, seluruh pengujian berikutnya menggunakan APK terbaru tersebut. **APK #194 tidak lagi dipakai sebagai APK testing aktif.**
+- Jika perubahan hanya berada di backend/DB dan tidak membutuhkan APK baru, tidak perlu membuat APK baru hanya untuk mengganti baseline testing.
+
 - Frozen final-gate baseline: `c44b2bc311baea5a46d0acb957049eb3c8307817`
 - Frozen implementation candidate: `40a8772e3c79e17de77c7581048620286ff638a9`
 - Frozen APK: #194 (hanya frozen baseline)
@@ -402,10 +414,10 @@ Frozen implementation:
 Frozen APK:
 `#194`
 
-DEV HEAD aktual untuk dokumentasi Resume 68:
-`5444e180cde293d1692958cef6efa9b0a2201802`
+DEV HEAD sebelum commit dokumentasi Resume 68 ini:
+`4c9146f3a059891c93edc2e60828c837337219f2`
 
-**Penting:** `d17a556...` adalah commit dokumentasi terbaru yang terdeteksi saat Resume 68 diperbaiki. Commit ini bukan source SHA untuk menentukan APK regression. Source APK harus selalu ditentukan dari build artifact/commit build yang sebenarnya.
+**Penting:** SHA commit dokumentasi tidak boleh dipakai sebagai source APK. Source APK aktif selalu ditentukan dari build artifact dan commit source build yang sebenarnya.
 
 ---
 
