@@ -94,7 +94,7 @@ function modelUserContent(c: RuntimeContext): unknown {
       { type: 'image_url', image_url: { url: `data:${mime};base64,${c.attachment.base64}` } }
     ];
   }
-  const textLike = /^(text\\/|application\\/json|application\\/csv|application\\/xml)/i.test(mime);
+  const textLike = /^(text\/|application\/json|application\/csv|application\/xml)/i.test(mime);
   if (textLike) {
     try {
       const decoded = atob(c.attachment.base64);
