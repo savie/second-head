@@ -16,6 +16,8 @@ function makeMessage(role: Message['role'], text: string, id?: string): Message 
   return { id: id ?? `${Date.now()}-${Math.random()}`, role, text };
 }
 
+function messageFromRow(row: ConversationHistoryRow): Message { return makeMessage(row.role, row.content, `${row.conversation_id}:${row.created_at}`, row.conversation_id, row.created_at); }
+
 function buildVirtualSessions(rows: ConversationHistoryRow[]): ConversationSession[] {
   const sessions: ConversationSession[] = [];
   const gapSeconds = 3600;
@@ -240,6 +242,26 @@ export default function ChatScreen() {
     Alert.alert('Delete conversation', 'Percakapan ini akan dihapus dari daftar chat.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setCurrentConversationId(null); setMenuOpen(false); } },
+    ]);
+  }
+
+  function deleteConversationAction() {
+    if (!currentConversationId) return Alert.alert('Delete conversation', 'Belum ada conversation yang tersimpan.');
+    const id = currentConversationId;
+    Alert.alert('Delete conversation', 'Percakapan ini akan dihapus dari database.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          await deleteConversation(id);
+          setMessages([]);
+          setConversationTitle('New conversation');
+          setCurrentConversationId(null);
+          setMenuOpen(false);
+          setHistorySessions(current => current.filter(session => session.id !== id));
+        } catch (error) {
+          Alert.alert('Delete failed', error instanceof Error ? error.message : 'Conversation deletion failed');
+        }
+      } },
     ]);
   }
 
