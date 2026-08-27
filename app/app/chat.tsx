@@ -71,6 +71,7 @@ export default function ChatScreen() {
   const [conversationTitle, setConversationTitle] = useState('New conversation');
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameText, setRenameText] = useState('');
+  const [messageActionTarget, setMessageActionTarget] = useState<Message | null>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -399,14 +400,11 @@ export default function ChatScreen() {
   }
 
   function openMessageActions(message: Message) {
-    const actions = [
-      { text: 'Copy', onPress: () => void copyMessage(message) },
-      ...(message.role === 'user' ? [{ text: 'Edit', onPress: () => editMessage(message) }] : []),
-      { text: 'Delete', style: 'destructive' as const, onPress: () => deleteMessage(message.id) },
-      ...(message.role === 'assistant' ? [{ text: 'Regenerate', onPress: regenerateResponse }] : []),
-      { text: 'Cancel', style: 'cancel' as const },
-    ];
-    Alert.alert(message.role === 'user' ? 'Your message' : 'SH response', undefined, actions, { cancelable: false });
+    setMessageActionTarget(message);
+  }
+
+  function closeMessageActions() {
+    setMessageActionTarget(null);
   }
 
   function handleAttachment(kind: string) {
@@ -437,6 +435,20 @@ export default function ChatScreen() {
 
   return (
     <>
+      <Modal visible={messageActionTarget !== null} transparent animationType="fade" onRequestClose={() => {}}>
+        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <View style={{ backgroundColor: '#FFFFFF', padding: 16, gap: 8, borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: '#111827' }}>
+              {messageActionTarget?.role === 'user' ? 'Your message' : 'SH response'}
+            </Text>
+            <Button title="Copy" onPress={() => { const target = messageActionTarget; closeMessageActions(); if (target) void copyMessage(target); }} />
+            {messageActionTarget?.role === 'user' ? <Button title="Edit" onPress={() => { const target = messageActionTarget; closeMessageActions(); if (target) editMessage(target); }} /> : null}
+            <Button title="Delete" onPress={() => { const target = messageActionTarget; closeMessageActions(); if (target) deleteMessage(target.id); }} />
+            {messageActionTarget?.role === 'assistant' ? <Button title="Regenerate" onPress={() => { closeMessageActions(); void regenerateResponse(); }} /> : null}
+            <Button title="Cancel" onPress={closeMessageActions} />
+          </View>
+        </View>
+      </Modal>
       <Modal visible={renameOpen} transparent animationType="fade" onRequestClose={() => {}}>
         <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.35)' }}>
           <View style={{ borderRadius: 16, padding: 16, backgroundColor: '#FFFFFF', gap: 12 }}>
