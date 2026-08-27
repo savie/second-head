@@ -78,3 +78,37 @@ export async function streamSHRuntime(userMessage: string, onEvent: (event: Runt
   while (true) { const { value, done } = await reader.read(); buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done }); const frames = buffer.split(/\r?\n\r?\n/); buffer = frames.pop() ?? ''; for (const frame of frames) handleFrame(frame); if (done) break; }
   if (buffer.trim()) handleFrame(buffer);
 }
+
+
+async function rpc<T = unknown>(fn: string, args: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.rpc(fn, args);
+  if (error) throw error;
+  return data as T;
+}
+
+export async function updateConversationMessage(row: ConversationHistoryRow, newContent: string): Promise<void> {
+  await rpc('runtime_update_conversation_message', {
+    p_conversation_id: row.conversation_id,
+    p_created_at: row.created_at,
+    p_role: row.role,
+    p_old_content: row.content,
+    p_new_content: newContent,
+  });
+}
+
+export async function deleteConversationMessage(row: ConversationHistoryRow): Promise<void> {
+  await rpc('runtime_delete_conversation_message', {
+    p_conversation_id: row.conversation_id,
+    p_created_at: row.created_at,
+    p_role: row.role,
+    p_content: row.content,
+  });
+}
+
+export async function deleteConversation(conversationId: string): Promise<void> {
+  await rpc('runtime_delete_conversation', { p_conversation_id: conversationId });
+}
+
+export async function renameConversation(conversationId: string, title: string): Promise<void> {
+  await rpc('runtime_rename_conversation', { p_conversation_id: conversationId, p_title: title });
+}
