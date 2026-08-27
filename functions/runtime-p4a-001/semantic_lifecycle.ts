@@ -15,6 +15,24 @@ export function hasExplicitMemoryOptOut(userMessage: string): boolean {
     || /(?:do not|don't|dont|jangan|tidak|tak)\s+(?:meminta|minta|ingin|mau|want|ask).{0,80}(?:simpan|save|store|remember).{0,80}(?:memory|memori)/i.test(text);
 }
 
+export function hasExplicitExperienceRequest(userMessage: string): boolean {
+  const text = userMessage.trim();
+  if (!text) return false;
+  const persistence = /^(?:tolong\\s+)?(?:simpan(?:lah)?|save|store|remember|ingat(?:lah)?|catat|keep|retain)\\b/i.test(text);
+  const designate = /^(?:jadikan|tetapkan)\\b/i.test(text);
+  const experience = /\\b(?:experience|pengalaman)\\b/i.test(text);
+  return experience && (persistence || designate);
+}
+
+function extractExplicitExperienceContent(userMessage: string): string {
+  const text = userMessage.trim();
+  const afterDomain = text.match(/\\b(?:sebagai|as)\\s+(?:an?\\s+)?(?:experience|pengalaman)\\s*:?\\s*(.*?)\\s*\\.?$/i);
+  if (afterDomain?.[1]?.trim()) return afterDomain[1].trim();
+  const designate = text.match(/^\\s*(?:jadikan|tetapkan)\\b\\s*(.*?)\\s+(?:sebagai|as)\\s+(?:an?\\s+)?(?:experience|pengalaman)\\s*\\.?$/i);
+  if (designate?.[1]?.trim()) return designate[1].trim();
+  return text;
+}
+
 export function hasExplicitMemoryOptIn(userMessage: string): boolean {
   const text = userMessage.trim();
   if (!text) return false;
@@ -72,7 +90,7 @@ export async function deleteRequestedMemory(supabase: ReturnType<typeof createCl
 
 export async function recordSemanticLifecycle(supabase: ReturnType<typeof createClient>, shId: string, userMessage: string, modelResponse: { semantic_signals?: Record<string, unknown> }) {
   const deletion = await deleteRequestedMemory(supabase, shId, userMessage);
-  if (deletion) return { memory: null, knowledge: null, deletedMemory: deletion };
+  if (deletion) return { memory: null, knowledge: null, experience: null, deletedMemory: deletion };
   const signals = objectValue(modelResponse.semantic_signals) ?? {};
   const replacement = replacementRequest(userMessage);
   if (replacement) {
@@ -80,12 +98,31 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
     if (error) throw new Error(`MEMORY_REPLACEMENT_FAILED: ${error.message}`);
     const memory = typeof data === "string" ? data : null;
     if (!memory) throw new Error("MEMORY_REPLACEMENT_FAILED: recorder returned no memory id");
-    return { memory, knowledge: null };
+    return { memory, knowledge: null, experience: null };
   }
 
   const memoryOptOut = hasExplicitMemoryOptOut(userMessage);
   const memoryOptIn = hasExplicitMemoryOptIn(userMessage);
   const fallback = explicitPersistenceFallback(userMessage);
+  const explicitExperience = hasExplicitExperienceRequest(userMessage);
+  let experience: string | null = null;
+  if (explicitExperience) {
+    const content = extractExplicitExperienceContent(userMessage);
+    if (content) {
+      const { data, error } = await supabase.rpc("runtime_record_experience", {
+        p_sh_id: shId,
+        p_experience_type: "EXPLICIT_USER_CAPTURE",
+        p_content: content,
+        p_scope: "PRIVATE",
+        p_visibility: "OWNER_ONLY",
+        p_source_ref: "runtime:p5a:explicit_user_capture",
+        p_provenance: { capture_mode: "EXPLICIT_USER", source_message: userMessage }
+      });
+      if (error) throw new Error(`EXPERIENCE_RECORD_FAILED: ${error.message}`);
+      experience = typeof data === "string" ? data : null;
+      if (!experience) throw new Error("EXPERIENCE_RECORD_FAILED: recorder returned no experience id");
+    }
+  }
   // Memory is explicit opt-in. For an explicit persistence request, prefer the
   // user-derived payload over a model paraphrase so semantically identical saves
   // converge on the same canonical content and database deduplication boundary.
@@ -101,7 +138,7 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
       if (!memory) throw new Error("MEMORY_RECORD_FAILED: recorder returned no memory id");
     }
   }
-  const knowledgeCandidate = objectValue(signals.knowledge_candidate) ?? fallback?.knowledge;
+  const knowledgeCandidate = explicitExperience ? undefined : (objectValue(signals.knowledge_candidate) ?? fallback?.knowledge);
   if (knowledgeCandidate) {
     const content = typeof knowledgeCandidate.content === "string" ? knowledgeCandidate.content.trim() : "";
     const candidateSource = typeof knowledgeCandidate.source === "string" ? knowledgeCandidate.source.trim() : "";
@@ -115,5 +152,5 @@ export async function recordSemanticLifecycle(supabase: ReturnType<typeof create
       if (!knowledge) throw new Error("KNOWLEDGE_ACQUISITION_FAILED: recorder returned no knowledge id");
     }
   }
-  return { memory, knowledge, deletedMemory: null };
+  return { memory, knowledge, experience, deletedMemory: null };
 }
