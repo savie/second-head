@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Button, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AppState } from 'react-native';
-import { loadConversationHistoryRows, streamSHRuntime, type ConversationHistoryRow } from '../services/runtime-stream';
+import { deleteConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
 import { supabase } from '../services/supabase';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
-type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string };
+type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string; conversationId?: string; createdAt?: string };
 type ConversationRow = { id: string; role: Message['role']; content: string; created_at: string; metadata?: Record<string, unknown> | null };
 type ConversationSession = { id: string; title: string; startedAt: string; endedAt: string; rows: ConversationHistoryRow[] };
 
@@ -65,6 +65,7 @@ export default function ChatScreen() {
   const [findOpen, setFindOpen] = useState(false);
   const [findQuery, setFindQuery] = useState('');
   const [conversationTitle, setConversationTitle] = useState('New conversation');
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
   const [attachmentName, setAttachmentName] = useState<string | null>(null);
@@ -106,7 +107,8 @@ export default function ChatScreen() {
         const latest = sessions[0];
         if (!latest) return;
         const recentRows = latest.rows.slice(-14);
-        setMessages(recentRows.map(row => makeMessage(row.role, row.content, row.conversation_id)));
+        setMessages(recentRows.map(messageFromRow));
+        setCurrentConversationId(latest.id);
         if (latest.title) setConversationTitle(latest.title);
       } catch {
         // History loading must not block the chat UI from opening.
@@ -182,6 +184,7 @@ export default function ChatScreen() {
     const start = () => {
       setMessages([]);
       setConversationTitle('New conversation');
+      setCurrentConversationId(null);
       setFindQuery('');
       setHistoryOpen(false);
       setMenuOpen(false);
@@ -211,7 +214,8 @@ export default function ChatScreen() {
   }
 
   function openHistorySession(session: ConversationSession) {
-    setMessages(session.rows.map(row => makeMessage(row.role, row.content, row.conversation_id)));
+    setMessages(session.rows.map(messageFromRow));
+    setCurrentConversationId(session.id);
     setConversationTitle(session.title || 'Conversation');
     setHistoryOpen(false);
   }
@@ -219,20 +223,29 @@ export default function ChatScreen() {
   function clearChat() {
     Alert.alert('Clear chat', 'Semua history pada sesi chat ini akan hilang dari sesi.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Clear', style: 'destructive', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setMenuOpen(false); } },
+      { text: 'Clear', style: 'destructive', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setCurrentConversationId(null); setMenuOpen(false); } },
     ]);
   }
 
   function deleteConversation() {
     Alert.alert('Delete conversation', 'Percakapan ini akan dihapus dari daftar chat.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setMenuOpen(false); } },
+      { text: 'Delete', style: 'destructive', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setCurrentConversationId(null); setMenuOpen(false); } },
     ]);
   }
 
-  function renameConversation() {
-    Alert.prompt?.('Rename conversation', 'Masukkan nama baru', text => {
-      if (text?.trim()) setConversationTitle(text.trim());
+  function renameConversationAction() {
+    if (!currentConversationId) return Alert.alert('Rename conversation', 'Belum ada conversation yang tersimpan.');
+    Alert.prompt?.('Rename conversation', 'Masukkan nama baru', async text => {
+      const title = text?.trim();
+      if (!title) return;
+      try {
+        await renameConversation(currentConversationId, title);
+        setConversationTitle(title);
+        setMenuOpen(false);
+      } catch (error) {
+        Alert.alert('Rename failed', error instanceof Error ? error.message : 'Conversation rename failed');
+      }
     }, 'plain-text', conversationTitle);
   }
 
@@ -253,28 +266,66 @@ export default function ChatScreen() {
     setEditingText(message.text);
   }
 
-  function saveEditedMessage() {
+  async function saveEditedMessage() {
     if (!editingId || !editingText.trim()) return;
-    setMessages(current => current.map(message => message.id === editingId ? { ...message, text: editingText.trim() } : message));
-    setEditingId(null);
-    setEditingText('');
+    const target = messages.find(message => message.id === editingId);
+    if (!target?.conversationId || !target.createdAt) return Alert.alert('Edit message', 'Pesan belum tersimpan di database. Tunggu sampai response selesai lalu edit lagi.');
+    try {
+      const row: ConversationHistoryRow = { conversation_id: target.conversationId, sh_id: context?.sh_id ?? '', role: target.role, content: target.text, created_at: target.createdAt };
+      await updateConversationMessage(row, editingText.trim());
+      setMessages(current => current.map(message => message.id === editingId ? { ...message, text: editingText.trim() } : message));
+      setEditingId(null); setEditingText('');
+    } catch (error) {
+      Alert.alert('Edit failed', error instanceof Error ? error.message : 'Message edit failed');
+    }
   }
 
   function deleteMessage(messageId: string) {
-    Alert.alert('Delete message', 'Hapus pesan ini?', [
+    const target = messages.find(message => message.id === messageId);
+    if (!target?.conversationId || !target.createdAt) return Alert.alert('Delete message', 'Pesan belum tersimpan di database. Tunggu sampai response selesai lalu hapus lagi.');
+    Alert.alert('Delete message', 'Hapus pesan ini dari conversation?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => setMessages(current => current.filter(message => message.id !== messageId)) },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          const row: ConversationHistoryRow = { conversation_id: target.conversationId!, sh_id: context?.sh_id ?? '', role: target.role, content: target.text, created_at: target.createdAt! };
+          await deleteConversationMessage(row);
+          setMessages(current => current.filter(message => message.id !== messageId));
+        } catch (error) {
+          Alert.alert('Delete failed', error instanceof Error ? error.message : 'Message deletion failed');
+        }
+      } },
     ]);
   }
 
-  function regenerateResponse() {
+  async function regenerateResponse() {
+    if (sending) return;
+    const rows = await loadConversationHistoryRows(100);
+    const visible = rows.filter(row => row?.content && !isVerificationArtifact(row));
     const lastUser = [...messages].reverse().find(message => message.role === 'user');
-    if (!lastUser || sending) return;
-    setDraft(lastUser.text);
-    setMessages(current => {
-      const index = current.map(message => message.id).lastIndexOf(lastUser.id);
-      return index >= 0 ? current.slice(0, index) : current;
-    });
+    if (!lastUser) return;
+    const assistant = [...messages].reverse().find(message => message.role === 'assistant' && message.text);
+    try {
+      if (assistant?.conversationId && assistant.createdAt) {
+        const row = visible.find(item => item.conversation_id === assistant.conversationId && item.created_at === assistant.createdAt);
+        if (row) await deleteConversationMessage(row);
+      }
+      setMessages(current => {
+        const index = current.findIndex(message => message.id === assistant?.id);
+        return index >= 0 ? current.slice(0, index) : current;
+      });
+      setDraft('');
+      await streamSHRuntime(lastUser.text, event => {
+        if (event.type === 'token') setMessages(current => [...current, makeMessage('assistant', event.text)]);
+        if (event.type === 'response') setMessages(current => {
+          const next = [...current];
+          const last = next[next.length - 1];
+          if (last?.role === 'assistant') last.text = event.text;
+          return next;
+        });
+      });
+    } catch (error) {
+      Alert.alert('Regenerate failed', error instanceof Error ? error.message : 'Regenerate failed');
+    }
   }
 
   function openMessageActions(message: Message) {
@@ -327,13 +378,13 @@ export default function ChatScreen() {
         {menuOpen ? <View style={{ marginTop: 10, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 8, backgroundColor: '#FFFFFF', gap: 4 }}>
           <Button title="＋ New chat" onPress={newChat} />
           <Button title="Conversation history" onPress={() => void openHistory()} />
-          <Button title="✎ Rename conversation" onPress={renameConversation} />
+          <Button title="✎ Rename conversation" onPress={renameConversationAction} />
           <Button title="⌕ Find in chat" onPress={() => { setFindOpen(true); setMenuOpen(false); }} />
           <Button title="Copy conversation" onPress={() => void copyConversation()} />
           <Button title="Clear chat" onPress={clearChat} />
-          <Button title="Delete conversation" onPress={deleteConversation} />
-          <Button title="Share conversation" onPress={() => Alert.alert('Share', 'UI share siap. Integrasi OS/BE menyusul.')} />
-          <Button title="Export conversation" onPress={() => Alert.alert('Export', 'UI export siap. Implementasi file menyusul.')} />
+          <Button title="Delete conversation" onPress={deleteConversationAction} />
+          <Button title="Share conversation" onPress={() => { const text = messages.map(message => `${message.role === 'user' ? 'You' : message.role === 'assistant' ? 'SH' : 'System'}: ${message.text}`).join('\n\n'); void Share.share({ message: text, title: conversationTitle }); setMenuOpen(false); }} />
+          <Button title="Export conversation" onPress={() => { const text = messages.map(message => `${message.role === 'user' ? 'You' : message.role === 'assistant' ? 'SH' : 'System'}: ${message.text}`).join('\n\n'); void Share.share({ message: text, title: `Export — ${conversationTitle}` }); setMenuOpen(false); }} />
         </View> : null}
         {historyOpen ? <View style={{ marginTop: 10, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 8, backgroundColor: '#FFFFFF', gap: 6 }}>
           <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827' }}>Conversation history</Text>
