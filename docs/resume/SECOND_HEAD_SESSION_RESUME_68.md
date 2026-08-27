@@ -385,6 +385,8 @@ FIXED
         ↓
 BUG-004
 Penghapusan Lifecycle Tersinkronisasi
+APK #199
+Source: 393f7e7...
         ↓
 CLOSED / PASS
 
@@ -412,7 +414,24 @@ Frozen implementation:
 `40a8772e3c79e17de77c7581048620286ff638a9`
 
 Frozen APK:
-`#194`
+`#194` — frozen baseline saja
+
+APK regression aktif terakhir:
+`#199` — digunakan untuk verifikasi BUG-004
+
+Source commit APK #199:
+`393f7e770b6108f394410bd3885024ca686430e9`
+
+Workflow Android Build #199:
+`33032370331` — success
+
+Artifact APK #199:
+`sh-app-release-apk` — artifact ID `9630932207`
+
+Aturan APK aktif:
+- #194 hanya frozen baseline historis dan tidak dipakai sebagai APK testing aktif setelah tersedia build regression.
+- Jika perubahan berikutnya membutuhkan APK baru, build number wajib naik; APK terbaru itulah yang menjadi APK aktif untuk regression berikutnya.
+- Jangan menebak source APK dari commit dokumentasi Resume.
 
 DEV HEAD sebelum commit dokumentasi Resume 68 ini:
 `4c9146f3a059891c93edc2e60828c837337219f2`
