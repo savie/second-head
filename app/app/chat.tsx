@@ -67,6 +67,7 @@ export default function ChatScreen() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [findQuery, setFindQuery] = useState('');
+  const [findIndex, setFindIndex] = useState(0);
   const [conversationTitle, setConversationTitle] = useState('New conversation');
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -125,8 +126,9 @@ export default function ChatScreen() {
   const visibleMatches = useMemo(() => {
     const query = findQuery.trim().toLowerCase();
     if (!query) return [];
-    return messages.filter(message => message.text.toLowerCase().includes(query));
+    return messages.map((message, index) => ({ message, index })).filter(item => item.message.text.toLowerCase().includes(query));
   }, [findQuery, messages]);
+  useEffect(() => { setFindIndex(0); }, [findQuery]);
 
   async function onSend() {
     const message = draft.trim();
@@ -267,17 +269,23 @@ export default function ChatScreen() {
 
   function renameConversationAction() {
     if (!currentConversationId) return Alert.alert('Rename conversation', 'Belum ada conversation yang tersimpan.');
-    Alert.prompt?.('Rename conversation', 'Masukkan nama baru', async text => {
-      const title = text?.trim();
-      if (!title) return;
-      try {
-        await renamePersistedConversation(currentConversationId, title);
-        setConversationTitle(title);
-        setMenuOpen(false);
-      } catch (error) {
-        Alert.alert('Rename failed', error instanceof Error ? error.message : 'Conversation rename failed');
-      }
-    }, 'plain-text', conversationTitle);
+    Alert.alert('Rename conversation', 'Masukkan nama baru melalui prompt?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Rename', onPress: () => {
+        Alert.prompt?.('Rename conversation', 'Masukkan nama baru', async text => {
+          const title = text?.trim();
+          if (!title) return;
+          try {
+            await renamePersistedConversation(currentConversationId, title);
+            setConversationTitle(title);
+            setHistorySessions(current => current.map(session => session.id === currentConversationId ? { ...session, title } : session));
+            setMenuOpen(false);
+          } catch (error) {
+            Alert.alert('Rename failed', error instanceof Error ? error.message : 'Conversation rename failed');
+          }
+        }, 'plain-text', conversationTitle);
+      } },
+    ]);
   }
 
   async function copyConversation() {
@@ -341,21 +349,51 @@ export default function ChatScreen() {
         if (row) await deleteConversationMessage(row);
       }
       setMessages(current => {
-        const index = current.findIndex(message => message.id === assistant?.id);
+        const index = assistant ? current.findIndex(message => message.id === assistant.id) : -1;
         return index >= 0 ? current.slice(0, index) : current;
       });
-      setDraft('');
+      setSending(true);
+      setLifecycleState('streaming');
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      let assistantText = '';
+      let assistantId: string | undefined;
       await streamSHRuntime(lastUser.text, event => {
-        if (event.type === 'token') setMessages(current => [...current, makeMessage('assistant', event.text)]);
-        if (event.type === 'response') setMessages(current => {
-          const next = [...current];
-          const last = next[next.length - 1];
-          if (last?.role === 'assistant') last.text = event.text;
-          return next;
-        });
-      });
+        if (!mountedRef.current) return;
+        if (event.type === 'token') {
+          assistantText += event.text;
+          setMessages(current => {
+            const next = [...current];
+            const last = next[next.length - 1];
+            if (last?.role === 'assistant' && last.id === assistantId) last.text = assistantText;
+            else {
+              assistantId = `regen-${Date.now()}`;
+              next.push(makeMessage('assistant', assistantText, assistantId));
+            }
+            return next;
+          });
+        }
+        if (event.type === 'response') {
+          assistantText = event.text;
+          setMessages(current => {
+            const next = [...current];
+            const last = next[next.length - 1];
+            if (last?.role === 'assistant' && last.id === assistantId) last.text = assistantText;
+            else next.push(makeMessage('assistant', assistantText, assistantId ?? `regen-${Date.now()}`));
+            return next;
+          });
+        }
+        if (event.type === 'complete') setLifecycleState('active');
+      }, controller.signal);
+      const refreshed = buildVirtualSessions((await loadConversationHistoryRows(100)).filter(row => row?.content && !isVerificationArtifact(row)));
+      const latest = refreshed[0];
+      if (latest) { setCurrentConversationId(latest.id); setConversationTitle(latest.title || conversationTitle); setMessages(latest.rows.map(messageFromRow)); }
     } catch (error) {
       Alert.alert('Regenerate failed', error instanceof Error ? error.message : 'Regenerate failed');
+    } finally {
+      abortControllerRef.current = null;
+      setSending(false);
+      setLifecycleState('active');
     }
   }
 
@@ -426,7 +464,11 @@ export default function ChatScreen() {
         </View> : null}
         {findOpen ? <View style={{ marginTop: 10, gap: 6 }}>
           <TextInput value={findQuery} onChangeText={setFindQuery} autoFocus placeholder="Find in chat..." placeholderTextColor="#6B7280" style={inputStyle} />
-          {findQuery ? <Text style={{ color: '#6B7280' }}>{visibleMatches.length} pesan cocok</Text> : null}
+          {findQuery ? <View style={{ gap: 6 }}>
+            <Text style={{ color: '#6B7280' }}>{visibleMatches.length ? `Match ${Math.min(findIndex + 1, visibleMatches.length)} / ${visibleMatches.length}` : '0 pesan cocok'}</Text>
+            {visibleMatches.length ? <Button title="Jump to match" onPress={() => { setFindIndex(index => (index + 1) % visibleMatches.length); setTimeout(() => {}, 0); }} /> : null}
+            {visibleMatches.length ? <Text style={{ color: '#111827' }}>Pesan: {visibleMatches[findIndex % visibleMatches.length].message.text.slice(0, 100)}</Text> : null}
+          </View> : null}
           <Button title="Close find" onPress={() => { setFindOpen(false); setFindQuery(''); }} />
         </View> : null}
       </View>
