@@ -3,30 +3,30 @@
 ## Melanjutkan dari SESSION RESUME 67
 
 
-## Project
+## Proyek
 SECOND HEAD — SYSTEM BUILD
 
 ## Dasar audit
 - Frozen final-gate baseline: `c44b2bc311baea5a46d0acb957049eb3c8307817`
 - Frozen implementation candidate: `40a8772e3c79e17de77c7581048620286ff638a9`
-- Frozen APK: #194
+- Frozen APK: #194 (hanya frozen baseline)
 - APK SHA-256: `bc53e9ebfe6c3fc92ec1e675998cbd774a97b5f51184e51c95236b97eb6690d4`
-- Audit continued through current DEV maintenance history after the freeze.
-- Current DEV HEAD at this resume update: `5444e180cde293d1692958cef6efa9b0a2201802`
+- Audit dilanjutkan melalui seluruh riwayat maintenance DEV setelah freeze.
+- DEV HEAD aktual saat Resume 68 diperbaiki: `d17a556e101fea2b13747c65c64d3bc4ae708cd2`
 
-> Frozen baseline remains immutable. All items below are post-baseline maintenance history.
+> Frozen baseline tetap tidak berubah. Seluruh bug di bawah adalah maintenance setelah baseline.
 
 ---
 
-# BUG-001 — IMMEDIATE / SHORT-TERM CONVERSATIONAL RECALL
+# BUG-001 — SHORT-TERM CONVERSATIONAL RECALL
 
 ## Masalah
-Conversation messages were already persisted and visible in the UI, but the runtime model request did not receive recent conversation history.
+Pesan percakapan sudah tersimpan dan terlihat di UI, tetapi runtime belum mengirim riwayat percakapan terbaru ke model.
 
-Therefore SH could not reliably answer using immediately preceding conversation messages.
+Akibatnya SH tidak dapat secara konsisten menjawab berdasarkan pesan percakapan yang baru saja terjadi.
 
 ## Akar masalah
-The missing link was:
+Jalur yang hilang adalah:
 
 ```
 conversation persistence
@@ -42,20 +42,20 @@ conversation_context
 model request
 ```
 
-Memory and Experience were separate persistence/context domains and were not supposed to become transcript storage.
+Memory dan Experience tetap merupakan domain persistence/context terpisah dan tidak digunakan sebagai penyimpanan transcript percakapan.
 
 ## Perbaikan
-A runtime-owned conversation-context retrieval path was added using the existing `conversations` persistence.
+Ditambahkan jalur retrieval conversation context yang dimiliki runtime menggunakan persistence `conversations` yang sudah ada.
 
-The DB function bounds the recent window and verifies the requested `sh_id` against the authenticated active SH identity.
+DB function membatasi jendela pesan terbaru dan memverifikasi `sh_id` terhadap active SH yang terautentikasi.
 
 ## Verifikasi
-Device verification demonstrated that SH could refer to prior conversation messages without relying on Memory or Experience.
+Verifikasi perangkat menunjukkan SH dapat merujuk pesan percakapan sebelumnya tanpa bergantung pada Memory atau Experience.
 
 ## Status
 **🟢 FIXED + DEVICE VERIFIED**
 
-Relevant implementation started with Build #195 / migration:
+Implementasi terkait dimulai pada Build #195 / migration:
 `20260826050000_bug_001_short_term_conversation_context`
 
 ---
@@ -63,9 +63,9 @@ Relevant implementation started with Build #195 / migration:
 # BUG-002 — KEBIJAKAN PERSISTENSI MEMORY / PENCEGAHAN DUPLIKAT
 
 ## Masalah
-Ordinary conversation could previously result in unwanted automatic Memory persistence.
+Percakapan biasa sebelumnya dapat menyebabkan Memory tersimpan otomatis tanpa permintaan eksplisit.
 
-The required behavior is:
+Behavior yang diwajibkan:
 
 ```
 ordinary conversation
@@ -82,14 +82,14 @@ hard boundary / do not persist
 ```
 
 ## Masalah historis tambahan
-Earlier implementation could create duplicate Memory records for repeated explicit saves.
+Implementasi sebelumnya dapat membuat duplicate Memory pada repeated explicit save.
 
-Those historical duplicates are evidence/history and must not be deleted merely to make current state look clean.
+Duplicate historis tersebut adalah evidence/history dan tidak boleh dihapus hanya agar kondisi saat ini terlihat bersih.
 
 ## Perbaikan / reconciliation
-The persistence and deduplication behavior was corrected.
+Behavior persistence dan deduplication telah diperbaiki.
 
-Current expected behavior:
+Behavior yang sekarang diharapkan:
 
 - ordinary statement does not create Memory/Experience
 - explicit Memory request creates Memory
@@ -99,31 +99,31 @@ Current expected behavior:
 - retrieval does not create Memory
 
 ## Verifikasi
-These behaviors were verified on device.
+Behavior tersebut telah diverifikasi pada perangkat.
 
 ## Status
 **🟢 FIXED + VERIFIED**
 
-Historical duplicate Memory records remain preserved as evidence.
+Duplicate Memory historis tetap dipertahankan sebagai evidence.
 
 ---
 
 # BUG-003 — FORMAT RESPONS DAFTAR MEMORY
 
 ## Masalah
-Memory retrieval itself was working, but a request to list all Memory one-per-line with blank lines produced concatenated output.
+Retrieval Memory sebenarnya sudah bekerja, tetapi permintaan untuk menampilkan semua Memory satu per baris dengan satu baris kosong menghasilkan output yang menyatu.
 
-Observed pattern:
+Pola yang terlihat:
 
 ```
 1. ...
 2. ...3. ...
 ```
 
-The underlying retrieval returned all expected Memory records, so this was not initially classified as a retrieval failure.
+Retrieval di backend mengembalikan seluruh record Memory yang diharapkan, sehingga awalnya ini bukan kegagalan retrieval.
 
 ## Trace / diagnosis
-The audit followed:
+Audit mengikuti jalur:
 
 ```
 authorized_memory_context
@@ -137,14 +137,14 @@ runtime SSE serialization
 natural-language response
 ```
 
-Two relevant defects were addressed:
+Dua defect terkait ditemukan dan diperbaiki:
 
-1. Explicit response-formatting instructions were not sufficiently enforced in the semantic model prompt.
-2. Runtime SSE chunk handling could collapse/preserve line breaks incorrectly.
+1. Instruksi format respons eksplisit belum cukup ditegakkan pada semantic model prompt.
+2. Penanganan chunk SSE runtime dapat menyebabkan line break tidak dipertahankan dengan benar.
 
 ## Perbaikanes
-- Explicit formatting instructions are now passed as a hard response-formatting requirement.
-- Runtime SSE handling was corrected to preserve newline characters.
+- Instruksi format eksplisit sekarang diteruskan sebagai persyaratan format respons.
+- Penanganan SSE runtime diperbaiki agar karakter newline tetap dipertahankan.
 
 Relevant commits include:
 
@@ -152,13 +152,13 @@ Relevant commits include:
 - `945b659fd5e28ef48bc8130029f81d1b6f80d171` — preserve newlines in runtime SSE chunks
 
 ## Pembedaan penting
-The Memory inventory/retrieval itself was already passing:
+Inventaris/retrieval Memory sendiri sudah PASS:
 
 - all Memory retrieval: PASS
 - no new Memory during retrieval: PASS
 - no new duplicate: PASS
 
-The defect was response presentation/serialization.
+Defect berada pada penyajian/serialisasi respons.
 
 ## Status
 **🟢 FIXED**
@@ -168,13 +168,13 @@ The defect was response presentation/serialization.
 # BUG-004 — PENGHAPUSAN LIFECYCLE TERSINKRONISASI
 
 ## Cakupan
-BUG-004 expanded from Memory-only deletion into synchronized lifecycle deletion for domains that actually have source-record deletion semantics:
+BUG-004 diperluas dari deletion Memory menjadi synchronized lifecycle deletion untuk domain yang memang mempunyai source-record deletion semantics:
 
 - MEMORY
 - KNOWLEDGE
 - EXPERIENCE
 
-Target principle:
+Prinsip target:
 
 ```
 delete from Journey
@@ -184,7 +184,7 @@ delete source record
 Journey representation/event synchronized
 ```
 
-Recovery/Evolution were not forced into delete semantics without implementation evidence.
+Recovery/Evolution tidak dipaksa menjadi delete semantics tanpa evidence dari implementation aktual.
 
 ## BUG-004A — Journey → Memory
 PASS.
@@ -199,26 +199,26 @@ Results:
 - refresh remained clean
 
 ## BUG-004B — Chat → Memory
-Initial failure:
+Kegagalan awal:
 SH reported Memory deleted, but the source and Journey representation remained.
 
-Root cause:
+Akar masalah:
 Chat deletion was not routed through the synchronized lifecycle deletion mechanism.
 
-Fix:
+Perbaikan:
 Chat Memory deletion was routed through:
 
 ```
 runtime_delete_record_with_journey(domain, record_id)
 ```
 
-Final result:
+Hasil akhir:
 **PASS**
 
 ## BUG-004C — Journey → Knowledge
 PASS.
 
-Important semantic distinction:
+Pembedaan semantic penting:
 
 ```
 source domain = KNOWLEDGE
@@ -228,31 +228,31 @@ Journey representation = LEARNING
 `LEARNING` does not mean the source became another domain.
 
 ## BUG-004D — Chat → Knowledge
-Initial failure:
+Kegagalan awal:
 Chat Knowledge deletion did not reliably resolve the target source record.
 
-Fix:
+Perbaikan:
 - Chat deletion routing added for Knowledge.
 - Knowledge matching corrected.
 - Explicit regression codes are prioritized for deterministic target resolution.
 - Deletion uses the synchronized lifecycle mechanism.
 
-Final result:
+Hasil akhir:
 **PASS**
 
 ## BUG-004E — Journey → Experience
 PASS.
 
-Experience source and Journey representation are synchronized on deletion.
+Source Experience dan Journey representation tersinkron saat deletion.
 
 ## BUG-004F — Chat → Experience
-Initial failure:
-Chat Experience deletion was not fully connected to synchronized lifecycle deletion.
+Kegagalan awal:
+Chat Experience deletion belum sepenuhnya terhubung ke synchronized lifecycle deletion.
 
-Fix:
+Perbaikan:
 Chat Experience deletion routed through the common deletion path.
 
-Final result:
+Hasil akhir:
 **PASS**
 
 ## Penerimaan akhir BUG-004
@@ -267,13 +267,13 @@ Chat → Knowledge       PASS
 Chat → Experience      PASS
 ```
 
-Final E2E account cleanliness check was performed on:
+Pemeriksaan kebersihan account E2E dilakukan pada:
 `E2E_TEST@SH.COM`
 
-Journey was clean of the tested Memory/Knowledge/Experience records. General Shared Experience records were not treated as private E2E leakage in the acceptance check.
+Journey bersih dari record Memory/Knowledge/Experience yang diuji. General Shared Experience tidak dihitung sebagai kebocoran data private E2E pada acceptance check.
 
 ## DB / provenance
-BUG-004 uses the database lifecycle mechanism:
+BUG-004 menggunakan mekanisme database lifecycle:
 
 ```
 runtime_delete_record_with_journey(domain, record_id)
@@ -285,7 +285,7 @@ Relevant migration lineage includes:
 - `20260827074749_bug004_sync_journey_source_delete_v2`
 - `20260827120000_bug004_synchronized_journey_source_delete`
 
-Runtime fixes were committed to GitHub DEV and deployed to Supabase DEV from the corresponding DEV source.
+Perbaikan runtime di-commit ke GitHub DEV dan di-deploy ke Supabase DEV dari source DEV yang sesuai.
 
 ## Status
 **🟢 CLOSED / PASS**
@@ -295,17 +295,17 @@ Runtime fixes were committed to GitHub DEV and deployed to Supabase DEV from the
 # BUG-005 — RIWAYAT PERCAKAPAN
 
 ## Posisi
-BUG-005 is the **next functional area after BUG-004**.
+BUG-005 adalah **area fungsional berikutnya setelah BUG-004**.
 
-Do not confuse it with BUG-001.
+Jangan menyamakannya dengan BUG-001.
 
 ### BUG-001
 Short-term conversation context **inside the active conversation/runtime model context**.
 
 ### BUG-005
-Persisted **Conversation History / conversation navigation and continuity as a product feature**.
+Persisted **Conversation History / navigasi dan continuity percakapan sebagai fitur produk**.
 
-The repository already contains a conversation-history implementation lineage, including authenticated history read/load and subsequent corrections to keep a newly created chat empty rather than hydrating account-wide history.
+Repository sudah memiliki lineage implementasi Conversation History, termasuk authenticated history read/load dan perbaikan agar chat baru tetap kosong, bukan mengisi history seluruh account.
 
 Relevant historical implementation commits include:
 
@@ -317,24 +317,24 @@ Relevant historical implementation commits include:
 
 ## Audit berikutnya yang wajib dilakukan
 
-Before changing code:
+Sebelum mengubah code:
 
-1. Trace persisted conversation records.
+1. Trace record Conversation yang tersimpan.
 2. Trace authenticated history read.
-3. Trace history loader and chat-open behavior.
-4. Trace active conversation vs newly created conversation.
-5. Verify account/S H isolation.
-6. Determine exact expected UX from current implementation and project contract.
-7. Reproduce current behavior on `E2E_TEST@SH.COM`.
-8. Only then classify the actual BUG-005 defect.
-9. Fix minimally.
+3. Trace history loader dan behavior saat chat dibuka.
+4. Trace perbedaan active conversation dan conversation baru.
+5. Verifikasi isolasi account/SH.
+6. Tentukan UX yang benar berdasarkan implementation aktual dan project contract.
+7. Reproduce behavior saat ini pada `E2E_TEST@SH.COM`.
+8. Setelah itu baru klasifikasikan defect BUG-005 yang sebenarnya.
+9. Lakukan fix minimal.
 10. Commit + push DEV.
-11. Deploy through the official path.
-12. Verify CI.
-13. Device-test.
-14. Verify DB and UI.
+11. Deploy melalui jalur resmi.
+12. Verifikasi CI.
+13. Uji pada perangkat.
+14. Verifikasi DB dan UI.
 
-**Do not invent a BUG-005 acceptance result before this audit.**
+**Jangan membuat hasil acceptance BUG-005 sebelum audit ini dilakukan.**
 
 ## Status
 **🟡 NEXT / AUDIT REQUIRED**
@@ -397,10 +397,10 @@ Frozen implementation:
 Frozen APK:
 `#194`
 
-Latest documented DEV commit before this resume update:
+DEV HEAD aktual untuk dokumentasi Resume 68:
 `5444e180cde293d1692958cef6efa9b0a2201802`
 
-**Important:** `5444e18...` is the current documentation commit for this Resume 68 update; the next implementation commit must be based on the actual DEV HEAD, not assumed from an older resume.
+**Penting:** `d17a556...` adalah commit dokumentasi terbaru yang terdeteksi saat Resume 68 diperbaiki. Commit ini bukan source SHA untuk menentukan APK regression. Source APK harus selalu ditentukan dari build artifact/commit build yang sebenarnya.
 
 ---
 
@@ -428,14 +428,14 @@ DB + UI VERIFICATION
 CLOSE ONLY WITH EVIDENCE
 ```
 
-Historical evidence must be preserved.
-Frozen APK #194 must not be mutated.
-No speculative migration.
-No manual deletion of regression evidence.
-GitHub DEV and Supabase DEV must remain provenance-consistent.
+Evidence historis harus dipertahankan.
+APK frozen #194 tidak boleh diubah.
+Tidak ada migration spekulatif.
+Tidak boleh menghapus evidence regression secara manual.
+GitHub DEV dan Supabase DEV harus tetap konsisten secara provenance.
 
 ## TINDAKAN BERIKUTNYA
 
-**BUG-005 Conversation History — audit first, implementation second.**
+**BUG-005 Conversation History — audit implementation terlebih dahulu, baru lakukan implementation jika memang ditemukan gap.**
 
 ---
