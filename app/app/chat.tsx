@@ -522,6 +522,7 @@ export default function ChatScreen() {
           {sending ? <Button title="Stop" onPress={cancelStreaming} /> : <Button title="Send" onPress={() => void onSend()} disabled={!canSend} />}
         </View>
       </View>
-    </View>
+      </View>
+    </>
   );
 }
