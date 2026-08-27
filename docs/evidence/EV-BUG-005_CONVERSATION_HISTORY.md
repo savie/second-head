@@ -1,6 +1,6 @@
 # EV-BUG-005 — Conversation History Audit / Minimal Fix
 
-Status: DEV FIX IMPLEMENTED / VERIFICATION PENDING
+Status: DEVICE VERIFIED / DB + UI ACCEPTANCE PASS
 
 ## Scope
 
@@ -138,12 +138,22 @@ The minimal fix therefore reuses the existing persisted rows and virtual-session
 - E2E data can be grouped into virtual sessions using the existing continuity rule;
 - DEV App source now contains persisted history navigation.
 
-### PENDING
+### DEVICE ACCEPTANCE — PASS
 
-- GitHub Android CI/build result for the new App commit;
-- installation of the resulting APK;
-- device UI reproduction and verification;
-- regression verification that New chat remains empty after navigation;
-- reopening an older history group on device.
+APK #202 was built successfully and installed on the test device.
 
-BUG-005 must not be marked CLOSED until those remaining evidence items are completed.
+Device verification confirmed:
+
+- Conversation History is visible.
+- An existing conversation can be opened from History.
+- Selected historical conversation content is correct.
+- New Chat starts empty after leaving a historical conversation.
+- History can be reopened after starting New Chat.
+- After force-close/reopen, persisted conversation history remains available.
+- Account/SH isolation remained correct for the tested E2E account.
+
+### FINAL STATUS
+
+**BUG-005 — CLOSED / PASS**
+
+Edit/Delete/Regenerate controls visible inside conversations are not part of the BUG-005 acceptance scope and remain separate functionality to audit if required by contract.
