@@ -11,15 +11,18 @@ import { supabase } from '../services/supabase';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
-type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string; conversationId?: string; createdAt?: string };
+type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string; conversationId?: string; createdAt?: string; attachmentName?: string };
 type ConversationRow = { id: string; role: Message['role']; content: string; created_at: string; metadata?: Record<string, unknown> | null };
 type ConversationSession = { id: string; title: string; startedAt: string; endedAt: string; rows: ConversationHistoryRow[] };
 
-function makeMessage(role: Message['role'], text: string, id?: string, conversationId?: string, createdAt?: string): Message {
-  return { id: id ?? `${Date.now()}-${Math.random()}`, role, text, conversationId, createdAt };
+function makeMessage(role: Message['role'], text: string, id?: string, conversationId?: string, createdAt?: string, attachmentName?: string): Message {
+  return { id: id ?? `${Date.now()}-${Math.random()}`, role, text, conversationId, createdAt, attachmentName };
 }
 
-function messageFromRow(row: ConversationHistoryRow): Message { return makeMessage(row.role, row.content, `${row.conversation_id}:${row.created_at}`, row.conversation_id, row.created_at); }
+function messageFromRow(row: ConversationHistoryRow): Message {
+  const attachmentName = typeof row.metadata?.attachment_name === 'string' ? row.metadata.attachment_name : undefined;
+  return makeMessage(row.role, row.content, `${row.conversation_id}:${row.created_at}`, row.conversation_id, row.created_at, attachmentName);
+}
 
 function buildVirtualSessions(rows: ConversationHistoryRow[]): ConversationSession[] {
   const sessions: ConversationSession[] = [];
@@ -149,7 +152,7 @@ export default function ChatScreen() {
     setLifecycleState('streaming');
     setConfirmationState('idle');
     if (conversationTitle === 'New conversation') setConversationTitle(message.slice(0, 42));
-    setMessages(current => [...current, makeMessage('user', message), makeMessage('assistant', '')]);
+    setMessages(current => [...current, makeMessage('user', message, undefined, undefined, undefined, attachment?.name ?? attachmentName ?? undefined), makeMessage('assistant', '')]);
     try {
       await streamSHRuntime(message, event => {
         if (!mountedRef.current) return;
@@ -546,6 +549,7 @@ export default function ChatScreen() {
         {messages.map(message => <View key={message.id} style={{ alignItems: message.role === 'user' ? 'flex-end' : 'flex-start' }}>
           <View style={{ maxWidth: '88%', borderRadius: 16, padding: 12, backgroundColor: message.role === 'user' ? '#E0F2FE' : '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB' }}>
             <Text style={{ fontSize: 12, fontWeight: '700', color: '#6B7280', marginBottom: 5 }}>{message.role === 'user' ? 'You' : message.role === 'assistant' ? 'SH' : 'System'}</Text>
+            {message.attachmentName ? <Text style={{ color: '#374151', marginBottom: 6 }}>📎 {message.attachmentName}</Text> : null}
             {editingId === message.id ? <View style={{ gap: 8 }}><TextInput value={editingText} onChangeText={setEditingText} multiline style={inputStyle} /><View style={{ flexDirection: 'row', gap: 8 }}><Button title="Save" onPress={saveEditedMessage} /><Button title="Cancel" onPress={() => { setEditingId(null); setEditingText(''); }} /></View></View> : <Text style={{ color: '#111827', lineHeight: 21 }}>{message.text || (sending && message.role === 'assistant' ? 'SH is thinking…' : '')}</Text>}
             {!editingId && message.text ? <View style={{ alignItems: 'flex-end', marginTop: 6 }}><Button title="⋮" onPress={() => openMessageActions(message)} /></View> : null}
           </View>
