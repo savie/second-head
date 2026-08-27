@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, ScrollView, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AppState } from 'react-native';
-import { streamSHRuntime } from '../services/runtime-stream';
+import { loadConversationHistoryRows, streamSHRuntime, type ConversationHistoryRow } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
 import { supabase } from '../services/supabase';
 
@@ -10,9 +10,33 @@ type PendingConfirmation = { confirmation_id: string; action_id: string; title: 
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
 type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string };
 type ConversationRow = { id: string; role: Message['role']; content: string; created_at: string; metadata?: Record<string, unknown> | null };
+type ConversationSession = { id: string; title: string; startedAt: string; endedAt: string; rows: ConversationHistoryRow[] };
 
 function makeMessage(role: Message['role'], text: string, id?: string): Message {
   return { id: id ?? `${Date.now()}-${Math.random()}`, role, text };
+}
+
+function buildVirtualSessions(rows: ConversationHistoryRow[]): ConversationSession[] {
+  const sessions: ConversationSession[] = [];
+  const gapSeconds = 3600;
+  for (const row of rows) {
+    const previous = sessions.at(-1);
+    const gap = previous ? (Date.parse(row.created_at) - Date.parse(previous.endedAt)) / 1000 : Infinity;
+    if (!previous || gap > gapSeconds) {
+      sessions.push({
+        id: row.conversation_id,
+        title: row.role === 'user' ? row.content.slice(0, 42) : 'Conversation',
+        startedAt: row.created_at,
+        endedAt: row.created_at,
+        rows: [row],
+      });
+    } else {
+      previous.rows.push(row);
+      previous.endedAt = row.created_at;
+      if (previous.title === 'Conversation' && row.role === 'user') previous.title = row.content.slice(0, 42);
+    }
+  }
+  return sessions.reverse();
 }
 
 function isVerificationArtifact(row: ConversationRow): boolean {
@@ -35,6 +59,9 @@ export default function ChatScreen() {
   const [confirmationState, setConfirmationState] = useState<'idle' | 'cancelled' | 'confirmed'>('idle');
   const [lifecycleState, setLifecycleState] = useState<ChatLifecycleState>('active');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historySessions, setHistorySessions] = useState<ConversationSession[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [findQuery, setFindQuery] = useState('');
   const [conversationTitle, setConversationTitle] = useState('New conversation');
@@ -70,16 +97,20 @@ export default function ChatScreen() {
     let cancelled = false;
     async function loadRecentConversation() {
       if (!context?.sh_id) return;
-      const { data, error } = await supabase.rpc('runtime_load_conversation', { p_limit: 30 });
-      if (cancelled || error || !Array.isArray(data)) return;
-      const rows = (data as ConversationRow[])
-        .filter(row => row?.content && !isVerificationArtifact(row))
-        .slice(-14)
-        .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
-      if (!rows.length) return;
-      setMessages(rows.map(row => makeMessage(row.role, row.content, row.id)));
-      const firstUser = rows.find(row => row.role === 'user');
-      if (firstUser) setConversationTitle(firstUser.content.slice(0, 42));
+      try {
+        const data = await loadConversationHistoryRows(100);
+        if (cancelled) return;
+        const rows = data.filter(row => row?.content && !isVerificationArtifact(row));
+        const sessions = buildVirtualSessions(rows);
+        setHistorySessions(sessions);
+        const latest = sessions[0];
+        if (!latest) return;
+        const recentRows = latest.rows.slice(-14);
+        setMessages(recentRows.map(row => makeMessage(row.role, row.content, row.conversation_id)));
+        if (latest.title) setConversationTitle(latest.title);
+      } catch {
+        // History loading must not block the chat UI from opening.
+      }
     }
     void loadRecentConversation();
     return () => { cancelled = true; };
@@ -148,14 +179,41 @@ export default function ChatScreen() {
   }
 
   function newChat() {
+    const start = () => {
+      setMessages([]);
+      setConversationTitle('New conversation');
+      setFindQuery('');
+      setHistoryOpen(false);
+      setMenuOpen(false);
+    };
     if (messages.length > 0) {
       Alert.alert('New chat', 'Mulai sesi chat baru?', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'New chat', onPress: () => { setMessages([]); setConversationTitle('New conversation'); setFindQuery(''); setMenuOpen(false); } },
+        { text: 'New chat', onPress: start },
       ]);
       return;
     }
-    setConversationTitle('New conversation');
+    start();
+  }
+
+  async function openHistory() {
+    setMenuOpen(false);
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const rows = await loadConversationHistoryRows(100);
+      setHistorySessions(buildVirtualSessions(rows.filter(row => row?.content && !isVerificationArtifact(row))));
+    } catch {
+      Alert.alert('History', 'Conversation history tidak dapat dimuat.');
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
+  function openHistorySession(session: ConversationSession) {
+    setMessages(session.rows.map(row => makeMessage(row.role, row.content, row.conversation_id)));
+    setConversationTitle(session.title || 'Conversation');
+    setHistoryOpen(false);
   }
 
   function clearChat() {
@@ -268,6 +326,7 @@ export default function ChatScreen() {
         </View>
         {menuOpen ? <View style={{ marginTop: 10, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 8, backgroundColor: '#FFFFFF', gap: 4 }}>
           <Button title="＋ New chat" onPress={newChat} />
+          <Button title="Conversation history" onPress={() => void openHistory()} />
           <Button title="✎ Rename conversation" onPress={renameConversation} />
           <Button title="⌕ Find in chat" onPress={() => { setFindOpen(true); setMenuOpen(false); }} />
           <Button title="Copy conversation" onPress={() => void copyConversation()} />
@@ -275,6 +334,13 @@ export default function ChatScreen() {
           <Button title="Delete conversation" onPress={deleteConversation} />
           <Button title="Share conversation" onPress={() => Alert.alert('Share', 'UI share siap. Integrasi OS/BE menyusul.')} />
           <Button title="Export conversation" onPress={() => Alert.alert('Export', 'UI export siap. Implementasi file menyusul.')} />
+        </View> : null}
+        {historyOpen ? <View style={{ marginTop: 10, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 8, backgroundColor: '#FFFFFF', gap: 6 }}>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827' }}>Conversation history</Text>
+          {historyLoading ? <Text style={{ color: '#6B7280' }}>Loading history…</Text> : null}
+          {!historyLoading && historySessions.length === 0 ? <Text style={{ color: '#6B7280' }}>Belum ada conversation history.</Text> : null}
+          {!historyLoading ? historySessions.map(session => <Button key={session.id} title={session.title || 'Conversation'} onPress={() => openHistorySession(session)} />) : null}
+          <Button title="Close history" onPress={() => setHistoryOpen(false)} />
         </View> : null}
         {findOpen ? <View style={{ marginTop: 10, gap: 6 }}>
           <TextInput value={findQuery} onChangeText={setFindQuery} autoFocus placeholder="Find in chat..." placeholderTextColor="#6B7280" style={inputStyle} />
