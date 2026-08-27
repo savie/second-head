@@ -269,23 +269,24 @@ export default function ChatScreen() {
 
   function renameConversationAction() {
     if (!currentConversationId) return Alert.alert('Rename conversation', 'Belum ada conversation yang tersimpan.');
-    Alert.alert('Rename conversation', 'Masukkan nama baru melalui prompt?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Rename', onPress: () => {
-        Alert.prompt?.('Rename conversation', 'Masukkan nama baru', async text => {
-          const title = text?.trim();
-          if (!title) return;
-          try {
-            await renamePersistedConversation(currentConversationId, title);
-            setConversationTitle(title);
-            setHistorySessions(current => current.map(session => session.id === currentConversationId ? { ...session, title } : session));
-            setMenuOpen(false);
-          } catch (error) {
-            Alert.alert('Rename failed', error instanceof Error ? error.message : 'Conversation rename failed');
-          }
-        }, 'plain-text', conversationTitle);
-      } },
-    ]);
+    setMenuOpen(false);
+    Alert.prompt?.(
+      'Rename conversation',
+      'Enter a new name for this conversation:',
+      async text => {
+        const title = text?.trim();
+        if (!title) return;
+        try {
+          await renamePersistedConversation(currentConversationId, title);
+          setConversationTitle(title);
+          setHistorySessions(current => current.map(session => session.id === currentConversationId ? { ...session, title } : session));
+        } catch (error) {
+          Alert.alert('Rename failed', error instanceof Error ? error.message : 'Conversation rename failed');
+        }
+      },
+      'plain-text',
+      conversationTitle === 'New conversation' ? '' : conversationTitle
+    );
   }
 
   async function copyConversation() {
