@@ -87,11 +87,21 @@ function contextText(c: RuntimeContext) {
 }
 function modelUserContent(c: RuntimeContext): unknown {
   if (!c.attachment?.base64) return contextText(c);
-  const mime = c.attachment.mimeType || 'image/jpeg';
-  return [
-    { type: 'text', text: contextText(c) },
-    { type: 'image_url', image_url: { url: `data:${mime};base64,${c.attachment.base64}` } }
-  ];
+  const mime = c.attachment.mimeType || 'application/octet-stream';
+  if (mime.startsWith('image/')) {
+    return [
+      { type: 'text', text: contextText(c) },
+      { type: 'image_url', image_url: { url: `data:${mime};base64,${c.attachment.base64}` } }
+    ];
+  }
+  const textLike = /^(text\\/|application\\/json|application\\/csv|application\\/xml)/i.test(mime);
+  if (textLike) {
+    try {
+      const decoded = atob(c.attachment.base64);
+      return contextText({ ...c, user_message: `${c.user_message}\\n\\nATTACHED FILE (${c.attachment.name ?? 'file'}, ${mime}):\\n${decoded.slice(0, 120000)}` });
+    } catch {}
+  }
+  return contextText({ ...c, user_message: `${c.user_message}\\n\\nATTACHED FILE: ${c.attachment.name ?? 'file'} (type: ${mime}). The file was attached successfully, but its contents are not available to this model as readable text.` });
 }
 
 function experienceSystemText(c: RuntimeContext) {
@@ -121,7 +131,10 @@ function select(cs: Candidate[], cap: Capability, task: Task) { const eligible =
 export async function executeModel(userMessage: string, context?: { conversation_context?: RuntimeConversation[]; experiences?: RuntimeExperience[]; memories?: RuntimeMemory[] }): Promise<{ response: Response; task: Task; model_id: string; provider: string; cost_tier: CostTier; context_entries: number; memory_context_entries: number; conversation_context_entries: number }> {
   const task = taskFor(userMessage), cap: Capability = context?.attachment?.base64 ? 'vision' : (task === 'image' ? 'image' : 'text');
   const candidates: Candidate[] = [
-    ...(cap === 'vision' ? [{ id: 'openrouter/qwen2.5-vl-32b-instruct:free', capability: 'vision' as Capability, cost_tier: 'ZERO_BUDGET' as CostTier, adapter: openRouterVision(), tasks: ['vision', 'conversation', 'reasoning'] as Task[], priority: 0 }] : []),
+    ...(cap === 'vision' ? [
+      { id: 'openrouter/qwen2.5-vl-32b-instruct:free', capability: 'vision' as Capability, cost_tier: 'ZERO_BUDGET' as CostTier, adapter: openRouterVision(), tasks: ['vision', 'conversation', 'reasoning'] as Task[], priority: 0 },
+      { id: 'openrouter/qwen2.5-vl-7b-instruct:free', capability: 'vision' as Capability, cost_tier: 'ZERO_BUDGET' as CostTier, adapter: (() => ({ generate: async request => { const c = request.context; const k = Deno.env.get('OPENROUTER_API_KEY'); if (!k) throw new Error('MODEL_CONFIGURATION_ERROR: OPENROUTER_API_KEY is not configured'); return provider('https://openrouter.ai/api/v1/chat/completions', k, 'qwen/qwen2.5-vl-7b-instruct:free', c, { 'X-Title': 'SECOND HEAD' }); } }))(), tasks: ['vision', 'conversation', 'reasoning'] as Task[], priority: 1 }
+    ] : []),
     { id: 'openrouter/free', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter: openRouter(), tasks: ['conversation', 'reasoning', 'semantic'], priority: 0 },
     { id: 'groq/openai/gpt-oss-20b', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter: groq(), tasks: ['conversation', 'reasoning'], priority: 1 },
     { id: 'huggingface/openai/gpt-oss-20b:groq', capability: 'text', cost_tier: 'ZERO_BUDGET', adapter: huggingFace(), tasks: ['conversation', 'semantic'], priority: 2 }
