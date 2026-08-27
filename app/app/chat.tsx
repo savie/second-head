@@ -39,7 +39,7 @@ function buildVirtualSessions(rows: ConversationHistoryRow[]): ConversationSessi
   return sessions.reverse();
 }
 
-function isVerificationArtifact(row: ConversationRow): boolean {
+function isVerificationArtifact(row: Pick<ConversationRow, 'content' | 'metadata'> | Pick<ConversationHistoryRow, 'content' | 'metadata'>): boolean {
   const metadata = row.metadata;
   if (metadata && (metadata.persistence === 'verification-only' || metadata.verification_only === true)) return true;
   const text = row.content.trim().toLowerCase();
