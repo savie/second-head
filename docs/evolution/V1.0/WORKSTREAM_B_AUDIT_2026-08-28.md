@@ -223,8 +223,108 @@ Visual candidate yang dipilih sementara untuk eksplorasi desain B disimpan sebag
 
 Status keduanya **REFERENCE / CANDIDATE — NON-CANONICAL**. Visual ini adalah evidence dari eksplorasi, bukan commitment final dan bukan perubahan Canonical.
 
-## Next B step
+## B roadmap — dari design gate menuju implementation
 
-Concrete UX exploration dimulai dari navigation + conversation/home + composer + drawer/history. Gunakan visual evidence di atas sebagai referensi konkret agar eksplorasi berikutnya tidak hanya bergantung pada deskripsi teks. Jangan coding significant UI sebelum interaction model tersebut cukup jelas.
+Setelah audit current state dan visual exploration, Workstream B dilanjutkan sebagai **design-first consolidation**, bukan langsung coding.
+
+Urutan kerja sementara:
+
+B0 DESIGN GATE
+↓
+B1 NAVIGATION + DRAWER / HISTORY
+↓
+B2 CONVERSATION HOME / CHAT COMPOSITION
+↓
+B3 COMPOSER + CAPABILITY ENTRY
+↓
+B4 CONTEXTUAL SURFACES
+↓
+B5 JOURNEY / CONTINUITY PRESENTATION
+↓
+B6 LIFECYCLE / MORE POLISH
+↓
+B7 RESPONSIVE BEHAVIOR REVIEW
+↓
+B8 INTEGRATION + UX VERIFICATION
+↓
+B-CLOSE
+
+### B0 — Design Gate
+
+Sebelum significant UI implementation, tetapkan working interaction model untuk primary navigation, collapsed/expanded navigation, drawer/history, conversation/home composition, composer, attachment/capability entry, contextual right-side surface, Journey entry/return-to-source, Lifecycle/More placement, mobile-first behavior, dan responsive applicability untuk tablet/web.
+
+Gunakan evidence/ui/SH_V1_UI_HYBRID_1_3_5_CANDIDATE.png sebagai kandidat utama, bukan design lock.
+
+### B1 — Navigation + Drawer / History
+
+Working direction:
+- icon-first/collapsed navigation;
+- expandable navigation ketika diperlukan;
+- history/conversation discovery tidak mengorbankan conversation space;
+- mobile memakai drawer/sheet;
+- desktop/web boleh mempertahankan rail/sidebar lebih persistent bila ruang memungkinkan.
+
+Jangan menambah top-level destination hanya karena subsystem tersedia.
+
+### B2 — Conversation Home / Chat Composition
+
+Conversation menjadi visual center. Fokus pada hierarchy percakapan, spacing/typography, message actions yang tenang, streaming/cancellation/error states, return ke conversation lama, dan empty/new conversation experience.
+
+Tidak mengubah runtime/data contract hanya demi kosmetik UI.
+
+### B3 — Composer + Capability Entry
+
+Composer menjadi redesign priority: TEXT + ATTACHMENT/CAPABILITY + SEND/STOP.
+
+Photo/camera/file dan capability lain diarahkan menuju interaction model yang konsisten. Upload/processing/unavailable state harus terlihat tanpa membocorkan plumbing/provider detail.
+
+### B4 — Contextual Surfaces
+
+Eksplorasi panel/sheet kontekstual untuk informasi yang membantu conversation tanpa membuat dashboard permanen.
+
+Candidate content: relevant Journey/context, Memory, Knowledge, Experience, dan tool/action context bila tersedia.
+
+Tidak membuat tiga CRUD screen Memory/Knowledge/Experience hanya karena domain backend sudah ada.
+
+### B5 — Journey / Continuity Presentation
+
+Journey diposisikan sebagai continuity/history experience. Event harus mudah dipahami, provenance/source tetap terlihat, source conversation/object dapat dibuka kembali jika contract mendukung, detail tidak terasa seperti database record viewer, dan state loading/empty/error konsisten.
+
+### B6 — Lifecycle / More Polish
+
+Lifecycle tetap action/process surface. More tetap technical/account surface. Polish diarahkan pada hierarchy, copy, confirmation, result/error feedback, dan diagnostic detail bila diperlukan.
+
+Tidak memindahkan governance/authorization decision ke client.
+
+### B7 — Responsive Behavior Review
+
+Mobile tetap primary target, tetapi interaction model tidak sengaja dikunci ke Android.
+
+PHONE → drawer/sheet → conversation full-screen
+
+TABLET → navigation + conversation → contextual panel bila ruang memungkinkan
+
+WEB/DESKTOP → persistent sidebar → conversation center → optional contextual panel
+
+Status: applicability candidate, bukan commitment untuk membuat web client pada Workstream B.
+
+### B8 — Integration + UX Verification
+
+Sebelum B ditutup, verifikasi navigation, authentication/owner continuity, existing Chat/Journey/Lifecycle/More flows, attachment baseline, loading/empty/error states, Android build/typecheck/test path yang relevan, dan tidak ada governance regression.
+
+### B-Close
+
+B dapat ditutup ketika interaction model utama jelas, visual direction tidak lagi bergantung pada ad-hoc screen decisions, Chat/Journey/Lifecycle/More memiliki hierarchy koheren, responsive behavior punya aturan dasar, runtime/data contracts tetap intact, dan C dapat masuk tanpa memaksa redesign navigation lagi.
+
+Implementation rule: B belum implementation-complete hanya karena mock/screen visual terlihat bagus. Significant UI changes harus melalui implementation → verify → reconcile.
+
+## Next action
+
+**Sekarang kita berada di B0 — Design Gate.**
+
+Jangan coding besar dulu.
+
+Langkah konkret berikutnya adalah membuat satu interaction map untuk kandidat UI hybrid: state collapsed/expanded, drawer/history, conversation home, contextual panel, dan mobile adaptation. Setelah map itu cukup jelas, baru B1 dapat diimplementasikan secara bounded.
+
 
 END OF WORKSTREAM B LIVING DOCUMENT
