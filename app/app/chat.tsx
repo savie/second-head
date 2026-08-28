@@ -182,7 +182,8 @@ export default function ChatScreen() {
         if (event.type === 'complete') setLifecycleState('active');
       }, controller.signal, attachments);
       const rows = await loadConversationHistoryRows(100);
-      const sessions = buildVirtualSessions(rows.filter(row => row?.content && !isVerificationArtifact(row)));
+      const sessionRows: ConversationHistoryRow[] = rows.filter((row): row is ConversationHistoryRow => Boolean(row?.content) && !isVerificationArtifact(row));
+       const sessions = buildVirtualSessions(sessionRows);
       const latest = sessions[0];
       if (latest) {
         setCurrentConversationId(latest.id);
