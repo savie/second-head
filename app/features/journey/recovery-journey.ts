@@ -1,5 +1,5 @@
 import { createJourneyRuntimeDecisionSink, type JourneyEventRecorder, type JourneySignalDetector } from '../../../runtime/p5a/journey_decision';
-import { supabase } from '../../services/supabase';
+import { backend } from '../../services/backend';
 
 type RecoveryRow = {
   recovery_event_id: string;
@@ -11,7 +11,7 @@ type RecoveryRow = {
 
 const recorder: JourneyEventRecorder = {
   async record(input) {
-    const { data, error } = await supabase.rpc('runtime_record_journey_event', {
+    const { data, error } = await backend.rpc('runtime_record_journey_event', {
       p_sh_id: input.sh_id,
       p_event_type: input.event_type,
       p_occurred_at: input.occurred_at ?? new Date().toISOString(),
