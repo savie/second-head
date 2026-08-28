@@ -308,6 +308,37 @@ Validate whether direct camera capture provides enough owner value to justify a 
 
 ---
 
+### C5 validation result
+
+The existing Chat surface already provides a direct camera path through the platform image-picker capability:
+
+- requests camera permission before capture;
+- launches the native camera flow;
+- requests image/base64 preparation at capture time;
+- rejects the capture when image data cannot be prepared;
+- appends the resulting image into the same C2 `attachments[]` composition;
+- therefore the captured image continues through the C3 first-class image-input path;
+- the existing lifecycle, remove, and replace controls remain shared with File/Photo.
+
+### Decision
+
+**Dedicated camera implementation is NOT required for this slice.** The existing direct-camera capability is already sufficient to satisfy the current C5 value/dependency check. C5 is therefore a validation/reconciliation slice rather than a request to create a second camera architecture.
+
+No Canonical semantics or new provider dependency is introduced.
+
+Evidence in DEV:
+
+```
+app/app/chat.tsx
+handleAttachment('Camera')
+requestCameraPermissionsAsync()
+launchCameraAsync({ mediaTypes: ['images'], base64: true, quality: 0.85 })
+```
+
+### Status
+
+**VERIFIED / NO DEDICATED IMPLEMENTATION REQUIRED**
+
 ## 8. C6 — Multimodal Conversation
 
 ### Scope
@@ -413,7 +444,7 @@ C1  🟢 Verified
 C2  🟢 Verified
 C3  🟢 Verified
 C4  🟡 Implemented / verification pending
-C5  ⏳ Not started
+C5  🟢 Verified / no dedicated implementation required
 C6  ⏳ Not started
 C7  ⏳ Not started
 C8  ⏳ Not started
@@ -435,6 +466,7 @@ The 🟡 state is intentional: implementation exists, but verification is the au
 - Implemented C4 bounded file intelligence for supported text-oriented file classes with explicit unsupported/failed states.
 - Preserved the roadmap dependency order from `ROADMAP.md`.
 - Explicitly kept image-generation provider/runtime unresolved.
+- Validated C5 against the existing direct-camera path; no duplicate camera architecture introduced.
 
 ---
 
