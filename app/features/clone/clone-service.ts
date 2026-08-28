@@ -17,7 +17,7 @@ const agreementSelect =
   'agreement_id,source_sh_id,source_account_id,target_email,target_account_id,status,scope,created_at,approved_at,revoked_at';
 
 export async function listCloneAgreements() {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('clone_agreements')
     .select(agreementSelect)
     .order('created_at', { ascending: false });
@@ -34,7 +34,7 @@ export async function createCloneAgreement(input: {
   const targetEmail = input.targetEmail.trim().toLowerCase();
   if (!targetEmail) throw new Error('Target recipient email is required');
 
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('clone_agreements')
     .insert({
       source_sh_id: input.sourceShId.trim(),
@@ -50,7 +50,7 @@ export async function createCloneAgreement(input: {
 }
 
 export async function approveCloneAgreement(agreementId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('clone_agreements')
     .update({ status: 'APPROVED', approved_at: new Date().toISOString() })
     .eq('agreement_id', agreementId)
@@ -62,7 +62,7 @@ export async function approveCloneAgreement(agreementId: string) {
 }
 
 export async function rejectCloneAgreement(agreementId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('clone_agreements')
     .update({ status: 'REJECTED' })
     .eq('agreement_id', agreementId)
