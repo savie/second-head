@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   contextButton: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ECE9E2' },
   contextButtonActive: { backgroundColor: '#EAE7F7' },
   contextIcon: { fontSize: 20, color: '#4A338E' },
-  contextPanel: { width: width >= 1180 ? 320 : 280, borderLeftWidth: 1, borderLeftColor: '#E3E1DC', backgroundColor: '#FBFAF7' },
+  contextPanel: { width: 280, borderLeftWidth: 1, borderLeftColor: '#E3E1DC', backgroundColor: '#FBFAF7' },
   contextHeader: { minHeight: 58, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#E7E4DE' },
   contextTitle: { fontSize: 17, fontWeight: '800', color: '#22211F' },
   closeIcon: { fontSize: 26, color: '#5F5E5A' },
