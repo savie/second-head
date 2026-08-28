@@ -10,6 +10,362 @@ Tujuan utamanya sederhana: **jangan sampai ide-ide daging hasil diskusi hilang.*
 
 ---
 
+# CARA BACA RESUME 69
+
+Resume 69 adalah **kumpulan diskusi dan brainstorming**, bukan dokumen kesimpulan.
+
+Di dalamnya boleh ada:
+- ide mentah
+- pertanyaan
+- kemungkinan
+- usulan
+- perbandingan
+- kekhawatiran
+- bantahan
+- revisi pemikiran
+- ide yang kemudian berubah atau dibuang
+- hal yang masih ingin diaudit
+
+Tulisan di sini **tidak otomatis menjadi keputusan**. Kalau suatu ide nantinya matang, pembahasannya dapat dipindahkan ke dokumen Evolution/Design/Implementation yang lebih terstruktur.
+
+Urutan berpikir yang diinginkan:
+
+IDE → ngobrol → eksplorasi → kritik → mungkin berkembang → mungkin dibuang → kandidat → keputusan formal (jika memang diperlukan)
+
+Resume 69 sengaja boleh berubah melalui banyak commit karena fungsinya adalah menjaga memory diskusi.
+
+---
+
+# BRAINSTORM AWAL — SETELAH V0.1.0
+
+Bagian ini menangkap brainstorming awal yang menjadi pemicu diskusi Resume 69. Isinya bukan daftar kewajiban dan bukan scope final.
+
+## 1. CHAT — fondasi sudah cukup matang
+
+Saat brainstorming dimulai, fungsi yang sudah terbukti meliputi conversation, history, rename, find, copy, share, export, delete, edit, regenerate, attachment, photo, camera, file, Android back dialog, persistence, dan isolation.
+
+Pertanyaan yang muncul bukan lagi "chat harus ditambah apa supaya ada fitur", tetapi:
+
+> Kalau SH diberikan ke user biasa, apa yang masih membuatnya terasa setengah jadi?
+
+Kemungkinan quality-of-life yang dilempar ke meja:
+- stop generation
+- retry failed response
+- attachment preview yang lebih enak
+- multiple attachments
+
+Semua ini kandidat diskusi, bukan keputusan implementasi.
+
+## 2. JOURNEY
+
+Journey dipandang berpotensi menjadi salah satu surface paling menarik.
+
+Bukan cuma list, tetapi kemungkinan:
+- filter All / Memory / Knowledge / Experience / Lifecycle/Other
+- event detail
+- tap event → source
+- source event → conversation
+- search
+- chronological grouping
+- event type indicator
+- empty state
+- refresh
+- pagination
+
+Muncul ide:
+
+> **Journey → Chat**
+
+Kalau event berasal dari conversation, user dapat langsung kembali ke conversation tersebut.
+
+Pertanyaan yang masih terbuka: apakah Journey akan terasa sebagai continuity system atau hanya database viewer?
+
+## 3. MEMORY
+
+Pertanyaan awal:
+
+> Kalau user punya Memory, bagaimana cara mengelolanya dengan nyaman?
+
+Kemungkinan:
+- view
+- search
+- detail
+- source/provenance
+- delete
+- mungkin edit
+
+Edit sengaja dipandang hati-hati karena bisa menyentuh provenance/lifecycle semantics.
+
+## 4. KNOWLEDGE
+
+Pertanyaan:
+
+> Bagaimana user memasukkan Knowledge?
+
+Ide yang dilempar:
+- text
+- file
+- URL
+- from conversation?
+
+Kemudian kemungkinan metadata:
+- title
+- content
+- source
+- provenance
+- visibility
+- created
+
+Belum diputuskan karena semantics Knowledge perlu dipahami dulu.
+
+## 5. EXPERIENCE
+
+Muncul pertanyaan apakah Experience benar-benar berbeda dari Memory.
+
+Mental model awal:
+
+Memory → tentang user / hal yang perlu diingat.
+
+Knowledge → hal yang diketahui tentang sesuatu.
+
+Experience → apa yang dialami/dipelajari SH dalam perjalanan.
+
+Ide surface Experience:
+
+What happened → What was learned → Context → Outcome → Journey
+
+Masih eksplorasi.
+
+## 6. SEARCH
+
+Find di Chat sudah terbukti berguna.
+
+Muncul ide **Global SH Search**:
+
+Search Second Head → Conversations / Memory / Knowledge / Experience / Journey
+
+Contoh pencarian seperti regression BUG-004 dapat menemukan sumber lintas surface, tetap dengan boundary account/privacy.
+
+## 7. LIFECYCLE
+
+Muncul keinginan mengaudit apakah surface Lifecycle benar-benar executable atau sebagian baru kosmetik.
+
+Konsep yang ingin dicek:
+- Clone
+- Recovery
+- Inheritance
+- Succession
+- End-of-Life
+- Legacy
+
+Contoh flow konseptual:
+
+Clone → Create Clone → approval → agreement → new SH
+
+Recovery → snapshot → validation → confirmation → restore
+
+Pertanyaan utamanya:
+
+> Mana yang functional, partial, dan cosmetic?
+
+Ini awalnya ide audit, bukan keputusan bahwa semua lifecycle feature harus dibangun sekarang.
+
+## 8. MORE
+
+More juga dicurigai berpotensi menjadi kumpulan tombol yang terlihat ada tetapi belum berguna.
+
+Yang ingin dieksplor:
+- Runtime Verification
+- Authorization
+- Error
+- Account / Sign out
+
+Contoh ide:
+
+Runtime Verification → diagnostic yang berguna.
+
+Authorization → user memahami authority SH.
+
+Error → error center sederhana.
+
+Account → identity/session/sign out.
+
+## 9. ERROR UX
+
+Pengalaman nyata dengan error seperti MODEL_SELECTION_FAILED dan SH_RUNTIME_STREAM_FAILED memunculkan ide bahwa user tidak seharusnya dipaksa membaca JSON teknis.
+
+Kemungkinan UX:
+
+> SH mengalami masalah saat memproses permintaan.
+>
+> [Try again]
+
+Detail teknis tetap bisa tersedia melalui diagnostic/error surface.
+
+Mental model:
+
+USER UX → sederhana  
+TECHNICAL DIAGNOSTIC → detail
+
+## 10. LOADING / EMPTY / OFFLINE STATES
+
+Hal kecil yang bisa membuat aplikasi terasa jauh lebih matang:
+- history kosong → penjelasan yang natural
+- Journey kosong → penjelasan
+- network mati → status yang jelas
+- model unavailable → status yang jelas
+- upload → uploading / processing / analyzing
+
+Tujuannya agar user tidak bertanya apakah aplikasi freeze atau sedang bekerja.
+
+## 11. CONVERSATION MANAGEMENT
+
+Rename sudah ada, tetapi muncul ide otomatis conversation title.
+
+Misalnya user bertanya:
+
+> Buat resume dari file...
+
+Conversation dapat memperoleh title yang lebih bermakna daripada "Untitled conversation".
+
+Rename manual tetap ada.
+
+## 12. NOTIFICATIONS
+
+Kemungkinan:
+- long-running processing selesai
+- recovery selesai
+- export selesai
+
+Belum dianggap prioritas.
+
+## 13. VOICE
+
+Ide:
+
+🎤 → speech-to-text → normal SH chat pipeline
+
+Tetapi waktu itu sengaja tidak diprioritaskan karena multimodal/file/photo/camera baru saja distabilkan.
+
+## 14. MULTIMODAL RESPONSE
+
+Awalnya SH sudah bergerak dari:
+
+user → image → SH → text
+
+Kemudian muncul bayangan kemampuan yang lebih utuh:
+
+image → question → reasoning → answer
+
+Bukan hanya attachment, tetapi capability multimodal.
+
+## 15. SH STATUS
+
+Ide surface ringan untuk menunjukkan kondisi SH:
+
+SECOND HEAD
+
+Status → Online  
+Identity → SH-xxxx  
+Runtime → Available  
+Memory → ...  
+Knowledge → ...  
+Experience → ...  
+Conversation → ...
+
+Bukan dashboard besar. Hanya "kondisi SH saya sekarang".
+
+## 16. IMAGE GENERATION
+
+Kemudian muncul ide yang dianggap jelas belum ada:
+
+User → "buatkan gambar..." → SH Runtime → image generation capability → hasil gambar → save/share/download
+
+Poin pentingnya: image generation tidak hanya dianggap attachment kebalikan, tetapi capability SH sendiri.
+
+## 17. PROJECTS
+
+Muncul ide workspace/project seperti:
+
+Projects
+- SECOND HEAD
+- Work
+- Personal
+
+Dengan kemungkinan conversations, files, knowledge, instructions di dalam project.
+
+Tetapi langsung muncul pertanyaan penting:
+
+> Project boundary ≠ SH boundary.
+
+Jadi konsep ini tidak boleh sekadar meniru produk lain.
+
+## 18. TOOLS / PLUGINS / EXTENSIONS
+
+Ide awalnya bukan membuat puluhan plugin.
+
+Lebih menarik jika ada konsep:
+
+SH → capability/tool → authorization → execution → result → reasoning
+
+Contoh capability:
+- web search
+- calculator
+- file reader
+- image generator
+
+Plugin/extension kemudian bisa menjadi layer yang mendeklarasikan capability, bukan sekadar tombol tambahan.
+
+## 19. MODERN UI
+
+Keinginan owner:
+
+> UI jangan konservatif seperti sekarang; lebih modern dan enak dipakai.
+
+Referensi visual/UX yang disebut dalam diskusi:
+- ChatGPT
+- Qwen Studio
+- Claude
+- produk AI modern lain
+- MiRA sebagai salah satu pembanding visual
+
+Tetapi targetnya bukan clone ChatGPT.
+
+Mental model:
+
+> **ChatGPT-like UX + SH architecture.**
+
+Clean, modern, conversation-first, ringan di HP, composer natural, attachment natural, message actions rapi, dan tidak terasa seperti admin dashboard.
+
+## 20. V0.1.0 → V1.0.0
+
+Muncul gagasan:
+
+v0.1.0 = functional foundation / proving ground
+
+v1.0.0 = SH yang mulai terasa sebagai sistem utuh.
+
+Kemungkinan isi v1.0.0 yang dilempar ke meja:
+- modern UI
+- conversational UX
+- Memory
+- Knowledge
+- Experience
+- Journey
+- Projects
+- Tools
+- Extensions
+- multimodal
+- image understanding
+- image generation
+- file intelligence
+- Lifecycle
+- global search
+
+Tetapi ini **bukan daftar final**.
+
+---
+
 # TITIK AWAL
 
 v0.1.0 secara fungsi dasar sudah terasa hidup.
