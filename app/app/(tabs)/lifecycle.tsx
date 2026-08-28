@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { SHShell } from '../../components/sh-shell';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 const actions = [
@@ -11,13 +12,13 @@ const actions = [
 ] as const;
 
 export default function LifecycleScreen() {
-  return <ScrollView contentContainerStyle={styles.content}>
+  return <SHShell title="Lifecycle"><ScrollView contentContainerStyle={styles.content}>
     <Text style={styles.title}>Lifecycle</Text>
     <Text style={styles.subtitle}>Run lifecycle and transfer processes here. Results and history are recorded in Journey.</Text>
     {actions.map(([title, route, description]) => <Pressable key={title} style={styles.card} onPress={() => router.push(route)}>
       <Text style={styles.cardTitle}>{title}</Text><Text style={styles.cardText}>{description}</Text><Text style={styles.open}>Open →</Text>
     </Pressable>)}
-  </ScrollView>;
+  </ScrollView></SHShell>;
 }
 
 const styles = StyleSheet.create({
