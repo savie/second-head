@@ -430,7 +430,7 @@ export default function ChatScreen() {
         if (result.canceled || !result.assets?.[0]) return;
         const asset = result.assets[0];
         if (!asset.base64) throw new Error('Photo data could not be read.');
-        setAttachments(current => [...current, { uri: asset.uri, name: asset.fileName ?? 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 }]);
+        setAttachments(current => [...current, { uri: asset.uri, name: asset.fileName ?? 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 ?? undefined }]);
         setAttachmentState('ready');
         return;
       }
@@ -519,7 +519,7 @@ export default function ChatScreen() {
         <View style={{ gap: 5 }}><Text style={{ fontSize: 13, fontWeight: '800', color: '#5D45A5' }}>CURRENT</Text><Text style={{ fontSize: 16, fontWeight: '700', color: '#22211F' }}>{conversationTitle}</Text><Text style={{ color: '#6B6A66' }}>{lifecycleState === 'streaming' ? 'SH sedang memproses percakapan.' : 'Conversation context.'}</Text></View>
         <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Journey</Text><Text style={{ color: '#6B6A66' }}>Continuity surface tersedia dari navigation.</Text></View>
         <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Memory · Knowledge · Experience</Text><Text style={{ color: '#6B6A66' }}>Contextual domains — bukan top-level navigation.</Text></View>
-        {attachmentName ? <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Attachment</Text><Text style={{ color: '#6B6A66' }}>{attachmentName}</Text></View> : null}
+        {attachments.length ? <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Attachments</Text><Text style={{ color: '#6B6A66' }}>{attachments.length} selected</Text></View> : null}
       </>}><View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
