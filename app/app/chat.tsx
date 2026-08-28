@@ -441,7 +441,7 @@ export default function ChatScreen() {
         if (result.canceled || !result.assets?.[0]) return;
         const asset = result.assets[0];
         if (!asset.base64) throw new Error('Camera image data could not be read.');
-        setAttachments(current => [...current, { uri: asset.uri, name: asset.fileName ?? 'camera.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 }]);
+        setAttachments(current => [...current, { uri: asset.uri, name: asset.fileName ?? 'camera.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 ?? undefined }]);
         setAttachmentState('ready');
         return;
       }
