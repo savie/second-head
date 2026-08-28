@@ -375,6 +375,7 @@ The 🟡 state is intentional: implementation exists, but verification is the au
 
 - Created this living Workstream C audit document.
 - Recorded C1 implementation and commit `78a9f665...`.
+- Implemented C2 multiple attachment composition and extended the runtime attachment contract.
 - Preserved the roadmap dependency order from `ROADMAP.md`.
 - Explicitly kept image-generation provider/runtime unresolved.
 
