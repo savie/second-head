@@ -1,4 +1,4 @@
-import { supabase } from '../../services/backend';
+import { backend } from '../../services/backend';
 
 export type CloneAgreement = {
   agreement_id: string;
