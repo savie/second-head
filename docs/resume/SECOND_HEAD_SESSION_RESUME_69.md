@@ -434,3 +434,370 @@ Semua isi Resume 69 setelah bagian ini adalah bahan diskusi.
 Boleh kritis. Boleh saling bertentangan. Boleh berubah. Boleh ditolak.
 
 Tidak ada yang otomatis menjadi Canonical hanya karena tertulis di sini.
+
+---
+
+# LANJUTAN BRAINSTORMING — MiRA, PRODUK AI LAIN, PORTABILITY, DAN LOCAL RUNTIME
+
+## MiRA — tetap proyek terpisah
+
+MiRA dibahas sebagai proyek terpisah dari SH.
+
+Tidak ada niat mencampur codebase, architecture, identity, atau scope MiRA dengan SH.
+
+Yang ingin diambil hanyalah insight/pattern yang memang berguna untuk SH.
+
+Observasi dari diskusi:
+- UI MiRA terasa lebih menarik dibanding UI SH v0.1.0 saat ini.
+- MiRA menunjukkan bahwa local-first/local runtime adalah arah yang menarik untuk dipelajari.
+- Local implementation MiRA yang pernah diuji masih mengalami masalah ketika konek melalui Termux.
+- Preferensi owner untuk SH: jika local AI dikembangkan, pengalaman user sebaiknya terintegrasi langsung di APK dan tidak mengharuskan Termux/service manual.
+
+Prinsip:
+
+> Ambil ide yang berguna, jangan mencampur proyek.
+
+## Produk AI lain sebagai referensi
+
+Brainstorming tidak berhenti pada ChatGPT dan MiRA. Beberapa produk/open-source project dapat menjadi sumber inspirasi untuk bagian yang berbeda:
+
+- ChatGPT → conversation-first UX, composer, attachment, message actions, navigation.
+- Qwen Studio → workspace feel, multimodal interaction, capability presentation, file interaction.
+- Claude → readability, typography, whitespace, calm conversation UX.
+- Perplexity → search/research workflow dan source/result presentation.
+- Gemini → multimodal interaction dan capability discovery.
+- Open WebUI → capability platform, tools/function calling, knowledge/RAG, web search, multimodal, provider abstraction.
+- LibreChat → multi-model/provider UX, comparison, presets/configuration.
+- AnythingLLM → workspace/context boundary dan knowledge separation.
+- LobeChat → polished AI UX, assistant/tool presentation, conversation organization.
+- Jan → local-first feeling, local simplicity, privacy-oriented capability.
+- OpenClaw → agent/action model, tools, browser/file/service interaction.
+- Open Interpreter → action execution dan permission boundary.
+- Dify → workflow thinking dan chaining capability/action/reasoning.
+- Onyx → knowledge access dan connected information.
+
+Semua ini adalah bahan inspirasi, bukan daftar kewajiban fitur SH.
+
+Prinsip pemilihannya:
+
+> Apakah konsep ini memperkuat identitas SH?
+
+Bukan:
+
+> Produk lain punya fitur X, jadi SH wajib punya X.
+
+## SH jangan menjadi Frankenstein
+
+Risiko dari terlalu banyak referensi adalah membuat SH menjadi kumpulan fitur tanpa identitas.
+
+Targetnya bukan:
+
+ChatGPT + MiRA + Qwen + Claude + Gemini + Open WebUI + LibreChat + dst.
+
+Targetnya:
+
+- ambil pola yang terbukti bagus
+- pahami alasan kenapa bagus
+- adaptasikan ke SH
+- pertahankan identitas SH
+
+Mental model:
+
+ChatGPT → conversation UX
+Claude → readability
+Qwen Studio → workspace/capability UX
+Perplexity → research UX
+Gemini → multimodal UX
+MiRA → local/personal feel
+Open WebUI → capability platform
+LibreChat → provider abstraction
+AnythingLLM → context/workspace thinking
+LobeChat → polished UX
+Jan → local simplicity
+OpenClaw → hands/action
+Open Interpreter → execution model
+Dify → workflow thinking
+Onyx → knowledge access
+
+↓
+
+SH
+
+## Portability — GitHub tetap rumah source code
+
+Diskusi juga membahas apakah suatu hari Supabase perlu diganti.
+
+Posisi brainstorming:
+
+GitHub tetap sangat nyaman sebagai rumah source code dan workflow:
+- source control
+- branch
+- commit
+- CI/CD
+- Actions
+- artifact/build lineage
+- audit
+
+Tidak ada kebutuhan mengganti GitHub hanya demi portability database.
+
+## Portability — Supabase sebagai infrastructure saat ini
+
+Supabase dipandang sebagai infrastructure yang digunakan SH saat ini, bukan identitas SH.
+
+Target konseptual:
+
+SH
+↓
+SH runtime/data contracts
+↓
+adapter/layer
+↓
+Supabase
+
+Jika suatu hari perlu pindah:
+
+SH
+↓
+SH runtime/data contracts
+↓
+adapter/layer
+↓
+Provider B / PostgreSQL lain / local
+
+Harapannya migrasi cukup berpusat pada infrastructure/data layer dan tidak memaksa bongkar total aplikasi.
+
+Migrasi database tidak hanya export/import data. Hal yang mungkin perlu ditangani antara lain:
+- schema
+- data
+- indexes
+- functions
+- triggers
+- RLS/security policies
+- auth
+- storage
+- realtime
+- edge functions
+- Supabase-specific RPC/API usage
+
+Karena Supabase berbasis PostgreSQL, perpindahan ke provider PostgreSQL lain secara konsep dapat lebih ringan daripada berpindah engine database yang berbeda. Detail migration tetap harus diaudit ketika kebutuhan nyata muncul.
+
+Prinsip:
+
+> Don't make SH permanently Supabase-dependent.
+
+Tetapi juga:
+
+> Jangan membangun portability abstraction berlebihan sekarang hanya untuk mengantisipasi masalah hipotetis.
+
+## Analogi provider
+
+Model AI dan database sama-sama sebaiknya tidak menjadi identitas SH.
+
+Model:
+
+SH Runtime
+↓
+Model Provider Interface
+├── A
+├── B
+├── C
+└── D
+
+Data/infrastructure:
+
+SH Runtime
+↓
+Data/Infrastructure Interface
+├── Supabase
+├── PostgreSQL provider lain
+└── Local store
+
+Gagasan utamanya:
+
+> SH harus tetap SH walaupun implementation provider berubah.
+
+## Local / Offline SH
+
+Muncul keinginan agar SH suatu hari tetap berguna di area tanpa sinyal atau ketika internet tidak tersedia.
+
+Offline tidak harus berarti seluruh SH harus berjalan penuh tanpa internet.
+
+Kemungkinan capability:
+
+- buka conversation lama → kemungkinan offline
+- baca Memory → kemungkinan offline
+- baca Knowledge tersimpan → kemungkinan offline
+- baca Journey → kemungkinan offline
+- edit data lokal → kemungkinan offline
+- buat draft → kemungkinan offline
+- sync perubahan → membutuhkan koneksi
+- cloud model → membutuhkan koneksi
+- web search → membutuhkan koneksi
+- cloud tools → membutuhkan koneksi
+- local model → mungkin offline jika tersedia
+
+Ini masih brainstorming.
+
+## Local model — preferensi pengalaman user
+
+Owner lebih menyukai local model yang terintegrasi langsung dengan aplikasi Android daripada flow yang mengharuskan Termux.
+
+Target pengalaman konseptual:
+
+Install SH APK
+↓
+download/import GGUF
+↓
+SH mendeteksi model
+↓
+load model
+↓
+inference langsung di Android
+
+Model besar tidak harus dibundel ke APK.
+
+Konsep pemisahan:
+
+SH APK
+├── SH application
+├── runtime
+└── local inference engine
+
+App/device storage
+└── models/
+    ├── model-a.gguf
+    └── model-b.gguf
+
+Lokasi storage final belum diputuskan.
+
+Yang penting dari sisi UX:
+- model dapat di-import/download
+- model tidak harus menjadi bagian dari APK utama
+- model dapat diganti
+- inference berjalan langsung dari aplikasi
+- user tidak membutuhkan Termux atau service manual
+
+## Local runtime sebagai otak alternatif
+
+Mental model:
+
+SH
+↓
+Model Runtime Interface
+├── CLOUD
+│   └── remote model/provider
+└── LOCAL
+    └── GGUF / native Android runtime
+
+Jika online:
+
+SH → remote brain
+
+Jika offline dan local model tersedia:
+
+SH → local brain
+
+Model/provider tetap bukan identitas SH.
+
+## Offline bukan sekadar cache
+
+Jika offline mode benar-benar dikembangkan, kemungkinan perlu memikirkan:
+- local state
+- local database
+- sync engine
+- conflict resolution
+- source-of-truth rules
+- offline-created records
+- deletion synchronization
+- ordering
+- authentication/session handling
+- local attachment storage
+- encryption/privacy
+- capability availability rules
+
+Karena itu offline SH tidak ideal dibuat sekadar sebagai cache chat.
+
+## Local + cloud hybrid
+
+Kemungkinan jangka panjang:
+
+SH
+↓
+Data / State Layer
+├── Remote Store
+│   └── Supabase atau provider lain
+└── Local Store
+    └── device
+
+Online:
+- Remote Brain
+- Remote Storage
+- Tools
+- Web
+
+Offline:
+- Local State
+- Local Memory
+- Local Knowledge
+- Local Journey
+- Local Tools
+- Optional Local Brain
+
+Masih berupa ide, bukan keputusan arsitektur.
+
+## Arah gabungan
+
+Brainstorming sampai titik ini mengarah pada mental model:
+
+SOUL
+↓
+BRAIN
+↓
+SENSES
+↓
+HANDS
+↓
+AUTHORITY
+↓
+CONTINUITY
+↓
+PROVENANCE
+↓
+LIFECYCLE
+↓
+UX
+
+Dengan kemungkinan implementation:
+
+CLOUD BRAIN ↔ LOCAL BRAIN
+REMOTE STORE ↔ LOCAL STORE
+
+Namun semuanya tetap berada di bawah identitas dan runtime SH.
+
+## Prinsip besar yang muncul
+
+SH sebaiknya dibangun agar:
+
+> **provider dapat diganti, tetapi identity SH tidak ikut berganti.**
+
+Dan untuk infrastructure:
+
+> **Supabase boleh menjadi rumah sekarang tanpa harus menjadi penjara arsitektur selamanya.**
+
+Untuk local capability:
+
+> **Offline/local adalah kemungkinan pengembangan, bukan alasan untuk membebani v0.1.0 dengan kompleksitas yang belum dibutuhkan.**
+
+---
+
+# CATATAN SESI TERKINI
+
+Diskusi setelah v0.1.0 sekarang mencakup tiga jalur besar:
+
+1. **Product identity** — SH bukan chatbot dan bukan sekadar personal AI assistant.
+2. **Capability expansion** — Brain, Soul, Senses, Hands, Authority, Continuity, Provenance, Lifecycle.
+3. **Product quality** — modern UX, multimodal, image generation, tools, provider portability, dan kemungkinan local/offline runtime.
+
+Belum ada keputusan final bahwa seluruh jalur tersebut harus masuk v1.0.0.
+
+Resume 69 tetap menjadi tempat eksplorasi sampai arah pengembangan cukup matang untuk dirumuskan menjadi candidate scope atau keputusan resmi.
