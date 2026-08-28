@@ -1,4 +1,4 @@
-import { supabase } from './backend';
+import { backend } from './backend';
 
 export async function signInWithPassword(email: string, password: string) {
   const result = await backend.auth.signInWithPassword({ email, password });
