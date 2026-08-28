@@ -32,7 +32,7 @@ export async function loadSHContext(input: {
   });
   if (contextError) throw new Error(`SH_CONTEXT_ASSEMBLY_FAILED: ${contextError.message}`);
 
-  const { data: journey, error: journeyError } = await supabase
+  const { data: journey, error: journeyError } = await backend
     .from('journey_events')
     .select('event_id,event_type,occurred_at,continuity_status,gap_code,payload,source_ref,created_at')
     .eq('sh_id', input.shId)
