@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Button, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { useAuth } from '../state/auth-context';
-import { supabase } from '../services/backend';
+import { backend } from '../services/backend';
 
 export default function EndOfLifeScreen() {
   const { session, context, logout } = useAuth(); const current = context?.shInstances.find(v => v.is_primary) ?? context?.shInstances[0];
