@@ -8,6 +8,7 @@ import { AppState } from 'react-native';
 import { deleteConversation as deletePersistedConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation as renamePersistedConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow, type ChatAttachment } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
 import { backend } from '../services/backend';
+import { SHShell } from '../components/sh-shell';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
@@ -506,12 +507,14 @@ export default function ChatScreen() {
           </View>
         </View>
       </Modal>
-      <View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
+      <SHShell title="Chat"><View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flex: 1, marginRight: 12 }}>
+            <View style={{ flex: 1, marginRight: 12 }}>
             <Text style={{ fontSize: 20, fontWeight: '700', color: '#111827' }}>{conversationTitle}</Text>
             <Text style={{ color: '#6B7280', marginTop: 3 }}>Second Head · {lifecycleState}</Text>
+          </View>
           </View>
           <Button title="⋮" onPress={() => setMenuOpen(value => !value)} />
         </View>
@@ -573,7 +576,7 @@ export default function ChatScreen() {
           {sending ? <Button title="Stop" onPress={cancelStreaming} /> : <Button title="Send" onPress={() => void onSend()} disabled={!canSend} />}
         </View>
       </View>
-      </View>
+      </View></SHShell>
     </>
   );
 }
