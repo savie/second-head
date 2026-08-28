@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from './backend';
 import type { RuntimeInvocationInput, RuntimeInvocationResponse } from '../types/runtime';
 
 const RUNTIME_FUNCTION = 'runtime-p4a-001';
@@ -7,11 +7,11 @@ export async function invokeSHRuntime(input: RuntimeInvocationInput): Promise<Ru
   const userMessage = input.userMessage.trim();
   if (!userMessage) throw new Error('Runtime request requires a non-empty user message');
 
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  const { data: sessionData, error: sessionError } = await backend.auth.getSession();
   if (sessionError) throw sessionError;
   if (!sessionData.session) throw new Error('Authenticated session required for runtime invocation');
 
-  const { data, error } = await supabase.functions.invoke(RUNTIME_FUNCTION, {
+  const { data, error } = await backend.functions.invoke(RUNTIME_FUNCTION, {
     body: { user_message: userMessage },
     headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
   });
