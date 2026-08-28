@@ -1383,3 +1383,227 @@ Tidak ada item di sini yang otomatis menjadi Canonical atau scope implementation
 Tujuan roadmap sementara ini hanya:
 
 > **membantu kita melihat arah besar tanpa mengunci tangan kita terlalu cepat.**
+
+
+---
+
+# UPDATE TERBARU — IMPLEMENTATION MAP, PROVIDER BOUNDARY, DAN CARA TRACKING AUDIT
+
+Diskusi kemudian masuk ke pertanyaan yang lebih teknis: bagaimana membedakan **SH Runtime**, **functions**, dan infrastructure provider, serta bagaimana melakukan audit tanpa harus membuka ulang seluruh sejarah 800+ commit.
+
+## Current implementation map
+
+Kita membuat working reference terpisah:
+
+`docs/architecture/SECOND_HEAD_CURRENT_IMPLEMENTATION_MAP_DEV.md`
+
+Dokumen ini **NON-CANONICAL**.
+
+Mental model yang dipakai:
+
+```
+SECOND HEAD
+│
+├── app/
+│   └── mobile application / UI / client interaction
+│
+├── functions/
+│   └── server-side executable/deployment units
+│       └── runtime-p4a-001/
+│
+├── database/
+│   └── database artifacts
+│       └── migrations/
+│
+└── docs/
+    ├── canonical/
+    ├── architecture/
+    └── resume/
+```
+
+### Function vs Runtime
+
+Pembeda istilah yang disepakati untuk mempermudah diskusi:
+
+- **SH Runtime** = konsep/sistem runtime SH yang melakukan processing/orchestration.
+- **Function** = executable server-side unit.
+- **runtime-p4a-001** = current function/deployment unit yang membawa runtime implementation.
+- **Supabase Edge Function** = infrastructure execution mechanism yang saat ini dipakai.
+
+Jadi `functions/` tidak boleh otomatis dianggap sinonim seluruh SH Runtime.
+
+## Provider boundary
+
+Current state yang ditemukan:
+
+```
+                  SH
+                   │
+          ┌────────┴────────┐
+          │                 │
+      Application        Runtime
+          │                 │
+          ↓                 ↓
+   backend.ts          current functions
+          │                 │
+          └────────┬────────┘
+                   ↓
+             Supabase DEV
+              │         │
+              ↓         ↓
+          PostgreSQL   Edge Functions
+```
+
+Supabase masih merupakan current infrastructure/provider.
+
+Application backend access sekarang mempunyai boundary di:
+
+`app/services/backend.ts`
+
+Ini lebih baik daripada feature/UI layer tersebar memakai modul bernama provider.
+
+Tetapi **SH belum true multi-database/provider**.
+
+Yang masih provider-coupled antara lain:
+- `app/services/backend.ts` implementation;
+- Supabase Auth;
+- Supabase Edge Function deployment;
+- server-side Supabase/database client calls.
+
+Jadi portability saat ini adalah **arah/boundary**, bukan klaim drop-in provider switching.
+
+## Database repository structure
+
+Prinsip yang ditegaskan:
+
+`database/` tetap menjadi lokasi general untuk database artifacts.
+
+Migration source:
+
+`database/migrations/`
+
+Tidak perlu:
+
+`database/supabase/`
+
+Supabase adalah provider/infrastructure saat ini; PostgreSQL adalah database engine yang mendasarinya.
+
+Tujuan struktur ini adalah supaya suatu hari provider database bisa diganti tanpa harus mengubah identitas/nama folder database artifacts.
+
+## Provider portability — prinsip brainstorming
+
+Target jangka panjang:
+
+```
+SH
+ ↓
+SH Runtime / contracts
+ ↓
+Infrastructure / data boundary
+ ↓
+Supabase / PostgreSQL provider lain / local
+```
+
+Tetapi kita sepakat tidak membangun abstraction berlebihan sekarang hanya untuk mengejar label "multi-database".
+
+Prinsip:
+
+> **Don't make SH permanently Supabase-dependent.**
+
+Dan sekaligus:
+
+> **Jangan membuat portability abstraction berlebihan sebelum ada kebutuhan nyata.**
+
+## GitHub sebagai source-code home
+
+GitHub tetap dipandang sebagai rumah source code/workflow:
+
+- source control
+- branch
+- commit
+- CI/CD
+- artifact/build lineage
+- audit
+
+Tidak ada alasan mengganti GitHub hanya demi portability database.
+
+## Audit/tracking baseline
+
+Muncul pertanyaan apakah audit harus dimulai dari commit awal atau commit terbaru.
+
+Kesimpulan brainstorming:
+
+> **Audit kondisi sekarang dimulai dari latest verified DEV baseline.**
+
+Tidak perlu replay 800+ commit untuk audit normal.
+
+Flow:
+
+```
+CURRENT / VERIFIED DEV BASELINE
+        ↓
+     AUDIT
+        ↓
+     FINDING
+        ↓
+       FIX
+        ↓
+    VERIFY
+```
+
+History Git baru dibuka jika diperlukan untuk:
+- regression
+- mencari commit penyebab perubahan
+- menelusuri migration
+- memahami asal dependency
+- investigasi anomaly
+
+Prinsip:
+
+> **Latest verified state adalah titik awal audit. History adalah alat investigasi, bukan titik awal default.**
+
+## Audit architecture vs Canonical
+
+Current implementation map hanya menjawab:
+
+> "Bagaimana system SH saat ini direpresentasikan oleh code DEV?"
+
+Canonical tetap authority.
+
+Jika implementation berbeda dari Canonical, jangan diam-diam menganggap implementation tersebut sebagai perubahan Canonical. Catat sebagai implementation state/gap dan audit lebih lanjut.
+
+## Dokumen audit provider
+
+Kita juga membuat:
+
+`docs/architecture/SH_PROVIDER_DEPENDENCY_AUDIT_DEV_2026-08-28.md`
+
+Dokumen ini juga **NON-CANONICAL** dan berisi hasil audit dependency provider pada DEV.
+
+Audit tersebut tidak melakukan reset/replay/mutation terhadap database DEV.
+
+---
+
+# POSISI TERBARU RESUME 69
+
+Brainstorming sekarang tidak hanya membahas "fitur apa yang kurang", tetapi mulai membentuk cara berpikir pengembangan SH:
+
+```
+PRODUCT IDENTITY
+      ↓
+CAPABILITIES
+      ↓
+MODERN UX
+      ↓
+RUNTIME / PROVIDER BOUNDARIES
+      ↓
+LOCAL / CLOUD POSSIBILITY
+      ↓
+AUDITABLE IMPLEMENTATION
+```
+
+Namun semua ini tetap berada di wilayah brainstorming/working reference sampai ada keputusan formal.
+
+**Canonical tidak berubah.**
+
+END UPDATE
