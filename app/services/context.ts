@@ -1,4 +1,4 @@
-import { supabase } from './backend';
+import { backend } from './backend';
 
 export type ContextResult = {
   sh_id: string;
