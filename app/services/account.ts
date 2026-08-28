@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from './backend';
 
 export type AuthenticatedAccount = {
   account_id: string;
@@ -16,7 +16,7 @@ export type AuthenticatedSH = {
 };
 
 export async function loadAuthenticatedContext() {
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const { data: authData, error: authError } = await backend.auth.getUser();
   if (authError) throw authError;
   if (!authData.user) return null;
 
