@@ -12,7 +12,7 @@ const actions = [
 ] as const;
 
 export default function LifecycleScreen() {
-  return <SHShell title="Lifecycle"><ScrollView contentContainerStyle={styles.content}>
+  return <SHShell title="Lifecycle" context={<><Text style={{ color: '#6B6A66', lineHeight: 20 }}>Lifecycle actions stay explicit and separate from daily conversation.</Text><Text style={{ marginTop: 8, fontWeight: '800', color: '#4A338E' }}>6 controlled workflows</Text></>}><ScrollView contentContainerStyle={styles.content}>
     <Text style={styles.title}>Lifecycle</Text>
     <Text style={styles.subtitle}>Run lifecycle and transfer processes here. Results and history are recorded in Journey.</Text>
     {actions.map(([title, route, description]) => <Pressable key={title} style={styles.card} onPress={() => router.push(route)}>
