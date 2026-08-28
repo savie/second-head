@@ -20,21 +20,21 @@ export async function loadAuthenticatedContext() {
   if (authError) throw authError;
   if (!authData.user) return null;
 
-  const { data: account, error: accountError } = await supabase
+  const { data: account, error: accountError } = await backend
     .from('accounts')
     .select('account_id,email,status')
     .maybeSingle();
   if (accountError) throw accountError;
   if (!account) return null;
 
-  const { data: shRows, error: shError } = await supabase
+  const { data: shRows, error: shError } = await backend
     .from('sh_instances')
     .select('sh_id,sh_type,is_primary,canonical_name,status')
     .eq('account_id', account.account_id)
     .order('is_primary', { ascending: false });
   if (shError) throw shError;
 
-  const { data: ownershipRows, error: ownershipError } = await supabase
+  const { data: ownershipRows, error: ownershipError } = await backend
     .from('sh_ownership')
     .select('sh_id,role')
     .eq('account_id', account.account_id);
