@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from './backend';
 
 const RUNTIME_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtime-p4a-001`;
 const CONVERSATION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/runtime-p4a-005`;
@@ -27,7 +27,7 @@ export type ConversationHistoryRow = {
 };
 
 export async function loadConversationHistoryRows(limit = 100): Promise<ConversationHistoryRow[]> {
-  const { data, error } = await supabase.auth.getSession();
+  const { data, error } = await backend.auth.getSession();
   if (error) throw error;
   const token = data.session?.access_token;
   if (!token) throw new Error('Authenticated session required for conversation history');
@@ -49,12 +49,12 @@ export async function loadConversationHistory(limit = 100): Promise<string[]> {
 }
 function parseSseText(text: string, onEvent: (event: RuntimeStreamEvent) => void) { for (const frame of text.split(/\r?\n\r?\n/)) { const lines = frame.split(/\r?\n/); const eventName = lines.find(line => line.startsWith('event: '))?.slice(7).trim(); const dataLine = lines.find(line => line.startsWith('data: '))?.slice(6); if (!eventName || dataLine === undefined) continue; const payload = JSON.parse(dataLine) as Record<string, unknown>; if (eventName === 'response') onEvent({ type: 'response', sh_id: String(payload.sh_id ?? ''), text: String(payload.text ?? '') }); else if (eventName === 'token') onEvent({ type: 'token', text: String(payload.text ?? '') }); else if (eventName === 'confirmation') onEvent({ type: 'confirmation', confirmation_id: String(payload.confirmation_id ?? ''), action_id: String(payload.action_id ?? ''), title: String(payload.title ?? 'Confirmation required'), description: String(payload.description ?? 'This action requires your explicit confirmation.') }); else if (eventName === 'complete') onEvent({ type: 'complete', sh_id: String(payload.sh_id ?? '') }); } }
 async function getAccessToken() {
-  const { data, error } = await supabase.auth.getSession();
+  const { data, error } = await backend.auth.getSession();
   if (error) throw error;
   if (!data.session?.access_token) throw new Error('Authenticated session required for runtime access');
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const { data: userData, error: userError } = await backend.auth.getUser();
   if (!userError && userData.user) return data.session.access_token;
-  const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+  const { data: refreshed, error: refreshError } = await backend.auth.refreshSession();
   if (refreshError || !refreshed.session?.access_token) throw new Error('Authenticated session could not be refreshed for runtime access');
   return refreshed.session.access_token;
 }
@@ -66,7 +66,7 @@ export async function captureJourneyEvent(representation: string, scope: 'PRIVAT
   if (!response.ok) throw new Error(`SH_JOURNEY_CAPTURE_FAILED: ${await response.text()}`);
   const payload = (await response.json()) as { experience_id?: string };
   if (!payload.experience_id) throw new Error('SH_JOURNEY_CAPTURE_FAILED: Experience id was not returned');
-  const { error } = await supabase.rpc('runtime_classify_experience', { p_experience_id: payload.experience_id, p_scope: scope, p_visibility: visibility });
+  const { error } = await backend.rpc('runtime_classify_experience', { p_experience_id: payload.experience_id, p_scope: scope, p_visibility: visibility });
   if (error) throw new Error(`EXPERIENCE_CLASSIFICATION_FAILED: ${error.message}`);
 }
 
@@ -83,7 +83,7 @@ export async function streamSHRuntime(userMessage: string, onEvent: (event: Runt
 
 
 async function rpc<T = unknown>(fn: string, args: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.rpc(fn, args);
+  const { data, error } = await backend.rpc(fn, args);
   if (error) throw error;
   return data as T;
 }
