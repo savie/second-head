@@ -1,7 +1,7 @@
-import { supabase } from './supabase';
+import { supabase } from './backend';
 
 export async function signInWithPassword(email: string, password: string) {
-  const result = await supabase.auth.signInWithPassword({ email, password });
+  const result = await backend.auth.signInWithPassword({ email, password });
   if (result.error) return result;
 
   const { data: account, error: accountError } = await supabase
@@ -10,12 +10,12 @@ export async function signInWithPassword(email: string, password: string) {
     .maybeSingle();
 
   if (accountError) {
-    await supabase.auth.signOut();
+    await backend.auth.signOut();
     throw accountError;
   }
 
   if (!account || account.status === 'deactivated') {
-    await supabase.auth.signOut();
+    await backend.auth.signOut();
     throw new Error('ACCOUNT_DEACTIVATED: this account is permanently deactivated and cannot sign in.');
   }
 
@@ -23,17 +23,17 @@ export async function signInWithPassword(email: string, password: string) {
 }
 
 export async function signUpWithPassword(email: string, password: string) {
-  return supabase.auth.signUp({ email, password });
+  return backend.auth.signUp({ email, password });
 }
 
 export async function signOut() {
-  return supabase.auth.signOut();
+  return backend.auth.signOut();
 }
 
 export async function getSession() {
-  return supabase.auth.getSession();
+  return backend.auth.getSession();
 }
 
-export function onAuthStateChange(callback: Parameters<typeof supabase.auth.onAuthStateChange>[0]) {
-  return supabase.auth.onAuthStateChange(callback);
+export function onAuthStateChange(callback: Parameters<typeof backend.auth.onAuthStateChange>[0]) {
+  return backend.auth.onAuthStateChange(callback);
 }
