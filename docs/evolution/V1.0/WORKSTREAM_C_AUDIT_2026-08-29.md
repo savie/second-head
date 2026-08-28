@@ -262,6 +262,34 @@ with explicit failure/unsupported states.
 
 ---
 
+### Current implementation
+
+C4 establishes a bounded file-intelligence path for currently supported text-oriented file classes:
+
+- supported classes are explicitly accepted: plain text, Markdown, CSV, JSON, and XML;
+- prepared file content is decoded and injected into model context for analysis;
+- decode failure returns an explicit `FILE_PROCESSING_FAILED` state;
+- unsupported file classes return an explicit `FILE_UNSUPPORTED` state;
+- the runtime audit records when file intelligence is processed;
+- image files remain on the C3 multimodal path rather than being treated as text files.
+
+Important boundary: this slice does **not** claim arbitrary PDF, Office-document, archive, or binary extraction. Those classes remain unsupported until a separately verified extraction path exists.
+
+Commits:
+
+```
+1109f0bd  feat: add supported file intelligence states
+9ff36deb  feat: enforce file intelligence acceptance states
+```
+
+### Verification
+
+**Pending.** C4 must pass typecheck and all relevant DEV verification paths before being marked green.
+
+### Status
+
+**IMPLEMENTED / VERIFICATION PENDING**
+
 ## 7. C5 — Camera Input
 
 ### Scope
@@ -383,8 +411,8 @@ Presentation-only capability does not satisfy C-Close.
 ```
 C1  🟢 Verified
 C2  🟢 Verified
-C3  🟡 Implemented / verification pending
-C4  ⏳ Not started
+C3  🟢 Verified
+C4  🟡 Implemented / verification pending
 C5  ⏳ Not started
 C6  ⏳ Not started
 C7  ⏳ Not started
@@ -404,6 +432,7 @@ The 🟡 state is intentional: implementation exists, but verification is the au
 - Recorded C1 implementation and commit `78a9f665...`.
 - Implemented C2 multiple attachment composition and extended the runtime attachment contract.
 - Implemented C3 first-class image input and runtime validation/routing.
+- Implemented C4 bounded file intelligence for supported text-oriented file classes with explicit unsupported/failed states.
 - Preserved the roadmap dependency order from `ROADMAP.md`.
 - Explicitly kept image-generation provider/runtime unresolved.
 
