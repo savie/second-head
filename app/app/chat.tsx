@@ -7,7 +7,7 @@ import * as FileSystem from 'expo-file-system';
 import { AppState } from 'react-native';
 import { deleteConversation as deletePersistedConversation, deleteConversationMessage, loadConversationHistoryRows, renameConversation as renamePersistedConversation, streamSHRuntime, updateConversationMessage, type ConversationHistoryRow, type ChatAttachment } from '../services/runtime-stream';
 import { useAuth } from '../state/auth-context';
-import { supabase } from '../services/supabase';
+import { supabase } from '../services/backend';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
