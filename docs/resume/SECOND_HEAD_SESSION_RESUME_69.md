@@ -1157,3 +1157,229 @@ Diskusi setelah v0.1.0 sekarang mencakup tiga jalur besar:
 Belum ada keputusan final bahwa seluruh jalur tersebut harus masuk v1.0.0.
 
 Resume 69 tetap menjadi tempat eksplorasi sampai arah pengembangan cukup matang untuk dirumuskan menjadi candidate scope atau keputusan resmi.
+
+
+---
+
+# BRAINSTORMING — ROADMAP PENGEMBANGAN V1.0.0
+
+Roadmap ini **belum merupakan roadmap resmi/implementation plan**. Ini hanya bentuk sementara dari obrolan kita supaya urutan gagasan tidak hilang.
+
+Satu keputusan terminologi yang muncul: **jangan memakai kata "Phase" untuk jalur V1.0.0**. SH sudah memiliki Phase/phase history tersendiri, sehingga istilah baru lebih aman agar tidak terjadi tracking/history confusion.
+
+Istilah sementara: **V1.0 Development Track** dengan milestone bernomor.
+
+## Draft alur yang sedang dipikirkan
+
+```
+V1.0-00  Product Direction / Definition Lock
+              ↓
+V1.0-01  Foundation Audit + Freeze
+              ↓
+V1.0-02  Modern UX / UI
+              ↓
+V1.0-03  Multimodal + Image Generation
+              ↓
+V1.0-04  Memory / Knowledge / Experience / Journey
+              ↓
+V1.0-05  Hands + Tools + Authority
+              ↓
+V1.0-06  Provider / Infrastructure Portability
+              ↓
+V1.0-07  Local Storage + Offline
+              ↓
+V1.0-08  Local AI Runtime / GGUF
+              ↓
+V1.0-09  Integration + Hardening + QA
+              ↓
+V1.0-RC  Release Candidate
+```
+
+## Kenapa ada V1.0-00?
+
+Sebelum membangun banyak fitur, perlu ada ruang untuk mengunci arah produk secara konseptual:
+
+- SH mau menjadi apa?
+- apa pembeda utamanya?
+- apa arti "jiwa / otak / indera / tangan" secara produk?
+- seperti apa modern UX SH?
+- capability minimum apa yang layak disebut V1.0.0?
+
+Ini bukan perubahan Canonical. Justru supaya brainstorming tidak langsung berubah menjadi implementation scope.
+
+## Kenapa ada Foundation Audit + Freeze?
+
+v0.1.0 sudah berfungsi sebagai functional foundation/proving ground. Sebelum redesign besar, ide yang muncul adalah audit kondisi foundation terlebih dahulu lalu membekukan baseline yang dianggap stabil.
+
+Audit dapat mencakup:
+- surface yang sudah functional
+- surface yang masih partial/cosmetic
+- error handling
+- persistence
+- isolation
+- attachment/multimodal foundation
+- integration antar fitur
+
+Belum diputuskan detail audit maupun arti "freeze" secara formal.
+
+## Modern UX / UI
+
+Target bukan membuat "SH Lite" dan bukan clone ChatGPT.
+
+Mental model:
+
+> **SECOND HEAD tetap SECOND HEAD, tetapi UX/UI dibuat modern dan familiar seperti produk AI modern, dalam client yang tetap ringan di HP.**
+
+Referensi boleh datang dari ChatGPT, Qwen Studio, Claude, dan produk lain, tetapi identitas SH harus tetap berbeda.
+
+## Multimodal + Image Generation
+
+Multimodal berkembang dari attachment/file/photo/camera menjadi capability yang lebih utuh.
+
+Image generation juga mulai dianggap capability SH sendiri:
+
+user → request → SH Runtime → image generation capability → image result → save/share/download
+
+Bukan sekadar tombol tempelan.
+
+## Continuity refinement
+
+Memory / Knowledge / Experience / Journey perlu dipikirkan sebagai sistem continuity SH, bukan sekadar kumpulan halaman.
+
+Kemungkinan fokus:
+- UX discovery
+- relationship antar data
+- provenance
+- Journey → source/conversation
+- search
+- lifecycle
+
+## Hands + Tools + Authority
+
+Jika SH bukan chatbot, maka SH perlu mempunyai "tangan" untuk melakukan sesuatu.
+
+Konsep awal:
+
+SH → capability/tool → authorization → execution → result → record
+
+Semakin kuat action capability, semakin penting permission, owner confirmation, authority boundary, dan auditability.
+
+## Provider / Infrastructure Portability
+
+Portability dipandang sebagai cara menjaga identity SH tetap stabil ketika implementation provider berubah.
+
+Target konseptual:
+
+```
+SH App
+  ↓
+SH Runtime / Contracts
+  ↓
+Infrastructure layer
+  ├── Supabase
+  ├── provider lain
+  └── local store
+```
+
+Untuk model:
+
+```
+SH Runtime
+  ↓
+Model Runtime Interface
+  ├── Provider A
+  ├── Provider B
+  ├── Provider C
+  └── Local model
+```
+
+Supabase tetap infrastructure saat ini. GitHub tetap rumah source code. Portability tidak berarti harus pindah sekarang.
+
+## Local Storage + Offline
+
+Offline dipandang sebagai capability yang lebih luas daripada cache.
+
+Kemungkinan:
+- membaca conversation/memory/knowledge/journey saat offline
+- draft
+- local attachment
+- local state
+- sync saat online
+- conflict resolution
+- deletion synchronization
+- authentication/session rules
+
+Tidak semua harus offline. Capability cloud seperti web search atau cloud model tetap bisa membutuhkan koneksi.
+
+## Local AI Runtime / GGUF
+
+Target pengalaman yang dibayangkan:
+
+```
+SH APK
+  ↓
+import/download GGUF
+  ↓
+SH mendeteksi model
+  ↓
+local inference engine
+  ↓
+jawaban tanpa Termux/service manual
+```
+
+Model tidak harus dibundel ke APK; dapat berada di device storage. Lokasi storage dan engine belum diputuskan.
+
+Preferensi utamanya adalah **integrated Android experience**, bukan workflow Termux.
+
+## Integration + Hardening + QA
+
+Setelah capability besar masuk, perlu tahap untuk memastikan fitur tidak hanya bekerja sendiri-sendiri.
+
+Contoh risiko:
+
+```
+attachment
+ + memory
+ + knowledge
+ + project
+ + tool
+ + streaming
+ + regenerate
+```
+
+harus tetap konsisten ketika dipakai bersamaan.
+
+Kemungkinan cakupan:
+- integration testing
+- failure handling
+- performance
+- security/isolation
+- persistence
+- cross-feature behavior
+- release regression
+
+## Release Candidate
+
+V1.0-RC adalah checkpoint ketika capability dan UX sudah dianggap cukup matang untuk diuji sebagai produk, bukan sekadar kumpulan feature.
+
+Belum ada definisi acceptance criteria final.
+
+---
+
+# CATATAN: URUTAN INI BOLEH BERUBAH
+
+Roadmap di atas adalah **hasil brainstorming saat ini**.
+
+Boleh:
+- ditambah
+- dikurangi
+- dipindah urutannya
+- dipecah menjadi beberapa milestone
+- digabung
+- dibatalkan
+
+Tidak ada item di sini yang otomatis menjadi Canonical atau scope implementation.
+
+Tujuan roadmap sementara ini hanya:
+
+> **membantu kita melihat arah besar tanpa mengunci tangan kita terlalu cepat.**
