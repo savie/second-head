@@ -82,8 +82,7 @@ export default function ChatScreen() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
-  const [attachmentName, setAttachmentName] = useState<string | null>(null);
-  const [attachment, setAttachment] = useState<ChatAttachment | null>(null);
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [attachmentState, setAttachmentState] = useState<'idle' | 'preparing' | 'ready' | 'failed'>('idle');
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -149,15 +148,14 @@ export default function ChatScreen() {
     const controller = new AbortController();
     abortControllerRef.current = controller;
     setDraft('');
-    setAttachmentName(null);
-    setAttachment(null);
+    setAttachments([]);
     setAttachmentState('idle');
     setAttachmentError(null);
     setSending(true);
     setLifecycleState('streaming');
     setConfirmationState('idle');
     if (conversationTitle === 'New conversation') setConversationTitle(message.slice(0, 42));
-    setMessages(current => [...current, makeMessage('user', message, undefined, undefined, undefined, attachment?.name ?? attachmentName ?? undefined), makeMessage('assistant', '')]);
+    setMessages(current => [...current, makeMessage('user', message, undefined, undefined, undefined, attachments.map(item => item.name ?? 'attachment').join(', ') || undefined), makeMessage('assistant', '')]);
     try {
       await streamSHRuntime(message, event => {
         if (!mountedRef.current) return;
@@ -182,7 +180,7 @@ export default function ChatScreen() {
           setConfirmationState('idle');
         }
         if (event.type === 'complete') setLifecycleState('active');
-      }, controller.signal, attachment ?? undefined);
+      }, controller.signal, attachments);
       const rows = await loadConversationHistoryRows(100);
       const sessions = buildVirtualSessions(rows.filter(row => row?.content && !isVerificationArtifact(row)));
       const latest = sessions[0];
@@ -431,8 +429,7 @@ export default function ChatScreen() {
         if (result.canceled || !result.assets?.[0]) return;
         const asset = result.assets[0];
         if (!asset.base64) throw new Error('Photo data could not be read.');
-        setAttachment({ uri: asset.uri, name: asset.fileName ?? 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 });
-        setAttachmentName(asset.fileName ?? 'Photo');
+        setAttachments(current => [...current, { uri: asset.uri, name: asset.fileName ?? 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 }]);
         setAttachmentState('ready');
         return;
       }
@@ -443,8 +440,7 @@ export default function ChatScreen() {
         if (result.canceled || !result.assets?.[0]) return;
         const asset = result.assets[0];
         if (!asset.base64) throw new Error('Camera image data could not be read.');
-        setAttachment({ uri: asset.uri, name: asset.fileName ?? 'camera.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 });
-        setAttachmentName(asset.fileName ?? 'Camera photo');
+        setAttachments(current => [...current, { uri: asset.uri, name: asset.fileName ?? 'camera.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 }]);
         setAttachmentState('ready');
         return;
       }
@@ -452,8 +448,7 @@ export default function ChatScreen() {
       if (result.canceled || !result.assets?.[0]) return;
       const asset = result.assets[0];
       const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: FileSystem.EncodingType.Base64 });
-      setAttachment({ uri: asset.uri, name: asset.name, mimeType: asset.mimeType ?? 'application/octet-stream', base64 });
-      setAttachmentName(asset.name);
+      setAttachments(current => [...current, { uri: asset.uri, name: asset.name, mimeType: asset.mimeType ?? 'application/octet-stream', base64 }]);
       setAttachmentState('ready');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Attachment could not be prepared.';
@@ -579,12 +574,12 @@ export default function ChatScreen() {
       </ScrollView>
 
       <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: '#E5E7EB', backgroundColor: '#FFFFFF', gap: 8 }}>
-        {attachmentName ? <View style={{ borderWidth: 1, borderColor: attachmentState === 'failed' ? '#D97706' : '#E3E1DC', borderRadius: 12, padding: 10, backgroundColor: '#FBFAF7', gap: 4 }}>
-          <Text style={{ color: '#374151', fontWeight: '700' }}>📎 {attachmentName}</Text>
+        {attachments.length ? <View style={{ borderWidth: 1, borderColor: attachmentState === 'failed' ? '#D97706' : '#E3E1DC', borderRadius: 12, padding: 10, backgroundColor: '#FBFAF7', gap: 6 }}>
+          {attachments.map((item, index) => <Text key={String(index)} style={{ color: '#374151', fontWeight: '700' }}>📎 {item.name ?? 'Attachment'}</Text>)}
           <Text style={{ color: attachmentState === 'failed' ? '#B45309' : '#6B6A66', fontSize: 12 }}>
             {attachmentState === 'preparing' ? 'Preparing attachment…' : attachmentState === 'ready' ? 'Ready to send' : attachmentState === 'failed' ? (attachmentError ?? 'Attachment failed') : ''}
           </Text>
-          {attachmentState !== 'preparing' ? <View style={{ flexDirection: 'row', gap: 8 }}><Button title="Remove" onPress={() => { setAttachment(null); setAttachmentName(null); setAttachmentState('idle'); setAttachmentError(null); }} /><Button title="Replace" onPress={() => Alert.alert('Replace attachment', 'Pilih attachment baru', [{ text: 'File', onPress: () => void handleAttachment('File') }, { text: 'Photo', onPress: () => void handleAttachment('Photo') }, { text: 'Camera', onPress: () => void handleAttachment('Camera') }, { text: 'Cancel', style: 'cancel' }], { cancelable: false })} /></View> : null}
+          {attachmentState !== 'preparing' ? <View style={{ flexDirection: 'row', gap: 8 }}><Button title="Remove all" onPress={() => { setAttachments([]); setAttachmentState('idle'); setAttachmentError(null); }} /><Button title="Replace" onPress={() => Alert.alert('Replace attachment', 'Pilih attachment baru', [{ text: 'File', onPress: () => void handleAttachment('File') }, { text: 'Photo', onPress: () => void handleAttachment('Photo') }, { text: 'Camera', onPress: () => void handleAttachment('Camera') }, { text: 'Cancel', style: 'cancel' }], { cancelable: false })} /></View> : null}
         </View> : null}
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
           <View style={{ gap: 4 }}>
