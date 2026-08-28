@@ -1,5 +1,5 @@
 import { PropsWithChildren, ReactNode, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { router, usePathname } from 'expo-router';
 
 type NavItem = { label: string; icon: string; route: string };
@@ -34,11 +34,12 @@ function NavContent({ expanded, onNavigate }: { expanded: boolean; onNavigate: (
   );
 }
 
-export function SHShell({ children, right, title }: PropsWithChildren<{ right?: ReactNode; title?: string }>) {
+export function SHShell({ children, right, title, context }: PropsWithChildren<{ right?: ReactNode; title?: string; context?: ReactNode }>) {
   const { width } = useWindowDimensions();
   const mobile = width < 760;
   const [expanded, setExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [contextOpen, setContextOpen] = useState(false);
 
   const navigate = (route: string) => { setMobileOpen(false); router.push(route); };
 
@@ -63,13 +64,19 @@ export function SHShell({ children, right, title }: PropsWithChildren<{ right?: 
         </Modal>
       ) : null}
 
+      {mobile && context && contextOpen ? <Modal transparent animationType="slide" visible onRequestClose={() => setContextOpen(false)}><Pressable style={styles.contextMobileBackdrop} onPress={() => setContextOpen(false)}><Pressable style={styles.contextMobilePanel} onPress={event => event.stopPropagation()}><View style={styles.contextHeader}><Text style={styles.contextTitle}>Context</Text><Pressable accessibilityRole="button" accessibilityLabel="Close context" onPress={() => setContextOpen(false)}><Text style={styles.closeIcon}>×</Text></Pressable></View><ScrollView contentContainerStyle={styles.contextBody}>{context}</ScrollView></Pressable></Pressable></Modal> : null}
+
       <View style={styles.main}>
         <View style={styles.topbar}>
           {mobile ? <Pressable accessibilityRole="button" accessibilityLabel="Open navigation" onPress={() => setMobileOpen(true)} style={styles.menuButton}><Text style={styles.menuIcon}>☰</Text></Pressable> : null}
           <Text numberOfLines={1} style={styles.topTitle}>{title ?? 'Second Head'}</Text>
-          {right ?? <View style={styles.topSpacer} />}
+          <View style={styles.topActions}>
+            {context ? <Pressable accessibilityRole="button" accessibilityLabel={contextOpen ? 'Close context' : 'Open context'} onPress={() => setContextOpen(v => !v)} style={[styles.contextButton, contextOpen && styles.contextButtonActive]}><Text style={styles.contextIcon}>◫</Text></Pressable> : null}
+            {right ?? <View style={styles.topSpacer} />}
+          </View>
         </View>
         <View style={styles.content}>{children}</View>
+        {context && contextOpen && !mobile ? <View style={styles.contextPanel}><View style={styles.contextHeader}><Text style={styles.contextTitle}>Context</Text><Pressable accessibilityRole="button" accessibilityLabel="Close context" onPress={() => setContextOpen(false)}><Text style={styles.closeIcon}>×</Text></Pressable></View><ScrollView contentContainerStyle={styles.contextBody}>{context}</ScrollView></View> : null}
       </View>
     </View>
   );
@@ -97,6 +104,17 @@ const styles = StyleSheet.create({
   topbar: { minHeight: 58, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#E7E4DE', backgroundColor: '#FBFAF7', gap: 10 },
   topTitle: { flex: 1, fontSize: 17, fontWeight: '800', color: '#22211F' },
   topSpacer: { width: 8 },
+  topActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  contextButton: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ECE9E2' },
+  contextButtonActive: { backgroundColor: '#EAE7F7' },
+  contextIcon: { fontSize: 20, color: '#4A338E' },
+  contextPanel: { width: 320, borderLeftWidth: 1, borderLeftColor: '#E3E1DC', backgroundColor: '#FBFAF7' },
+  contextHeader: { minHeight: 58, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#E7E4DE' },
+  contextTitle: { fontSize: 17, fontWeight: '800', color: '#22211F' },
+  closeIcon: { fontSize: 26, color: '#5F5E5A' },
+  contextBody: { padding: 16, gap: 12 },
+  contextMobileBackdrop: { flex: 1, backgroundColor: 'rgba(20,20,18,0.28)', justifyContent: 'flex-end' },
+  contextMobilePanel: { maxHeight: '82%', minHeight: '45%', backgroundColor: '#FBFAF7', borderTopLeftRadius: 22, borderTopRightRadius: 22 },
   menuButton: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ECE9E2' },
   menuIcon: { fontSize: 20, color: '#2D2C29' },
   content: { flex: 1 },
