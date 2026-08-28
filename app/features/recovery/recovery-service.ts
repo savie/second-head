@@ -1,4 +1,4 @@
-import { supabase } from '../../services/backend';
+import { backend } from '../../services/backend';
 import { recordRecoveryJourneyEvent } from '../journey/recovery-journey';
 
 export type RecoverySnapshot = {
