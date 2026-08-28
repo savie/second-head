@@ -214,8 +214,17 @@ Resume 69: brainstorming source; bukan commitment.
 Working design: bagian ini; boleh direvisi sebelum implementation.
 Implementation: HOLD sampai design gate cukup jelas.
 
+## Visual evidence / candidate references
+
+Visual candidate yang dipilih sementara untuk eksplorasi desain B disimpan sebagai repository evidence:
+
+- `evidence/ui/SH_V1_UI_HYBRID_1_3_5_CANDIDATE.png` — hybrid navigation + conversation + contextual panel + summary.
+- `evidence/brand/SH_LOGO_C2_V3_CANDIDATE.png` — brand/logo candidate, C2 evolution dengan V3 sebagai pilihan sementara.
+
+Status keduanya **REFERENCE / CANDIDATE — NON-CANONICAL**. Visual ini adalah evidence dari eksplorasi, bukan commitment final dan bukan perubahan Canonical.
+
 ## Next B step
 
-Concrete UX exploration dimulai dari navigation + conversation/home + composer + drawer/history. Jangan coding significant UI sebelum interaction model tersebut cukup jelas.
+Concrete UX exploration dimulai dari navigation + conversation/home + composer + drawer/history. Gunakan visual evidence di atas sebagai referensi konkret agar eksplorasi berikutnya tidak hanya bergantung pada deskripsi teks. Jangan coding significant UI sebelum interaction model tersebut cukup jelas.
 
 END OF WORKSTREAM B LIVING DOCUMENT
