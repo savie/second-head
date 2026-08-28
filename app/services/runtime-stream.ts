@@ -72,7 +72,7 @@ export async function captureJourneyEvent(representation: string, scope: 'PRIVAT
 
 export async function streamSHRuntime(userMessage: string, onEvent: (event: RuntimeStreamEvent) => void, signal?: AbortSignal, attachments?: ChatAttachment[]): Promise<void> {
   const message = userMessage.trim(); if (!message) throw new Error('Runtime request requires a non-empty user message'); const token = await getAccessToken();
-  const response = await fetch(RUNTIME_URL, { method: 'POST', headers: { ...authHeaders(token), 'Content-Type': 'application/json', Accept: 'text/event-stream' }, body: JSON.stringify({ user_message: message, stream: true, ...(attachments?.length ? { attachments } : {}) }), signal });
+  const response = await fetch(RUNTIME_URL, { method: 'POST', headers: { ...authHeaders(token), 'Content-Type': 'application/json', Accept: 'text/event-stream' }, body: JSON.stringify({ user_message: message, stream: true, ...(attachments?.length ? { attachments, image_inputs: attachments.filter(item => (item.mimeType ?? '').startsWith('image/') && !!item.base64).map(item => ({ uri: item.uri, name: item.name, mimeType: item.mimeType, base64: item.base64 })) } : {}) }), signal });
   if (!response.ok) throw new Error(`SH_RUNTIME_STREAM_FAILED: ${await response.text()}`);
   if (!response.body) { parseSseText(await response.text(), onEvent); return; }
   const reader = response.body.getReader(); const decoder = new TextDecoder(); let buffer = '';
