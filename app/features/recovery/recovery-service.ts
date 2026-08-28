@@ -32,7 +32,7 @@ export type PortabilityExport = {
 };
 
 export async function listRecoverySnapshots(shId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('recovery_snapshots')
     .select('snapshot_id,sh_id,account_id,snapshot_kind,manifest,created_at')
     .eq('sh_id', shId)
@@ -42,7 +42,7 @@ export async function listRecoverySnapshots(shId: string) {
 }
 
 export async function listRecoveryEvents(shId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('recovery_events')
     .select('recovery_event_id,snapshot_id,sh_id,outcome,continuity_status,gap_code,created_at')
     .eq('sh_id', shId)
@@ -52,7 +52,7 @@ export async function listRecoveryEvents(shId: string) {
 }
 
 export async function listPortabilityExports(shId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('portability_exports')
     .select('export_id,snapshot_id,sh_id,format,manifest,status,created_at,imported_at')
     .eq('sh_id', shId)
