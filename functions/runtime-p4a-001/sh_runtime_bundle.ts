@@ -98,9 +98,11 @@ function modelUserContent(c: RuntimeContext): unknown {
       try {
         const decoded = atob(attachment.base64);
         augmentedMessage += `\\n\\nATTACHED FILE (${attachment.name ?? 'file'}, ${mime}):\\n${decoded.slice(0, 120000)}`;
-      } catch {}
+      } catch {
+        augmentedMessage += `\\n\\nATTACHED FILE: ${attachment.name ?? 'file'} (type: ${mime}) could not be decoded. Treat it as PROCESSING_FAILED.`;
+      }
     } else if (!mime.startsWith('image/')) {
-      augmentedMessage += `\\n\\nATTACHED FILE: ${attachment.name ?? 'file'} (type: ${mime}). The file was attached successfully, but its contents are not available to this model as readable text.`;
+      augmentedMessage += `\\n\\nATTACHED FILE: ${attachment.name ?? 'file'} (type: ${mime}) is currently UNSUPPORTED for file-content analysis in this runtime. Do not claim to have read its contents.`;
     }
   }
   const context = contextText({ ...c, user_message: augmentedMessage });
