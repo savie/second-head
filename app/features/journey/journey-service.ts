@@ -1,4 +1,4 @@
-import { supabase } from '../../services/backend';
+import { backend } from '../../services/backend';
 
 export type JourneyVisibility = 'PRIVATE' | 'SHARED' | 'PUBLIC';
 export type JourneyTransferPolicy = 'NON_TRANSFERABLE' | 'TRANSFERABLE' | 'EXPLICIT_ONLY';
