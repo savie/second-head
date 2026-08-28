@@ -310,7 +310,16 @@ Status: applicability candidate, bukan commitment untuk membuat web client pada 
 
 ### B8 — Integration + UX Verification
 
-Sebelum B ditutup, verifikasi navigation, authentication/owner continuity, existing Chat/Journey/Lifecycle/More flows, attachment baseline, loading/empty/error states, Android build/typecheck/test path yang relevan, dan tidak ada governance regression.
+**Status: AUTOMATED INTEGRATION PASS / MANUAL VISUAL REVIEW PENDING**
+
+Current DEV head `9a6a35f92fe071162d098c265513eb3efb29f8ce` passed the available automated verification paths after the B7 reconciliation:
+- Runtime Controlled Verification #245 — PASS
+- App Chat Verification #360 — PASS
+- App Android Build #269 — PASS
+
+The integrated shell now covers the four owner-facing destinations (`Chat | Journey | Lifecycle | More`), responsive rail/drawer behavior, contextual surface behavior, Journey continuity context, and Lifecycle/More context surfaces without changing the database/runtime contract.
+
+Manual APK visual review is intentionally not treated as completed in this pass; the Android build artifact was not manually inspected. Therefore B8 can confirm automated integration/build health, but cannot claim final visual UX acceptance from device inspection alone.
 
 ### B-Close
 
@@ -320,11 +329,11 @@ Implementation rule: B belum implementation-complete hanya karena mock/screen vi
 
 ## Next action
 
-**Sekarang kita berada di B0 — Design Gate.**
+**Workstream B sekarang berada di B8 — automated integration pass selesai; B-Close belum diklaim.**
 
-Jangan coding besar dulu.
+Remaining gate adalah manual visual/interaction review bila diperlukan, terutama untuk memastikan hasil Android benar-benar terasa sesuai arah Resume 69 dan kandidat hybrid UI. Tidak ada alasan untuk membuat APK download sebagai syarat otomatis bila automated build/verification sudah hijau; inspeksi manual hanya diperlukan jika kita ingin menerima visual UX sebagai final.
 
-Langkah konkret berikutnya adalah membuat satu interaction map untuk kandidat UI hybrid: state collapsed/expanded, drawer/history, conversation home, contextual panel, dan mobile adaptation. Setelah map itu cukup jelas, baru B1 dapat diimplementasikan secara bounded.
+Setelah visual acceptance cukup, lakukan B-Close dan tetapkan boundary untuk Workstream C.
 
 
 END OF WORKSTREAM B LIVING DOCUMENT
