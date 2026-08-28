@@ -10,9 +10,10 @@ SECOND HEAD — SYSTEM BUILD
 
 ### Status APK — frozen baseline dan APK aktif
 - **APK #194** adalah **frozen baseline saja** dan tetap immutable.
-- **APK aktif untuk regression saat ini: #199**.
-- Build #199 dibuat setelah frozen baseline dan digunakan untuk pengujian BUG-004.
-- Workflow Android Build #199: run `33032370331` — **success**.
+- **APK aktif untuk regression saat ini: #220**.
+- Build #199 digunakan untuk pengujian BUG-004. APK #220 kemudian menjadi regression build terbaru setelah BUG-006.
+- Workflow Android Build #199: run `33032370331`
+- APK #220: manual build, installed and device-verified for BUG-006 — **success**.
 - Source commit Build #199: `393f7e770b6108f394410bd3885024ca686430e9`.
 - Artifact: `sh-app-release-apk` — artifact ID `9630932207`.
 - Jika perubahan berikutnya membutuhkan APK baru, build number **wajib meningkat** (mis. #200), dan APK baru tersebut menjadi **APK aktif/regression terbaru**.
@@ -25,7 +26,7 @@ SECOND HEAD — SYSTEM BUILD
 - APK SHA-256: `bc53e9ebfe6c3fc92ec1e675998cbd774a97b5f51184e51c95236b97eb6690d4`
 - Audit dilanjutkan melalui seluruh riwayat maintenance DEV setelah freeze.
 - DEV HEAD aktual saat Resume 68 diperbarui: `4c9146f3a059891c93edc2e60828c837337219f2`
-- **APK regression terakhir yang digunakan untuk pengujian BUG-004: #199**
+- **APK regression terakhir yang digunakan untuk pengujian BUG-006: #220**
 - Workflow Android Build #199: run `33032370331`
 - Commit source Build #199: `393f7e770b6108f394410bd3885024ca686430e9`
 - Status Build #199: **success**
@@ -407,23 +408,71 @@ Evidence:
 
 ## Status
 
-**🟡 FIXED IN DEV / VERIFICATION PENDING**
+**🟢 CLOSED / PASS — DEVICE VERIFIED**
 
-Belum boleh CLOSED.
+Acceptance selesai pada APK #202. Verified: Conversation History visible; persisted conversation dapat dibuka; content yang dipilih benar; New Chat tetap kosong; history dapat dibuka kembali setelah New Chat; persisted history tetap tersedia setelah force-close/reopen; account/SH isolation tetap benar.
 
-Yang masih wajib:
+Evidence: `docs/evidence/EV-BUG-005_CONVERSATION_HISTORY.md` — commit `f1529cf2cca3b7d5fcd2455ed4329c593406de8f`.
 
-1. GitHub Android CI/build result untuk App commit.
-2. APK baru jika build berhasil — build number wajib naik dari #199.
-3. Install APK terbaru.
-4. Device verification:
-   - persisted history appears;
-   - history group can be opened;
-   - selected history content is correct;
-   - New chat starts empty;
-   - switching between history and New chat does not leak content.
-5. DB + UI regression verification.
-6. Hanya setelah evidence lengkap BUG-005 dapat ditutup.
+---
+
+# BUG-006 — CHAT ACTIONS FUNCTIONALITY
+
+## Cakupan
+
+BUG-006 mencakup user-facing Chat actions pada conversation menu (⋮), message menu (⋮), serta attachment flow yang menjadi bagian dari Chat UX.
+
+Scope berkembang selama audit menjadi dua kelompok:
+
+- conversation/message actions;
+- file, photo, dan camera attachment serta runtime processing.
+
+## Audit / perbaikan
+
+Gap yang ditemukan dan diperbaiki mencakup:
+
+- Conversation History actions: rename, find/search, copy, share, export, delete.
+- Message actions: copy, edit, delete, regenerate.
+- Regenerate sebelumnya dapat menghasilkan duplicated/chunked response; diperbaiki agar membuat user prompt/assistant response baru.
+- Required-choice/action dialogs tidak boleh dibypass dengan Android back; behavior diperbaiki dan diverifikasi.
+- Attachment sebelumnya hanya terlihat di composer dan belum benar-benar ikut ke sent message/runtime.
+- File/photo/camera attachment routing dan runtime processing diperbaiki.
+- Photo/camera sebelumnya gagal karena MODEL_SELECTION_FAILED: no zero-budget model available for capability/task; failure tersebut tidak lagi terjadi pada regression final.
+
+## Verification
+
+APK #220 dibuat secara manual, di-install, dan diuji pada device.
+
+PASS:
+
+- Conversation history dapat dibuka.
+- Rename conversation berfungsi.
+- Find/search berfungsi.
+- Copy berfungsi dan terverifikasi via copy/paste.
+- Share berfungsi melalui native text sharing.
+- Export berfungsi melalui native text export/share.
+- Delete conversation menghapus conversation dari history.
+- Message copy berfungsi.
+- Message edit berfungsi.
+- Message delete berfungsi.
+- Regenerate berfungsi dan menghasilkan prompt/response baru tanpa duplicated streamed chunks.
+- Android back pada required-choice/action dialogs berfungsi sesuai acceptance.
+- File attachment berfungsi.
+- Photo attachment berfungsi.
+- Camera attachment berfungsi.
+- Filename attachment tampil pada sent message.
+- File content dapat diproses Runtime.
+- Photo/camera image dapat diproses Runtime/model.
+- Attachment conversation continuity/history berfungsi.
+- Account/SH isolation terverifikasi; data attachment/conversation tidak muncul pada user lain.
+
+Evidence: `docs/evidence/EV-BUG-006_CHAT_ACTIONS_FUNCTIONALITY.md` — commit `2b13e2babeda973ca561950a4b2a6984b196fc0f`.
+
+## Status
+
+**🟢 CLOSED / PASS — APK #220 DEVICE VERIFIED**
+
+BUG-006 selesai. APK #220 menjadi regression APK aktif terbaru setelah digunakan untuk verifikasi.
 
 ---
 
@@ -463,7 +512,14 @@ CLOSED / PASS
 BUG-005
 Conversation History
         ↓
-NEXT / AUDIT REQUIRED
+CLOSED / PASS
+
+        ↓
+BUG-006
+Chat Actions + Attachments
+APK #220
+        ↓
+CLOSED / PASS
 ```
 
 ---
@@ -541,6 +597,6 @@ GitHub DEV dan Supabase DEV harus tetap konsisten secara provenance.
 
 ## TINDAKAN BERIKUTNYA
 
-**BUG-005 Conversation History — audit implementation terlebih dahulu, baru lakukan implementation jika memang ditemukan gap.**
+**BUG-001 → BUG-006: seluruh bug yang tercatat dalam Resume 68 telah selesai sesuai evidence masing-masing. BUG-005 ditutup dengan APK #202; BUG-006 ditutup dengan APK #220.**
 
 ---
