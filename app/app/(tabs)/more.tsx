@@ -14,7 +14,7 @@ export default function MoreScreen() {
     await logout();
     router.replace('/login');
   }
-  return <SHShell title="More"><ScrollView contentContainerStyle={styles.content}>
+  return <SHShell title="More" context={<><Text style={{ color: '#6B6A66', lineHeight: 20 }}>Technical and account controls live here, away from the primary conversation flow.</Text><Text style={{ marginTop: 8, fontWeight: '800', color: '#4A338E' }}>Build 0.1.0 · DEV</Text></>}><ScrollView contentContainerStyle={styles.content}>
     <Text style={styles.title}>More</Text>
     <Text style={styles.subtitle}>Technical tools and account controls. Daily use stays in Chat, Journey, and Lifecycle.</Text>
     <Text style={styles.buildStamp}>Version 0.1.0 • Build #{process.env.EXPO_PUBLIC_BUILD_NUMBER ?? 'DEV'}</Text>
