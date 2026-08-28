@@ -1607,3 +1607,62 @@ Namun semua ini tetap berada di wilayah brainstorming/working reference sampai a
 **Canonical tidak berubah.**
 
 END UPDATE
+
+
+---
+
+# UPDATE TERBARU — MODERN UX, RESPONSIVE / WEB APPLICABILITY
+
+Dari eksplorasi visual Workstream B muncul satu masukan product/UX yang layak disimpan di Resume 69 sebelum hilang:
+
+## Modern UX tidak harus mobile-only
+
+Arah V1.0 tetap **mobile-first** karena SH saat ini dibangun dan diverifikasi terutama sebagai Android application.
+
+Namun interaction model yang sedang dieksplorasi — conversation-first, drawer/sidebar, conversation history, contextual surfaces, composer, attachment/capability picker — secara alami dapat dibuat **responsive**.
+
+Bayangan konseptual:
+
+```text
+PHONE
+→ drawer/sheet
+→ conversation full-screen
+→ contextual surface sebagai sheet
+
+TABLET
+→ navigation + conversation
+→ contextual panel bila ruang memungkinkan
+
+WEB / DESKTOP
+→ persistent sidebar
+→ conversation center
+→ optional contextual panel
+```
+
+Ini membuka kemungkinan bahwa **SH dapat memiliki web-based experience/client di masa depan**, tanpa berarti web menjadi scope V1.0 saat ini.
+
+Prinsip desain yang muncul:
+
+> **Design once, adapt across surfaces.**
+
+Artinya interaction model sebaiknya tidak sengaja dikunci pada layout Android saja jika keputusan desain yang sama dapat diterapkan secara responsive pada mobile, tablet, dan web.
+
+## Applicability vs commitment
+
+Ini masih **IDE / PRODUCT DIRECTION CANDIDATE**, bukan commitment.
+
+Pertanyaan yang perlu dieksplorasi nanti:
+- apakah web menjadi client resmi SH?
+- apakah web dan Android berbagi interaction model yang sama?
+- capability apa yang cocok/berbeda di web?
+- bagaimana local/offline capability dipetakan antara Android dan web?
+- apakah web membutuhkan workspace/sidebar yang lebih persistent?
+- bagaimana menjaga identity dan continuity SH tetap sama lintas client?
+
+Tidak perlu membuat web client sekarang hanya karena arah desain memungkinkan.
+
+Yang penting:
+
+> **Jangan membuat V1.0 UX yang secara tidak perlu mengunci SH hanya pada Android jika ada kemungkinan SH juga akan hadir sebagai web experience.**
+
+Ini adalah brainstorming Resume 69, bukan perubahan Canonical dan bukan keputusan implementation.
