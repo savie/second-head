@@ -1,4 +1,4 @@
-import { supabase } from '../../services/supabase';
+import { supabase } from '../../services/backend';
 
 export type CloneAgreement = {
   agreement_id: string;
@@ -74,7 +74,7 @@ export async function rejectCloneAgreement(agreementId: string) {
 }
 
 export async function executeClone(agreementId: string, cloneName?: string) {
-  const { data, error } = await supabase.rpc('runtime_create_clone', {
+  const { data, error } = await backend.rpc('runtime_create_clone', {
     p_agreement_id: agreementId,
     p_clone_name: cloneName?.trim() || null,
   });
