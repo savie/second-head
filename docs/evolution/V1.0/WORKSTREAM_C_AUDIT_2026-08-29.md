@@ -194,6 +194,33 @@ Potential sources include:
 
 ---
 
+### Current implementation
+
+C3 promotes image input to an explicit multimodal request path while preserving the C2 attachment composition contract:
+
+- image attachments are projected into explicit `image_inputs[]` at the Chat → runtime boundary;
+- only image MIME types with prepared base64 content qualify as image inputs;
+- runtime validates image inputs before model execution;
+- image-capable routing is selected when prepared image input exists;
+- existing zero-budget vision routing is reused;
+- multiple image inputs remain supported through the C2 composition list;
+- request audit records the image-input count.
+
+Commits:
+
+```
+3f35736e  feat: expose first-class image input
+073cf246  fix: reconcile image input validation order
+```
+
+### Verification
+
+**Pending.** C3 must pass typecheck and all relevant DEV verification paths before being marked green.
+
+### Status
+
+**IMPLEMENTED / VERIFICATION PENDING**
+
 ## 6. C4 — File Intelligence / Analysis
 
 ### Scope
@@ -354,9 +381,9 @@ Presentation-only capability does not satisfy C-Close.
 ## 12. Current status
 
 ```
-C1  🟡 Implemented / verification pending
-C2  ⏳ Not started
-C3  ⏳ Not started
+C1  🟢 Verified
+C2  🟢 Verified
+C3  🟡 Implemented / verification pending
 C4  ⏳ Not started
 C5  ⏳ Not started
 C6  ⏳ Not started
@@ -376,6 +403,7 @@ The 🟡 state is intentional: implementation exists, but verification is the au
 - Created this living Workstream C audit document.
 - Recorded C1 implementation and commit `78a9f665...`.
 - Implemented C2 multiple attachment composition and extended the runtime attachment contract.
+- Implemented C3 first-class image input and runtime validation/routing.
 - Preserved the roadmap dependency order from `ROADMAP.md`.
 - Explicitly kept image-generation provider/runtime unresolved.
 
