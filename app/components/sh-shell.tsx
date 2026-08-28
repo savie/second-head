@@ -36,7 +36,8 @@ function NavContent({ expanded, onNavigate }: { expanded: boolean; onNavigate: (
 
 export function SHShell({ children, right, title, context }: PropsWithChildren<{ right?: ReactNode; title?: string; context?: ReactNode }>) {
   const { width } = useWindowDimensions();
-  const mobile = width < 760;
+  const mobile = width < 700;
+  const tablet = width >= 700 && width < 980;
   const [expanded, setExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [contextOpen, setContextOpen] = useState(false);
@@ -46,9 +47,9 @@ export function SHShell({ children, right, title, context }: PropsWithChildren<{
   return (
     <View style={styles.root}>
       {!mobile ? (
-        <View style={[styles.rail, expanded && styles.railExpanded]}>
+        <View style={[styles.rail, tablet && styles.railTablet, expanded && !tablet && styles.railExpanded]}>
           <NavContent expanded={expanded} onNavigate={navigate} />
-          <Pressable accessibilityRole="button" accessibilityLabel={expanded ? 'Collapse navigation' : 'Expand navigation'} onPress={() => setExpanded(v => !v)} style={styles.expandButton}>
+          <Pressable accessibilityRole="button" accessibilityLabel={expanded ? 'Collapse navigation' : 'Expand navigation'} onPress={() => setExpanded(v => !v)} style={[styles.expandButton, tablet && styles.expandButtonHidden]}>
             <Text style={styles.expandIcon}>{expanded ? '‹' : '›'}</Text>
           </Pressable>
         </View>
@@ -86,6 +87,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, flexDirection: 'row', backgroundColor: '#F6F5F2' },
   rail: { width: 68, borderRightWidth: 1, borderRightColor: '#E3E1DC', backgroundColor: '#FBFAF7', position: 'relative' },
   railExpanded: { width: 206 },
+  railTablet: { width: 64 },
   navInner: { flex: 1, paddingVertical: 16, paddingHorizontal: 10 },
   brandMark: { width: 40, height: 40, borderRadius: 13, backgroundColor: '#181817', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 24 },
   brandText: { color: '#FFF', fontSize: 18, fontWeight: '800' },
@@ -98,6 +100,7 @@ const styles = StyleSheet.create({
   navLabelActive: { color: '#4A338E', fontWeight: '800' },
   navBottom: { marginTop: 'auto', alignItems: 'center' },
   navHint: { color: '#8B8982', fontSize: 11, fontWeight: '700' },
+  expandButtonHidden: { display: 'none' },
   expandButton: { position: 'absolute', right: -12, top: 68, width: 24, height: 24, borderRadius: 12, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#DDD9D1', alignItems: 'center', justifyContent: 'center' },
   expandIcon: { fontSize: 18, color: '#5D45A5', lineHeight: 20 },
   main: { flex: 1, minWidth: 0 },
@@ -108,7 +111,7 @@ const styles = StyleSheet.create({
   contextButton: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ECE9E2' },
   contextButtonActive: { backgroundColor: '#EAE7F7' },
   contextIcon: { fontSize: 20, color: '#4A338E' },
-  contextPanel: { width: 320, borderLeftWidth: 1, borderLeftColor: '#E3E1DC', backgroundColor: '#FBFAF7' },
+  contextPanel: { width: width >= 1180 ? 320 : 280, borderLeftWidth: 1, borderLeftColor: '#E3E1DC', backgroundColor: '#FBFAF7' },
   contextHeader: { minHeight: 58, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#E7E4DE' },
   contextTitle: { fontSize: 17, fontWeight: '800', color: '#22211F' },
   closeIcon: { fontSize: 26, color: '#5F5E5A' },
