@@ -29,7 +29,7 @@ const recorder: JourneyEventRecorder = {
 export async function recordRecoveryJourneyEvent(recoveryEventId: string) {
   if (!recoveryEventId.trim()) throw new Error('RECOVERY_EVENT_ID_REQUIRED');
 
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('recovery_events')
     .select('recovery_event_id,sh_id,outcome,continuity_status,gap_code')
     .eq('recovery_event_id', recoveryEventId)
