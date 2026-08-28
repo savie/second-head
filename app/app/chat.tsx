@@ -84,6 +84,8 @@ export default function ChatScreen() {
   const [editingText, setEditingText] = useState('');
   const [attachmentName, setAttachmentName] = useState<string | null>(null);
   const [attachment, setAttachment] = useState<ChatAttachment | null>(null);
+  const [attachmentState, setAttachmentState] = useState<'idle' | 'preparing' | 'ready' | 'failed'>('idle');
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
 
@@ -149,6 +151,8 @@ export default function ChatScreen() {
     setDraft('');
     setAttachmentName(null);
     setAttachment(null);
+    setAttachmentState('idle');
+    setAttachmentError(null);
     setSending(true);
     setLifecycleState('streaming');
     setConfirmationState('idle');
@@ -417,6 +421,8 @@ export default function ChatScreen() {
   }
 
   async function handleAttachment(kind: 'File' | 'Photo' | 'Camera') {
+    setAttachmentState('preparing');
+    setAttachmentError(null);
     try {
       if (kind === 'Photo') {
         const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -427,6 +433,7 @@ export default function ChatScreen() {
         if (!asset.base64) throw new Error('Photo data could not be read.');
         setAttachment({ uri: asset.uri, name: asset.fileName ?? 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 });
         setAttachmentName(asset.fileName ?? 'Photo');
+        setAttachmentState('ready');
         return;
       }
       if (kind === 'Camera') {
@@ -438,6 +445,7 @@ export default function ChatScreen() {
         if (!asset.base64) throw new Error('Camera image data could not be read.');
         setAttachment({ uri: asset.uri, name: asset.fileName ?? 'camera.jpg', mimeType: asset.mimeType ?? 'image/jpeg', base64: asset.base64 });
         setAttachmentName(asset.fileName ?? 'Camera photo');
+        setAttachmentState('ready');
         return;
       }
       const result = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true, multiple: false });
@@ -446,8 +454,12 @@ export default function ChatScreen() {
       const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: FileSystem.EncodingType.Base64 });
       setAttachment({ uri: asset.uri, name: asset.name, mimeType: asset.mimeType ?? 'application/octet-stream', base64 });
       setAttachmentName(asset.name);
+      setAttachmentState('ready');
     } catch (error) {
-      Alert.alert('Attachment failed', error instanceof Error ? error.message : 'Attachment could not be prepared.');
+      const message = error instanceof Error ? error.message : 'Attachment could not be prepared.';
+      setAttachmentState('failed');
+      setAttachmentError(message);
+      Alert.alert('Attachment failed', message);
     }
   }
 
@@ -567,7 +579,13 @@ export default function ChatScreen() {
       </ScrollView>
 
       <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: '#E5E7EB', backgroundColor: '#FFFFFF', gap: 8 }}>
-        {attachmentName ? <Text style={{ color: '#374151' }}>📎 {attachmentName}</Text> : null}
+        {attachmentName ? <View style={{ borderWidth: 1, borderColor: attachmentState === 'failed' ? '#D97706' : '#E3E1DC', borderRadius: 12, padding: 10, backgroundColor: '#FBFAF7', gap: 4 }}>
+          <Text style={{ color: '#374151', fontWeight: '700' }}>📎 {attachmentName}</Text>
+          <Text style={{ color: attachmentState === 'failed' ? '#B45309' : '#6B6A66', fontSize: 12 }}>
+            {attachmentState === 'preparing' ? 'Preparing attachment…' : attachmentState === 'ready' ? 'Ready to send' : attachmentState === 'failed' ? (attachmentError ?? 'Attachment failed') : ''}
+          </Text>
+          {attachmentState !== 'preparing' ? <View style={{ flexDirection: 'row', gap: 8 }}><Button title="Remove" onPress={() => { setAttachment(null); setAttachmentName(null); setAttachmentState('idle'); setAttachmentError(null); }} /><Button title="Replace" onPress={() => Alert.alert('Replace attachment', 'Pilih attachment baru', [{ text: 'File', onPress: () => void handleAttachment('File') }, { text: 'Photo', onPress: () => void handleAttachment('Photo') }, { text: 'Camera', onPress: () => void handleAttachment('Camera') }, { text: 'Cancel', style: 'cancel' }], { cancelable: false })} /></View> : null}
+        </View> : null}
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
           <View style={{ gap: 4 }}>
             <Button title="＋" onPress={() => Alert.alert('Attach', 'Pilih attachment', [
