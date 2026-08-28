@@ -1,4 +1,4 @@
-import { supabase } from './backend';
+import { backend } from './backend';
 export type ExperienceScope = 'PRIVATE' | 'GENERAL';
 export type ExperienceVisibility = 'OWNER_ONLY' | 'SHARED';
 export type ExperienceTransferPolicy = 'NON_TRANSFERABLE' | 'INHERITANCE' | 'SUCCESSION' | 'LEGACY';
