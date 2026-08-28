@@ -1,4 +1,4 @@
-import { supabase } from './backend';
+import { backend } from './backend';
 import type { RuntimeInvocationInput, RuntimeInvocationResponse } from '../types/runtime';
 
 const RUNTIME_FUNCTION = 'runtime-p4a-001';
