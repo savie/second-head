@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from './backend';
 
 export type ContextResult = {
   sh_id: string;
@@ -24,7 +24,7 @@ export async function loadSHContext(input: {
   if (!input.shId) throw new Error('SH_CONTEXT_REQUIRES_SH_ID');
   if (query.length > 2_000) throw new Error('SH_CONTEXT_QUERY_TOO_LARGE');
 
-  const { data: context, error: contextError } = await supabase.rpc('assemble_context', {
+  const { data: context, error: contextError } = await backend.rpc('assemble_context', {
     p_sh_id: input.shId,
     p_query_text: query,
     p_memory_limit: memoryLimit,
