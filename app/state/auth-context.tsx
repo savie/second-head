@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { Session } from '@supabase/supabase-js';
 import { getSession, onAuthStateChange, signOut } from '../services/auth';
 import { loadAuthenticatedContext } from '../services/account';
-import { supabase } from '../services/supabase';
+import { supabase } from '../services/backend';
 
 export type AuthContextValue = {
   session: Session | null;
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (nextContext) {
-        const { error: cloneError } = await supabase.rpc('runtime_materialize_registered_clone');
+        const { error: cloneError } = await backend.rpc('runtime_materialize_registered_clone');
         if (cloneError) throw cloneError;
         nextContext = await loadAuthenticatedContext();
       }
