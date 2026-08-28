@@ -4,7 +4,7 @@ export async function signInWithPassword(email: string, password: string) {
   const result = await backend.auth.signInWithPassword({ email, password });
   if (result.error) return result;
 
-  const { data: account, error: accountError } = await supabase
+  const { data: account, error: accountError } = await backend
     .from('accounts')
     .select('status')
     .maybeSingle();
