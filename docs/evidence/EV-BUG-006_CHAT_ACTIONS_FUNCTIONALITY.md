@@ -1,6 +1,6 @@
 # EV-BUG-006 — CHAT ACTIONS FUNCTIONALITY
 
-Status: **FIX IMPLEMENTED / VERIFICATION PENDING**
+Status: **CLOSED / PASS — DEVICE VERIFIED**
 
 ## Scope
 User-facing actions exposed by the Chat conversation menu (⋮), message menu (⋮), and related chat actions.
@@ -54,13 +54,48 @@ Git commits:
 - `d1887aba3e4c66ca4d81f56f8d24a3bbc113005b` — Chat action wiring
 - `e43811204948ea186905c40517a80eb1034160ab` — persisted-state synchronization and title handling
 
-## Verification pending
-CI/typecheck, Android build, device verification, and DB/UI regression are still required.
+## Verification evidence
 
-The active regression APK remains #202 until a newer successful build is installed and used for regression.
+### APK #220 — device regression
+Manual Android build **#220** was installed and tested on device.
+
+Verified PASS:
+
+- Conversation history opens and persisted conversations can be opened.
+- Conversation rename works.
+- Conversation find/search works and identifies matching conversation content.
+- Copy works and was verified by copy/paste.
+- Share works through native text sharing.
+- Export works through native text export/share.
+- Delete conversation removes it from history.
+- Message copy works.
+- Message edit works.
+- Message delete works.
+- Regenerate works by creating a new user prompt/assistant response rather than duplicating streamed chunks.
+- Android back behavior for required-choice/action dialogs was fixed and verified.
+- File attachment works.
+- Photo attachment works.
+- Camera attachment works.
+- Attached filename is rendered as part of the sent message rather than remaining only in the composer.
+- File content can be processed by Runtime.
+- Photo/camera images can be processed by Runtime/model.
+- Attachment conversation continuity/history behavior was verified.
+- Account/SH isolation was verified: attachment/conversation data did not appear for another user.
+
+### Regression result
+
+All previously identified BUG-006 Chat Actions and attachment cases tested on the active regression APK are **PASS**.
+
+The earlier attachment failure:
+
+`MODEL_SELECTION_FAILED: no zero-budget model available for capability/task`
+
+is no longer reproduced on APK #220.
+
+The earlier attachment UI-only behavior is no longer reproduced: the attachment is represented in the sent message and participates in runtime processing.
 
 ## Dialog/back behavior
-Confirmation behavior must be verified on device. The acceptance requirement is that destructive/required-choice dialogs cannot be bypassed with Android back; the user must explicitly choose an available option.
+Verified on device. Required-choice dialogs cannot be bypassed with Android back; the user must explicitly choose an available option.
 
 ## Final status
-**🟡 OPEN — IMPLEMENTED IN DEV, VERIFICATION PENDING**
+**🟢 CLOSED / PASS — APK #220 DEVICE VERIFIED**
