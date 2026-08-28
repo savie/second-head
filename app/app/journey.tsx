@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Button, FlatList, Modal, Pressable, RefreshCo
 import { Redirect } from 'expo-router';
 import { useAuth } from '../state/auth-context';
 import { deleteJourneyEvent, loadJourneyEventsForAccount, type JourneyEvent } from '../features/journey/journey-service';
-import { SHShell } from '../../components/sh-shell';
+import { SHShell } from '../components/sh-shell';
 import { getJourneyRecordPolicy, setRecordPolicy, type JourneyRecordPolicy, type TransferPolicy, type RecordScope, type RecordVisibility } from '../features/inheritance/inheritance-service';
 const FILTERS = ['All', 'Memory', 'Knowledge', 'Experience', 'Lifecycle / Other'] as const; type Filter = typeof FILTERS[number]; const TRANSFER_POLICIES: TransferPolicy[] = ['NON_TRANSFERABLE', 'INHERITANCE', 'SUCCESSION', 'LEGACY'];
 function formatDate(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? value : date.toLocaleString(); }
