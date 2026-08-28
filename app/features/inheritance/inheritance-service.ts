@@ -1,4 +1,4 @@
-import { supabase } from '../../services/supabase';
+import { supabase } from '../../services/backend';
 
 export type TransferPolicy = 'NON_TRANSFERABLE' | 'INHERITANCE' | 'SUCCESSION' | 'LEGACY';
 export type RecordScope = 'PRIVATE' | 'GENERAL';
