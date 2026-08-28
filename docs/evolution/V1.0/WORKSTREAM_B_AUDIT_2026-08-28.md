@@ -323,17 +323,30 @@ Manual APK visual review is intentionally not treated as completed in this pass;
 
 ### B-Close
 
-B dapat ditutup ketika interaction model utama jelas, visual direction tidak lagi bergantung pada ad-hoc screen decisions, Chat/Journey/Lifecycle/More memiliki hierarchy koheren, responsive behavior punya aturan dasar, runtime/data contracts tetap intact, dan C dapat masuk tanpa memaksa redesign navigation lagi.
+**Status: CLOSED FOR IMPLEMENTATION / AUTOMATED ACCEPTANCE**
+
+B-Close is satisfied for the current implementation boundary:
+- primary interaction model is explicit;
+- Chat/Journey/Lifecycle/More hierarchy is coherent;
+- contextual surfaces are implemented without adding top-level navigation;
+- responsive rules exist for phone/tablet/desktop applicability;
+- runtime/data contracts were left intact;
+- automated Runtime, Chat, and Android verification passed on the final reconciled DEV head;
+- Workstream C can enter without requiring another navigation redesign.
+
+Manual device visual inspection remains an optional product/UX review and is **not** recorded as a completed acceptance gate. This does not block the implementation transition to C because no manual inspection was defined as an automated release prerequisite.
+
+B is therefore considered **closed at the implementation/verification boundary**, while visual polish may continue later if a concrete UX issue is found.
 
 Implementation rule: B belum implementation-complete hanya karena mock/screen visual terlihat bagus. Significant UI changes harus melalui implementation → verify → reconcile.
 
 ## Next action
 
-**Workstream B sekarang berada di B8 — automated integration pass selesai; B-Close belum diklaim.**
+**Workstream B sekarang CLOSED untuk implementation/verification boundary.**
 
-Remaining gate adalah manual visual/interaction review bila diperlukan, terutama untuk memastikan hasil Android benar-benar terasa sesuai arah Resume 69 dan kandidat hybrid UI. Tidak ada alasan untuk membuat APK download sebagai syarat otomatis bila automated build/verification sudah hijau; inspeksi manual hanya diperlukan jika kita ingin menerima visual UX sebagai final.
+Automated verification sudah hijau pada final reconciled DEV head. Manual APK visual review tetap optional dan belum diklaim selesai.
 
-Setelah visual acceptance cukup, lakukan B-Close dan tetapkan boundary untuk Workstream C.
+**Next: Workstream C — Multimodal & File Intelligence.**
 
 
 END OF WORKSTREAM B LIVING DOCUMENT
