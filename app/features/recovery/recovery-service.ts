@@ -1,4 +1,4 @@
-import { supabase } from '../../services/supabase';
+import { supabase } from '../../services/backend';
 import { recordRecoveryJourneyEvent } from '../journey/recovery-journey';
 
 export type RecoverySnapshot = {
@@ -62,7 +62,7 @@ export async function listPortabilityExports(shId: string) {
 }
 
 export async function createRecoverySnapshot(shId: string) {
-  const { data, error } = await supabase.rpc('runtime_create_recovery_snapshot', {
+  const { data, error } = await backend.rpc('runtime_create_recovery_snapshot', {
     p_sh_id: shId,
   });
   if (error) throw error;
@@ -70,7 +70,7 @@ export async function createRecoverySnapshot(shId: string) {
 }
 
 export async function restoreRecoverySnapshot(snapshotId: string) {
-  const { data, error } = await supabase.rpc('runtime_restore_recovery_snapshot', {
+  const { data, error } = await backend.rpc('runtime_restore_recovery_snapshot', {
     p_snapshot_id: snapshotId,
   });
   if (error) throw error;
@@ -81,7 +81,7 @@ export async function restoreRecoverySnapshot(snapshotId: string) {
 }
 
 export async function createPortabilityExport(snapshotId: string) {
-  const { data, error } = await supabase.rpc('runtime_create_portability_export', {
+  const { data, error } = await backend.rpc('runtime_create_portability_export', {
     p_snapshot_id: snapshotId,
   });
   if (error) throw error;
