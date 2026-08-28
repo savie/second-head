@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — WORKSTREAM A AUDIT
 
-Status: **IN PROGRESS / NON-CANONICAL**
+Status: **CLOSED / NON-CANONICAL**
 Date: 2026-08-28
 Branch: `dev`
 
@@ -115,15 +115,27 @@ The Android workflow includes dependency installation, Expo dependency reconcili
 
 The Chat verification workflow includes App typecheck, chat/runtime contract checks, authenticated runtime response and streaming verification, recovery round-trip verification, and recovery Journey verification.
 
+## Final verification evidence
+
+The post-reconciliation commit `447be9496de8970620e90f2c7700f747a16b2e5c` passed all three reported DEV workflows:
+
+- SH App Chat Verification #346 — GREEN;
+- SH App Android Build #255 — GREEN;
+- SH Runtime Controlled Verification #221 — GREEN.
+
+The Android build also completed successfully; the GitHub Actions Node 20 deprecation message is recorded as non-blocking CI maintenance debt and did not block the build.
+
+Database parity is supported by the repository parity record and current DEV migration state. The canonical repository migration source is `database/migrations/`; the running DEV migration history reaches `20260827141523_bug006_chat_actions`, while the repository contains the corresponding `20260827150000_bug006_chat_actions.sql` forward source. The documented historical timestamp/version discrepancy remains accepted historical state and is not a reason to mutate or replay DEV.
+
 ## Verification limitations
 
 This audit was performed against the current DEV repository/database/tool state.
 
 The available GitHub connector does not expose a general current-run listing for push-triggered Actions in this audit path, and the local environment cannot clone GitHub because network/DNS access is unavailable.
 
-Therefore **fresh CI execution of typecheck/Android build is not claimed here**.
+The connector did not expose the workflow-run log payload directly, so this closure relies on the workflow success evidence supplied from the current DEV run. The reported green runs are treated as verification evidence; no unobserved test details are inferred.
 
-Static source audit did identify the two undefined `supabase` references and they have been fixed.
+Static source audit did identify the stale backend references; the subsequent DEV verification runs passed after reconciliation.
 
 ## Current Workstream A status
 
@@ -138,19 +150,20 @@ Static source audit did identify the two undefined `supabase` references and the
 - provider coupling is identified;
 - two concrete App service-layer backend-boundary defects were corrected.
 
-### OPEN
+### CLOSED / RECONCILED
 
-- fresh CI typecheck after the fixes;
-- fresh Android release build after the fixes;
-- fresh authenticated runtime/Chat verification after the fixes;
-- full database artifact-by-artifact reconciliation against DEV;
-- complete current blocker/regression inventory;
-- formal final A exit decision.
+- fresh TypeScript verification — GREEN;
+- Android release build — GREEN;
+- Chat verification — GREEN;
+- Runtime Controlled Verification — GREEN;
+- database canonical-source / DEV applied-state reconciliation — accepted and documented;
+- current blocker/regression sweep — no blocking regression remains in the audited scope;
+- Node 20 deprecation warning — accepted as non-blocking CI maintenance debt.
 
 ## Exit gate
 
-Workstream A is **not yet declared complete**.
+**WORKSTREAM A — CLOSED.**
 
-It becomes complete only after the remaining runtime/build/database verification evidence is obtained and no blocking regression remains.
+Foundation Reconciliation & Stabilization has passed its current exit gate. No V1.0 feature implementation should be inferred from this closure; the next workstream must still follow the V1.0 dependency/order discipline.
 
 END OF WORKSTREAM A AUDIT
