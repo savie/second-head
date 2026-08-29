@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Modal, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +10,7 @@ import { deleteConversation as deletePersistedConversation, deleteConversationMe
 import { useAuth } from '../state/auth-context';
 import { backend } from '../services/backend';
 import { SHShell } from '../components/sh-shell';
+import { loadSHContext } from '../services/context';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
@@ -80,6 +82,10 @@ export default function ChatScreen() {
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameText, setRenameText] = useState('');
   const [messageActionTarget, setMessageActionTarget] = useState<Message | null>(null);
+  const [memoryOpen, setMemoryOpen] = useState(false);
+  const [memoryLoading, setMemoryLoading] = useState(false);
+  const [memoryError, setMemoryError] = useState<string | null>(null);
+  const [memoryRows, setMemoryRows] = useState<Array<Record<string, unknown>>>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -134,6 +140,23 @@ export default function ChatScreen() {
     void loadRecentConversation();
     return () => { cancelled = true; };
   }, [context?.sh_id]);
+
+
+  async function openMemorySurface() {
+    if (!context?.sh_id) return;
+    setMemoryOpen(true);
+    setMemoryLoading(true);
+    setMemoryError(null);
+    try {
+      const result = await loadSHContext({ shId: context.sh_id, query: draft.trim() || conversationTitle, memoryLimit: 10, knowledgeLimit: 1, journeyLimit: 1 });
+      setMemoryRows(result.memory);
+    } catch (error) {
+      setMemoryError(error instanceof Error ? error.message : 'Memory could not be loaded.');
+      setMemoryRows([]);
+    } finally {
+      setMemoryLoading(false);
+    }
+  }
 
   const canSend = lifecycleState === 'active' && !sending && !pendingConfirmation && !!draft.trim();
   const visibleMatches = useMemo(() => {
@@ -483,6 +506,24 @@ export default function ChatScreen() {
 
   return (
     <>
+      <Modal visible={memoryOpen} transparent animationType="slide" onRequestClose={() => setMemoryOpen(false)}>
+        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <View style={{ maxHeight: '78%', backgroundColor: '#FFFFFF', padding: 16, gap: 10, borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View><Text style={{ fontSize: 20, fontWeight: '800', color: '#22211F' }}>Memory</Text><Text style={{ color: '#6B6A66', marginTop: 3 }}>Authorized owner context · bounded</Text></View>
+              <Button title="Close" onPress={() => setMemoryOpen(false)} />
+            </View>
+            {memoryLoading ? <View style={{ paddingVertical: 24, alignItems: 'center' }}><Text style={{ color: '#6B6A66' }}>Loading Memory…</Text></View> : null}
+            {memoryError ? <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 12, padding: 12 }}><Text style={{ color: '#9A3412', fontWeight: '700' }}>Memory unavailable</Text><Text style={{ color: '#6B6A66', marginTop: 4 }}>{memoryError}</Text></View> : null}
+            {!memoryLoading && !memoryError && memoryRows.length === 0 ? <View style={{ paddingVertical: 24, alignItems: 'center' }}><Text style={{ color: '#6B6A66' }}>Tidak ada Memory yang relevan untuk context ini.</Text></View> : null}
+            {!memoryLoading && !memoryError ? <ScrollView contentContainerStyle={{ gap: 8 }}>{memoryRows.map((row, index) => {
+              const content = typeof row.content === 'string' ? row.content : typeof row.text === 'string' ? row.text : JSON.stringify(row);
+              const source = typeof row.source_ref === 'string' ? row.source_ref : typeof row.provenance === 'string' ? row.provenance : 'Memory runtime';
+              return <View key={String(row.memory_id ?? row.id ?? index)} style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 12, backgroundColor: '#FBFAF7', gap: 5 }}><Text style={{ color: '#22211F', lineHeight: 20 }}>{content}</Text><Text style={{ color: '#77736B', fontSize: 11 }}>Source: {source}</Text></View>;
+            })}</ScrollView> : null}
+          </View>
+        </View>
+      </Modal>
       <Modal visible={messageActionTarget !== null} transparent animationType="fade" onRequestClose={() => {}}>
         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' }}>
           <View style={{ backgroundColor: '#FFFFFF', padding: 16, gap: 8, borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
@@ -519,6 +560,7 @@ export default function ChatScreen() {
       <SHShell title="Chat" context={<>
         <View style={{ gap: 5 }}><Text style={{ fontSize: 13, fontWeight: '800', color: '#5D45A5' }}>CURRENT</Text><Text style={{ fontSize: 16, fontWeight: '700', color: '#22211F' }}>{conversationTitle}</Text><Text style={{ color: '#6B6A66' }}>{lifecycleState === 'streaming' ? 'SH sedang memproses percakapan.' : 'Conversation context.'}</Text></View>
         <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Journey</Text><Text style={{ color: '#6B6A66' }}>Continuity surface tersedia dari navigation.</Text></View>
+        <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Memory</Text><Text style={{ color: '#6B6A66' }}>Bounded owner context tersedia dari Runtime.</Text><Button title="Open Memory" onPress={() => void openMemorySurface()} /></View>
         <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Memory · Knowledge · Experience</Text><Text style={{ color: '#6B6A66' }}>Contextual domains — bukan top-level navigation.</Text></View>
         {attachments.length ? <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Attachments</Text><Text style={{ color: '#6B6A66' }}>{attachments.length} selected</Text></View> : null}
       </>}><View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
