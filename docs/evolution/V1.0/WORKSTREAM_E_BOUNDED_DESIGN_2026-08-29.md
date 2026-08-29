@@ -600,3 +600,13 @@ E4 audit/reconciliation completed. Dedicated document:
 **E4 = 🟡 BOUNDED DESIGN ACCEPTED / IMPLEMENTATION BLOCKED.** Generic Tool execution is not evidenced as existing; Runtime foundation exists but is primarily model/conversation runtime.
 
 Next candidate: **E5 — Tool Adapter + Result Contract**, subject to its own audit. Registry remains deferred.
+
+
+## 28. E5 dedicated document
+
+E5 audit/reconciliation completed. Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E5_TOOL_ADAPTER_RESULT_2026-08-29.md
+
+**E5 = 🟡 BOUNDED DESIGN ACCEPTED / IMPLEMENTATION BLOCKED.** Existing Runtime has a result path for the model/conversation flow, but no verified generic Tool adapter/result contract.
+
+Next candidate: **E6 — Tool/Action Registry & Capability Binding**, subject to a fresh dependency audit. Registry remains deferred until evidence proves it is required.
