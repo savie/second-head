@@ -11,7 +11,7 @@ const authHeaders = (token: string) => ({
 export type ChatAttachment = { uri: string; name?: string; mimeType?: string; base64?: string; };
 
 type RuntimeStreamEvent =
-  | { type: 'response'; sh_id: string; text: string }
+  | { type: 'response'; sh_id: string; text: string; generatedImage?: { b64_json: string; media_type: string } }
   | { type: 'token'; text: string }
   | { type: 'confirmation'; confirmation_id: string; action_id: string; title: string; description: string }
   | { type: 'complete'; sh_id: string }
@@ -47,7 +47,7 @@ export async function loadConversationHistory(limit = 100): Promise<string[]> {
   const rows = await loadConversationHistoryRows(limit);
   return rows.map(row => row.role === 'user' ? 'You: ' + row.content : row.role === 'assistant' ? 'SH: ' + row.content : 'System: ' + row.content);
 }
-function parseSseText(text: string, onEvent: (event: RuntimeStreamEvent) => void) { for (const frame of text.split(/\r?\n\r?\n/)) { const lines = frame.split(/\r?\n/); const eventName = lines.find(line => line.startsWith('event: '))?.slice(7).trim(); const dataLine = lines.find(line => line.startsWith('data: '))?.slice(6); if (!eventName || dataLine === undefined) continue; const payload = JSON.parse(dataLine) as Record<string, unknown>; if (eventName === 'response') onEvent({ type: 'response', sh_id: String(payload.sh_id ?? ''), text: String(payload.text ?? '') }); else if (eventName === 'token') onEvent({ type: 'token', text: String(payload.text ?? '') }); else if (eventName === 'confirmation') onEvent({ type: 'confirmation', confirmation_id: String(payload.confirmation_id ?? ''), action_id: String(payload.action_id ?? ''), title: String(payload.title ?? 'Confirmation required'), description: String(payload.description ?? 'This action requires your explicit confirmation.') }); else if (eventName === 'complete') onEvent({ type: 'complete', sh_id: String(payload.sh_id ?? '') }); } }
+function parseSseText(text: string, onEvent: (event: RuntimeStreamEvent) => void) { for (const frame of text.split(/\r?\n\r?\n/)) { const lines = frame.split(/\r?\n/); const eventName = lines.find(line => line.startsWith('event: '))?.slice(7).trim(); const dataLine = lines.find(line => line.startsWith('data: '))?.slice(6); if (!eventName || dataLine === undefined) continue; const payload = JSON.parse(dataLine) as Record<string, unknown>; if (eventName === 'response') { const meta = payload.meta && typeof payload.meta === 'object' ? payload.meta as Record<string, unknown> : undefined; const image = meta?.generated_image && typeof meta.generated_image === 'object' ? meta.generated_image as Record<string, unknown> : undefined; onEvent({ type: 'response', sh_id: String(payload.sh_id ?? ''), text: String(payload.text ?? ''), ...(image?.b64_json && image?.media_type ? { generatedImage: { b64_json: String(image.b64_json), media_type: String(image.media_type) } } : {}) }); } else if (eventName === 'token') onEvent({ type: 'token', text: String(payload.text ?? '') }); else if (eventName === 'confirmation') onEvent({ type: 'confirmation', confirmation_id: String(payload.confirmation_id ?? ''), action_id: String(payload.action_id ?? ''), title: String(payload.title ?? 'Confirmation required'), description: String(payload.description ?? 'This action requires your explicit confirmation.') }); else if (eventName === 'complete') onEvent({ type: 'complete', sh_id: String(payload.sh_id ?? '') }); } }
 async function getAccessToken() {
   const { data, error } = await backend.auth.getSession();
   if (error) throw error;
