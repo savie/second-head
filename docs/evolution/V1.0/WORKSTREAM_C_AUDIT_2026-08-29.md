@@ -468,6 +468,41 @@ Therefore:
 
 ---
 
+### C8 provider/runtime audit & decision
+
+The provider/runtime decision is now resolved for the V1.0 implementation path.
+
+**Selected path: OpenRouter Unified Image API** using the same `OPENROUTER_API_KEY` already used by the verified text/vision runtime, but through the dedicated `POST /api/v1/images` endpoint rather than Chat Completions. OpenRouter documents this as its unified image-generation interface, with model discovery, capability metadata, provider routing/failover, and base64 image output. citeturn0search0turn0search2
+
+This is an implementation choice, not a Canonical provider lock.
+
+**Budget boundary:** OpenRouter currently has no free image-generation model; image generation consumes credit balance. Therefore C8 is **explicitly gated** behind `SH_IMAGE_GENERATION_ENABLED=true`; it is not silently added to SH's zero-budget automatic model pool. citeturn0search2
+
+**Initial model default:** `recraft/recraft-v3`, selected as a low-cost, image-generation-capable model with text/image input support. The model remains configurable through `SH_IMAGE_MODEL`, so changing the model does not require changing the runtime architecture. citeturn0search10
+
+Implementation:
+
+- dedicated image-generation adapter;
+- explicit paid-capability gate;
+- configurable model selection;
+- dedicated OpenRouter Image API request;
+- generated image returned as base64 + media type in runtime metadata;
+- existing zero-budget text/vision routing remains untouched.
+
+Commits:
+
+```
+5afd8fa1  feat: add gated image generation provider path
+d9011b0d  fix: expose generated image result metadata
+dfb5b47c  feat: expose generated image runtime result
+```
+
+**Important remaining integration boundary:** the current slice proves the provider/runtime path and exposes the generated asset through runtime metadata. It does not yet claim owner-facing image rendering/storage lifecycle is complete. That must be verified before C8 is green.
+
+### Status
+
+**IMPLEMENTED / PROVIDER PATH SELECTED / VERIFICATION PENDING**
+
 ## 11. C-Close — Integration & Verification
 
 C can close only when relevant capabilities are:
@@ -498,8 +533,8 @@ C3  🟢 Verified
 C4  🟡 Implemented / verification pending
 C5  🟢 Verified / no dedicated implementation required
 C6  🟢 Verified
-C7  🟡 Implemented / verification pending
-C8  ⏳ Not started
+C7  🟢 Verified
+C8  🟡 Implemented / provider path selected / verification pending
 C-Close ⏳ Not started
 ```
 
@@ -517,7 +552,8 @@ The 🟡 state is intentional: implementation exists, but verification is the au
 - Implemented C3 first-class image input and runtime validation/routing.
 - Implemented C4 bounded file intelligence for supported text-oriented file classes with explicit unsupported/failed states.
 - Preserved the roadmap dependency order from `ROADMAP.md`.
-- Explicitly kept image-generation provider/runtime unresolved.
+- Resolved C8 provider/runtime to the OpenRouter Unified Image API with an explicit paid-capability gate.
+- Kept the provider choice implementation-level, not Canonical.
 - Validated C5 against the existing direct-camera path; no duplicate camera architecture introduced.
 - Implemented C6 multimodal turn persistence and history continuity.
 - Implemented C7 explicit image-understanding task classification on the existing vision runtime path.
