@@ -47,3 +47,13 @@ Deno.test('P4D-002 keeps model selection independent from SH identity', () => {
   const selected = selectModel(candidates, { capability: 'text' });
   assertEquals(selected.model_id, 'zero-budget-primary');
 });
+
+
+Deno.test('P4D-002 selects the zero-budget image generation candidate', () => {
+  const selected = selectModel([
+    { id: 'openrouter/image-generation', capability: 'image', cost_tier: 'ZERO_BUDGET', adapter },
+    { id: 'paid-image-fallback', capability: 'image', cost_tier: 'PAID', adapter, priority: 1 },
+  ], { capability: 'image', task: 'image' });
+  assertEquals(selected.model_id, 'openrouter/image-generation');
+  assertEquals(selected.cost_tier, 'ZERO_BUDGET');
+});
