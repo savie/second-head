@@ -258,3 +258,107 @@ Bounded Design: IN PROGRESS
 Implementation: NOT AUTHORIZED YET
 
 The objective is a small, governed Hands capability layer — not a general-purpose plugin ecosystem or autonomous execution platform.
+## 19. Full bounded-design sequence — provisional, implementation deferred
+
+Following the established SH workstream method, E should be designed end-to-end before implementation begins. The labels below are working packages, not frozen sub-workstreams and do not authorize coding.
+
+### E1 — Capability / Tool / Action vocabulary
+Define the conceptual distinctions and relationships. No schema.
+
+### E2 — Capability / Tool registry boundary
+Define what must be registered, what metadata is required, lifecycle/state, ownership/provider attribution, and what must remain outside the registry.
+
+### E3 — Invocation contract
+Define the minimum invocation envelope: actor, SH context, capability, tool, action, target/resource, request identity, context, and requested operation. Separate intent from executable instruction.
+
+### E4 — Authorization decision contract
+Map invocation context to existing authority/ownership/policy primitives. Define ALLOW / DENY / explicit escalation semantics. No App-side authority and no Tool self-authorization.
+
+### E5 — Permission evaluation boundary
+Verify and then define the missing bridge between invocation context and permission_matrix. Reuse existing policy semantics; default deny where the applicable contract requires it. Do not duplicate policy sources.
+
+### E6 — Risk classification
+Define risk dimensions and minimum classification needed by E. Keep risk separate from authorization. Exact taxonomy remains open until reconciled with existing contracts.
+
+### E7 — Confirmation contract
+Generalize the existing confirmation lifecycle only where necessary. Preserve the recovery-specific implementation. Define when confirmation is required, what is confirmed, expiry/cancellation behavior, and binding between confirmation and intended action.
+
+### E8 — Execution boundary
+Define Runtime -> Tool Adapter -> Action execution semantics, including preconditions, failure behavior, cancellation, and the point at which an external side effect occurs.
+
+### E9 — Execution identity / idempotency / traceability
+Determine whether request/execution IDs are required and how retries, duplicate invocation, partial execution, and correlation are handled. Do not add identifiers without a demonstrated need.
+
+### E10 — Result contract / normalization
+Define a stable SH-facing result envelope for success, failure, partial result, and external/untrusted content. Preserve the rule that Tool output is data, not system instruction.
+
+### E11 — Audit / event lifecycle
+Map invocation, authorization, confirmation, execution, result, and failure states onto existing audit infrastructure. Reuse existing TOOL_INVOCATION / RUNTIME_ACTION capabilities where semantically appropriate.
+
+### E12 — Built-in Tool boundary
+Define what qualifies as built-in, its trust/maintenance boundary, and how it differs from generic external capability access.
+
+### E13 — Extension / Plugin boundary
+Define the contract boundary for future Extensions/Plugins without building a marketplace or ecosystem. A plugin is not an authority and cannot bypass Runtime governance.
+
+### E14 — Provider / Model capability boundary
+Define the distinction among SH capability, Tool, external provider, and Model capability. Avoid premature multi-provider abstraction.
+
+### E15 — UX / conversation interaction contract
+Using the supplied visual evidence only as design input, define how Tool/Action availability, planning, confirmation, progress, failure, and result return to the conversation-first UX. UI must not become authorization authority.
+
+### E16 — Security / abuse / failure matrix
+Bound denial, malformed input, unauthorized target, cross-SH access, stale confirmation, replay, duplicate execution, external failure, timeout, partial success, and untrusted result handling. This is a design/test matrix, not implementation yet.
+
+### E17 — Evidence / observability contract
+Define the evidence required to prove each lifecycle transition and security boundary. Align with the project's existing evidence and audit requirements.
+
+### E18 — End-to-end vertical-slice design
+Choose exactly one meaningful Tool/Action slice and specify its complete lifecycle against E1-E17. No coding until the slice is contract-complete.
+
+### E19 — E acceptance / dependency gate
+Review every E package against Canonical, Build Scope, Implementation Contract, Implementation Guide, Roadmap, Resume 69, and current DEV evidence. Reclassify all yellow/red items using evidence. Identify blockers and prerequisites.
+
+### E20 — Implementation package / execution readiness
+Produce the final bounded implementation package: accepted contracts, affected files/components, DB impact if any, migration requirement if any, tests, evidence plan, rollback/containment plan, and execution order. This package authorizes a later implementation stage only after explicit Owner approval.
+
+### Sequence rule
+
+E1 -> E2 -> ... -> E20 is not a promise that every package must remain separate. Packages may be merged, split, or retired when evidence shows they are redundant. What is fixed is the method:
+
+AUDIT -> MAP -> RECONCILE -> BOUNDED DESIGN -> ACCEPT -> IMPLEMENT -> VERIFY
+
+Implementation must remain BLOCKED until the bounded-design gate is passed.
+
+## 20. Bounded-design decision ledger
+
+Use this ledger throughout E. Every decision must be classified as one of:
+
+- CANON — directly established by Canonical; do not alter here.
+- CONTRACT — required by approved technical contract/scope.
+- EXISTING DEV — verified implementation/runtime evidence.
+- EVOLUTION DECISION — new E design decision filling a genuine gap without contradicting higher authority.
+- ASSUMPTION — temporary and explicitly marked; never silently promoted to fact.
+- OPEN — insufficient evidence; requires audit/review before closure.
+- DEFERRED — intentionally outside current E slice.
+
+No item may move from OPEN/ASSUMPTION to ACCEPTED without a traceable basis.
+
+## 21. E implementation readiness gate — future
+
+Implementation may begin only when:
+
+- all mandatory E contracts are accepted;
+- Canonical/contract reconciliation is clean;
+- no unresolved Critical/High blocker remains;
+- all yellow items affecting the first slice have been re-audited or explicitly accepted as design gaps;
+- prohibited/deferred boundaries are explicitly recorded;
+- the first vertical slice has an end-to-end contract;
+- DB/API/runtime/UI impact is known;
+- test and evidence plans exist;
+- execution order and rollback/containment are defined;
+- Owner explicitly authorizes implementation.
+
+Until then:
+
+E STATUS = BOUNDED DESIGN ONLY.
