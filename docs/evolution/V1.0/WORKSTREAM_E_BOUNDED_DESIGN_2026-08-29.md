@@ -568,3 +568,15 @@ Next candidate package:
 **E2 — Invocation + Authorization Boundary**
 
 Before E2 is numbered/frozen, audit whether registry concerns belong inside E2 or should remain a separate/deferred package. Do not assume the provisional E2 decomposition is final.
+
+
+## 25. E2 dedicated document
+
+E2 bounded design has been audited against current DEV database evidence and closed at the semantic boundary level.
+
+Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E2_INVOCATION_AUTHORIZATION_2026-08-29.md
+
+**E2 = 🟢 BOUNDED DESIGN ACCEPTED / CLOSED.** Implementation remains blocked.
+
+Next candidate: **E3 — Risk + Confirmation Boundary**, subject to its own audit. Registry remains deferred unless a dependency is proven.
