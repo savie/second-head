@@ -650,3 +650,12 @@ E9 audit/reconciliation completed. Dedicated document:
 **E9 = 🟢 CANDIDATE IDENTIFIED — GLOBAL SEARCH PROMOTED TO FIRST-SLICE CANDIDATE.** Existing `globalSearch` + `global_search_bounded` provide the strongest bounded internal read-oriented operation found so far. This is a design promotion only; implementation remains blocked pending E10 contract/authorization/risk freeze.
 
 Next candidate: **E10 — GLOBAL SEARCH ACTION CONTRACT + AUTHORIZATION/RISK FREEZE**.
+
+
+## 33. E9 revised
+
+E9 was revised in-place (no new E9 file) to correct scope: **Tool Landscape / Reusable Foundation Mapping**. Global Search is retained only as a reference vertical-slice candidate, not as the architectural center or V1.0 Tool inventory.
+
+**E9 = 🟢 TOOL LANDSCAPE / REUSABLE FOUNDATION MAPPED.** Workstream E remains extensible to built-in, extension, plugin/provider-backed Tools while SH Runtime retains authorization, risk, confirmation, execution eligibility, and audit governance.
+
+Next candidate: **E10 — TOOL GOVERNANCE & EXTENSIBILITY BOUNDARY**.
