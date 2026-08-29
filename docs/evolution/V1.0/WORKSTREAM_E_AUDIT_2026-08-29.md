@@ -1536,3 +1536,104 @@ The requested current scope ends at:
 **Candidate Mapping → Existing Capability Discovery → Contract Coverage → Representative Tool Selection → Tool-specific Bounded Design**
 
 No implementation, migration, marketplace, broad automation, or provider lock-in is authorized by this document.
+
+
+# FINAL BOUNDED-DESIGN CHECK — R1–R4 — 2026-08-29
+
+## Scope
+
+Final check of the four selected representative Tool bounded-design documents against the current Workstream E boundary and the already reconciled Canonical / technical-contract constraints.
+
+This check does **not** reopen the Landscape, replace the E contract, or authorize broad implementation.
+
+## R1 — A.1 Global Search
+
+**🟢 BOUNDED-DESIGN READY**
+
+- Boundary is read-oriented and bounded.
+- Existing DEV capability is explicitly preferred for REUSE / ADAPT.
+- SH Runtime remains the governance boundary.
+- Result is data, not authority.
+- Existing audit infrastructure is reused.
+- Open generic E bridges remain dependencies, not R1-specific redesign work.
+
+**Implementation prerequisite:** verify the exact existing Global Search entry point/contract and map it to the frozen E invocation → authorization → eligibility → adapter → result → audit lifecycle.
+
+## R2 — B.1 Authorized Read / Retrieve
+
+**🟢 BOUNDED-DESIGN READY / PROVIDER VERIFICATION REQUIRED**
+
+- Source and scope are explicitly bound.
+- Connection is correctly separated from SH authorization.
+- Private-data boundary is preserved.
+- Provider authority cannot replace SH governance.
+- No write/action expansion is included.
+
+**Implementation prerequisite:** discover and verify one concrete existing source/connector before provider lock-in.
+
+## R3 — C.1 File Content / Extract / Transform
+
+**🟢 BOUNDED-DESIGN READY / CAPABILITY VERIFICATION REQUIRED**
+
+- Artifact, operation, and scope are explicitly bound.
+- Processing is bounded; no filesystem/document-management expansion.
+- TRANSFORM is separated from external export/share/create/update.
+- Resource containment is explicit.
+- Existing attachment/file capability is preferred for REUSE / ADAPT.
+
+**Implementation prerequisite:** verify the exact existing file/attachment primitive and one concrete parser/extractor/converter capability.
+
+## R4 — F.1 External Create / Update
+
+**🟡 BOUNDED-DESIGN READY, IMPLEMENTATION BLOCKED BY SHARED HIGH-RISK DEPENDENCIES**
+
+- Exact provider, target, operation, parameters, authorization, and confirmation are bound.
+- HIGH-risk execution follows PLAN → AUTHORIZATION → CONFIRMATION → EXECUTE → EVIDENCE → AUDIT.
+- Provider permission is not SH authority.
+- Partial/uncertain external outcomes are explicitly contained.
+- DELETE / SEND / SUBMIT remain outside this slice.
+
+**Implementation prerequisites:** generic action authorization bridge, generic confirmation semantics, exact target/scope binding, verified external provider/operation, idempotency/retry policy, and normalized result/error contract.
+
+## Cross-R1–R4 findings
+
+### 🟢 Consistent
+
+- A–G is the current taxonomy; A.x/B.x/etc. are current candidate codes.
+- R1–R4 are the current representative selections.
+- Historical T1–T5 remain traceability only.
+- Tool ≠ Action ≠ Authority.
+- REUSE → ADAPT → BUILD remains the source strategy.
+- SH Runtime/governance retains authority.
+- Results remain untrusted data.
+- Existing identity, ownership, permission, and audit primitives are reused where compatible.
+- No plugin marketplace, arbitrary third-party code execution, unrestricted autonomous execution, or generic workflow platform is introduced.
+
+### 🟡 Shared implementation dependencies
+
+The four bounded designs are coherent, but the following shared bridges must be verified/implemented only as required by the first reference slice:
+
+1. invocation contract;
+2. generic authorization decision boundary;
+3. execution eligibility;
+4. controlled adapter boundary;
+5. normalized result/error envelope;
+6. lifecycle audit correlation.
+
+These are **not reasons to redesign R1–R4**. They are the implementation mapping work that follows bounded design.
+
+## Final disposition
+
+**R1–R4 bounded-design set: ACCEPTED FOR THE NEXT GATE.**
+
+No material Canonical conflict was identified in this final check.
+
+However, **R1–R4 are not all simultaneously authorized for implementation**. The next gate is representative Tool Selection / implementation planning, beginning with the current first reference slice: **R1 Global Search**.
+
+The implementation path must start from actual DEV source/schema verification and preserve existing behavior. R2–R4 remain prepared bounded candidates until their concrete capabilities and shared dependencies are verified.
+
+## Stop point after this check
+
+**FINAL BOUNDED-DESIGN CHECK → STOP.**
+
+Do not expand the taxonomy, add new representative Tools, lock providers, or mutate Supabase as part of this check.
