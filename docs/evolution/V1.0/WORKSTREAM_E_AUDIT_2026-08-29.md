@@ -130,6 +130,50 @@ App already uses a backend/runtime service boundary. The App is not treated as e
 
 **Important:** 🟡 and 🔴 are audit labels, not final decisions. Yellow must be audited; red must have an explicit evidence-based reason for deferral or prohibition.
 
+## E0 trace result — DB → runtime → caller → enforcement
+
+### What is verified
+
+**Database objects exist in DEV:**
+- `private.authority_assignments`
+- `public.permission_matrix`
+- `public.audit_events`
+- `public.runtime_high_risk_confirmations`
+
+**High-risk runtime primitives exist:**
+- `runtime_create_high_risk_confirmation`
+- `runtime_confirm_high_risk_action`
+- `runtime_execute_high_risk_action`
+- `runtime_record_audit`
+
+The confirmation API currently accepts an `action_id`, operation, target, title and description; confirmation and execution are addressed by `confirmation_id`. Audit accepts SH, event type, status and JSON metadata.
+
+### Actual application/runtime caller found
+
+`functions/runtime-p4a-001/index.ts` directly calls `runtime_record_audit` for runtime request/response events and uses runtime identity resolution plus existing semantic lifecycle recorders.
+
+The same function does **not** call the high-risk confirmation functions in its normal conversation/model path.
+
+Therefore:
+
+> The audit primitive is demonstrably wired into an application runtime path. The generic high-risk confirmation primitive is demonstrably present in the database/runtime surface, but its integration into a generic Tool/Action invocation path has **not** been verified.
+
+### Enforcement conclusion
+
+Current evidence is sufficient to classify:
+- audit persistence: **🟢 verified runtime path**;
+- identity resolution: **🟢 verified runtime path**;
+- high-risk confirmation primitive: **🟢 verified database/runtime primitive**;
+- generic Tool authorization enforcement: **🟡 not yet evidenced**;
+- generic Tool execution enforcement: **🟡 not yet evidenced**;
+- generic Tool caller/adapter: **🟡 not yet evidenced**.
+
+Do not infer a generic Tool system merely from the existence of these primitives.
+
+### Important boundary finding
+
+The existing `runtime-p4a-001` path is primarily conversation/model/semantic-lifecycle runtime. It is evidence for reusable runtime infrastructure, **not evidence that Workstream E Tool execution already exists**.
+
 ## E0 audit update — 2026-08-29
 
 The first deeper reconcile changed several provisional labels based on direct source evidence.
