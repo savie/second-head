@@ -1383,212 +1383,128 @@ READY TO START IMPLEMENTATION PLANNING, NOT YET AUTHORIZED TO MUTATE DEV.
 
 The next execution step is to inspect and document the exact source-level insertion points for Work Preparation and Contract-to-Implementation Mapping. Only after that bounded implementation plan is accepted should code or Supabase mutation begin.
 
-# TOOL CANDIDATE AUDIT — EXTERNAL / NON-GITHUB SOURCES — 2026-08-29
-
-## Scope
-This pass is intentionally narrow: only candidate Tool/Action patterns that materially relate to the frozen E contract are retained. External material is reference input only; it does not become SH authority.
-
-## Candidate shortlist
-
-### T1 — Global Search
-Status: SELECTED — reference implementation candidate.
-
-Already exists in SH DEV and is the lowest-risk first slice because it is read-oriented, bounded, and already has runtime/server-side controls.
-
-Why it fits E:
-- clear invocation;
-- bounded input/output;
-- server-side authorization/ownership boundary;
-- normalized result pattern;
-- audit evidence;
-- no inherent external side effect.
-
-Next document: WORKSTREAM_E_TOOL_GLOBAL_SEARCH.md
-
-### T2 — Read / Retrieve from an explicitly authorized connected source
-Status: CANDIDATE — retain for later.
-
-Pattern: a Tool retrieves information from a connected source under explicit scope.
-
-Why it fits E:
-- exercises Action identity;
-- authorization is materially important;
-- capability and private-data permission must remain distinct;
-- result normalization and provenance matter.
-
-Important boundary: a connection/capability must never be treated as blanket permission to read all private data.
-
-### T3 — Create / Update an external record
-Status: CANDIDATE — HIGH-RISK REFERENCE.
-
-Pattern: create/update a ticket, task, note, calendar item, or similar external record.
-
-Why it fits E:
-- exercises write-side execution eligibility;
-- naturally tests risk classification;
-- provides a meaningful confirmation-gate test;
-- requires strong target/scope binding and audit.
-
-Not selected as first implementation because it introduces side effects before the read-only reference slice is verified.
-
-### T4 — Human-confirmed sensitive Action
-Status: CANDIDATE PATTERN — not a standalone Tool.
-
-External research consistently treats human approval as a useful control for sensitive tool calls. MCP's current specification recommends a human-in-the-loop ability to deny tool invocations and clear confirmation for operations. citeturn0search4turn0search16
-
-This maps directly to E's risk/confirmation contract, but does not justify importing an external approval product or protocol as SH architecture.
-
-### T5 — MCP-compatible Tool/Server boundary
-Status: REFERENCE PATTERN — DO NOT ADOPT AS E ARCHITECTURE.
-
-Current MCP material provides useful patterns for tool discovery/listing, explicit tool invocation, authorization scopes, human approval, and separating host/client/server concerns. citeturn0search4turn0search5turn0search0
-
-Useful lesson: Tool protocol is not SH authority.
-
-MCP can inform an adapter/transport boundary later, but E must retain SH Runtime authorization and governance as the authority.
-
-## Deferred candidates
-
-Deliberately not retained as active E Tool candidates yet:
-- broad plugin marketplace/ecosystem;
-- arbitrary autonomous agents;
-- unrestricted agent-to-agent execution;
-- generic task orchestration;
-- broad external connector marketplace.
-
-Reason: they expand the system surface before the core governed Tool lifecycle is proven.
-
-## External-source design signals worth carrying forward
-
-1. Tool metadata can describe risk characteristics such as read-only, destructive, idempotent, or external side effects, but annotations are hints and should not become the authorization authority. citeturn0search10
-2. Modern MCP authorization work emphasizes centralized policy and audit rather than leaving authorization fragmented across individual tools/connectors. citeturn0search2
-3. Tool integrations commonly fall into simple API/plugin, MCP-style dynamic tool, or more complex agent-to-agent patterns; E should start with the simplest bounded integration pattern and only expand when the governance contract remains intact. citeturn0search1
-
-## Current shortlist for SH
-
-Keep active:
-1. Global Search — first reference Tool.
-2. Authorized Read/Retrieve — second candidate family.
-3. External Record Create/Update — later write-side candidate.
-
-Keep as architecture references, not Tools:
-- MCP-style Tool boundary;
-- human confirmation/approval pattern;
-- risk annotations.
-
-Do not expand now:
-- marketplace/ecosystem;
-- unrestricted autonomy;
-- broad A2A/task orchestration.
-
-## Decision rule for new candidates
-
-A future candidate enters E only if it can be mapped to the frozen contract:
-
-Action Identity → Invocation → Authorization → Risk/Confirmation → Eligibility → Adapter → Result/Error → Audit
-
-and remains compatible with Canonical.
-
-If a candidate requires changing the E contract, that is a contract-revision proposal, not an implementation shortcut.
-
-## Document rule
-
-Selected Tool candidates get their own bounded document:
-WORKSTREAM_E_TOOL_<NAME>.md
-
-The E master retains only:
-- candidate/selected Tool name;
-- status;
-- rationale;
-- dependency/blocker;
-- link to Tool-specific document.
-
-No Tool-specific implementation detail should be copied into the master unless it changes an E-wide contract or boundary.
-
-
-# E TOOL CLASSIFICATION & SOURCE STRATEGY — 2026-08-29
+# SH TOOL LANDSCAPE — RECONCILED 2026-08-29
 
 ## Purpose
 
-This section adds the reconciled capability classification from Resume 69, E contract, DEV evidence, and external reference patterns. It is a classification layer, not an implementation mandate.
+Living classification for Workstream E. This section is the primary current map for reading and tracking candidates.
 
-The goal is to prevent E from becoming a collection of unrelated one-off Tools while keeping future capability expansion bounded by Canonical and the frozen E technical contract.
+- **A–G** = capability families.
+- **A.1, A.2, etc.** = candidates within a family.
+- **R1–R4** = representative candidates selected for the current bounded-design work.
+- Earlier **T1–T5** remain historical audit references only.
 
-## SH capability families
+## Capability families
 
-| Family | Purpose | Candidate examples | Default approach |
+| Code | Family | Candidate examples | Current status |
 |---|---|---|---|
-| **A — Search & Discovery** | Find/discover information | Global Search, Web Search | REUSE / ADAPT |
-| **B — Knowledge & Retrieval** | Retrieve from explicitly authorized sources | Connected Read/Retrieve, File Reader, Retrieval | REUSE / ADAPT |
-| **C — Files & Content** | Read, create, transform, extract artifacts | File Creation, Transformation, Extraction | REUSE / ADAPT |
-| **D — Creation & Generation** | Generate new content/media/artifacts | Image Generation, Content/Media Generation | ADAPT |
-| **E — Productivity & Communication** | Bounded work with productivity/communication services | Email, Calendar, Tasks, Docs | ADAPT |
-| **F — External Actions** | Cause bounded external state changes | Create, Update, Send, Submit | ADAPT + stronger governance as required |
-| **G — Integration & Extension** | Bring external capability through a controlled boundary | Connector, Adapter, Plugin/Extension, MCP boundary | ADAPT / REFERENCE |
+| **A** | Search & Discovery | A.1 Global Search [✓ R1]; A.2 Web Search | R1 selected; Web Search candidate |
+| **B** | Knowledge & Retrieval | B.1 Authorized Read / Retrieve [✓ R2]; B.2 Connected Retrieval | R2 selected; others candidate |
+| **C** | Files & Content | C.1 File Content / Extract / Transform [✓ R3]; C.2 File Creation | R3 selected; others candidate |
+| **D** | Creation & Generation | D.1 Image Generation; D.2 Media Generation | Candidate |
+| **E** | Productivity & Communication | E.1 Email; E.2 Calendar; E.3 Docs; E.4 Tasks | Candidate |
+| **F** | External Actions | F.1 Create / Update [✓ R4]; F.2 Send; F.3 Submit | R4 selected for bounded design; others candidate |
+| **G** | Integration & Extension | G.1 Connector / Adapter; G.2 Plugin / Extension; G.3 MCP boundary | Candidate/reference; no marketplace |
 
-**Automation is intentionally not a primary family.** It is an execution/composition pattern that may later use capabilities from several families. E does not thereby become a generic workflow engine.
+Automation is not a primary family. It is an execution/composition pattern that may later combine capabilities from several families. This does not authorize a generic workflow engine.
 
 ## Layer distinction
 
-The following are separate concepts:
+Capability family ≠ Tool ≠ Action ≠ Connector/Plugin/Extension ≠ MCP ≠ Authority.
 
-- **Capability family** — what kind of capability is being provided.
-- **Tool** — a runtime-callable capability grouping one or more Actions.
-- **Action** — the concrete governed operation.
-- **Connector / Plugin / Extension / Adapter** — mechanisms for bringing a capability into SH.
-- **MCP** — an integration/protocol mechanism, not a capability family.
-- **Authorization** — SH Runtime/governance decision over a concrete Action in context.
-- **Risk** — property of the concrete Action + context, not blanket permission attached to a family.
-- **Authority** — remains outside the Tool/provider/plugin/protocol.
+- **Tool** = runtime-callable capability.
+- **Action** = concrete governed operation/effect.
+- **Connector/Adapter/Plugin/Extension** = integration mechanism.
+- **MCP** = protocol/integration mechanism, not SH authority.
+- **Authorization** = SH Runtime/governance decision for the concrete Action.
+- **Risk** = contextual property of the Action, not blanket permission.
+- **Authority** remains outside the Tool/provider/protocol.
 
-Therefore: Capability family is not Tool; Tool is not Connector/Plugin; MCP is not Authority.
+## Current representative set
 
-## Candidate mapping
+| ID | Capability | Boundary tested | Status |
+|---|---|---|---|
+| **R1** | A.1 Global Search | Read / discovery | SELECTED |
+| **R2** | B.1 Authorized Read / Retrieve | Capability ≠ private-data permission | SELECTED FOR BOUNDED DESIGN |
+| **R3** | C.1 File Content / Extract / Transform | Bounded artifact processing | SELECTED FOR BOUNDED DESIGN |
+| **R4** | F.1 External Create / Update | External side effect + risk/confirmation | SELECTED FOR BOUNDED DESIGN |
 
-| Candidate | Family | Role | Source strategy | Status |
-|---|---|---|---|---|
-| **T1 — Global Search** | A — Search & Discovery | First governed reference slice | REUSE / ADAPT governance | 🟢 SELECTED |
-| **T2 — Authorized Read/Retrieve** | B — Knowledge & Retrieval | Read-side authorization test | REUSE / ADAPT valid source | 🟡 CANDIDATE |
-| **T3 — External Create/Update** | F — External Actions | Write-side/high-risk test | ADAPT valid external service | 🟡 HIGH-RISK CANDIDATE |
-| **T4 — Human-confirmed Sensitive Action** | Cross-family governance pattern | Confirmation control | REUSE / ADAPT existing SH pattern | 🟡 PATTERN |
-| **T5 — MCP-compatible Tool/Server Boundary** | G — Integration & Extension | Integration reference | REFERENCE / later ADAPT | 🟡 REFERENCE |
+This is the minimum useful representative set for the current bounded-design work, not a permanent Tool inventory.
 
-Additional candidate families from Resume 69 remain available but are **not automatically selected**: C — Files & Content; D — Creation & Generation; E — Productivity & Communication; and additional A/B/F/G capabilities as real needs emerge.
+## Historical trace
+
+- T1 Global Search → **A.1 / R1**
+- T2 Authorized Read/Retrieve → **B.1 / R2**
+- T3 External Create/Update → **F.1 / R4**
+- T4 Human-confirmed Sensitive Action → **governance pattern used by R4**
+- T5 MCP-compatible Tool/Server Boundary → **G.3 reference pattern**
+
+Do not use T1–T5 as the primary current classification.
+
+## Candidate mapping → existing capability → contract coverage
+
+| Candidate | Existing foundation | E Contract coverage | Disposition |
+|---|---|---|---|
+| A.1 Global Search | Existing bounded runtime capability | High | R1 / selected |
+| B.1 Authorized Read/Retrieve | Knowledge + privacy/permission primitives; connected source still to be verified | High potential | R2 / bounded design |
+| C.1 File Content/Extract/Transform | Existing attachment/file direction; generic Tool boundary not yet verified | High | R3 / bounded design |
+| D.1 Image Generation | Capability concept; provider binding not verified | Medium/high potential | Candidate |
+| E.1–E.4 Productivity/Communication | No concrete integration verified in this pass | High potential | Candidate |
+| F.1 External Create/Update | Permission, audit, and recovery-specific confirmation foundations | Very high | R4 / bounded design |
+| G.1 Connector/Adapter | Runtime boundary exists; generic adapter registry not verified | Architectural | Candidate/reference |
+| G.2 Plugin/Extension | No generic extension runtime/marketplace verified | Architectural | Deferred/boundary |
+| G.3 MCP | External integration reference | Architectural | Reference only |
+
+### Contract coverage summary
+
+- Identity / SH context → 🟢 existing
+- Ownership → 🟢 existing
+- Authorization policy data → 🟢 existing
+- Generic Tool→Action authorization bridge → 🟡 gap
+- Default-deny/private-data boundary → 🟢 governance foundation; concrete source evaluation remains design work
+- Invocation contract → 🟡 gap
+- Risk classification → 🟡 generic semantics gap
+- Confirmation → 🟡 recovery-specific foundation; generic Tool semantics gap
+- Execution boundary → 🟡 generic Tool execution not yet verified
+- Result/error normalization → 🟡 common envelope gap
+- Audit/provenance → 🟢 existing primitive/runtime path; common Tool lifecycle correlation remains design work
+- Adapter/source boundary → 🟡 generic contract gap
+- Capability registry → 🟡 candidate, not verified as existing
+- Plugin/extension boundary → 🟡 conceptual; bounded adapter model only
+- MCP → 🟡 reference; never authority
+- Automation → 🟡 execution pattern; no workflow engine
 
 ## Source strategy
 
-SH should prefer an existing valid capability over rebuilding generic infrastructure.
+**REUSE → ADAPT → BUILD**, with **REFERENCE** for external patterns and **DEFER** where current evolution does not justify the surface.
 
-Use this decision order: **REUSE → ADAPT → BUILD**, with **REFERENCE** for useful external patterns that are not adopted as SH architecture, and **DEFER** where current evolution does not justify the surface area.
+- REUSE existing SH capability when it already satisfies the boundary.
+- ADAPT a valid existing SH/external capability through E governance.
+- BUILD only for SH-specific capability or when no suitable valid source exists.
+- REFERENCE useful standards/patterns without importing their authority.
+- DEFER capability that is not justified by the current bounded evolution.
 
-- **REUSE** — an existing SH capability already satisfies the required contract/boundary.
-- **ADAPT** — an existing SH or external capability is wrapped/governed through the E contract.
-- **BUILD** — only when the capability is SH-specific or no suitable valid source exists.
-- **REFERENCE** — useful pattern/standard; not adopted as SH authority or architecture.
-- **DEFER** — useful possibility, but not justified by the current bounded evolution.
+> **SH builds governance and SH-specific primitives; it should reuse/adapt valid existing capabilities whenever possible rather than rebuilding the world.**
 
-This is an efficiency rule, **not permission to bypass SH governance**.
+## Selection flow
 
-## Selection principle
+CLASSIFY → IDENTIFY SOURCE → REUSE / ADAPT / BUILD / REFERENCE / DEFER → MAP TO E CONTRACT → CHECK CANONICAL → SELECT → TOOL-SPECIFIC BOUNDED DESIGN
 
-E should select the **minimum useful set of representative capabilities** that proves the frozen contract across materially different capability types.
+Selection does not authorize implementation.
 
-The objective is not maximum Tool count.
+## Tool-specific bounded-design layer
 
-A candidate is promoted when it provides meaningful SH value, a useful new contract/governance test, or a justified evolution need, and when its source and integration boundary can be verified.
+Current working documents:
+- WORKSTREAM_E_TOOL_GLOBAL_SEARCH.md
+- WORKSTREAM_E_TOOL_AUTHORIZED_READ.md
+- WORKSTREAM_E_TOOL_FILE_CONTENT.md
+- WORKSTREAM_E_TOOL_EXTERNAL_CREATE_UPDATE.md
 
-A Tool does not become required merely because GPT, Claude, MCP, or another platform exposes an equivalent capability.
-
-## Future candidate flow
-
-CLASSIFY → IDENTIFY SOURCE → REUSE / ADAPT / BUILD / REFERENCE / DEFER → MAP TO E CONTRACT → CHECK CANONICAL → SELECT
-
-If a suitable capability is later discovered already existing in SH or from a valid source, **REUSE/ADAPT takes precedence over rebuilding it**.
+These are design-only. Implementation remains separately gated.
 
 ## Scope guardrails
 
-This classification does **not** authorize:
-
+The classification does not authorize:
 - plugin marketplace/ecosystem;
 - arbitrary third-party code execution;
 - unrestricted autonomous execution;
@@ -1596,169 +1512,27 @@ This classification does **not** authorize:
 - provider/model authority;
 - capability-as-private-data permission;
 - app-side authorization;
-- broad multi-provider abstraction without a concrete need.
+- broad multi-provider abstraction without concrete need.
 
-These remain scope boundaries/deferred items unless a future contract revision explicitly changes them while preserving Canonical invariants.
+These are current scope boundaries/deferred items, not new Canonical prohibitions.
 
-## E master document rule
+## Living-document rule
 
-The master retains only the classification, candidate/status, rationale, dependency/blocker, and link/reference to any Tool-specific document.
+This audit is intentionally dynamic.
 
-Tool-specific implementation detail belongs in: docs/evolution/V1.0/WORKSTREAM_E_TOOL_<NAME>.md
+1. **A–G may expand** when a genuinely new capability family is justified.
+2. **A.x/B.x/etc. may expand** when new candidates are discovered.
+3. **R1–Rx may expand/change** as representative coverage evolves.
+4. A candidate may move between Candidate / Selected / Bounded / Implemented / Deferred without changing its family identity.
+5. Historical T labels are retained only for traceability and must not be mistaken for current taxonomy.
+6. New discussion that changes a substantive E decision must be recorded here or in the relevant Tool-specific document; it must not exist only as chat context.
+7. If evidence shows an existing capability, upgrade the mapping to REUSE/ADAPT rather than rebuild it.
+8. Any proposed E Contract change is a change proposal, not an implementation shortcut, and remains subordinate to Canonical.
 
-This keeps the E master bounded while allowing each selected Tool to be fully designed and verified independently.
+## Current stop point
 
+The requested current scope ends at:
 
-# CANDIDATE MAPPING → EXISTING CAPABILITY DISCOVERY → CONTRACT COVERAGE — 2026-08-29
+**Candidate Mapping → Existing Capability Discovery → Contract Coverage → Representative Tool Selection → Tool-specific Bounded Design**
 
-## Scope of this pass
-
-This pass stops at Tool-specific Bounded Design. It does not authorize implementation, schema migration, new external subscriptions, marketplace/ecosystem work, or broad platform abstraction.
-
-Evidence sources reconciled:
-- Resume 69 candidate pool;
-- current E Audit / bounded E direction;
-- current DEV evidence available through the repository and runtime database;
-- Canonical/contract guardrails already recorded in E;
-- external platform/protocol material only as reference, never as SH authority.
-
-Resume 69 remains a candidate source, not authority.
-
-## 1. Candidate mapping
-
-| Family | Candidate | Resume 69 support | Existing SH/DEV evidence | Contract coverage | Disposition |
-|---|---|---|---|---|---|
-| A Search & Discovery | Global Search | explicit | existing bounded runtime capability | high | REPRESENTATIVE / SELECTED |
-| A Search & Discovery | Web Search | explicit | no SH-native implementation verified in this pass | high potential | CANDIDATE |
-| B Knowledge & Retrieval | Authorized Read/Retrieve | explicit via tools/knowledge direction | knowledge + privacy/permission primitives exist; connected external source not verified | high | REPRESENTATIVE / SELECTED FOR BOUNDED DESIGN |
-| C Files & Content | File Read / Extract / Transform | explicit | attachment/file flow exists; generic Tool boundary not verified | high | REPRESENTATIVE / SELECTED FOR BOUNDED DESIGN |
-| D Creation & Generation | Image Generation | explicit | capability concept present; provider binding not verified | medium/high | CANDIDATE |
-| E Productivity & Communication | Email / Calendar / Tasks / Docs | external-service direction | no concrete SH integration verified in this pass | high potential | CANDIDATE |
-| F External Actions | Create / Update / Send / Submit | explicit | permission + audit + high-risk confirmation foundations exist | very high | REPRESENTATIVE / SELECTED FOR BOUNDED DESIGN |
-| G Integration & Extension | Connector / Adapter | explicit | runtime boundary exists; generic adapter registry not verified | architectural | REFERENCE / CANDIDATE |
-| G Integration & Extension | Plugin / Extension | explicit | no generic marketplace/extension runtime verified | architectural | DEFER / BOUNDARY ONLY |
-| G Integration & Extension | MCP boundary | not a capability family in Resume 69 | external reference pattern | architectural | REFERENCE ONLY |
-
-### Discovery finding
-
-The DEV database currently contains reusable governance/data primitives including:
-
-- accounts
-- sh_instances
-- sh_ownership
-- permission_matrix
-- memories
-- knowledge
-- audit_events
-- runtime_high_risk_confirmations
-- conversations
-- journey_events
-- experiences
-
-These are existing foundations, not evidence that a generic Tool framework already exists.
-
-The current permission_matrix explicitly models actors, authority domains, actions including READ, WRITE, and EXECUTE, target domains, target SH scope, and ALLOW/DENY/ESCALATE decisions. The current high-risk confirmation table is explicitly present, but the existing verified operation is recovery-oriented rather than a generic Tool confirmation framework.
-
-Conclusion: E should reuse these primitives where their contracts fit; it must not create parallel identity, permission, private-data, or audit systems merely to support Tools.
-
-## 2. Contract coverage matrix
-
-| Contract concern | Existing foundation | Representative test | Remaining design gap |
-|---|---|---|---|
-| Identity / SH context | 🟢 existing | all selected | bind invocation to resolved context |
-| Ownership | 🟢 existing | all selected | no new ownership model |
-| Authorization | 🟢 permission matrix + runtime checks | Search / Read / Action | generic Tool→Action authorization bridge |
-| Default deny / private-data boundary | 🟢 existing governance foundation | Read / Action | concrete evaluation semantics per source |
-| Tool ≠ Authority | 🟢 contract principle | all selected | preserve at adapter/runtime boundary |
-| Invocation | 🟡 bounded Global Search exists | Search | generic invocation envelope |
-| Risk classification | 🟡 direction/foundation | Action | generic classification contract |
-| Confirmation | 🟡 recovery-specific foundation | Action | generic confirmation applicability |
-| Execution | 🟡 runtime boundary exists | Action | generic eligibility/execution boundary |
-| Result normalization | 🟡 concrete Search result exists | Search / Read / File | common result/error envelope |
-| Audit / provenance | 🟢 audit primitive | all selected | common Tool lifecycle correlation |
-| Adapter/source boundary | 🟡 concrete Search implementation | Read / File / Action | generic adapter contract |
-| Capability registry | 🟡 candidate only | future | no registry implementation in this pass |
-| Plugin / extension boundary | 🟡 conceptual | future | bounded adapter model only |
-| MCP | 🟡 external reference | future | protocol must not become SH authority |
-| Automation | 🟡 execution pattern | future | no workflow engine |
-
-## 3. Representative Tool selection
-
-The minimum useful representative set for the current E design is:
-
-### R1 — Global Search
-Selected. Existing bounded capability; lowest-risk reference slice.
-
-Tests: INVOCATION → AUTHORIZATION → EXECUTION → NORMALIZED RESULT → AUDIT
-
-### R2 — Authorized Read / Retrieve
-Selected for bounded design. Tests the crucial boundary:
-
-CAPABILITY TO READ ≠ PERMISSION TO READ PRIVATE DATA
-
-It may use an external/connected source later, but source/provider selection is not silently fixed here.
-
-### R3 — File Content Read / Extract / Transform
-Selected for bounded design. Uses the already-proven file/attachment direction to test artifact input without forcing a new external service. The bounded design must distinguish read/extract from creating or exporting artifacts.
-
-### R4 — External Create / Update
-Selected for bounded design only; not implementation-ready. This is the representative side-effect Tool/Action that validates:
-
-PLAN → AUTHORIZATION → CONFIRMATION → EXECUTE → AUDIT
-
-It is intentionally not first implementation.
-
-### Non-tool patterns retained
-
-- T4 Human-confirmed Sensitive Action = governance pattern used by R4.
-- T5 MCP-compatible boundary = integration reference used only when a later source requires it.
-
-### Deferred candidates
-
-Image Generation, Productivity/Communication integrations, broad Web Search providers, Plugin/Extension ecosystem, and generic Automation remain candidates but are not required to complete the current representative contract coverage.
-
-## 4. Selection rationale
-
-This set is deliberately small but crosses materially different boundaries:
-
-R1 READ/DISCOVER
-R2 AUTHORIZED PRIVATE-SOURCE READ
-R3 ARTIFACT PROCESSING
-R4 EXTERNAL STATE CHANGE
-
-Together they test more of E than implementing four similar search providers.
-
-The selection does not mean these four are the permanent V1.0 Tool inventory. A later evolution may replace, add, or remove representatives when evidence or real product need justifies it.
-
-## 5. Tool-specific bounded design status
-
-The following Tool-specific design documents are now the next working layer:
-
-- WORKSTREAM_E_TOOL_GLOBAL_SEARCH.md
-- WORKSTREAM_E_TOOL_AUTHORIZED_READ.md
-- WORKSTREAM_E_TOOL_FILE_CONTENT.md
-- WORKSTREAM_E_TOOL_EXTERNAL_CREATE_UPDATE.md
-
-Each document is design-only. Implementation remains separately gated.
-
-## 6. Design completion criteria
-
-A Tool-specific bounded design is considered complete only when it defines:
-
-1. capability purpose and non-goals;
-2. Tool vs Action distinction;
-3. source/provider strategy;
-4. input/output boundary;
-5. identity/SH binding;
-6. authorization decision point;
-7. risk class;
-8. confirmation requirement;
-9. execution boundary;
-10. result/error normalization;
-11. audit/provenance expectations;
-12. private-data boundary;
-13. failure/containment behavior;
-14. dependencies and blockers;
-15. what remains explicitly out of scope.
-
-No design may weaken Canonical invariants or delegate authorization to the App/UI/provider.
+No implementation, migration, marketplace, broad automation, or provider lock-in is authorized by this document.
