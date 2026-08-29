@@ -192,3 +192,85 @@ Not yet implementation-authorized.
 Not yet a database contract.
 Not Canonical amendment.
 
+
+## 15. E1 reconciliation result — 2026-08-29
+
+### Authority cross-check
+
+E1 was reconciled against:
+- Canonical SH Core;
+- SH Full Build Scope;
+- SH Full Implementation Contract;
+- SH Full Implementation Guide;
+- SH Full Execution Strategy;
+- V1.0 Roadmap;
+- Workstream E Audit;
+- Resume 69 as historical/evolution input;
+- current DEV implementation evidence already established by E0.
+
+### Findings
+
+1. **Capability / Tool / Action distinction is supported.**
+   The Canonical and Implementation Contract establish Tools and Actions as distinct SH Core/runtime concepts. E1's explicit Capability layer is an evolution-level vocabulary clarification, not a Canonical replacement.
+
+2. **Tool is not authority.**
+   This is directly consistent with Canonical/contract guardrails and therefore remains a hard E1 boundary.
+
+3. **Action is the concrete operation/effect boundary.**
+   This is compatible with the contract requirement that Actions may produce effects/changes and that high-risk Actions require governed handling.
+
+4. **Intent is not execution.**
+   E1's intent/execution separation is consistent with the runtime governance model. It does not create an autonomous-execution permission.
+
+5. **Existing DEV governance primitives remain upstream dependencies.**
+   E1 does not require a second authority system. The existing identity, ownership, permission-policy, runtime-boundary, confirmation, and audit primitives remain the foundation to which later invocation/authorization contracts must connect.
+
+6. **No Canonical contradiction was found.**
+   No E1 decision requires changing Canonical semantics.
+
+### Reclassification
+
+| E1 item | Previous | Reconciled |
+|---|---|---|
+| Capability concept | 🟡/🟢 | 🟢 supported as evolution vocabulary |
+| Tool concept | 🟢 | 🟢 verified |
+| Action concept | 🟢 conceptual / 🟡 implementation | 🟢 contract-supported concept |
+| Tool ≠ Authority | 🔴 guardrail | 🔴 hard prohibited boundary |
+| Capability ≠ Permission | 🔴 guardrail | 🔴 hard prohibited boundary |
+| Intent ≠ Execution | 🟡 design | 🟢 accepted E1 boundary |
+| Physical registry/schema | OPEN | OPEN / deferred to E2+ |
+| Generic invocation contract | OPEN | OPEN / E2+ |
+| Generic authorization evaluator | OPEN | OPEN / E2+ |
+
+### E1 acceptance
+
+**E1 = 🟢 BOUNDED DESIGN ACCEPTED / CLOSED**
+
+E1 is closed at the vocabulary/boundary level.
+
+This closure does **not** authorize implementation.
+
+It means only that the conceptual distinction and authority guardrails are sufficiently reconciled to become the input contract for the next bounded-design package.
+
+### E1 exit dependency
+
+The next design package must not start by inventing a new authority model.
+
+It must define how a concrete invocation is represented and how that invocation maps into the existing authorization/ownership/runtime foundations.
+
+Candidate next package:
+
+**E2 — Invocation + Authorization Boundary**
+
+This is provisional until E2 audit confirms whether registry concerns should be included, merged, or deferred.
+
+### Implementation gate
+
+Still blocked:
+
+- no code;
+- no migration;
+- no new Tool runtime;
+- no registry implementation;
+- no Supabase mutation.
+
