@@ -949,3 +949,78 @@ The next bounded-design task is to specify the generic contract for:
 Only after those contracts are reconciled against the existing DEV foundations should an implementation slice be authorized.
 
 No Supabase mutation was performed in this reconciliation pass.
+
+
+# BOUNDED GENERIC CONTRACT PASS — 2026-08-29
+
+## Status
+
+**DESIGN / RECONCILIATION — NOT IMPLEMENTATION**
+
+This pass matures the seven generic contracts required by E. It does not create database schema, runtime code, UI, or a generic Tool framework.
+
+## 1. Invocation Contract
+An Invocation is a governed request to perform one specific Tool/Action operation.
+Minimum semantic fields: invocation_id; actor/account identity; sh_id; capability identity; tool identity; action identity; target/resource where applicable; input/payload; request provenance/source; correlation/trace identity; requested-at timestamp.
+Rules: Invocation ≠ authorization; Invocation ≠ execution; invalid identity or SH context fails before authorization; client request does not grant execution authority.
+Status: 🟢 bounded design
+
+## 2. Authorization Decision Contract
+Authorization is evaluated by the SH Runtime for the concrete Action and invocation context.
+Decision vocabulary: ALLOW; DENY; ESCALATE.
+Context may include actor, account, SH, authority relationship, Action, target/resource, requested scope, relevant policy/rules, and invocation context.
+Rules: ownership is not blanket Action permission; capability availability is not permission; confirmation cannot convert DENY into ALLOW; Tool/provider/plugin cannot make the authorization decision.
+permission_matrix remains the existing policy foundation; a generic evaluator API is still not verified in DEV.
+Status: 🟡 design complete / implementation gap
+
+## 3. Risk / Confirmation Decision Contract
+Risk is evaluated at concrete Action + invocation context.
+Bounded vocabulary: LOW where policy permits without confirmation; HIGH where confirmation is required. Additional states require evidence.
+For HIGH: PLAN → AUTHORIZATION → CONFIRMATION → EXECUTE → AUDIT.
+Confirmation must bind to the approved operation/context sufficiently to prevent replay or substitution.
+Existing runtime_high_risk_confirmations is a reusable foundation/pattern but currently implements RECOVERY_RESTORE; generic Tool confirmation is not verified.
+Status: 🟡 design complete / generic implementation gap
+
+## 4. Execution Eligibility Contract
+Execution may start only after Runtime establishes eligibility.
+Eligibility binds, as applicable: invocation_id; actor/account; sh_id; capability/tool/action; target; authorization decision; confirmation state when required; freshness/expiry; correlation identity.
+Boundary: Caller → Runtime → Governance Gates → Adapter → Tool.
+The concrete Tool cannot reinterpret authorization, bypass confirmation, or select a more privileged Action.
+Status: 🟡 design complete / implementation gap
+
+## 5. Adapter Contract
+Adapter is the controlled bridge between the governed Runtime contract and a concrete Tool implementation.
+Governed Execution Request → Adapter → Concrete Tool.
+Adapter maps governed input, preserves approved identity/context/target/correlation, invokes only the approved Tool/Action, captures raw outcome, and returns it to the Runtime result boundary.
+Adapter MUST NOT authorize, grant permissions, change actor/SH context, substitute Action, bypass risk/confirmation, or become authority.
+Status: 🟡 design complete / implementation gap
+
+## 6. Result / Error Contract
+Runtime returns a normalized governed envelope around Tool-specific output.
+Minimum conceptual envelope: execution_id; tool_id; action_id; status; data/result; error; metadata; timestamp/correlation.
+Minimum status classes: SUCCEEDED; FAILED; REJECTED_BEFORE_EXECUTION; RESULT_UNAVAILABLE.
+Errors distinguish governance rejection, confirmation/authorization failure, execution failure, timeout/unavailability, and result interpretation/normalization failure.
+External Tool output remains untrusted data and cannot become a system instruction.
+Global Search provides evidence for a bounded normalized result shape, but does not establish the generic envelope as implemented.
+Status: 🟡 design complete / generic implementation gap
+
+## 7. Audit / Trace Contract
+Generic lifecycle: Invocation → Authorization → Risk → Confirmation → Execution → Result → Audit.
+Candidate events: INVOCATION_REQUESTED; AUTHORIZATION_ALLOWED/DENIED/ESCALATED; CONFIRMATION_REQUIRED/CONFIRMED/REJECTED/EXPIRED; EXECUTION_STARTED/COMPLETED/FAILED; RESULT_RECORDED.
+Final taxonomy must reuse existing audit infrastructure and actual runtime semantics.
+runtime_record_audit and audit_events provide the persistence/runtime foundation. E must not create a competing audit authority.
+Status: 🟢 foundation verified / 🟡 generic Tool event taxonomy still to be mapped
+
+## Contract composition
+The seven contracts form one governed lifecycle, not seven independent subsystems:
+Invocation → Authorization Decision → Risk/Confirmation → Execution Eligibility → Adapter → Result/Error → Audit.
+A failed governance gate terminates or diverts the lifecycle before execution.
+
+## Explicit non-derivations
+This design does NOT infer a generic registry, marketplace, arbitrary autonomous Tool calling, a new permission model, a new audit store, a generic confirmation table, provider/model authority, or client-side authorization.
+
+## Current E implementation readiness
+NOT READY FOR IMPLEMENTATION.
+The next prerequisite is a concrete mapping from each contract to existing DEV primitives and one bounded reference Tool/Action.
+Next pass: reconcile the exact Runtime caller/orchestration point; identity/authority/permission primitives; generic authorization evaluation placement; generic confirmation versus recovery-specific confirmation; execution/adapter location; normalized result boundary; audit event mapping.
+Only then should implementation scope be frozen.
