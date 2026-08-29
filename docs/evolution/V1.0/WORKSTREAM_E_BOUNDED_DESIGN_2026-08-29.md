@@ -554,3 +554,17 @@ E1 has been split into its own living document for clarity and long-term maintai
     docs/evolution/V1.0/WORKSTREAM_E1_CAPABILITY_TOOL_ACTION_2026-08-29.md
 
 The master E document remains the orchestration/index document. The dedicated E1 document contains the E1 bounded-design material. No authority level changes by this split.
+
+## 24. E1 closure / next package — 2026-08-29
+
+E1 dedicated document has completed reconciliation and is now **🟢 BOUNDED DESIGN ACCEPTED / CLOSED**.
+
+Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E1_CAPABILITY_TOOL_ACTION_2026-08-29.md
+
+E1 closure is vocabulary/boundary closure only and does not authorize implementation.
+
+Next candidate package:
+**E2 — Invocation + Authorization Boundary**
+
+Before E2 is numbered/frozen, audit whether registry concerns belong inside E2 or should remain a separate/deferred package. Do not assume the provisional E2 decomposition is final.
