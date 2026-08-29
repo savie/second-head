@@ -1504,3 +1504,106 @@ The E master retains only:
 - link to Tool-specific document.
 
 No Tool-specific implementation detail should be copied into the master unless it changes an E-wide contract or boundary.
+
+
+# E TOOL CLASSIFICATION & SOURCE STRATEGY — 2026-08-29
+
+## Purpose
+
+This section adds the reconciled capability classification from Resume 69, E contract, DEV evidence, and external reference patterns. It is a classification layer, not an implementation mandate.
+
+The goal is to prevent E from becoming a collection of unrelated one-off Tools while keeping future capability expansion bounded by Canonical and the frozen E technical contract.
+
+## SH capability families
+
+| Family | Purpose | Candidate examples | Default approach |
+|---|---|---|---|
+| **A — Search & Discovery** | Find/discover information | Global Search, Web Search | REUSE / ADAPT |
+| **B — Knowledge & Retrieval** | Retrieve from explicitly authorized sources | Connected Read/Retrieve, File Reader, Retrieval | REUSE / ADAPT |
+| **C — Files & Content** | Read, create, transform, extract artifacts | File Creation, Transformation, Extraction | REUSE / ADAPT |
+| **D — Creation & Generation** | Generate new content/media/artifacts | Image Generation, Content/Media Generation | ADAPT |
+| **E — Productivity & Communication** | Bounded work with productivity/communication services | Email, Calendar, Tasks, Docs | ADAPT |
+| **F — External Actions** | Cause bounded external state changes | Create, Update, Send, Submit | ADAPT + stronger governance as required |
+| **G — Integration & Extension** | Bring external capability through a controlled boundary | Connector, Adapter, Plugin/Extension, MCP boundary | ADAPT / REFERENCE |
+
+**Automation is intentionally not a primary family.** It is an execution/composition pattern that may later use capabilities from several families. E does not thereby become a generic workflow engine.
+
+## Layer distinction
+
+The following are separate concepts:
+
+- **Capability family** — what kind of capability is being provided.
+- **Tool** — a runtime-callable capability grouping one or more Actions.
+- **Action** — the concrete governed operation.
+- **Connector / Plugin / Extension / Adapter** — mechanisms for bringing a capability into SH.
+- **MCP** — an integration/protocol mechanism, not a capability family.
+- **Authorization** — SH Runtime/governance decision over a concrete Action in context.
+- **Risk** — property of the concrete Action + context, not blanket permission attached to a family.
+- **Authority** — remains outside the Tool/provider/plugin/protocol.
+
+Therefore: Capability family is not Tool; Tool is not Connector/Plugin; MCP is not Authority.
+
+## Candidate mapping
+
+| Candidate | Family | Role | Source strategy | Status |
+|---|---|---|---|---|
+| **T1 — Global Search** | A — Search & Discovery | First governed reference slice | REUSE / ADAPT governance | 🟢 SELECTED |
+| **T2 — Authorized Read/Retrieve** | B — Knowledge & Retrieval | Read-side authorization test | REUSE / ADAPT valid source | 🟡 CANDIDATE |
+| **T3 — External Create/Update** | F — External Actions | Write-side/high-risk test | ADAPT valid external service | 🟡 HIGH-RISK CANDIDATE |
+| **T4 — Human-confirmed Sensitive Action** | Cross-family governance pattern | Confirmation control | REUSE / ADAPT existing SH pattern | 🟡 PATTERN |
+| **T5 — MCP-compatible Tool/Server Boundary** | G — Integration & Extension | Integration reference | REFERENCE / later ADAPT | 🟡 REFERENCE |
+
+Additional candidate families from Resume 69 remain available but are **not automatically selected**: C — Files & Content; D — Creation & Generation; E — Productivity & Communication; and additional A/B/F/G capabilities as real needs emerge.
+
+## Source strategy
+
+SH should prefer an existing valid capability over rebuilding generic infrastructure.
+
+Use this decision order: **REUSE → ADAPT → BUILD**, with **REFERENCE** for useful external patterns that are not adopted as SH architecture, and **DEFER** where current evolution does not justify the surface area.
+
+- **REUSE** — an existing SH capability already satisfies the required contract/boundary.
+- **ADAPT** — an existing SH or external capability is wrapped/governed through the E contract.
+- **BUILD** — only when the capability is SH-specific or no suitable valid source exists.
+- **REFERENCE** — useful pattern/standard; not adopted as SH authority or architecture.
+- **DEFER** — useful possibility, but not justified by the current bounded evolution.
+
+This is an efficiency rule, **not permission to bypass SH governance**.
+
+## Selection principle
+
+E should select the **minimum useful set of representative capabilities** that proves the frozen contract across materially different capability types.
+
+The objective is not maximum Tool count.
+
+A candidate is promoted when it provides meaningful SH value, a useful new contract/governance test, or a justified evolution need, and when its source and integration boundary can be verified.
+
+A Tool does not become required merely because GPT, Claude, MCP, or another platform exposes an equivalent capability.
+
+## Future candidate flow
+
+CLASSIFY → IDENTIFY SOURCE → REUSE / ADAPT / BUILD / REFERENCE / DEFER → MAP TO E CONTRACT → CHECK CANONICAL → SELECT
+
+If a suitable capability is later discovered already existing in SH or from a valid source, **REUSE/ADAPT takes precedence over rebuilding it**.
+
+## Scope guardrails
+
+This classification does **not** authorize:
+
+- plugin marketplace/ecosystem;
+- arbitrary third-party code execution;
+- unrestricted autonomous execution;
+- generic workflow/automation platform;
+- provider/model authority;
+- capability-as-private-data permission;
+- app-side authorization;
+- broad multi-provider abstraction without a concrete need.
+
+These remain scope boundaries/deferred items unless a future contract revision explicitly changes them while preserving Canonical invariants.
+
+## E master document rule
+
+The master retains only the classification, candidate/status, rationale, dependency/blocker, and link/reference to any Tool-specific document.
+
+Tool-specific implementation detail belongs in: docs/evolution/V1.0/WORKSTREAM_E_TOOL_<NAME>.md
+
+This keeps the E master bounded while allowing each selected Tool to be fully designed and verified independently.
