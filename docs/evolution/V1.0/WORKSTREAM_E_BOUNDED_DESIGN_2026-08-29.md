@@ -590,3 +590,13 @@ E3 audit/bounded design completed. Dedicated document:
 **E3 = 🟢 BOUNDED DESIGN ACCEPTED / CLOSED.** No implementation authorization.
 
 Next candidate: **E4 — Execution Boundary / Tool Invocation Runtime**, subject to its own audit. Registry remains deferred until dependency is proven.
+
+
+## 27. E4 dedicated document
+
+E4 audit/reconciliation completed. Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E4_EXECUTION_BOUNDARY_2026-08-29.md
+
+**E4 = 🟡 BOUNDED DESIGN ACCEPTED / IMPLEMENTATION BLOCKED.** Generic Tool execution is not evidenced as existing; Runtime foundation exists but is primarily model/conversation runtime.
+
+Next candidate: **E5 — Tool Adapter + Result Contract**, subject to its own audit. Registry remains deferred.
