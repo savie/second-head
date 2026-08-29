@@ -85,6 +85,10 @@ export default function ChatScreen() {
   const [memoryLoading, setMemoryLoading] = useState(false);
   const [memoryError, setMemoryError] = useState<string | null>(null);
   const [memoryRows, setMemoryRows] = useState<Array<Record<string, unknown>>>([]);
+  const [knowledgeOpen, setKnowledgeOpen] = useState(false);
+  const [knowledgeLoading, setKnowledgeLoading] = useState(false);
+  const [knowledgeError, setKnowledgeError] = useState<string | null>(null);
+  const [knowledgeRows, setKnowledgeRows] = useState<Array<Record<string, unknown>>>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -154,6 +158,23 @@ export default function ChatScreen() {
       setMemoryRows([]);
     } finally {
       setMemoryLoading(false);
+    }
+  }
+
+
+  async function openKnowledgeSurface() {
+    if (!context?.sh_id) return;
+    setKnowledgeOpen(true);
+    setKnowledgeLoading(true);
+    setKnowledgeError(null);
+    try {
+      const result = await loadSHContext({ shId: context.sh_id, query: draft.trim() || conversationTitle, memoryLimit: 1, knowledgeLimit: 10, journeyLimit: 1 });
+      setKnowledgeRows(result.knowledge);
+    } catch (error) {
+      setKnowledgeError(error instanceof Error ? error.message : 'Knowledge could not be loaded.');
+      setKnowledgeRows([]);
+    } finally {
+      setKnowledgeLoading(false);
     }
   }
 
@@ -560,7 +581,7 @@ export default function ChatScreen() {
         <View style={{ gap: 5 }}><Text style={{ fontSize: 13, fontWeight: '800', color: '#5D45A5' }}>CURRENT</Text><Text style={{ fontSize: 16, fontWeight: '700', color: '#22211F' }}>{conversationTitle}</Text><Text style={{ color: '#6B6A66' }}>{lifecycleState === 'streaming' ? 'SH sedang memproses percakapan.' : 'Conversation context.'}</Text></View>
         <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Journey</Text><Text style={{ color: '#6B6A66' }}>Continuity surface tersedia dari navigation.</Text></View>
         <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Memory</Text><Text style={{ color: '#6B6A66' }}>Bounded owner context tersedia dari Runtime.</Text><Button title="Open Memory" onPress={() => void openMemorySurface()} /></View>
-        <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Memory · Knowledge · Experience</Text><Text style={{ color: '#6B6A66' }}>Contextual domains — bukan top-level navigation.</Text></View>
+        <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Memory · Knowledge · Experience</Text><Text style={{ color: '#6B6A66' }}>Contextual domains — bukan top-level navigation.</Text></View><View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Knowledge</Text><Text style={{ color: '#6B6A66' }}>Authorized bounded knowledge context tersedia dari Runtime.</Text><Button title="Open Knowledge" onPress={() => void openKnowledgeSurface()} /></View>
         {attachments.length ? <View style={{ borderWidth: 1, borderColor: '#E3E1DC', borderRadius: 14, padding: 13, gap: 5, backgroundColor: '#FFFFFF' }}><Text style={{ fontWeight: '800', color: '#22211F' }}>Attachments</Text><Text style={{ color: '#6B6A66' }}>{attachments.length} selected</Text></View> : null}
       </>}><View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
