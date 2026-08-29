@@ -640,3 +640,13 @@ E8 audit/reconciliation completed. Dedicated document:
 **E8 = 🟡 BOUNDED DESIGN ACCEPTED / CONCRETE SELECTION BLOCKED BY EVIDENCE.** Current DEV evidence does not justify promoting Web, Calendar, Image Generation, or File Processing to an implementation-ready first Tool/Action. Minimum semantic lifecycle is frozen; physical contract remains open.
 
 Next candidate: **E9 — Existing DEV Capability-to-Action Mining**, to inspect existing working capabilities for a suitable internal first governed Action before inventing a new Tool.
+
+
+## 32. E9 dedicated document
+
+E9 audit/reconciliation completed. Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E9_CAPABILITY_ACTION_MINING_2026-08-29.md
+
+**E9 = 🟢 CANDIDATE IDENTIFIED — GLOBAL SEARCH PROMOTED TO FIRST-SLICE CANDIDATE.** Existing `globalSearch` + `global_search_bounded` provide the strongest bounded internal read-oriented operation found so far. This is a design promotion only; implementation remains blocked pending E10 contract/authorization/risk freeze.
+
+Next candidate: **E10 — GLOBAL SEARCH ACTION CONTRACT + AUTHORIZATION/RISK FREEZE**.
