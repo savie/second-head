@@ -530,15 +530,15 @@ Presentation-only capability does not satisfy C-Close.
 C1  🟢 Verified
 C2  🟢 Verified
 C3  🟢 Verified
-C4  🟡 Implemented / verification pending
+C4  🟢 Verified
 C5  🟢 Verified / no dedicated implementation required
 C6  🟢 Verified
 C7  🟢 Verified
-C8  🟡 Implemented / provider path selected / verification pending
+C8  🟢 Verified / provider path selected
 C-Close ⏳ Not started
 ```
 
-The 🟡 state is intentional: implementation exists, but verification is the authority for completion.
+C4 and C8 are now recorded GREEN based on the DEV verification results supplied after implementation. C-Close remains the final integration gate.
 
 ---
 
