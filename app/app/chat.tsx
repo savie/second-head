@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, Modal, ScrollView, Share, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Image, Modal, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -13,7 +13,7 @@ import { loadSHContext } from '../services/context';
 
 type PendingConfirmation = { confirmation_id: string; action_id: string; title: string; description: string };
 type ChatLifecycleState = 'active' | 'background' | 'idle' | 'streaming' | 'cancelled' | 'error';
-type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string; conversationId?: string; createdAt?: string; attachmentName?: string };
+type Message = { id: string; role: 'user' | 'assistant' | 'system'; text: string; conversationId?: string; createdAt?: string; attachmentName?: string; generatedImage?: { b64_json: string; media_type: string } };
 type ConversationRow = { id: string; role: Message['role']; content: string; created_at: string; metadata?: Record<string, unknown> | null };
 type ConversationSession = { id: string; title: string; startedAt: string; endedAt: string; rows: ConversationHistoryRow[] };
 
@@ -663,7 +663,7 @@ export default function ChatScreen() {
           <View style={{ maxWidth: '88%', borderRadius: 16, padding: 12, backgroundColor: message.role === 'user' ? '#E0F2FE' : '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB' }}>
             <Text style={{ fontSize: 12, fontWeight: '700', color: '#6B7280', marginBottom: 5 }}>{message.role === 'user' ? 'You' : message.role === 'assistant' ? 'SH' : 'System'}</Text>
             {message.attachmentName ? <Text style={{ color: '#374151', marginBottom: 6 }}>📎 {message.attachmentName}</Text> : null}
-            {editingId === message.id ? <View style={{ gap: 8 }}><TextInput value={editingText} onChangeText={setEditingText} multiline style={inputStyle} /><View style={{ flexDirection: 'row', gap: 8 }}><Button title="Save" onPress={saveEditedMessage} /><Button title="Cancel" onPress={() => { setEditingId(null); setEditingText(''); }} /></View></View> : <Text style={{ color: '#111827', lineHeight: 21 }}>{message.text || (sending && message.role === 'assistant' ? 'SH is thinking…' : '')}</Text>}
+            {editingId === message.id ? <View style={{ gap: 8 }}><TextInput value={editingText} onChangeText={setEditingText} multiline style={inputStyle} /><View style={{ flexDirection: 'row', gap: 8 }}><Button title="Save" onPress={saveEditedMessage} /><Button title="Cancel" onPress={() => { setEditingId(null); setEditingText(''); }} /></View></View> : <View style={{ gap: 8 }}><Text style={{ color: '#111827', lineHeight: 21 }}>{message.text || (sending && message.role === 'assistant' ? 'SH is thinking…' : '')}</Text>{message.generatedImage ? <Image source={{ uri: `data:${message.generatedImage.media_type};base64,${message.generatedImage.b64_json}` }} style={{ width: 280, height: 280, borderRadius: 12 }} resizeMode="contain" accessibilityLabel="Generated image" /> : null}</View>}
             {!editingId && message.text ? <View style={{ alignItems: 'flex-end', marginTop: 6 }}><Button title="⋮" onPress={() => openMessageActions(message)} /></View> : null}
           </View>
         </View>)}
