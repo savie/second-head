@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — WORKSTREAM E TOOL — R4 EXTERNAL ACTION
 
-Status: SELECTED CANDIDATE / TOOL-SPECIFIC BOUNDED DESIGN
+Status: VERIFIED CANDIDATE / IMPLEMENTATION BLOCKED — EXTERNAL CAPABILITY GAP
 Date: 2026-08-29
 Branch: dev
 
@@ -49,7 +49,7 @@ Preferred order:
 4. otherwise adapt it through SH Runtime;
 5. build only SH-specific governance/bridge behavior that cannot reasonably be reused.
 
-The concrete provider and operation are NOT locked by this document. They require separate verification before implementation.
+Source-level verification completed against the current DEV runtime. The configured provider secrets (OpenRouter, Groq, OpenAI, Gemini, Mistral, Hugging Face) currently back model-generation capability; they do not constitute a verified external CREATE/UPDATE target. Repository inspection also did not identify an existing external CRUD connector/webhook/action adapter that can satisfy the R4 contract without inventing a new authority boundary.
 
 ## 5. Boundary
 
@@ -217,7 +217,7 @@ R4 does not establish:
 
 ## 15. Exit Condition
 
-R4 bounded design is ready for later implementation when one existing, verified external capability can be mapped end-to-end:
+R4 remains blocked until one existing, verified external capability can be mapped end-to-end:
 
 WHO
 → SH/account
@@ -232,7 +232,7 @@ WHO
 → NORMALIZE
 → AUDIT
 
-The concrete provider/action is not locked until that verification is completed.
+The six configured model-provider credentials are explicitly NOT treated as R4 external-action providers. Using them for R4 would conflate model generation with external state mutation and would violate the bounded candidate definition. No fake/pseudo external mutation is introduced.
 
 ## R4 Conclusion
 
