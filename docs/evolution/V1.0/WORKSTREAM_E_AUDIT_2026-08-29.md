@@ -130,6 +130,137 @@ App already uses a backend/runtime service boundary. The App is not treated as e
 
 **Important:** 🟡 and 🔴 are audit labels, not final decisions. Yellow must be audited; red must have an explicit evidence-based reason for deferral or prohibition.
 
+## E0 FINAL DOCUMENT RECONCILIATION — 2026-08-29
+
+### Authority reconciliation
+
+The final source hierarchy for Workstream E is:
+
+1. `docs/canonical/SECOND_HEAD_SH_CORE_CANONICAL_v1.0_BILINGUAL.md` — Canonical conceptual authority.
+2. `docs/canonical/SECOND_HEAD_SH_FULL_BUILD_SCOPE_v1.0.md` — approved/locked build scope.
+3. `docs/canonical/SECOND_HEAD_SH_FULL_IMPLEMENTATION_CONTRACT_v1.0.md` — implementation contract.
+4. `docs/canonical/SECOND_HEAD_SH_FULL_IMPLEMENTATION_GUIDE_v1.0.md` — implementation guidance.
+5. `docs/canonical/SECOND_HEAD_SH_FULL_EXECUTION_STRATEGY_v1.0.md` — derived execution strategy.
+6. `docs/evolution/V1.0/ROADMAP.md` — V1.0 working roadmap.
+7. `docs/resume/SECOND_HEAD_SESSION_RESUME_69.md` — historical/brainstorming continuity input only.
+8. Current DEV source/runtime/database — implementation evidence, not conceptual authority.
+
+No evidence requires changing the Canonical documents.
+
+### Roadmap reconciliation
+
+The V1.0 roadmap explicitly defines Workstream E as **Hands / Tools / Authority** and describes it as a system capability layer, not merely UI.
+
+The roadmap's minimum lifecycle requirements are:
+- capability identity;
+- invocation contract;
+- actor/SH context;
+- authorization;
+- risk classification;
+- confirmation when required;
+- execution;
+- result normalization;
+- audit/event recording.
+
+It also requires distinction among built-in Tools, Extensions/Plugins, and provider/model capabilities, while explicitly deferring a plugin marketplace/broad extension ecosystem until the execution/authority contract is stable.
+
+The roadmap's V1.0 gate requires at least one meaningful tool/action to traverse the complete authorized lifecycle without placing authority decisions in the App.
+
+### Contract reconciliation
+
+The Implementation Contract confirms:
+- Tools are external capabilities callable by Runtime;
+- Tools are not authority;
+- Tool results are external/untrusted results, not system instructions;
+- Actions are operations that produce effects/changes outside internal reasoning;
+- high-risk Actions require authorization, confirmation, execution, and audit;
+- authorization remains distinct from ownership/private-data access;
+- Runtime is the execution/orchestration layer.
+
+The Build Scope explicitly includes Tools and Actions in SH Full and includes authorization matrix, action authorization, audit schema, and Tool/action execution architecture.
+
+### Resume 69 reconciliation
+
+Resume 69 supplies useful evolutionary design input:
+`SH → capability/tool → authorization → execution → result → reasoning`,
+the Hands/Authority framing, owner confirmation, tool/action examples, and references to external capability patterns.
+
+Resume 69 remains brainstorming/history and does not override Canonical or contracts.
+
+### Final E boundary
+
+**E is allowed to evolve the missing generic capability/execution bridge on top of existing SH governance/runtime primitives.**
+
+The first bounded design target should cover:
+1. generic authorization decision semantics;
+2. Capability / Tool / Action contracts;
+3. invocation identity and actor/SH context;
+4. risk classification and confirmation semantics;
+5. runtime execution boundary;
+6. normalized result contract;
+7. lifecycle audit/traceability.
+
+Existing identity, ownership, authority, audit, and recovery-specific confirmation mechanisms must be reused where semantically compatible, not duplicated blindly.
+
+### Explicit non-scope / deferred
+
+The following are not first-slice E requirements based on the reconciled evidence:
+- plugin marketplace;
+- broad third-party extension ecosystem;
+- unrestricted arbitrary tool calling;
+- full multi-provider abstraction;
+- generic workflow/automation platform;
+- provider migration;
+- broad portability abstraction without a concrete need.
+
+These are deferred/scope boundaries, not new Canonical prohibitions.
+
+### E0 outcome
+
+**E0 EXISTING-FOUNDATION AUDIT: READY TO CLOSE.**
+
+Reason:
+- Canonical constraints are reconciled;
+- Roadmap requirements are identified;
+- DEV foundation has been traced through DB, security, runtime, and privilege layers;
+- genuine generic gaps are identified without inventing missing implementation;
+- Resume 69 inputs are separated from authority;
+- no unresolved evidence currently requires a Canonical change.
+
+### Remaining prerequisite before implementation
+
+The next stage is **BOUNDED DESIGN**, not implementation.
+
+Bounded design must decide the minimum generic authorization/Tool/Action contracts and explicitly map them to existing DEV primitives before any code or migration is authorized.
+
+### Proposed natural first sub-workstream
+
+**E1 — Capability / Tool / Action + Authorization Contract**
+
+Provisional only; this is not frozen until the bounded-design document is reviewed.
+
+Likely sequence:
+
+```
+E1  Contract / authorization boundary
+ ↓
+E2  Execution + risk/confirmation integration
+ ↓
+E3  Result + audit lifecycle
+ ↓
+E4  First meaningful Tool/Action vertical slice
+```
+
+This sequence is a planning hypothesis, not a locked roadmap change.
+
+### Audit rule going forward
+
+If a previously 🟡 item becomes provably existing during bounded design, upgrade it to 🟢 rather than rebuilding it.
+
+If a previously 🔴 item lacks sufficient Canonical evidence for prohibition, downgrade it to 🟡 boundary/scope review rather than inventing a rule.
+
+No implementation is implied by E0 closure.
+
 ## E0 trace — PostgreSQL grants / function privileges — 2026-08-29
 
 ### Direct DEV finding
