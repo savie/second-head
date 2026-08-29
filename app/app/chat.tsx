@@ -89,6 +89,10 @@ export default function ChatScreen() {
   const [knowledgeLoading, setKnowledgeLoading] = useState(false);
   const [knowledgeError, setKnowledgeError] = useState<string | null>(null);
   const [knowledgeRows, setKnowledgeRows] = useState<Array<Record<string, unknown>>>([]);
+  const [experienceOpen, setExperienceOpen] = useState(false);
+  const [experienceLoading, setExperienceLoading] = useState(false);
+  const [experienceError, setExperienceError] = useState<string | null>(null);
+  const [experienceRows, setExperienceRows] = useState<Array<Record<string, unknown>>>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -175,6 +179,23 @@ export default function ChatScreen() {
       setKnowledgeRows([]);
     } finally {
       setKnowledgeLoading(false);
+    }
+  }
+
+
+  async function openExperienceSurface() {
+    setExperienceOpen(true);
+    setExperienceLoading(true);
+    setExperienceError(null);
+    try {
+      const { listExperiences } = await import('../services/experience');
+      const rows = await listExperiences(10);
+      setExperienceRows(rows.filter((row) => row.scope === 'PRIVATE' && row.visibility === 'OWNER_ONLY'));
+    } catch (error) {
+      setExperienceError(error instanceof Error ? error.message : 'Experience could not be loaded.');
+      setExperienceRows([]);
+    } finally {
+      setExperienceLoading(false);
     }
   }
 
