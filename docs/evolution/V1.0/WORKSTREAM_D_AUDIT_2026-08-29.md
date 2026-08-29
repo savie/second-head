@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — WORKSTREAM D AUDIT
 
-Status: **PLANNING / NON-CANONICAL**
+Status: **CLOSED / VERIFIED / NON-CANONICAL**
 Date: 2026-08-29
 Branch: `dev`
 
@@ -161,36 +161,56 @@ Focus:
 
 ## D5 — Global SH Search
 
-Search is the most contract-sensitive D slice and must be defined before broad UI implementation.
+D5 is now implemented and verified as a bounded Global SH Search contract plus owner-facing App surface.
 
-Define:
-- searchable domains;
-- authorization scope;
-- result model;
-- provenance;
-- ranking/relevance expectations;
-- source navigation;
-- pagination/limits;
-- private-data isolation.
+### Implemented boundary
 
-Search must consume authorized backend retrieval contracts. The App must not download unrestricted private memory and search it locally.
+- searchable domains: Conversation, Memory, Knowledge, Experience, Journey;
+- server-side SH/account ownership validation;
+- authenticated execution only; anonymous RPC execution explicitly denied;
+- bounded query length, result limit, and pagination offset;
+- domain allow-list; unsupported domains are rejected;
+- server-side retrieval only; no unrestricted private-memory download/search in the App;
+- private Memory remains scoped to the authorized SH and eligible lifecycle states;
+- shared/general Knowledge remains distinct from private Memory;
+- Experience preserves private owner-only vs shared semantics;
+- Journey remains SH/account scoped and carries source/provenance context;
+- verification-only conversation artifacts are excluded;
+- normalized result model includes domain, title, snippet, source reference, provenance, timestamp, and bounded relevance score;
+- App exposes domain filters and bounded pagination through the existing owner navigation.
 
-**Exit:** bounded search contract exists and can return authorized results with source/provenance context.
+### Verification
+
+- Supabase DEV RPC verified with authenticated identity and bounded result retrieval.
+- Domain filtering verified for Knowledge.
+- Unsupported-domain rejection verified.
+- Anonymous execution explicitly revoked.
+- Supabase security review did not report the D5 RPC as anonymously executable after the hardening fix.
+- SH Runtime Controlled Verification passed for the D5 hardening commits.
+- SH App Android Build passed for the D5 route commit; latest reported DEV state is **All Green**.
+
+### Reconciliation decision
+
+D5 satisfies the D acceptance contract without introducing a new Canonical semantic layer. It is an evolution-layer retrieval/surface contract that reuses existing domain and authorization boundaries.
+
+**D5 CLOSED / GREEN.**
 
 ## D-Close
 
-D may close only when the relevant implemented surfaces are:
+D is now closed because the relevant implemented surfaces are:
 
 - runtime-backed where applicable;
 - connected rather than isolated;
 - authorization-safe;
 - provenance-aware where source data exists;
 - persistence behavior verified where applicable;
-- typecheck/build/test verified;
-- free of blocking regressions;
+- runtime verification and Android build verification passed for the completed D slices;
+- free of reported blocking regressions in the latest DEV verification state;
 - consistent with Canonical invariants.
 
-A placeholder screen or navigation-only implementation does not satisfy D-Close.
+D-Close does not claim that every future Search or continuity feature is complete. It claims that the defined D1–D5 slices meet their current bounded contracts and verification gates.
+
+**D-CLOSE: GREEN / VERIFIED.**
 
 ## Explicit non-scope / deferred from Resume 69
 
@@ -216,19 +236,20 @@ B 🟢
 ↓
 C 🟢 CLOSED
 ↓
-D0 Audit / Contract
+D0 🟢
 ↓
 D1 Memory ─┐
-D2 Knowledge├→ D4 Journey integration → D5 Search → D-Close
-D3 Experience┘
+D2 Knowledge├→ D4 Journey → D5 Global Search 🟢
+D3 Experience┘                 ↓
+                           D-CLOSE 🟢
 ```
 
-D1–D3 may overlap where their contracts permit, but D5 should not bypass authorization/provenance design.
+D1–D3 overlapped where their contracts permitted. D5 did not bypass authorization/provenance design.
 
 ## Current status
 
-**D0 CLOSED / READY FOR D1**
+**D0–D5 CLOSED / GREEN / VERIFIED.**
 
-No D implementation is claimed by this planning document.
+The document has been reconciled against the completed DEV implementation state. It remains non-Canonical and does not redefine SH Core semantics.
 
 END OF WORKSTREAM D AUDIT
