@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Modal, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
