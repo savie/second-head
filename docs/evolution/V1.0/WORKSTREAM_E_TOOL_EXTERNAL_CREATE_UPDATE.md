@@ -87,10 +87,10 @@ Bounded scope is unchanged: no generic workflow engine, plugin marketplace, arbi
 
 ## SUPPORTING R4 DOCUMENTS — 2026-08-29
 
-The following existing documents are supporting records of this R4 slice and are not separate Workstream E/R implementations:
+The following existing documents are supporting R4 evidence and are kept under `evidence/R4/`; they are not separate Workstream E/R implementations:
 
-- `WORKSTREAM_E_EXTERNAL_ACCOUNT_AUTHORIZATION.md` — detailed Google authorization implementation, security boundary, operator prerequisites, and runtime authorization proof.
-- `WORKSTREAM_E_GOOGLE_AUTH_OPERATOR_SETUP.md` — operator setup/runbook for Google OAuth configuration and credential wiring.
+- `evidence/R4/WORKSTREAM_E_EXTERNAL_ACCOUNT_AUTHORIZATION.md` — detailed Google authorization implementation, security boundary, operator prerequisites, and runtime authorization proof.
+- `evidence/R4/WORKSTREAM_E_GOOGLE_AUTH_OPERATOR_SETUP.md` — operator setup/runbook for Google OAuth configuration and credential wiring.
 
 The primary R4 record is this document. Supporting documents retain their detail/history; they do not define a separate R4 scope or override the current implementation. The current implementation uses the deployed SH Edge Function callback specified in the authorization record, so earlier Android/mobile-client wording in the operator runbook is historical and does not override the current implementation.
 
