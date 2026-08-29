@@ -49,7 +49,7 @@ Preferred order:
 4. otherwise adapt it through SH Runtime;
 5. build only SH-specific governance/bridge behavior that cannot reasonably be reused.
 
-Source-level verification completed against the current DEV runtime. The configured provider secrets (OpenRouter, Groq, OpenAI, Gemini, Mistral, Hugging Face) currently back model-generation capability; they do not constitute a verified external CREATE/UPDATE target. Repository inspection also did not identify an existing external CRUD connector/webhook/action adapter that can satisfy the R4 contract without inventing a new authority boundary.
+Source-level verification completed against the current DEV runtime. The six configured model-provider secrets are not R4 targets. The representative external target selected for R4 is **GitHub Issues** on the existing SH repository. GitHub provides a bounded `CREATE ISSUE` operation requiring repository Issues write permission; the target repository can be fixed to the SH DEV repository, keeping scope narrow. This is an external state mutation and therefore remains behind SH authorization and explicit confirmation.
 
 ## 5. Boundary
 
@@ -217,7 +217,7 @@ R4 does not establish:
 
 ## 15. Exit Condition
 
-R4 remains blocked until one existing, verified external capability can be mapped end-to-end:
+R4 implementation is ready to proceed once a dedicated GitHub credential with the minimum required repository permission is supplied to the DEV runtime:
 
 WHO
 → SH/account
@@ -232,8 +232,20 @@ WHO
 → NORMALIZE
 → AUDIT
 
-The six configured model-provider credentials are explicitly NOT treated as R4 external-action providers. Using them for R4 would conflate model generation with external state mutation and would violate the bounded candidate definition. No fake/pseudo external mutation is introduced.
+The required operator action is to create a GitHub fine-grained credential restricted to the SH repository with **Issues: write** permission and store it as a Supabase DEV secret. No model-provider key is reused for this purpose. No broad GitHub repository write permission is required.
 
 ## R4 Conclusion
 
 External Create / Update remains the selected representative of Family F because it completes the current four-tool representative set by testing a real external side effect under explicit governance. The strategy remains reuse/adapt: SH builds and owns the governance boundary, while the external capability supplies the underlying operation.
+
+
+### R4 Representative Target
+
+**GitHub Issues — CREATE ISSUE**
+
+Target: `savie/second-head` on DEV.
+Operation: create one issue with bounded title/body fields.
+Credential: dedicated GitHub fine-grained credential, repository-scoped, `Issues: write` only.
+SH controls: authenticated SH identity → target binding → authorization → explicit confirmation → execution → evidence/audit.
+
+GitHub's official API documents `POST /repos/{owner}/{repo}/issues` and requires repository `Issues` write permission for a fine-grained token. This makes GitHub Issues a concrete, bounded external-action representative without introducing a generic connector platform.
