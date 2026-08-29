@@ -1668,3 +1668,24 @@ Therefore R4 must no longer be described as implementation-blocked. Its remainin
 Current DEV head: `c02e918d02062c4951ab296a28c2395afedf9f32`.
 
 Automated verification is GREEN on the current DEV line. Standard status is **CI VERIFIED**. Live Google OAuth E2E and real external Calendar mutation remain runtime gates and are not inferred from CI.
+
+
+## R5 — Family D Representative — 2026-08-29
+
+R5 is the selected representative capability for **Family D — Creation & Generation**.
+
+Primary record:
+- `WORKSTREAM_E_TOOL_IMAGE_GENERATION.md`
+
+Bounded capability:
+- prompt → image capability → generated artifact → normalized runtime result → chat presentation → trace.
+
+R5 is materially distinct from R3:
+- R3 processes an existing explicitly supplied artifact;
+- R5 creates a new visual artifact.
+
+The DEV implementation reuses the existing runtime image capability/adapter rather than introducing a parallel generation platform. The default image model is the verified zero-budget `recraft/recraft-v3:free` endpoint. Paid image models require explicit opt-in.
+
+R5 implementation is currently **IMPLEMENTED / CI VERIFICATION PENDING**. No runtime acceptance is claimed until the DEV verification workflow proves a valid generated image result and client presentation.
+
+R5 does not alter Canonical scope.
