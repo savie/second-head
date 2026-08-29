@@ -130,6 +130,44 @@ App already uses a backend/runtime service boundary. The App is not treated as e
 
 **Important:** 🟡 and 🔴 are audit labels, not final decisions. Yellow must be audited; red must have an explicit evidence-based reason for deferral or prohibition.
 
+## E0 trace — PostgreSQL grants / function privileges — 2026-08-29
+
+### Direct DEV finding
+
+The audited governance tables are not granted to `anon`/generic `authenticated` roles in the same way as ordinary application data:
+- `permission_matrix`: direct table privileges observed for `postgres` and `service_role`;
+- `authority_assignments`: direct table privileges observed for `postgres`;
+- `runtime_high_risk_confirmations`: direct table privileges observed for `postgres` and `service_role`;
+- `audit_events`: direct table privileges observed for `anon`, `authenticated`, `service_role`, and `postgres`, with RLS/policies providing ownership restrictions.
+
+A direct privilege search did not reveal a generic permission-evaluator function exposed through the audited public/private function surface.
+
+### Interpretation
+
+This strengthens the previous conclusion that `permission_matrix` is currently best treated as **policy data / governance configuration**, not as a verified generic runtime decision API.
+
+The existing security-definer functions demonstrate a strong backend enforcement pattern, but the high-risk functions are recovery-specific and do not evaluate the permission matrix.
+
+### E0 conclusion
+
+No additional hidden PostgreSQL grant/function layer was found that closes the generic authorization-evaluation gap.
+
+Therefore the current evidence supports:
+
+```
+Policy data / Permission Matrix      🟢
+Identity + ownership enforcement     🟢
+Generic permission evaluator         🟡 GAP
+Generic Tool/Action authorization    🟡 GAP
+Generic execution contract           🟡 GAP
+```
+
+This is an **audit finding**, not yet an implementation decision. The missing evaluator and its relationship to the existing permission matrix must be defined in bounded design before any implementation begins.
+
+### E0 exit candidate
+
+The audit can now move toward closure of the **existing-foundation trace**, subject to a final document-level reconciliation of Canonical / Contract / Roadmap / Resume 69. No code implementation is authorized by this finding alone.
+
 ## E0 trace — RLS / function security / enforcement semantics — 2026-08-29
 
 ### Direct DEV database finding
