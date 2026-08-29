@@ -1,6 +1,6 @@
 # R4 — GOOGLE ACCOUNT AUTHORIZATION SETUP
 
-Status: **OPERATOR SETUP REQUIRED**
+Status: **SUPPORTING R4 OPERATOR SETUP RECORD / RUNTIME PREREQUISITE**
 Branch: `dev`
 Date: 2026-08-29
 
@@ -47,3 +47,8 @@ Once the actual mobile callback URI and Google OAuth client configuration are av
 Only after that proceed to R4:
 
 `CREATE EVENT → confirmation → execute → audit`.
+
+
+## DOCUMENT ROLE RECONCILIATION — 2026-08-29
+
+This file is retained as the supporting operator runbook for the R4 Google Calendar authorization path, not as a separate Workstream E/R track. The implementation has since moved to the deployed SH Edge Function callback documented by the R4 authorization record. The old Android/mobile-client wording is historical and must not override the current callback implementation. Runtime credential wiring remains an operator prerequisite.
