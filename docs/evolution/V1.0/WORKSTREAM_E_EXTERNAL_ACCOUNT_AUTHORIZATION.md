@@ -68,3 +68,41 @@ External account authorization is considered ready only when a DEV account can:
 - disconnect/revoke without leaving an executable R4 credential path.
 
 No R4 CREATE EVENT execution is implied by this document alone.
+
+## DEV implementation status — 2026-08-29
+
+The first SH-owned Google authorization bridge is now implemented in DEV.
+
+Implemented:
+- functions/r4-google-oauth/index.ts — authenticated OAuth initiation, state binding, Google callback, authorization-code exchange, scope verification, Vault-backed refresh-token storage, connection state, disconnect/revocation, and audit evidence.
+- database/migrations/20260829130000_r4_google_calendar_authorization.sql — short-lived OAuth state storage, non-secret Google connection metadata, RLS, and service-role-only Vault helper functions.
+- app/services/google-authorization.ts — mobile client bridge.
+- app/app/authorization.tsx — DEV connection/status surface and deep-link return handling.
+- supabase/config.toml — callback function has JWT gateway verification disabled because the function implements its own authenticated start/disconnect checks and must accept Google's unauthenticated callback.
+
+Security boundary:
+- OAuth state is generated server-side and only its SHA-256 hash is persisted.
+- Google refresh tokens are not stored in Git, app bundle, chat, or the public connection table; they are stored through Supabase Vault.
+- The App can initiate connection and display status but does not decide R4 authorization.
+- Connection performs no Calendar mutation.
+- Disconnect removes the stored refresh credential and marks the connection REVOKED.
+
+Current operator prerequisites:
+1. Add the exact callback URI below to the Google OAuth Web client:
+   https://pkhkgvsrqeupvwoqjwmd.supabase.co/functions/v1/r4-google-oauth
+2. Add these DEV Edge Function secrets:
+   - R4_GOOGLE_CLIENT_ID = the Google OAuth Client ID
+   - R4_GOOGLE_CLIENT_SECRET = the Google OAuth Client Secret
+3. Keep the Google OAuth consent application in DEV/testing and ensure the Owner account is an allowed test user.
+4. Keep Calendar scope at https://www.googleapis.com/auth/calendar.events.owned.
+
+The callback URI is deliberately the deployed SH Edge Function callback, not the Supabase Google Sign-in callback.
+
+## Verification gate
+
+The source, migration, and deployed Edge Function are present in DEV. Final end-to-end authorization verification remains blocked only on the operator Google credential wiring above.
+
+Required runtime proof:
+Owner → Connect Google → Google consent → callback → CONNECTED state → Disconnect → REVOKED state
+
+No R4 CREATE EVENT mutation is executed as part of this authorization verification.
