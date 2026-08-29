@@ -620,3 +620,13 @@ E6 audit/reconciliation completed. Dedicated document:
 **E6 = 🟢 AUDIT / BOUNDED DESIGN CLOSED — REGISTRY DEFERRED.** Stable semantic identity and Capability/Tool/Action binding are required, but a physical generic registry is not evidenced or yet proven necessary. No registry implementation is authorized.
 
 Next candidate: **E7 — Concrete V1.0 Tool/Action Vertical Slice**, to test the complete E lifecycle and resolve only the generic contracts actually required.
+
+
+## 30. E7 dedicated document
+
+E7 audit/reconciliation completed. Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E7_VERTICAL_SLICE_2026-08-29.md
+
+**E7 = 🟡 BOUNDED DESIGN ACCEPTED / CONCRETE TOOL SELECTION OPEN.** The complete vertical-slice test is defined, but DEV evidence does not establish an already-existing concrete external Tool/Action suitable for promotion without inventing provider/implementation dependencies.
+
+Next candidate: **E8 — Concrete Tool/Action Selection + Contract Freeze**, using current DEV capability/provider evidence to select one bounded first Action.
