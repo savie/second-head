@@ -174,6 +174,59 @@ Do not infer a generic Tool system merely from the existence of these primitives
 
 The existing `runtime-p4a-001` path is primarily conversation/model/semantic-lifecycle runtime. It is evidence for reusable runtime infrastructure, **not evidence that Workstream E Tool execution already exists**.
 
+## E0 trace — Permission Matrix enforcement — 2026-08-29
+
+### Audit finding
+
+The DEV database contains `public.permission_matrix`, including an `EXECUTE` action domain and ALLOW/DENY decisions.
+
+However, direct inspection of the DEV PostgreSQL routine catalog found **no public routine whose name indicates a generic permission evaluator**, and no public routine definition was found that directly references `permission_matrix`.
+
+GitHub source search likewise did not identify a generic runtime permission-evaluator function or an application caller that demonstrably evaluates `permission_matrix` for Tool/Action execution.
+
+### Consequence
+
+The following must be separated:
+
+- **Permission Matrix exists:** 🟢 verified.
+- **Permission Matrix semantics are documented:** 🟢 verified.
+- **Generic permission evaluation/enforcement path is runtime-verified:** 🟡 NOT VERIFIED.
+- **Generic Tool/Action authorization bridge:** 🟡 NOT VERIFIED.
+
+This does **not** prove that permission enforcement is absent everywhere. It proves only that the audited evidence set does not establish a generic evaluator/caller path.
+
+### E dependency implication
+
+Before E implements a generic Tool/Action authorization bridge, the project must either:
+
+1. locate and verify the existing evaluator/enforcement path; or
+2. explicitly define the missing evaluator as part of bounded E design.
+
+E must not silently duplicate or bypass the existing permission model.
+
+### Current boundary conclusion
+
+The strongest current evidence is:
+
+```
+Permission policy / matrix
+        🟢
+          │
+          ▼
+Generic evaluator
+        🟡
+          │
+          ▼
+Tool/Action authorization bridge
+        🟡
+          │
+          ▼
+Execution
+        🟡
+```
+
+This is now an explicit E0 blocker/question, not an implementation assumption.
+
 ## E0 audit update — 2026-08-29
 
 The first deeper reconcile changed several provisional labels based on direct source evidence.
