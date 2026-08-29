@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — WORKSTREAM E — R1 GLOBAL SEARCH
 
-Status: **SELECTED CANDIDATE / TOOL-SPECIFIC BOUNDED DESIGN**
+Status: **IMPLEMENTED / CI VERIFIED / RUNTIME-SPECIFIC EVIDENCE PENDING**
 Date: 2026-08-29
 Branch: `dev`
 
@@ -244,3 +244,8 @@ Implementation itself is a later step.
 ---
 
 **R1 conclusion:** Global Search remains the selected first representative Tool because it gives high E-contract coverage with low side effect while allowing SH to reuse existing capability and governance primitives. R1 is a concrete slice of Family A, not the definition of Workstream E.
+
+
+## CURRENT DEV AUDIT — 2026-08-29
+
+DEV contains the bounded Global Search service and the R1 audit-correlation migration. Current DEV CI is GREEN. This establishes implementation and automated verification on the DEV line, but no R1-specific runtime acceptance is claimed from CI alone. The generic E authorization/Tool bridge remains the shared architectural dependency identified in the E audit.
