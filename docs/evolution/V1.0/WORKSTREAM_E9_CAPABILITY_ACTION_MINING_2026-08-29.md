@@ -3,192 +3,173 @@
 **Project:** SECOND HEAD V1.0  
 **Workstream:** E9  
 **Date:** 2026-08-29  
-**Status:** AUDIT → MAP → RECONCILE COMPLETE / CANDIDATE IDENTIFIED  
+**Status:** AUDIT → MAP → RECONCILE COMPLETE / TOOL LANDSCAPE MAPPED  
 **Implementation:** NOT AUTHORIZED
 
 > Living evolution/design document. Non-Canonical. No implementation or schema mutation is authorized by this document.
 
 ## 1. Purpose
 
-E9 mines existing DEV operations to determine whether a real working operation can become the first governed Tool/Action vertical slice, instead of inventing an external Tool prematurely.
+E9 mines existing DEV capabilities and operations to identify reusable foundations for the Workstream E Tool/Action system.
 
-## 2. GitHub evidence
+**Important correction:** E9 does not make Global Search the scope or architectural center of Workstream E. Global Search is retained only as the strongest currently evidenced **reference vertical-slice candidate**.
 
-Existing services contain real bounded operations:
-- `app/services/global-search.ts` exposes `globalSearch({ shId, query, limit, offset, domains })` and calls `global_search_bounded`.
-- `app/services/context.ts` exposes `loadSHContext(...)` and calls `assemble_context` plus bounded Journey retrieval.
-- `app/features/journey/journey-service.ts` exposes bounded Journey operations including retrieval, classification, deletion, source-record deletion, transfer, and legacy preservation.
-- `functions/runtime-p4a-001/sh_runtime_bundle.ts` contains model/provider adapters and image generation, but these are model capabilities, not yet a governed generic Tool/Action executor.
+The Workstream E system must remain extensible to additional built-in Tools, extensions, plugins, and future providers without allowing those mechanisms to bypass SH governance.
 
-## 3. Supabase DEV evidence
+## 2. Evidence hierarchy
 
-Current DEV exposes Runtime RPCs including:
-- `global_search_bounded`;
-- `assemble_context`;
-- `runtime_assert_active_sh`;
-- `runtime_record_audit`;
-- `runtime_confirm_high_risk_action`;
-- `runtime_create_high_risk_confirmation`;
-- `runtime_execute_high_risk_action`;
-- Journey and lifecycle Runtime operations;
-- memory/knowledge/experience recording operations.
+- Canonical SH documents remain conceptual authority.
+- Implementation Contract / Guide / Execution Strategy constrain implementation.
+- Evolution documents are living working design.
+- Resume/history is contextual input only.
+- GitHub DEV is implementation evidence.
+- Supabase DEV is running backend/database evidence.
 
-This is significant evidence that SH already has governed Runtime operations which can serve as foundations. It is not evidence that they are already registered as Tools.
+## 3. Existing DEV capability / operation map
 
-## 4. Candidate mining result
+### A — Global Search
+- `app/services/global-search.ts`
+- `globalSearch({ shId, query, limit, offset, domains })`
+- backend: `global_search_bounded`
+- read-oriented, bounded, explicit SH context.
+- **Assessment: 🟢 strongest reference-slice candidate.**
 
-### Candidate A — Global Search
+### B — SH Context
+- `app/services/context.ts`
+- `loadSHContext(...)`
+- uses `assemble_context` and bounded Journey retrieval.
+- primarily internal Runtime context assembly.
+- **Assessment: 🟡 foundation; not automatically a Tool.**
 
-**Capability:** Global Search / retrieval across SH domains.  
-**Existing operation:** `globalSearch`.  
-**Backend:** `global_search_bounded`.  
-**Side effect:** Read-oriented.  
-**Target:** explicit `shId` + query.  
-**Result:** bounded page with results, query, offset, limit, `has_more`.  
-**Current assessment:** **🟢 strongest first-slice candidate**.
+### C — Journey operations
+- `app/features/journey/journey-service.ts`
+- includes retrieval/classification plus state-changing operations such as deletion/transfer.
+- **Assessment: 🟡 reusable domain operations; individual Actions require separate governance/risk treatment.**
 
-Why:
-- already implemented;
-- bounded input;
-- explicit SH context;
-- read-oriented;
-- deterministic result envelope already exists;
-- no destructive side effect;
-- easy to correlate and test;
-- does not require a plugin/provider ecosystem.
+### D — Model/provider capabilities
+- `functions/runtime-p4a-001/sh_runtime_bundle.ts`
+- includes provider adapters and image-generation capability.
+- These demonstrate existing provider/runtime capability, but do not prove a generic governed Tool executor.
+- **Assessment: 🟡 provider foundation; not automatically a Tool.**
 
-### Candidate B — SH Context Retrieval
+### E — Runtime governance foundations
+Supabase DEV exposes Runtime operations including:
+- `runtime_assert_active_sh`
+- `runtime_record_audit`
+- `runtime_confirm_high_risk_action`
+- `runtime_create_high_risk_confirmation`
+- `runtime_execute_high_risk_action`
+- `global_search_bounded`
+- `assemble_context`
+- Journey/lifecycle and memory/knowledge/experience Runtime operations.
 
-`loadSHContext` is real and bounded, but it is primarily internal Runtime context assembly rather than a user-facing Tool Action.
+These are reusable foundations. They are not to be reinterpreted as an already-existing generic Tool registry/executor.
 
-**Assessment: 🟡 foundation, not first Tool.**
+## 4. Tool landscape principle
 
-### Candidate C — Journey retrieval
+The existence of an operation does **not** automatically make it a Tool.
 
-`loadJourneyEvents` is real and read-oriented, but it is a domain-specific service operation. It could become a Tool later if product semantics justify exposing Journey retrieval as an explicit Action.
+Likewise:
+- Capability ≠ Tool;
+- Tool ≠ Action;
+- Tool availability ≠ authorization;
+- Tool ≠ authority;
+- provider ≠ authority;
+- plugin ≠ authorization;
+- private-data capability ≠ private-data permission.
 
-**Assessment: 🟡 candidate, lower priority than Global Search.**
+A Tool becomes governed only when its concrete Actions pass the SH Runtime governance boundary.
 
-### Candidate D — Journey mutation / transfer / deletion
+## 5. Extensible Tool classes
 
-These are real Runtime operations but have meaningful state-changing effects and therefore are poor first slices for validating the generic Tool boundary.
+The Workstream E design must be able to accommodate, when justified:
+- built-in/internal Tools;
+- extension Tools;
+- plugin/provider-backed Tools;
+- future Tools not yet known.
 
-**Assessment: 🟡/🔴 defer as first slice; retain as later high-risk/state-changing Action candidates.**
+No fixed V1.0 Tool inventory is declared here.
 
-### Candidate E — Image generation / model provider adapters
+No plugin marketplace/ecosystem is being designed as part of E merely to achieve extensibility.
 
-Real provider adapters exist in the Runtime, including image generation, but they belong to model/provider execution rather than an already-governed Tool/Action layer.
+## 6. Global Search role
 
-**Assessment: 🟡 capability/provider foundation, not first Tool without additional governance wrapping.**
+Global Search remains the preferred **reference vertical slice** because it is already implemented, bounded, read-oriented, and has an inspectable result shape.
 
-## 5. First candidate decision
+Proposed semantic identifiers remain provisional:
+- Capability: `GLOBAL_SEARCH`
+- Tool: `SH_GLOBAL_SEARCH`
+- Action: `SEARCH_SH`
 
-**E9 promotes Global Search as the preferred first concrete Action candidate.**
+These are working design identifiers only. They are not Canonical and do not constitute an implementation contract yet.
 
-Proposed semantic shape:
+The reference slice must prove the generic governance lifecycle; it must not dictate the architecture of every future Tool.
 
-`Capability: GLOBAL_SEARCH`
+## 7. Generic lifecycle to preserve
 
-`Tool: SH_GLOBAL_SEARCH`
+Every Tool/Action mechanism must be able to fit the governed lifecycle:
 
-`Action: SEARCH_SH`
-
-These names are **working design identifiers only** and are not Canonical or implementation identifiers yet.
-
-The Action is read-oriented and should normally be low-risk, subject to the final risk contract in E10.
-
-## 6. Vertical lifecycle
-
-The proposed first slice is:
-
-User intent
-→ Capability GLOBAL_SEARCH
-→ Tool SH_GLOBAL_SEARCH
-→ Action SEARCH_SH
-→ Invocation with shId + query + bounded parameters
+Capability
+→ Tool
+→ Action
+→ Invocation
+→ Actor + SH context
 → Authorization
 → Risk classification
-→ Confirmation only if required by final policy
+→ Confirmation when required
 → Execution eligibility
-→ existing `globalSearch` / `global_search_bounded`
-→ Result envelope
-→ Audit correlation
+→ Tool/extension adapter
+→ Concrete execution
+→ Result
+→ Audit
 
-Important: E9 does not claim this lifecycle is already wired together. Only the underlying search operation is existing evidence.
+Tool-specific implementation may differ, but governance ownership remains with SH Runtime.
 
-## 7. Why this does not violate the Canonical boundary
+## 8. Extensibility boundary
 
-Global Search already exists as a real SH capability and operation. E9 is not inventing a new conceptual authority.
+Future Tool/plugin/extension support must preserve:
 
-The Tool/Action wrapper is an evolution-layer engineering representation that must remain subordinate to Canonical semantics and Runtime governance.
+1. **SH owns authorization.**
+2. **SH owns risk classification.**
+3. **SH owns confirmation gates.**
+4. **SH owns execution eligibility.**
+5. **SH owns audit correlation.**
+6. **External provider/plugin cannot become authority.**
+7. **A Tool cannot directly infer private-data permission.**
+8. **No unrestricted autonomous execution path is introduced.**
+9. **Plugin/extension does not receive implicit access merely because it exists.**
+10. **Tool output is result data, not SH authority.**
 
-## 8. Registry implication
+These are bounded design principles, not permission to implement an ecosystem.
 
-Global Search can be represented as a bounded static binding initially.
+## 9. Registry position
 
-Therefore E6's registry decision remains valid:
+E6 remains valid: a physical generic registry is not required merely because the system is extensible.
 
-**No generic registry is required for the first slice.**
+Static binding is acceptable for an initial slice.
 
-A registry may only be reconsidered if later evidence demonstrates dynamic discovery/configuration requirements.
+Registry/discovery/configuration becomes a new design requirement only if later evidence demonstrates a real need such as dynamic lifecycle, discovery, enable/disable, version negotiation, or equivalent runtime behavior.
 
-## 9. Result implication
+## 10. Selection rule
 
-Global Search already has a useful result shape:
+When choosing a concrete reference Tool:
+1. prefer an existing bounded internal operation where appropriate;
+2. otherwise define the smallest new Tool boundary;
+3. do not select a provider first and retrofit SH governance;
+4. do not let the first Tool become the universal architecture by accident.
 
-- results;
-- query;
-- offset;
-- limit;
-- has_more.
+## 11. E9 decision
 
-E5 should therefore be refined around an envelope rather than replacing this existing domain result with an unnecessarily generic universal schema.
+**E9 = 🟢 TOOL LANDSCAPE / REUSABLE FOUNDATION MAPPED.**
 
-## 10. Authorization implication
+Global Search is retained as a **reference candidate**, not as Workstream E scope.
 
-The existing search service requires an `shId`, but that is not equivalent to authorization.
+No implementation is authorized.
 
-The governed Tool Action must establish authorization separately and must not infer permission merely because a valid SH identifier was supplied.
+## 12. Next candidate
 
-## 11. Risk implication
+**E10 — TOOL GOVERNANCE & EXTENSIBILITY BOUNDARY**
 
-Global Search is read-oriented and has no identified state mutation in the audited path.
+E10 should define the common governance contract for all future Tool classes—built-in, extension, plugin/provider-backed—while explicitly bounding authority, authorization, risk, confirmation, execution, result, and audit.
 
-This makes it a strong candidate for a low-risk Action. Final classification remains an E10 decision based on the actual authorization/data-access semantics.
-
-## 12. Existing foundation to reuse
-
-E9 identifies reusable foundations rather than replacing them:
-
-- `globalSearch` service boundary;
-- `global_search_bounded` RPC;
-- existing SH context/ownership boundary;
-- existing Runtime audit infrastructure;
-- existing authorization/confirmation infrastructure where applicable.
-
-No duplicate search engine or new provider is proposed.
-
-## 13. Gaps before implementation
-
-Before implementation, E10+ must still freeze:
-1. exact Capability/Tool/Action semantic contract;
-2. authorization mapping for SEARCH_SH;
-3. risk classification;
-4. whether confirmation is ever required;
-5. execution adapter boundary;
-6. result envelope/correlation;
-7. audit event semantics;
-8. input/output/error contract;
-9. test/evidence criteria.
-
-## 14. Status
-
-**E9 = 🟢 CANDIDATE IDENTIFIED — GLOBAL SEARCH PROMOTED TO FIRST-SLICE CANDIDATE**
-
-This is a design promotion, not implementation authorization.
-
-## 15. Next candidate
-
-**E10 — GLOBAL SEARCH ACTION CONTRACT + AUTHORIZATION/RISK FREEZE**
-
-E10 should audit the actual Global Search authorization/data boundary and freeze the concrete Action contract before any code changes.
+Global Search may be used as an example/test case inside E10, but E10 must not be designed solely around it.
