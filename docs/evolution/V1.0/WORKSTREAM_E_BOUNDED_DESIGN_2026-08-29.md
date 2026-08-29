@@ -580,3 +580,13 @@ Dedicated document:
 **E2 = 🟢 BOUNDED DESIGN ACCEPTED / CLOSED.** Implementation remains blocked.
 
 Next candidate: **E3 — Risk + Confirmation Boundary**, subject to its own audit. Registry remains deferred unless a dependency is proven.
+
+
+## 26. E3 dedicated document
+
+E3 audit/bounded design completed. Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E3_RISK_CONFIRMATION_2026-08-29.md
+
+**E3 = 🟢 BOUNDED DESIGN ACCEPTED / CLOSED.** No implementation authorization.
+
+Next candidate: **E4 — Execution Boundary / Tool Invocation Runtime**, subject to its own audit. Registry remains deferred until dependency is proven.
