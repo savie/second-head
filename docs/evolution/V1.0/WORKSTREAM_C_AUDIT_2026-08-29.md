@@ -421,6 +421,31 @@ Enable SH to consume and reason over image input through a verified runtime/mode
 
 ---
 
+### Current implementation
+
+C7 is implemented on top of the verified C3/C6 multimodal path:
+
+- image attachments with prepared base64 are promoted to the runtime vision capability;
+- the runtime already sends image parts as `image_url` data URLs to an image-capable model;
+- the vision candidate is zero-budget and has an explicit fallback;
+- image-understanding language is now classified as the explicit `vision` task rather than relying only on generic conversation/reasoning classification;
+- conversation and reasoning requests containing images continue to use the same vision-capable path;
+- no image is persisted or interpreted as Canonical memory merely because it was analyzed.
+
+Commit:
+
+```
+68f771b8  feat: make image understanding task explicit
+```
+
+### Verification
+
+**Pending.** C7 must pass typecheck and relevant DEV verification paths before being marked green.
+
+### Status
+
+**IMPLEMENTED / VERIFICATION PENDING**
+
 ## 10. C8 — Image Generation
 
 ### Scope
@@ -472,8 +497,8 @@ C2  🟢 Verified
 C3  🟢 Verified
 C4  🟡 Implemented / verification pending
 C5  🟢 Verified / no dedicated implementation required
-C6  🟡 Implemented / verification pending
-C7  ⏳ Not started
+C6  🟢 Verified
+C7  🟡 Implemented / verification pending
 C8  ⏳ Not started
 C-Close ⏳ Not started
 ```
@@ -495,6 +520,7 @@ The 🟡 state is intentional: implementation exists, but verification is the au
 - Explicitly kept image-generation provider/runtime unresolved.
 - Validated C5 against the existing direct-camera path; no duplicate camera architecture introduced.
 - Implemented C6 multimodal turn persistence and history continuity.
+- Implemented C7 explicit image-understanding task classification on the existing vision runtime path.
 
 ---
 
