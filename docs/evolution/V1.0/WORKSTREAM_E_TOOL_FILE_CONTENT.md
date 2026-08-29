@@ -1,39 +1,169 @@
-# SECOND HEAD V1.0 — WORKSTREAM E TOOL — FILE CONTENT
+# SECOND HEAD V1.0 — WORKSTREAM E TOOL — R3 FILE CONTENT / EXTRACT / TRANSFORM
 
-Status: BOUNDED DESIGN / NOT IMPLEMENTATION
+Status: SELECTED CANDIDATE / TOOL-SPECIFIC BOUNDED DESIGN
 Date: 2026-08-29
+Branch: dev
 
-## Purpose
-Representative artifact capability covering file reading, extraction, and bounded transformation without turning E into a generic file platform.
+## 1. Position
 
-## Boundary
-IN: explicitly supplied/authorized file content; text extraction; bounded transformation of that content.
-OUT: arbitrary filesystem access, silent export, unrestricted file creation, external sharing, private-data permission bypass.
+R3 is the selected representative Tool for Family C — Files & Content.
+Candidate: C.1 File Content / Extract / Transform.
+Role: test bounded artifact processing without creating a generic file platform.
+Strategy: REUSE / ADAPT existing attachment/file capability where valid.
 
-## Tool vs Action
-Tool: File Content capability.
-Actions: READ/EXTRACT/TRANSFORM on one explicitly bound artifact.
+R3 covers content processing of an explicitly supplied/authorized artifact. It does not become a general filesystem, storage, sharing, or file-management system.
 
-## Source strategy
-REUSE existing attachment/file handling where possible. ADAPT an existing parser/converter rather than building generic document infrastructure unless SH-specific behavior requires BUILD.
+## 2. Why R3
 
-## Contract
-Input binds the artifact and requested operation.
-Authorization is evaluated before content access or transformation.
-Transformation does not automatically grant permission to export/share the result.
-Output is a bounded artifact/text/result envelope with provenance.
+R1 tests governed search.
+R2 tests the boundary between connection/capability and permission to read data.
+R3 tests a different boundary:
 
-## Risk
-READ/EXTRACT generally low side effect; TRANSFORM is bounded state-local processing. Export/share/create operations are separate Actions and are not implicitly included.
+> SH may process an artifact that is explicitly supplied and authorized, but processing that artifact does not grant broader rights over the artifact or its result.
 
-## Audit
-Record artifact reference, operation, outcome, and provenance using existing audit infrastructure without storing unnecessary full sensitive payloads.
+This gives the representative set bounded content handling without introducing an external write side effect.
 
-## Failure / containment
-Unsupported type, malformed content, authorization failure, size/resource limit, or parser failure => fail closed; no unintended external mutation.
+## 3. Basic Flow
 
-## Dependencies / gaps
-Exact existing attachment/runtime primitive mapping, generic invocation/result envelope, and export/share boundary.
+artifact supplied → identify actor + SH/account → bind exact artifact → identify operation READ / EXTRACT / TRANSFORM → authorization/scope check → process → normalize result + provenance → audit.
 
-## Exit condition
-The selected existing file capability is proven to fit the E boundary without introducing a parallel storage/authority system.
+If the artifact, operation, scope, or authorization cannot be established unambiguously, processing does not proceed.
+
+## 4. Existing Capability / Source Strategy
+
+R3 should not build a generic document/file platform.
+
+Preferred order:
+1. identify the existing attachment/file-handling capability available to SH;
+2. verify the concrete parser/extractor/converter capability needed;
+3. reuse it directly when its boundary already fits;
+4. otherwise adapt it through the SH Runtime boundary;
+5. build only SH-specific behavior that cannot reasonably be reused/adapted.
+
+The exact parser/provider is not locked by this document. A source must be verified before implementation.
+
+## 5. Boundary
+
+IN:
+- one explicitly supplied/authorized artifact;
+- one bounded operation;
+- authenticated actor / SH context;
+- permitted content access;
+- bounded processing;
+- normalized output;
+- provenance;
+- audit correlation.
+
+OUT:
+- arbitrary filesystem access;
+- arbitrary path traversal;
+- unrestricted bulk file access;
+- silent export;
+- automatic external sharing;
+- unrestricted file creation;
+- deletion or mutation of external files;
+- private-data permission bypass;
+- new storage/authority system;
+- generic document-management platform.
+
+## 6. Tool vs Action
+
+Tool: File Content / Extract / Transform capability.
+Actions: bounded READ, EXTRACT, or TRANSFORM against one explicitly bound artifact.
+
+The Tool provides capability; it does not provide authority.
+
+Processing a file does not imply permission to export, share, publish, create an external record, or modify the original externally. Those are separate governed operations.
+
+## 7. Authorization & Ownership
+
+Before processing, SH Runtime must establish:
+- WHO is requesting;
+- WHICH SH/account context applies;
+- WHAT artifact is targeted;
+- WHAT operation is requested;
+- WHAT scope applies;
+- WHETHER the request is authorized.
+
+For an explicitly supplied file, possession/supply is context but must not become blanket authority for subsequent operations.
+
+If authorization or scope is ambiguous, R3 must deny/fail closed rather than guess.
+
+## 8. Risk / Resource Boundary
+
+R3 is normally low side-effect because processing is bounded and local to the supplied artifact.
+
+Resource limits remain relevant: file size, page/record count, parser complexity, processing time, memory/compute limits, and unsupported or potentially unsafe formats.
+
+Resource exhaustion must fail safely. It must not cause scope expansion or fallback to an unbounded source.
+
+TRANSFORM means bounded content transformation. It does not include external export/share/create/update.
+
+## 9. Contract Coverage
+
+| E requirement | R3 coverage |
+|---|---|
+| Capability identity | Covered |
+| Tool identity | Covered |
+| Actor / SH context | Required |
+| Artifact binding | Required |
+| Operation binding | Required |
+| Authorization | Required |
+| Ownership / privacy boundary | Explicit |
+| Result normalization | Required |
+| Provenance | Required |
+| Audit / traceability | Required |
+| Resource bounds | Explicit |
+| External side effect | Out of scope |
+| Confirmation | Normally not required for bounded local processing; contextual policy may escalate |
+
+R3 is a representative coverage slice. It does not imply a generic file framework already exists.
+
+## 10. Result Boundary
+
+The processed result is data, not authority.
+
+The result should remain bounded and provenance-aware and identify, conceptually: invocation identity, artifact reference, operation, success/failure, bounded result, provenance, metadata, and error information where applicable.
+
+The exact generic result envelope belongs to the shared E contract; R3 must consume it rather than invent a parallel envelope.
+
+## 11. Audit
+
+Each R3 invocation remains traceable through existing SH audit infrastructure.
+
+Audit should establish actor/SH context, artifact reference, requested operation, authorization outcome, execution outcome, provenance, and timing/correlation.
+
+Do not store unnecessary full sensitive file contents in audit metadata.
+R3 must reuse the existing audit primitive rather than create a parallel audit authority.
+
+## 12. Failure / Containment
+
+R3 must fail closed for missing/invalid artifact binding, authorization failure, unsupported type, malformed/corrupt content, size/resource limit exceeded, parser/extractor/converter failure, or invalid normalized result.
+
+Failure must not expose content outside the authorized scope, silently export/share content, mutate an external target, or broaden source/artifact scope.
+
+## 13. Dependencies / Open Gaps
+
+R3 depends on:
+1. exact existing attachment/file runtime primitive mapping;
+2. a verified parser/extractor/converter capability for the selected bounded operation;
+3. generic invocation contract;
+4. generic authorization boundary;
+5. normalized result/error envelope;
+6. audit correlation.
+
+These are shared E dependencies. R3 must not create parallel versions of them.
+
+## 14. Non-Goals
+
+R3 does not establish a generic filesystem abstraction, document-management system, unrestricted file access, automatic sharing/export, external file mutation, generic file-storage authority, new identity/ownership system, generic workflow engine, plugin/extension marketplace, or MCP as a required architecture.
+
+## 15. Exit Condition
+
+R3 bounded design is ready for later implementation when one existing, verified file/attachment capability can be mapped end-to-end:
+
+WHO → SH/account → artifact → operation → scope → AUTHORIZED → PROCESS → NORMALIZE + PROVENANCE → AUDIT.
+
+No parser/provider is locked until that verification occurs.
+
+R3 conclusion: File Content / Extract / Transform remains the selected representative of Family C because it tests bounded artifact processing and resource containment while remaining separate from export, sharing, creation, and external mutation. The implementation strategy remains reuse/adapt, with SH Runtime retaining governance and authority boundaries.
