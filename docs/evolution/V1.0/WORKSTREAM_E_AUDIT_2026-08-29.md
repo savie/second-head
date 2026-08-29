@@ -111,7 +111,7 @@ App already uses a backend/runtime service boundary. The App is not treated as e
 | Authorization reuse | 🟢 | Existing permission/authority foundation |
 | Audit foundation | 🟢 | Existing runtime/database infrastructure |
 | Minimum Tool contract | 🟡 | Required; exact design unresolved |
-| Capability registry | 🟡 | Strong candidate; generic registry not verified |
+| Capability registry | 🟡 | Strong candidate; no generic registry verified in DEV |
 | Invocation contract | 🟡 | Required; schema unresolved |
 | Risk classification | 🟡 | Required direction; generic runtime model unresolved |
 | Confirmation gate | 🟡 | Recovery foundation exists; generic contract unresolved |
@@ -119,16 +119,49 @@ App already uses a backend/runtime service boundary. The App is not treated as e
 | Result normalization | 🟡 | Required by roadmap; generic envelope unresolved |
 | Tool lifecycle audit taxonomy | 🟡 | Audit primitive exists; Tool semantics unresolved |
 | Execution ID / traceability | 🟡 | Candidate; must be evaluated |
-| Tool vs Action | 🟡 | Requires reconciliation |
+| Tool vs Action | 🟢 conceptual / 🟡 implementation | Canonical + Implementation Contract explicitly distinguish Tools and Actions; generic implementation contract still unresolved |
 | Built-in vs Extension/Plugin | 🟡 | Boundary requires reconciliation |
 | Provider/model capability distinction | 🟡 | Direction exists; generic registry unresolved |
-| Plugin marketplace/ecosystem | 🔴 provisional/deferred | Not needed for first E boundary |
-| Unrestricted autonomous execution | 🔴 boundary candidate | Must not bypass authorization/confirmation |
+| Plugin marketplace/ecosystem | 🟡/🔴 scope review | Broad Extensions/Plugins are a candidate direction; marketplace specifically is not established as a V1.0 E requirement |
+| Unrestricted autonomous execution | 🟡/🔴 boundary review | No unrestricted execution contract has been verified; must be reconciled against authorization/risk/confirmation rules before any implementation claim |
 | Tool as authority | 🔴 prohibited | Conflicts with Canonical boundary |
 | Capability = private-data permission | 🔴 prohibited | Capability does not replace authorization |
-| App-side authorization | 🔴 prohibited | Runtime/server remains authorization boundary |
+| App-side authorization | 🟡 boundary review | Runtime authorization is required by the contracts; exact client/server enforcement boundary must be verified from implementation before labeling this prohibited |
 
 **Important:** 🟡 and 🔴 are audit labels, not final decisions. Yellow must be audited; red must have an explicit evidence-based reason for deferral or prohibition.
+
+## E0 audit update — 2026-08-29
+
+The first deeper reconcile changed several provisional labels based on direct source evidence.
+
+### Tool vs Action is not an unresolved concept
+
+Canonical section 6.10 and Implementation Contract sections 10–11 explicitly establish the distinction:
+
+- **Tool** = external capability callable by runtime.
+- **Action** = operation producing an effect/change outside internal reasoning.
+- Tool is subordinate to identity, authorization, and governance.
+- Action risk must be considered; high-risk actions require authorization and confirmation before execution and audit after execution.
+
+Therefore the **conceptual distinction is GREEN**. What remains yellow is the exact generic runtime contract and lifecycle implementation.
+
+### Tool system is explicitly a development target, not an invented E requirement
+
+Canonical identifies the full Capability/Tool system as blueprint/deferred, while Build Scope and Execution Strategy put Tools and Actions into the broader SH Full target and define Tool Execution as registration, discovery, validation, invocation, monitoring, audit, default deny, and external-result handling.
+
+Therefore E is not inventing the existence of Tools; E is the evolutionary implementation work needed to make that target concrete for the current V1.0 track.
+
+### “Plugin marketplace” must not be treated as a Canonical prohibition
+
+The source material supports Extensions/Plugins as a capability direction, but does not establish a marketplace as a required E deliverable. It is therefore **scope/dependency review**, not a Canonical prohibition.
+
+### “Unrestricted autonomous execution” needs precise wording
+
+The reviewed sources clearly require authorization for actions and a confirmation gate for high-risk actions. They do not, in the material audited so far, define a standalone formal rule named “unrestricted autonomous execution is prohibited.” Therefore the item remains a **boundary review** until the exact permitted autonomous execution model is derived.
+
+### App-side authorization needs evidence before a hard prohibition label
+
+The contracts require authorization and runtime execution orchestration, but this audit must distinguish the architectural principle from the exact current client implementation. Until the implementation enforcement path is fully mapped, the safe label is **boundary review**, not an invented prohibition.
 
 ## Yellow / red reconciliation protocol
 
@@ -356,6 +389,14 @@ E0 is complete only when:
 - first E sub-workstream can be defined without guessing.
 
 ## Change log
+
+### 2026-08-29 — E0 deeper source reconciliation
+
+- Tool vs Action conceptual distinction upgraded from unresolved to conceptually confirmed.
+- Plugin marketplace changed from hard red to scope/dependency review because the sources do not establish it as a Canonical prohibition.
+- Unrestricted autonomous execution changed to boundary review because the sources require authorization/high-risk confirmation but do not define that exact prohibition as a named rule.
+- App-side authorization changed to boundary review pending exact implementation enforcement evidence.
+- Generic Tool/Capability implementation remains unresolved; E is the bounded evolutionary work to make the already-defined Tool/Action target concrete.
 
 ### 2026-08-29 — Initial living E audit baseline
 
