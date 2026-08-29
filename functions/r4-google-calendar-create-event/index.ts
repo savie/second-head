@@ -8,6 +8,7 @@ const ACTION_TTL_MS = 10 * 60 * 1000;
 type Identity = { account_id: string; sh_id: string; ownership_role: string };
 
 import { validateCreateEventInput, type CreateEventInput } from "./contract.ts";
+import { connectorRegistry } from "../../runtime/p4g/connectors/google_calendar.ts";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers });
@@ -267,31 +268,15 @@ async function execute(admin: ReturnType<typeof createClient>, identity: Identit
       end: input.end,
     };
 
-    const response = await fetch(
-      "https://www.googleapis.com/calendar/v3/calendars/primary/events?sendUpdates=none",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(event),
-      },
-    );
+    const connector = connectorRegistry.google_calendar;
+    const connectorResult = await connector.createEvent(accessToken, input, eventId);
 
-    const result = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      const code = response.status === 401 || response.status === 403
-        ? "R4_GOOGLE_CALENDAR_WRITE_REJECTED"
-        : response.status === 409
-          ? "R4_GOOGLE_EVENT_ID_CONFLICT"
-          : "R4_GOOGLE_CREATE_EVENT_FAILED";
-
+    if (!connectorResult.result) {
+      const code = connectorResult.errorCode ?? "R4_GOOGLE_CREATE_EVENT_FAILED";
       await admin.from("r4_google_calendar_actions").update({
         status: "FAILED",
         error_code: code,
-        result: { http_status: response.status, google_error: result?.error?.message ?? null },
+        result: { http_status: connectorResult.httpStatus ?? null },
         updated_at: new Date().toISOString(),
       }).eq("action_id", action.action_id);
 
@@ -299,23 +284,18 @@ async function execute(admin: ReturnType<typeof createClient>, identity: Identit
         action_id: action.action_id,
         authorization: "CONFIRMED",
         outcome: code,
-        http_status: response.status,
+        http_status: connectorResult.httpStatus ?? null,
       });
 
-      return fail(code, response.status >= 500 ? 502 : 409);
+      return fail(code, (connectorResult.httpStatus ?? 500) >= 500 ? 502 : 409);
     }
 
+    const result = connectorResult.result;
     await admin.from("r4_google_calendar_actions").update({
       status: "EXECUTED",
-      external_event_id: result.id ?? eventId,
-      external_event_html_link: result.htmlLink ?? null,
-      result: {
-        provider: "GOOGLE_CALENDAR",
-        calendar_id: "primary",
-        event_id: result.id ?? eventId,
-        html_link: result.htmlLink ?? null,
-        status: result.status ?? null,
-      },
+      external_event_id: result.event_id,
+      external_event_html_link: result.html_link,
+      result,
       executed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }).eq("action_id", action.action_id);
@@ -324,20 +304,16 @@ async function execute(admin: ReturnType<typeof createClient>, identity: Identit
       action_id: action.action_id,
       authorization: "CONFIRMED",
       outcome: "EXECUTED",
-      external_event_id: result.id ?? eventId,
+      external_event_id: result.event_id,
+      connector_id: connector.connector_id,
     });
 
     return json({
       ok: true,
       action_id: action.action_id,
       status: "EXECUTED",
-      result: {
-        provider: "GOOGLE_CALENDAR",
-        calendar_id: "primary",
-        event_id: result.id ?? eventId,
-        html_link: result.htmlLink ?? null,
-        status: result.status ?? null,
-      },
+      result,
+      connector_id: connector.connector_id,
     });
   } catch (error) {
     const code = error instanceof Error ? error.message : "R4_GOOGLE_CREATE_EVENT_FAILED";
