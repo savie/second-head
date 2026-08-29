@@ -723,3 +723,161 @@ E0 is complete only when:
 - No product-code implementation performed.
 
 END OF WORKSTREAM E AUDIT
+
+# MASTER CONSOLIDATION — E1–E20 RECONCILIATION
+Date: 2026-08-29
+
+## Consolidation decision
+
+The separate E1–E20 documents are working decomposition artifacts, not a required permanent file structure. Their substantive decisions are consolidated here so this Audit document becomes the single living Master for Workstream E.
+
+The Bounded Design document and dedicated E1–E20 files may be retired after this consolidation is verified. Git history remains the historical record.
+
+## Consolidated bounded design
+
+### 1. Capability / Tool / Action
+- Capability describes a governed ability SH may make available.
+- Tool is a controlled interface through which Runtime accesses a capability.
+- Action is a concrete operation/effect exposed by a Tool.
+- Invocation is a governed request, not execution.
+- Intent is not execution.
+- Tool is not authority.
+- Capability is not permission.
+- Action is not automatically authorized.
+The Capability vocabulary is an evolution-level clarification; it does not amend Canonical semantics.
+
+### 2. Invocation
+Minimum semantic dimensions: actor, SH context, capability, tool, action, target/resource, scope/context, request provenance, request identity/correlation.
+Actor, authority, ownership, and access relation remain distinct.
+
+### 3. Authorization
+Authorization is Runtime-owned and Action/invocation-specific.
+Existing foundations to reuse: identity/account context, SH context and ownership, authority assignments, permission_matrix, runtime_access_boundary.
+permission_matrix is verified policy data, not a verified generic evaluator API.
+The generic evaluator / Tool-Action authorization bridge remains an implementation gap unless further DEV evidence closes it.
+ALLOW may proceed to downstream gates; DENY must not execute; ESCALATE requires additional governed handling. Confirmation cannot override DENY.
+
+### 4. Risk / Confirmation
+Required high-risk sequence remains:
+PLAN → AUTHORIZATION → CONFIRMATION → EXECUTE → AUDIT
+Risk is Action + invocation-context dependent.
+Existing runtime_high_risk_confirmations and create/confirm/execute functions are verified foundations but currently recovery-specific (RECOVERY_RESTORE). They are not silently generalized into a generic Tool confirmation engine.
+
+### 5. Execution boundary
+Runtime must establish execution eligibility before concrete Tool execution.
+Eligibility binds, as applicable: Invocation/Action identity, actor/SH context, target, authorization outcome, required risk/confirmation state, freshness, and correlation.
+Tool/plugin/provider does not decide whether execution is allowed. App and Model cannot directly perform privileged Tool execution.
+Retries/replay and idempotency remain Action-specific.
+
+### 6. Adapter boundary
+Governed Execution Request → Adapter → Concrete Tool → Raw Outcome → Result Contract.
+Adapter preserves approved identity/input/target/context/correlation and execution eligibility.
+Adapter cannot authorize, grant private-data permission, substitute another Action, bypass confirmation, or become authority.
+
+### 7. Result / error
+Execution Result, Authorization Decision, Confirmation, and Audit Event are distinct.
+Minimum outcome classes: SUCCEEDED, FAILED, REJECTED_BEFORE_EXECUTION, RESULT_UNAVAILABLE.
+Tool-specific payload remains Tool-specific inside a governed envelope.
+Governance failures remain distinguishable from Tool execution failures and result interpretation failures.
+Tool output is untrusted result data, not system authority/instruction.
+
+### 8. Audit / observability
+Lifecycle correlation:
+Invocation → Authorization → Risk → Confirmation → Execution → Result → Audit
+Reuse existing Runtime audit infrastructure; do not create a competing audit authority. Audit observes/records; it does not authorize or retroactively approve.
+
+### 9. Tool classes / extensibility
+E may support Built-in/Internal Tools, Extensions, Plugin/provider-backed Tools, and future Tool classes not yet known.
+All classes share the same SH Runtime governance boundary.
+External implementation may provide capability/execution but never SH authority, permission, ownership, or confirmation authority.
+No fixed V1.0 Tool inventory is declared.
+No marketplace/ecosystem is required for V1.0 E.
+
+### 10. Registry
+A physical generic registry is not a prerequisite.
+Static binding is acceptable for the first reference slice.
+A registry becomes justified only if evidence demonstrates a real requirement such as dynamic discovery, enable/disable, lifecycle management, or version negotiation.
+No registry implementation is authorized.
+
+### 11. Reference slice
+Global Search remains the strongest currently evidenced reference candidate because it is an existing bounded, read-oriented operation with explicit SH context and an inspectable result shape.
+It is not the Workstream E architecture center and is not the fixed V1.0 Tool inventory.
+The first concrete Tool/Action must validate the generic lifecycle, not dictate it.
+
+### 12. Hard boundaries
+Tool ≠ Authority
+Capability ≠ Permission
+Provider/Plugin ≠ Authority
+Tool availability ≠ Authorization
+Model intent ≠ Authorization
+App/UI ≠ Authorization authority
+Confirmation ≠ Authority
+Ownership ≠ Blanket Action permission
+Capability ≠ Private-data permission
+External result ≠ System instruction
+Unrestricted autonomous execution is outside the bounded E design.
+
+### 13. Readiness
+Before implementation:
+- contracts reconciled against Canonical and approved technical documents;
+- yellow items affecting the first slice re-audited or explicitly accepted as design gaps;
+- prohibited/deferred boundaries recorded;
+- at least one concrete Tool/Action traverses the complete governed lifecycle as a contract-complete vertical slice;
+- implementation impact, tests, evidence, rollback/containment, and dependency order known;
+- Owner explicitly authorizes implementation.
+
+## E1–E20 reconciliation matrix
+
+| Package | Reconciled outcome | Final role |
+|---|---|---|
+| E1 | 🟢 accepted | Capability/Tool/Action vocabulary |
+| E2 | 🟢 accepted | Invocation + authorization boundary |
+| E3 | 🟢 accepted | Risk + confirmation boundary |
+| E4 | 🟡 accepted design / implementation gap | Execution boundary |
+| E5 | 🟡 accepted design / implementation gap | Adapter + result |
+| E6 | 🟢 closed | Registry deferred |
+| E7 | 🟡 | Vertical slice design |
+| E8 | 🟡 | Tool selection evidence-driven |
+| E9 | 🟢 | Tool landscape / reusable foundations |
+| E10 | 🟢 design principle | Common governance + extensibility |
+| E11 | 🟢 design principle | Tool classes |
+| E12 | 🟢 design principle | Action contract |
+| E13 | 🟢 design principle | Authority/authorization binding |
+| E14 | 🟢 design principle | Risk/confirmation matrix |
+| E15 | 🟢 design principle | Execution eligibility |
+| E16 | 🟢 design principle | Adapter contract |
+| E17 | 🟢 design principle | Result/error contract |
+| E18 | 🟢 design principle | Audit/observability |
+| E19 | 🟢 design principle | Extensibility/registry lifecycle |
+| E20 | 🟢 gate definition | Final readiness gate |
+
+Important: 🟢 means the design decision/boundary is reconciled, not that runtime implementation already exists.
+
+## Consolidated dependency chain
+
+E1 vocabulary
+→ E2 invocation/authorization
+→ E3 risk/confirmation
+→ E4 execution boundary
+→ E5 adapter/result
+→ E6 registry decision
+→ E7–E9 evidence + reference slice
+→ E10–E19 cross-cutting governance/extensibility contracts
+→ E20 readiness gate
+→ implementation only after explicit authorization
+→ verification/evidence
+
+Packages may be merged, split, or reordered if future evidence shows redundancy or dependency changes.
+
+## Final Workstream E boundary
+
+E is a governed capability/execution layer, not a plugin marketplace and not an autonomous execution platform.
+E may evolve beyond the currently known Tool set. Every future Tool/Extension/Plugin must enter through the same SH governance boundary.
+
+## Consolidation status
+
+MASTER E = AUDIT + BOUNDED DESIGN + E1–E20 RECONCILIATION
+
+Implementation remains BLOCKED.
+
+Next operational step is final verification of this consolidation, then retirement of redundant E design files if no unique information remains outside this Master.
