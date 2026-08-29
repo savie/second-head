@@ -103,6 +103,27 @@ Rules:
 
 **Exit:** relevant authorized memory can be surfaced through a meaningful owner flow with provenance/context.
 
+## D1 implementation boundary — 2026-08-29
+
+D1 is now defined as an owner-facing Memory flow, not a new Memory backend. Existing bounded memory retrieval remains the authority boundary.
+
+### Implementation scope
+
+- expose a compact Memory surface from the existing contextual/owner navigation;
+- load only authorized, bounded Memory records/context;
+- show enough context/provenance to understand why a memory is present;
+- support safe owner actions already permitted by the existing Memory contract;
+- keep transcript/history, Experience, and Knowledge visibly distinct;
+- avoid client-side unrestricted memory retrieval or a second local Memory store.
+
+### Acceptance
+
+A D1 implementation is GREEN only when runtime retrieval, authorization boundary, owner surface, persistence/action semantics where applicable, and typecheck/runtime verification all pass. A static Memory list does not satisfy D1.
+
+### Current decision
+
+**D1 READY FOR IMPLEMENTATION.**
+
 ## D2 — Knowledge owner experience
 
 Refine authorized knowledge retrieval/presentation while keeping shared/general knowledge distinct from private memory.
