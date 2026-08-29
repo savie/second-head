@@ -12,17 +12,19 @@ For the first bounded implementation, use a separate Google OAuth consent flow f
 
 ## Operator steps
 
-1. Open Google Cloud Console and create/select a project for SH DEV.
-2. Configure the OAuth consent screen for the DEV test application.
+1. Open Google Cloud Console and create/select a project for SH DEV. **Do not start a Google Cloud Free Trial and do not add a card.** Google’s Resource Manager documentation distinguishes creating a project from attaching a billing account.
+2. Configure the OAuth consent screen for the DEV test application. Keep the app in testing and add the Owner account as a test user.
 3. Create an OAuth Client ID for the SH Android/mobile flow appropriate to the final Expo/Android implementation.
 4. Add only the redirect URI that the SH authorization implementation specifies.
-5. Enable **Google Calendar API** for the project.
+5. Enable **Google Calendar API** for the project. Google’s current Calendar quickstart does not list billing as a Calendar setup prerequisite, and standard Calendar API usage is currently available at no additional cost. If the Console specifically blocks Calendar API enablement behind billing, **STOP and report the exact screen; do not add a card.**
 6. Request the narrowest Calendar scope that supports the bounded operation: preferably `https://www.googleapis.com/auth/calendar.events.owned` when compatible with the selected target; otherwise `https://www.googleapis.com/auth/calendar.events`.
 7. Do **not** paste the Client Secret into GitHub or chat.
 
 ## Important
 
 Do not configure the credential yet if the exact redirect URI has not been supplied by the implementation. The redirect URI must match the actual SH callback path exactly.
+
+**Billing boundary:** The payment screen previously encountered is the Google Cloud billing/free-trial flow. It is not evidence that the Owner must pay to use Calendar. For SH Zero-Budget DEV, do not enter payment details. Use an unbilled Cloud project if the Console permits it; do not activate Free Trial just to continue.
 
 ## SH-side contract
 
