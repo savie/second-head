@@ -54,4 +54,5 @@ begin
   select * from candidates order by relevance_score desc, occurred_at desc, result_id asc offset v_offset limit v_limit;
 end; $$;
 revoke all on function public.global_search_bounded(uuid,text,integer,integer,text[]) from public;
+revoke execute on function public.global_search_bounded(uuid,text,integer,integer,text[]) from anon;
 grant execute on function public.global_search_bounded(uuid,text,integer,integer,text[]) to authenticated;
