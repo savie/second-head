@@ -43,6 +43,54 @@ Before feature implementation:
 
 **Exit:** D implementation slices have explicit dependencies and no unresolved prerequisite that would materially invalidate the slice.
 
+
+## D0 audit result — 2026-08-29
+
+### Verified current implementation
+
+The DEV tree was inspected against the D objective and current runtime boundary.
+
+**Conversation:** runtime already retrieves bounded conversation context through `runtime_load_conversation_context`, while the App uses the existing backend/runtime service boundary rather than introducing a new direct provider path.
+
+**Memory:** the runtime already has bounded retrieval through `retrieve_memories_bounded` and returns a bounded memory context into model orchestration. Memory is therefore not an empty foundation; D1 is primarily an owner-facing continuity/retrieval integration task.
+
+**Experience:** explicit user capture already records Experience as `PRIVATE` / `OWNER_ONLY` through `runtime_record_experience`; runtime can retrieve bounded Experience context through `list_experience_context`. This confirms Experience remains a distinct semantic/runtime domain.
+
+**Journey:** Journey is materially runtime-backed. `journey-service.ts` exposes bounded event retrieval, classification, deletion, synchronized source deletion, selected transfer, and legacy preservation. The Journey App surface already filters events into Memory / Knowledge / Experience / Lifecycle-Other and exposes source/provenance plus record policy controls. D4 therefore extends an existing surface rather than creating Journey from zero.
+
+**Knowledge:** runtime lifecycle handling can attach an acquired knowledge candidate to a Journey candidate. The current Journey UI distinguishes Knowledge from Memory and Experience. However, D0 does not establish that a complete owner-facing Knowledge retrieval/search experience already exists. D2 remains required.
+
+**Search:** no verified general Global SH Search contract was found in the inspected DEV feature/runtime surface. Therefore D5 remains a design + implementation slice and must not be inferred from the existing in-chat “Find in chat” UI, which is conversation-local rather than Global SH Search.
+
+### Boundary findings
+
+1. **No new backend semantic layer is required by D0 itself.** Existing runtime/domain contracts provide the foundation.
+2. **Journey is ahead of the other D domains at the owner-surface level.** D4 should integrate and connect it, not duplicate it.
+3. **Memory retrieval exists but must not be confused with owner-visible global search.** Bounded retrieval is a runtime context capability; Search is a separate contract.
+4. **Experience has explicit capture and bounded retrieval paths.** D3 should preserve that distinction instead of converting it into transcript/history.
+5. **Knowledge has evidence of lifecycle integration, but owner-facing retrieval semantics remain insufficiently established for D2 to be skipped.**
+6. **The current App “Find in chat” feature is not D5.** It searches only the currently loaded conversation messages.
+7. **Authorization must remain server/runtime enforced.** D must not introduce client-side unrestricted private-memory retrieval.
+
+### D0 acceptance contract
+
+For the next D slices, the minimum acceptance contract is now:
+
+- Memory, Knowledge, Experience, Journey and Conversation remain distinct domains.
+- Existing backend/runtime boundaries are reused.
+- Private Memory remains private; shared/general Knowledge remains distinct.
+- Experience is not silently collapsed into transcript or Journey storage.
+- Journey references preserve source/provenance where available.
+- Search, when implemented, operates on an authorized bounded backend retrieval contract.
+- No D slice is considered complete from UI/navigation alone.
+- Typecheck/build/runtime verification remains mandatory at each implementation boundary.
+
+### D0 decision
+
+**D0 CLOSED / READY FOR D1.**
+
+No implementation change was made to product code during D0. The output is the dependency and acceptance baseline for D1–D5.
+
 ## D1 — Memory owner experience
 
 Refine how the owner discovers and uses relevant memory through existing contextual/Journey surfaces.
@@ -158,7 +206,7 @@ D1–D3 may overlap where their contracts permit, but D5 should not bypass autho
 
 ## Current status
 
-**D0 READY TO START**
+**D0 CLOSED / READY FOR D1**
 
 No D implementation is claimed by this planning document.
 
