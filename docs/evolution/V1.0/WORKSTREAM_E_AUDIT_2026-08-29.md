@@ -1661,3 +1661,10 @@ Status discipline:
 - Final R4 acceptance: NOT YET ACCEPTED.
 
 Therefore R4 must no longer be described as implementation-blocked. Its remaining gate is runtime verification. R1–R3 are not inferred complete from this R4 pass and require their own evidence.
+
+
+## CURRENT DEV VERIFICATION — 2026-08-29
+
+Current DEV head: `c02e918d02062c4951ab296a28c2395afedf9f32`.
+
+Automated verification is GREEN on the current DEV line. Standard status is **CI VERIFIED**. Live Google OAuth E2E and real external Calendar mutation remain runtime gates and are not inferred from CI.
