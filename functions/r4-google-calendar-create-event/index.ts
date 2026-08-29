@@ -7,13 +7,7 @@ const ACTION_TTL_MS = 10 * 60 * 1000;
 
 type Identity = { account_id: string; sh_id: string; ownership_role: string };
 
-type CreateEventInput = {
-  summary: string;
-  description?: string;
-  location?: string;
-  start: { dateTime: string; timeZone?: string };
-  end: { dateTime: string; timeZone?: string };
-};
+import { validateCreateEventInput, type CreateEventInput } from "./contract.ts";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers });

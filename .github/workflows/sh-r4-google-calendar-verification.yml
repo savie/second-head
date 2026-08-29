@@ -1,0 +1,25 @@
+name: SH R4 Google Calendar Verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/r4-google-calendar-create-event/**'
+      - 'database/migrations/*r4_google_calendar_create_event.sql'
+      - '.github/workflows/sh-r4-google-calendar-verification.yml'
+
+jobs:
+  r4-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.x
+      - name: Verify R4 bounded input contract
+        run: deno test functions/r4-google-calendar-create-event/index.test.ts
