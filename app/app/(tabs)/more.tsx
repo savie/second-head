@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { useAuth } from '../../state/auth-context';
 
 const items = [
+  ['Global SH Search', '/search', 'Search authorized Conversation, Memory, Knowledge, Experience, and Journey context.'],
   ['Runtime Verification', '/runtime-test', 'Run checks on the phone and copy diagnostic text.'],
   ['Authorization', '/authorization', 'View authorization status and scope.'],
 ] as const;
