@@ -1,39 +1,244 @@
-# SECOND HEAD V1.0 — WORKSTREAM E TOOL — AUTHORIZED READ
+# SECOND HEAD V1.0 — WORKSTREAM E TOOL — R2 AUTHORIZED READ / RETRIEVE
 
-Status: BOUNDED DESIGN / NOT IMPLEMENTATION
+Status: **SELECTED CANDIDATE / TOOL-SPECIFIC BOUNDED DESIGN**
 Date: 2026-08-29
+Branch: `dev`
 
-## Purpose
-Representative read capability for testing the boundary between a connected capability and permission to access data.
+## 1. Position
 
-## Boundary
-IN: read/retrieve from one explicitly authorized source and bounded scope.
-OUT: blanket connector access, cross-SH private-data access, write actions, source-side authority becoming SH authority.
+R2 is the selected representative Tool for:
 
-## Tool vs Action
-Tool: Authorized Read/Retrieve capability.
-Action: one concrete retrieval request against one bound source/scope.
+- **Family:** B — Knowledge & Retrieval
+- **Candidate:** Authorized Read / Retrieve
+- **Selection:** R2
+- **Role:** test the boundary between a connected capability and permission to access data
+- **Strategy:** **REUSE / ADAPT** an existing valid source/connector
 
-## Source strategy
-Prefer an existing valid source/connector. ADAPT through SH Runtime governance. Provider selection remains open until source verification.
+R2 does not define the whole Integration/Connector architecture and does not grant blanket access to connected sources.
 
-## Contract
-Input must identify bounded source/scope and retrieval parameters.
-Authorization must evaluate actor, SH/account context, target, scope, and data sensitivity before retrieval.
-No connection may be interpreted as blanket permission.
-Output is normalized and provenance-aware; provider output is untrusted data.
+## 2. Why R2
 
-## Risk
-Read operation; risk increases with private/sensitive scope. High-risk classification is contextual.
+R1 tests governed search.
 
-## Audit
-Record invocation and outcome through existing SH audit infrastructure; retain provenance sufficient to explain what source/scope was accessed.
+R2 tests the next distinct boundary:
 
-## Failure / containment
-Missing authorization, ambiguous scope, unavailable source, or invalid binding => deny/fail closed.
+> **Having a connection/capability does not itself mean SH is authorized to read the data behind it.**
 
-## Dependencies / gaps
-Concrete connected source, generic authorization bridge, source adapter contract, normalized result envelope, and Tool audit correlation.
+This makes R2 useful as a representative slice because it exercises source binding, scope, authorization, data sensitivity, provenance, and audit without introducing write-side effects.
 
-## Exit condition
-A bounded source and scope can be mapped end-to-end without creating a new private-data permission model.
+## 3. Basic Flow
+
+```
+request
+  ↓
+identify actor + SH/account
+  ↓
+identify exact source
+  ↓
+identify bounded scope
+  ↓
+authorization decision
+  ↓
+retrieve
+  ↓
+normalize + attach provenance
+  ↓
+audit
+```
+
+If the source, scope, or authorization cannot be established unambiguously, the operation does not proceed.
+
+## 4. Existing Capability / Source Strategy
+
+R2 should **not build a new connector ecosystem**.
+
+Preferred order:
+
+1. discover an existing valid connected source/connector;
+2. verify that its capability can satisfy the bounded R2 contract;
+3. adapt it through the SH Runtime boundary;
+4. reuse existing SH identity, ownership, authorization, and audit primitives where compatible.
+
+A concrete provider/source remains **open until verified**. This document therefore defines the contract and boundary, not an invented provider choice.
+
+## 5. Boundary
+
+### IN
+
+- one explicitly bound source;
+- one bounded retrieval scope;
+- authenticated actor / SH context;
+- authorization evaluation;
+- retrieval of permitted data;
+- normalized result;
+- provenance/source information;
+- audit correlation.
+
+### OUT
+
+- blanket access to all connected services;
+- “connected = authorized” semantics;
+- cross-SH private-data access by implication;
+- unrestricted private-data retrieval;
+- write/update/send/submit actions;
+- provider-side authority overriding SH authority;
+- new connector marketplace/ecosystem;
+- arbitrary third-party code execution.
+
+## 6. Tool vs Action
+
+**Tool:** Authorized Read / Retrieve capability.
+
+**Invocation/Action:** one concrete read request against one specifically bound source and scope.
+
+The Tool provides capability; it does not provide authority.
+
+A provider's own connection/permission state must not silently become SH authority.
+
+## 7. Authorization & Ownership
+
+Before retrieval, SH Runtime must be able to establish at minimum:
+
+- **WHO** is requesting;
+- **WHICH SH/account context** applies;
+- **WHAT source** is targeted;
+- **WHAT scope** is requested;
+- **WHAT data sensitivity** applies;
+- **WHETHER the request is authorized**.
+
+Private data is not readable merely because a connector exists.
+
+If ownership, scope, or authorization is ambiguous, R2 must deny/fail closed rather than guess.
+
+## 8. Risk
+
+Default operation is **read-oriented**, but risk is contextual.
+
+Examples:
+
+- public/non-sensitive bounded source → lower risk;
+- private source → higher sensitivity;
+- highly sensitive/private scope → potentially high-risk.
+
+Risk classification must not be used as a shortcut around authorization.
+
+## 9. Contract Coverage
+
+| E requirement | R2 coverage |
+|---|---|
+| Capability identity | Covered |
+| Tool identity | Covered |
+| Actor / SH context | Required |
+| Source binding | Required |
+| Scope binding | Required |
+| Authorization | Required |
+| Ownership / private-data boundary | Explicit |
+| Data sensitivity | Required input to decision |
+| Result normalization | Required |
+| Provenance | Required |
+| Audit / traceability | Required |
+| Write side effect | Out of scope |
+| Confirmation | Not normally required for bounded read; depends on contextual risk policy |
+
+R2 is a representative coverage slice. It does not imply that all generic E infrastructure is already implemented.
+
+## 10. Result Boundary
+
+The retrieved payload is **data, not authority**.
+
+The SH Runtime should receive a bounded normalized result containing, conceptually:
+
+- invocation identity;
+- success/failure;
+- bounded result payload;
+- source/provenance;
+- relevant metadata;
+- error information when retrieval fails.
+
+The exact generic result envelope belongs to the shared E contract; R2 should consume it rather than invent another envelope.
+
+## 11. Audit
+
+Each R2 invocation must remain traceable through the existing SH audit infrastructure.
+
+The audit trail should be sufficient to establish:
+
+- who/which SH context initiated the request;
+- which Tool was invoked (R2);
+- which source and bounded scope were targeted;
+- authorization outcome;
+- execution outcome;
+- relevant provenance;
+- execution timing/correlation.
+
+R2 must reuse the existing audit primitive where semantically compatible.
+
+## 12. Failure / Containment
+
+R2 must fail closed when any required binding cannot be established, including:
+
+- missing authorization;
+- ambiguous actor/SH context;
+- ambiguous source;
+- ambiguous scope;
+- invalid ownership/permission binding;
+- unavailable source;
+- provider failure;
+- invalid result.
+
+A provider failure must not be converted into an authorization success.
+
+No failed R2 invocation may silently broaden scope or fall back to an unbounded source.
+
+## 13. Dependencies / Open Gaps
+
+R2 depends on:
+
+1. a concrete existing source/connector selected through capability discovery;
+2. generic authorization decision semantics;
+3. source/adapter contract;
+4. normalized result/error envelope;
+5. Tool execution audit correlation.
+
+These are shared E dependencies. R2 should not create parallel versions of them.
+
+## 14. Non-Goals
+
+R2 does not establish:
+
+- universal access to every connected service;
+- a generic connector marketplace;
+- a new private-data permission model;
+- a new identity/ownership system;
+- provider authority as SH authority;
+- write/action execution;
+- autonomous retrieval across arbitrary sources;
+- MCP as a required architecture.
+
+## 15. Exit Condition
+
+R2 bounded design is ready for later implementation when one **existing, verified source/connector** can be mapped end-to-end:
+
+```
+WHO?
+  ↓
+WHICH SH/account?
+  ↓
+WHAT source?
+  ↓
+WHAT scope?
+  ↓
+AUTHORIZED?
+  ↓
+RETRIEVE
+  ↓
+NORMALIZE + PROVENANCE
+  ↓
+AUDIT
+```
+
+No provider is locked by this document until that verification occurs.
+
+---
+
+**R2 conclusion:** Authorized Read / Retrieve is retained as the selected representative of Family B because it tests a boundary that Global Search alone does not: **capability/connection must remain separate from permission to access data**. The implementation strategy remains reuse/adapt, with SH Runtime retaining governance and authority boundaries.
