@@ -2079,3 +2079,471 @@ Yang ingin dipertahankan dari sesi ini:
 8. Semua poin di atas tetap **brainstorming**, tidak mengubah Canonical dan belum otomatis menjadi implementation commitment.
 
 END UPDATE
+
+---
+
+# UPDATE TERBARU — WORKSTREAM E BRAINSTORM: CAPABILITY REGISTRY, AUTHORITY REGISTRY, DAN “HANDS”
+
+Brainstorming lanjutan memperdalam Workstream E — **Hands / Tools / Authority** dengan fokus pada pertanyaan: bagaimana membuat SH benar-benar terasa punya “tangan” tanpa berubah menjadi sekadar toolbox atau merusak authority boundary.
+
+## Prinsip baru yang muncul
+
+### Capability ≠ Tool
+
+Satu gagasan yang dianggap penting:
+
+> **Tool adalah mekanisme eksekusi; capability adalah kemampuan semantic yang SH punya atau dapat akses.**
+
+Mental model:
+
+```
+Capability
+    ↓
+Tool / Provider implementation
+    ↓
+Execution
+    ↓
+Result
+```
+
+Contoh konseptual:
+
+- capability: `create_calendar_event`
+- tool: provider-specific calendar API operation
+
+atau:
+
+- capability: `generate_image`
+- tool: image-generation provider/runtime operation
+
+Konsekuensinya, pergantian provider/tool tidak seharusnya otomatis mengubah semantic capability SH.
+
+Ini masih **BRAINSTORM**, bukan perubahan contract atau Canonical.
+
+## Hands jangan menjadi toolbox
+
+Daripada membayangkan:
+
+```
+SH
+├── Search
+├── Files
+├── Calendar
+├── Image
+└── Web
+```
+
+arah yang lebih menarik adalah:
+
+```
+intent
+  ↓
+capability selection
+  ↓
+authority check
+  ↓
+risk / confirmation gate
+  ↓
+execution
+  ↓
+structured result
+  ↓
+SH continuation
+```
+
+Target konseptualnya:
+
+> **SH punya tangan yang terkontrol, bukan sekadar daftar tools.**
+
+Tool surface juga tidak harus sama dengan tool catalog. Internal capability dapat tersedia tanpa semuanya menjadi menu UI yang terlihat user.
+
+## Tiga kemungkinan lapisan Hands
+
+Ini masih exploratory:
+
+### 1. Native Hands
+
+Capability yang memang disediakan langsung oleh SH/runtime.
+
+Contoh representative yang sudah/ mulai terbukti:
+- Global Search
+- Authorized Read
+- File Content
+- Calendar `CREATE_EVENT`
+
+### 2. Connected Hands
+
+Capability yang diperoleh melalui koneksi ke service/provider eksternal.
+
+Contoh konseptual:
+
+```
+SH
+ ↓
+connector
+ ↓
+external service
+ ↓
+capability
+```
+
+Connector menangani connectivity/provider boundary; authority SH tetap harus menentukan apa yang boleh dilakukan.
+
+### 3. Extensible Hands
+
+Capability yang datang melalui extension/plugin/protocol boundary.
+
+Contoh area eksplorasi:
+- Connector / Adapter
+- Plugin / Extension
+- MCP
+
+Poin penting:
+
+> **Tool existence ≠ permission to execute.**
+
+dan:
+
+> **OAuth/access grant ≠ automatic authority for every operation.**
+
+## Capability Registry — kandidat konsep
+
+Salah satu ide paling menarik dari sesi ini adalah kemungkinan adanya **Capability Registry**.
+
+Mental model:
+
+```
+SH
+ ↓
+Capability Registry
+ ├── capability A
+ ├── capability B
+ ├── capability C
+ └── ...
+```
+
+Registry secara konseptual dapat mengetahui hal seperti:
+- capability id/name
+- type/category
+- provider
+- input/output contract
+- availability
+- execution boundary
+- provenance
+- confirmation/risk metadata
+
+Tetapi registry **bukan** authority database.
+
+Prinsip yang perlu dipertahankan:
+
+> **Capability Registry ≠ Authority Registry**
+
+Capability Registry menjawab:
+
+> “Apa yang tersedia?”
+
+Authority Registry / authority layer menjawab:
+
+> “Apa yang boleh dilakukan?”
+
+Ini masih **BRAINSTORM**, bukan keputusan bahwa registry harus dibangun sekarang.
+
+## Kenapa pemisahan ini penting?
+
+Karena semakin besar Hands, semakin berbahaya jika:
+
+```
+available
+   =
+authorized
+   =
+allowed
+   =
+executed
+```
+
+Padahal semestinya konsep-konsep tersebut dapat berbeda:
+
+```
+DISCOVERED
+   ↓
+AVAILABLE
+   ↓
+AUTHORIZED
+   ↓
+READY
+   ↓
+CONFIRMATION REQUIRED? 
+   ↓
+EXECUTE
+   ↓
+RESULT
+```
+
+State di atas hanya **mental model**, bukan pengganti lifecycle R4.
+
+R4 tetap bounded pada contract/lifecycle yang sudah ditetapkan.
+
+## Representative capability ≠ feature checklist
+
+Target brainstorming Family A–G bukan:
+
+> “Bikin tujuh menu.”
+
+Melainkan:
+
+> **Gunakan representative capability untuk membuktikan bahwa setiap capability family dapat hidup di dalam SH architecture.**
+
+Working mental model:
+
+```
+Family
+  ↓
+Representative capability
+  ↓
+Capability contract
+  ↓
+Authority
+  ↓
+Execution
+  ↓
+Evidence / result
+```
+
+Dengan demikian A–G lebih tepat dipandang sebagai **capability landscape** daripada tujuh feature bucket.
+
+## Family A–G sebagai capability landscape
+
+Working map tetap:
+
+- **A — Search & Discovery**
+  - Global Search
+  - Web Search
+- **B — Knowledge & Retrieval**
+  - Authorized Read / Retrieve
+- **C — Files & Content**
+  - File Content / Extract / Transform
+- **D — Creation & Generation**
+  - Image Generation
+- **E — Productivity & Communication**
+  - Email / Calendar / Docs / Tasks
+- **F — External Actions**
+  - Create / Update / Send / Submit
+- **G — Integration & Extension**
+  - Connector / Adapter
+  - Plugin / Extension
+  - MCP
+
+R1–R4 tetap dipandang sebagai **bounded implementation slices / representatives**, bukan inventory final Hands.
+
+## E vs F — taxonomy masih open
+
+Satu pertanyaan desain tetap terbuka:
+
+- **E** mungkin lebih tepat dipahami sebagai **domain/capability family** seperti Calendar, Email, Docs, Tasks.
+- **F** mungkin lebih tepat dipahami sebagai **action semantics** seperti Create, Update, Send, Submit.
+
+Contoh konseptual:
+
+```
+Calendar capability (E)
+        ↓
+CREATE_EVENT action (F)
+        ↓
+connector/provider
+```
+
+Ini **belum keputusan taxonomy**. Jangan mengubah mapping Canonical hanya berdasarkan brainstorming ini.
+
+## Web Search sebagai authority/trust stress test
+
+Global Search dan Web Search sama-sama “search”, tetapi secara sistem berbeda.
+
+Global Search:
+- beroperasi pada SH-owned/authorized data boundary.
+
+Web Search:
+- menjangkau external world.
+
+Karena itu Web Search dapat menguji:
+- external source provenance
+- freshness
+- untrusted content
+- external instructions/content
+- citation/source handling
+- result normalization
+
+Jadi Web Search bukan sekadar “search tool tambahan”; ia berpotensi menjadi representative capability untuk menguji external-world boundary.
+
+Masih **BRAINSTORM**.
+
+## Image Generation sebagai real Hands capability
+
+C8 sudah mempunyai implementation evidence untuk image-generation provider/runtime path.
+
+Brainstorming yang dipertahankan:
+
+> **Image Generation adalah capability creation/generation milik SH, bukan sekadar attachment kebalikan atau tombol UI.**
+
+Mental model:
+
+```
+user intent
+   ↓
+SH Runtime
+   ↓
+image-generation capability
+   ↓
+provider/runtime
+   ↓
+image result / artifact
+   ↓
+save / share / reuse
+```
+
+Provider implementation saat ini tidak otomatis menjadi Canonical provider lock.
+
+Pertanyaan lanjutan yang masih terbuka:
+- result/artifact lifecycle
+- provenance
+- storage
+- reuse as input
+- provider/model switching
+- cost/paid-capability policy
+- authority terhadap configuration
+
+## Family G — bukan “nanti kalau sempat”
+
+Family G tetap dianggap penting karena membahas **bagaimana SH memperoleh tangan baru tanpa kehilangan boundary SH**.
+
+Pertanyaan yang ingin dipertahankan:
+
+### Connector
+Bagaimana SH terhubung ke service/provider?
+
+### Adapter
+Bagaimana external capability diterjemahkan ke SH contract?
+
+### Extension
+Bagaimana capability baru ditambahkan secara modular?
+
+### Plugin
+Bagaimana lifecycle/discovery/packaging capability dikelola?
+
+### MCP
+Bagaimana SH berkomunikasi dengan capability provider melalui protocol/interoperability boundary?
+
+Poin penting:
+
+> **MCP tidak otomatis = seluruh plugin architecture SH.**
+
+Dan:
+
+> **External capability tidak membawa authority SH hanya karena ia berhasil terhubung.**
+
+## Tool chaining / multi-step work
+
+Muncul kemungkinan bahwa satu user request membutuhkan beberapa capability:
+
+```
+User request
+ ↓
+capability/action selection
+ ↓
+tool A
+ ↓
+tool B
+ ↓
+tool C
+ ↓
+result/artifact
+ ↓
+SH response
+```
+
+Ini belum berarti kita membutuhkan generic workflow engine.
+
+Yang ingin dieksplor adalah kemampuan SH untuk melakukan **bounded multi-step work** ketika sebuah task memang membutuhkan lebih dari satu capability.
+
+Hidden chain-of-thought tetap bukan bagian dari user-facing design.
+
+## Artifact sebagai output Hands
+
+Hands tidak selalu menghasilkan text.
+
+Possible outputs:
+- image
+- file
+- document
+- spreadsheet
+- structured data
+- link
+- mutation pada external resource
+
+Artifact/result lifecycle dapat menjadi bagian penting dari future Hands design.
+
+## Authority sebagai fondasi Hands
+
+Semakin besar capability landscape, semakin penting pertanyaan:
+
+```
+WHO
+ ↓
+WHAT
+ ↓
+ON WHAT
+ ↓
+WITH WHICH AUTHORITY
+ ↓
+UNDER WHICH SCOPE
+ ↓
+EXECUTE
+ ↓
+EVIDENCE / RECORD
+```
+
+Prinsip:
+
+> **Tool access tidak boleh disamakan dengan ownership atau authority.**
+
+Dan:
+
+> **Model/provider bukan sovereign atas SH.**
+
+Mental model yang muncul:
+
+```
+LLM / reasoning
+      ↓
+proposes capability invocation
+      ↓
+SH runtime
+      ↓
+authority check
+      ↓
+risk / confirmation gate
+      ↓
+tool execution
+```
+
+Ini tetap conceptual. Tidak menggantikan Canonical architecture.
+
+## STATUS BRAINSTORMING WORKSTREAM E — tambahan
+
+Poin-poin di atas **belum menjadi commitment**.
+
+Yang ingin dipertahankan:
+
+1. Capability ≠ Tool.
+2. Capability Registry dan Authority Registry/layer sebaiknya dipikirkan sebagai concern berbeda.
+3. Native / Connected / Extensible Hands adalah mental model eksplorasi.
+4. Representative capability lebih berguna daripada feature checklist untuk membuktikan A–G.
+5. Web Search dapat menjadi external-world / trust / provenance stress test.
+6. Image Generation tetap representative candidate untuk D dan sudah punya C8 implementation path.
+7. Family G tetap penting sebagai extensibility/integration/authority-boundary problem.
+8. Tool chaining boleh dieksplorasi, tetapi tidak otomatis berarti generic workflow engine.
+9. Artifact/result adalah kemungkinan output Hands yang lebih luas dari text.
+10. Authority harus tetap menjadi boundary antara capability availability dan execution.
+11. Semua ini **BRAINSTORMING**, tidak mengubah Canonical dan belum otomatis menjadi implementation scope.
+
+END UPDATE
