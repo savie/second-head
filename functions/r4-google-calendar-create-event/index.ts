@@ -259,14 +259,7 @@ async function execute(admin: ReturnType<typeof createClient>, identity: Identit
     const input = action.input as CreateEventInput;
 
     const eventId = action.action_id.replace(/-/g, "").replace(/[wxyz]/g, "a").toLowerCase();
-    const event = {
-      id: eventId,
-      summary: input.summary.trim(),
-      ...(input.description?.trim() ? { description: input.description.trim() } : {}),
-      ...(input.location?.trim() ? { location: input.location.trim() } : {}),
-      start: input.start,
-      end: input.end,
-    };
+
 
     const connector = connectorRegistry.google_calendar;
     const connectorResult = await connector.createEvent(accessToken, input, eventId);
