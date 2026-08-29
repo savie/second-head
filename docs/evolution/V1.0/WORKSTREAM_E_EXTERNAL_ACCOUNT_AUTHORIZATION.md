@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — EXTERNAL ACCOUNT AUTHORIZATION
 
-Status: **IMPLEMENTED / RUNTIME VERIFICATION PENDING**
+Status: **SUPPORTING R4 AUTHORIZATION RECORD / CI VERIFIED / RUNTIME VERIFICATION PENDING**
 Date: 2026-08-29
 Branch: `dev`
 
@@ -114,3 +114,8 @@ The authorization implementation prerequisite described above is now implemented
 The remaining gate is live runtime proof: Owner → Connect Google → Google consent → callback → CONNECTED, followed separately by the R4 action proof. No live Google-account E2E or real Calendar mutation is claimed yet.
 
 An APK download is not required to establish the repository/CI implementation state; device-level verification remains a separate runtime gate when the actual client flow is exercised.
+
+
+## DOCUMENT ROLE RECONCILIATION — 2026-08-29
+
+This file is retained as the supporting authorization record for R4, not as a separate Workstream E/R track. Its implementation and runtime-gate facts are part of the R4 External Create / Update slice. The parent R4 document is the primary R4 workstream record; this file preserves detailed authorization evidence and operator prerequisites.
