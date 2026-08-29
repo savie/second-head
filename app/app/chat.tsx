@@ -21,7 +21,8 @@ function makeMessage(role: Message['role'], text: string, id?: string, conversat
 }
 
 function messageFromRow(row: ConversationHistoryRow): Message {
-  const attachmentName = typeof row.metadata?.attachment_name === 'string' ? row.metadata.attachment_name : undefined;
+  const names = Array.isArray(row.metadata?.attachment_names) ? row.metadata.attachment_names.filter((value): value is string => typeof value === 'string') : [];
+  const attachmentName = names.join(', ') || (typeof row.metadata?.attachment_name === 'string' ? row.metadata.attachment_name : undefined);
   return makeMessage(row.role, row.content, `${row.conversation_id}:${row.created_at}`, row.conversation_id, row.created_at, attachmentName);
 }
 
