@@ -2,7 +2,7 @@
 
 Status: **WORKING / NON-CANONICAL**
 Branch: `dev`
-Last refinement: 2026-08-28
+Last refinement: 2026-08-29
 
 This roadmap is an evolution plan, not a Canonical change.
 
@@ -198,6 +198,8 @@ Search should consume authorized backend retrieval contracts. The App must not d
 ### Exit condition
 
 The user can move between conversation, continuity, source/history, and authorized information without those surfaces becoming disconnected silos.
+
+**Current state: D0–D5 CLOSED / GREEN / VERIFIED on DEV.**
 
 ---
 
@@ -453,7 +455,7 @@ The following remain open unless separately resolved:
 
 - exact final V1.0 feature inventory;
 - exact image-generation provider/runtime;
-- complete global Search semantics;
+- future expansion of Global Search semantics beyond the current bounded D5 contract;
 - complete Project boundary and scope;
 - minimum Tool contract details;
 - Extension/Plugin contract;
