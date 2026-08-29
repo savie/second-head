@@ -368,6 +368,33 @@ The multimodal turn must remain coherent across:
 
 ---
 
+### Current implementation
+
+C6 closes the multimodal conversation coherence gap:
+
+- Chat composes attachments through the existing C2 `attachments[]` contract;
+- C3 image inputs and C4 supported file intelligence continue through the same runtime turn;
+- runtime executes the turn with conversation context plus the supplied multimodal inputs;
+- user turns persist attachment count, names, and MIME types;
+- assistant turns persist matching multimodal metadata;
+- conversation history reconstructs attachment names from persisted metadata, so a multimodal turn remains recognizable after reload;
+- no new provider or Canonical semantic layer is introduced.
+
+Commits:
+
+```
+9cbd037e  feat: persist multimodal turn metadata
+d632ff2e  fix: restore multimodal attachments in history
+```
+
+### Verification
+
+**Pending.** C6 must pass typecheck and relevant DEV verification paths before being marked green.
+
+### Status
+
+**IMPLEMENTED / VERIFICATION PENDING**
+
 ## 9. C7 — Image Understanding
 
 ### Scope
@@ -445,7 +472,7 @@ C2  🟢 Verified
 C3  🟢 Verified
 C4  🟡 Implemented / verification pending
 C5  🟢 Verified / no dedicated implementation required
-C6  ⏳ Not started
+C6  🟡 Implemented / verification pending
 C7  ⏳ Not started
 C8  ⏳ Not started
 C-Close ⏳ Not started
@@ -467,6 +494,7 @@ The 🟡 state is intentional: implementation exists, but verification is the au
 - Preserved the roadmap dependency order from `ROADMAP.md`.
 - Explicitly kept image-generation provider/runtime unresolved.
 - Validated C5 against the existing direct-camera path; no duplicate camera architecture introduced.
+- Implemented C6 multimodal turn persistence and history continuity.
 
 ---
 
