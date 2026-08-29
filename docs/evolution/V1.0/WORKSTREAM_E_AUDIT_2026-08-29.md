@@ -1098,3 +1098,74 @@ Implementation remains blocked until the next pass freezes:
 - audit correlation strategy.
 
 No Supabase mutation was performed.
+
+# CONTRACT FREEZE PREPARATION — 2026-08-29
+
+## Purpose
+Freeze the minimum generic contract boundary for Workstream E without implementing it.
+
+## 1. Action Identity — proposed freeze
+An Action is the atomic governed operation. It is identified by a stable, non-authoritative identifier:
+action_id = <tool_id>.<action_name>
+Optional versioning may be attached by the implementation contract, but versioning must not alter authority semantics.
+
+An Action definition describes: action_id; human-readable name/description; input schema; output/result schema; declared risk class; required capability/context; target/resource semantics; execution mode; confirmation requirement policy reference.
+
+A Tool groups Actions. A Capability describes what the Runtime may consider/request; it does not itself grant private-data access or execution permission.
+
+## 2. Authorization evaluator — proposed freeze
+Authorization belongs to the SH Runtime/governance boundary.
+
+Input: authenticated actor/account; sh_id; Action identity; target/resource; requested scope; invocation context; applicable policy.
+
+Output: ALLOW; DENY; ESCALATE; reason/code; policy reference; evaluation correlation.
+
+Rules: server/runtime is authoritative; client only submits a request; Tool/adapter/provider never decides authorization; confirmation cannot override DENY; absence of a matching allow rule is DENY.
+
+Existing permission_matrix is the policy foundation; E must not create a competing authority model.
+
+## 3. Risk / confirmation policy — proposed freeze
+Risk attaches to the Action, then is evaluated against context.
+Minimum initial classes: LOW; HIGH.
+Confirmation is required when resolved policy says so.
+Generic conceptual state: NOT_REQUIRED | PENDING | CONFIRMED | REJECTED | EXPIRED.
+Confirmation must bind to invocation/action/context and have freshness/expiry.
+Existing recovery confirmation infrastructure is a reference implementation pattern, not the generic E contract.
+
+## 4. Execution eligibility — proposed freeze
+Runtime produces an execution-eligible request only after required gates pass.
+
+Eligibility includes: invocation_id; actor/account; sh_id; action_id/tool_id; target; authorization decision; confirmation state when required; expiry/freshness; correlation id.
+
+No eligible request may be produced from a DENY or an unmet required confirmation.
+
+## 5. Adapter interface — proposed freeze
+execute(eligible_request) -> raw_outcome
+
+Adapter is the only controlled bridge to a concrete Tool implementation.
+It may translate payloads and capture outcomes.
+It may not authorize; change identity; change SH; broaden target/scope; select another Action; bypass confirmation; or become an authority.
+
+## 6. Result / Error envelope — proposed freeze
+Generic result: execution_id; invocation_id; tool_id; action_id; status; data; error; metadata; correlation_id; completed_at.
+Statuses: SUCCEEDED | FAILED | REJECTED_BEFORE_EXECUTION | RESULT_UNAVAILABLE.
+Errors are machine-classifiable and separate governance, confirmation/authorization, execution, availability, and normalization failures.
+Tool output is untrusted data.
+
+## 7. Audit correlation — proposed freeze
+Every invocation carries one correlation identity through the lifecycle.
+Minimum linkage: INVOCATION → AUTHORIZATION → RISK/CONFIRMATION → EXECUTION → RESULT.
+Audit uses existing audit_events / runtime_record_audit() infrastructure.
+E must not create a parallel audit authority.
+
+## 8. Contract freeze conditions
+The above is PROPOSED, not Canonical.
+Freeze is blocked until reconciled against existing authority model; exact permission_matrix semantics; audit event schema; high-risk confirmation semantics; runtime entry points; and Global Search contract.
+
+## 9. Hard boundary
+E does not define plugin marketplace; autonomous unrestricted execution; Tool/provider authority; capability-as-private-data-permission; app-side authorization; or arbitrary model-to-tool execution.
+
+## 10. Next reconciliation gate
+Perform final source-level reconciliation of each proposed contract against actual DEV source/schema and SH Canonical.
+Classify each as: FROZEN / REUSE-AS-IS / ADAPT / NEW-BRIDGE / BLOCKED.
+No implementation is authorized by this document.
