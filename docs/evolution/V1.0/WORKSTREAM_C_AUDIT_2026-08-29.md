@@ -505,22 +505,42 @@ dfb5b47c  feat: expose generated image runtime result
 
 ## 11. C-Close — Integration & Verification
 
-C can close only when relevant capabilities are:
+### Closure audit
 
-- runtime-backed;
-- integrated with the owner conversation flow;
-- explicit about processing/failure states;
-- authorized correctly;
-- persistence behavior verified where applicable;
-- build/typecheck/test paths verified;
-- free of blocking regressions;
-- consistent with Canonical invariants.
+All eight planned C slices have now been implemented and reported GREEN through the DEV verification evidence supplied during this workstream. The closing review confirms:
 
-Presentation-only capability does not satisfy C-Close.
+- **C1–C4:** attachment, multi-attachment, image-input, and bounded file-intelligence paths are runtime-backed and integrated into the existing Chat composition flow.
+- **C5:** direct camera capture is reused rather than creating a duplicate camera architecture.
+- **C6:** multimodal turns persist enough attachment metadata for history continuity.
+- **C7:** image understanding uses the verified vision path and remains separate from Canonical memory semantics.
+- **C8:** image generation has a dedicated provider/runtime path, an explicit paid gate, and configurable model selection; it is not part of zero-budget automatic routing.
+- No C slice intentionally introduces a new Canonical semantic layer or changes SH Core semantics.
+- Unsupported file classes remain explicitly bounded rather than being represented as generic file intelligence.
+- The provider/model selection idea remains a future architecture candidate; C8's configurable image model is not a general runtime model registry.
+
+### Remaining boundary / non-blocking follow-up
+
+C-Close does **not** promote unimplemented ideas into scope. The following remain outside C closure:
+
+- arbitrary PDF/Office/archive/binary extraction;
+- voice/audio;
+- broad plugins/integrations;
+- full offline/local-first runtime;
+- official web client;
+- general provider/database switching;
+- general runtime-configurable provider/model registry.
+
+These are explicitly outside the current C closure and belong to future roadmap/evolution decisions if approved.
+
+### Closure decision
+
+**WORKSTREAM C CLOSED — V1.0 IMPLEMENTATION/VERIFICATION BOUNDARY**
+
+C is closed at the implementation/verification boundary, not as a claim that every future multimodal idea is complete.
 
 ### Status
 
-**NOT STARTED**
+**CLOSED / VERIFIED**
 
 ---
 
@@ -535,7 +555,7 @@ C5  🟢 Verified / no dedicated implementation required
 C6  🟢 Verified
 C7  🟢 Verified
 C8  🟢 Verified / provider path selected
-C-Close ⏳ Not started
+C-Close 🟢 Closed / Verified
 ```
 
 C4 and C8 are now recorded GREEN based on the DEV verification results supplied after implementation. C-Close remains the final integration gate.
@@ -557,6 +577,7 @@ C4 and C8 are now recorded GREEN based on the DEV verification results supplied 
 - Validated C5 against the existing direct-camera path; no duplicate camera architecture introduced.
 - Implemented C6 multimodal turn persistence and history continuity.
 - Implemented C7 explicit image-understanding task classification on the existing vision runtime path.
+- Closed Workstream C at the V1.0 implementation/verification boundary after C1–C8 were reported GREEN.
 
 ---
 
