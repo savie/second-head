@@ -1024,3 +1024,77 @@ NOT READY FOR IMPLEMENTATION.
 The next prerequisite is a concrete mapping from each contract to existing DEV primitives and one bounded reference Tool/Action.
 Next pass: reconcile the exact Runtime caller/orchestration point; identity/authority/permission primitives; generic authorization evaluation placement; generic confirmation versus recovery-specific confirmation; execution/adapter location; normalized result boundary; audit event mapping.
 Only then should implementation scope be frozen.
+
+# DEV PRIMITIVE MAPPING — RECONCILIATION PASS 2026-08-29
+
+## Mapping result
+
+| E contract | Existing DEV foundation | Status | Gap |
+|---|---|---|---|
+| Invocation | Global Search RPC + existing runtime audit event type TOOL_INVOCATION | 🟡 | No generic invocation object/entry contract verified |
+| Authorization | resolve_identity(), account/SH ownership checks, permission_matrix | 🟡 | Generic Action evaluator/bridge not verified |
+| Risk / Confirmation | runtime_high_risk_confirmations, runtime_create_high_risk_confirmation(), runtime_confirm_high_risk_action() | 🟡 | Current implementation is explicitly limited to RECOVERY_RESTORE |
+| Execution Eligibility | Global Search server-side ownership/input gates | 🟡 | No generic pre-execution eligibility gate verified |
+| Adapter | global_search_bounded() is a concrete bounded RPC, not an adapter framework | 🟡 | Generic adapter boundary absent |
+| Result / Error | Global Search normalized page/result types + bounded RPC return table | 🟡 | Generic execution result/error envelope absent |
+| Audit / Trace | audit_events + runtime_record_audit() | 🟢 foundation / 🟡 E mapping | Existing event vocabulary supports TOOL_INVOCATION/RUNTIME_ACTION but no complete generic lifecycle correlation contract verified |
+
+## Important correction
+
+Foundation exists ≠ generic E contract exists.
+
+Direct DEV inspection confirms:
+- runtime_create_high_risk_confirmation() rejects any operation other than RECOVERY_RESTORE.
+- runtime_confirm_high_risk_action() confirms an existing recovery-oriented confirmation row.
+- runtime_record_audit() validates SH ownership and accepts TOOL_INVOCATION and RUNTIME_ACTION, useful evidence for E, but does not implement the seven-stage lifecycle.
+- Global Search proves a bounded server-side capability/action pattern, but not a generic Tool runtime.
+
+## Reconciled reuse strategy
+
+E should reuse:
+1. identity resolution;
+2. SH/account ownership boundaries;
+3. permission policy data;
+4. existing audit persistence/function;
+5. existing high-risk confirmation as a reference pattern;
+6. Global Search as the first reference Tool/Action.
+
+E should add only the smallest missing generic bridges required by evidence:
+- invocation contract;
+- generic authorization evaluation boundary;
+- generic risk/confirmation decision boundary;
+- execution eligibility;
+- adapter contract;
+- generic result/error envelope;
+- lifecycle correlation.
+
+No new registry, marketplace, or broad Tool ecosystem is justified by current evidence.
+
+## First implementation candidate
+
+Global Search remains the preferred first bounded reference slice, but implementation must wrap it behind the generic E contracts rather than modify its semantics to become the architecture.
+
+Conceptual flow:
+
+Caller → Invocation → Authorization → Risk/Confirmation → Eligibility → Global Search Adapter → Result/Error → Audit
+
+For this read-oriented search Action, the risk/confirmation branch may be resolved by policy as non-confirmation-required; this is a design decision to be verified against the eventual Action policy, not an implementation assumption.
+
+## Readiness change
+
+The mapping pass closes a major ambiguity but does not authorize implementation.
+
+E status:
+
+**🟡 BOUNDED-DESIGN COMPLETE ENOUGH FOR CONTRACT FREEZE PREPARATION**
+
+Implementation remains blocked until the next pass freezes:
+- Action identity shape;
+- authorization evaluator placement and inputs;
+- risk/confirmation policy representation;
+- execution eligibility record/contract;
+- adapter interface;
+- result/error envelope;
+- audit correlation strategy.
+
+No Supabase mutation was performed.
