@@ -7,7 +7,7 @@ const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const GOOGLE_CLIENT_ID = Deno.env.get("R4_GOOGLE_CLIENT_ID") ?? "";
 const GOOGLE_CLIENT_SECRET = Deno.env.get("R4_GOOGLE_CLIENT_SECRET") ?? "";
-const GOOGLE_REDIRECT_URI = Deno.env.get("R4_GOOGLE_REDIRECT_URI") ?? "";
+const GOOGLE_REDIRECT_URI = Deno.env.get("R4_GOOGLE_REDIRECT_URI") ?? `${PROJECT_URL}/functions/v1/r4-google-oauth`;
 const APP_CALLBACK_URI = "secondhead://authorization?provider=google";
 
 const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events.owned";
