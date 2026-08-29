@@ -1317,7 +1317,7 @@ This freeze does not modify Canonical and does not authorize unrestricted Tool i
 
 ## Implementation checklist
 
-### Phase 0 — pre-implementation verification
+### Work Preparation — pre-implementation verification
 - [ ] Re-read frozen E contract.
 - [ ] Verify exact existing permission_matrix semantics before touching authorization code.
 - [ ] Verify exact Runtime entry point/caller for the first bounded slice.
@@ -1325,7 +1325,7 @@ This freeze does not modify Canonical and does not authorize unrestricted Tool i
 - [ ] Verify audit event schema and existing event vocabulary.
 - [ ] Verify recovery confirmation boundary remains isolated.
 
-### Phase 1 — minimal governance bridge
+### Contract-to-Implementation Mapping — minimal governance bridge
 - [ ] Define the concrete invocation object/contract.
 - [ ] Define Action identity for the reference slice.
 - [ ] Map authorization inputs to existing identity/ownership/permission primitives.
@@ -1336,7 +1336,7 @@ This freeze does not modify Canonical and does not authorize unrestricted Tool i
 - [ ] Define normalized result/error envelope.
 - [ ] Map lifecycle correlation to existing audit infrastructure.
 
-### Phase 2 — first bounded reference slice
+### First Bounded Reference Slice
 Reference candidate: Global Search.
 
 - [ ] Wrap existing Global Search behind the E governance boundary.
@@ -1348,7 +1348,7 @@ Reference candidate: Global Search.
 - [ ] Prove audit correlation.
 - [ ] Prove failure paths do not execute the Tool.
 
-### Phase 3 — verification
+### Verification & Closure
 - [ ] GitHub source verification.
 - [ ] Supabase schema/function/policy verification.
 - [ ] Runtime/Android verification.
@@ -1381,4 +1381,4 @@ Canonical + frozen E contract
 
 READY TO START IMPLEMENTATION PLANNING, NOT YET AUTHORIZED TO MUTATE DEV.
 
-The next execution step is to inspect and document the exact source-level insertion points for Phase 0/1. Only after that bounded implementation plan is accepted should code or Supabase mutation begin.
+The next execution step is to inspect and document the exact source-level insertion points for Work Preparation and Contract-to-Implementation Mapping. Only after that bounded implementation plan is accepted should code or Supabase mutation begin.
