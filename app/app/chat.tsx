@@ -93,6 +93,10 @@ export default function ChatScreen() {
   const [experienceLoading, setExperienceLoading] = useState(false);
   const [experienceError, setExperienceError] = useState<string | null>(null);
   const [experienceRows, setExperienceRows] = useState<Array<Record<string, unknown>>>([]);
+  const [journeyOpen, setJourneyOpen] = useState(false);
+  const [journeyLoading, setJourneyLoading] = useState(false);
+  const [journeyError, setJourneyError] = useState<string | null>(null);
+  const [journeyRows, setJourneyRows] = useState<Array<Record<string, unknown>>>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -197,6 +201,15 @@ export default function ChatScreen() {
     } finally {
       setExperienceLoading(false);
     }
+  }
+
+
+  async function openJourneySurface() {
+    if (!context?.sh_id) return;
+    setJourneyOpen(true); setJourneyLoading(true); setJourneyError(null);
+    try { const result = await loadSHContext({ shId: context.sh_id, query: draft.trim() || conversationTitle, memoryLimit: 1, knowledgeLimit: 1, journeyLimit: 20 }); setJourneyRows(result.journey); }
+    catch (error) { setJourneyError(error instanceof Error ? error.message : 'Journey could not be loaded.'); setJourneyRows([]); }
+    finally { setJourneyLoading(false); }
   }
 
   const canSend = lifecycleState === 'active' && !sending && !pendingConfirmation && !!draft.trim();
