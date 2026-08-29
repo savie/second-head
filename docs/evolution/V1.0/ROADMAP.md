@@ -481,3 +481,28 @@ Authority remains:
 This roadmap must not rewrite Canonical or historical Phase/Resume material.
 
 END OF SECOND HEAD V1.0 — ROADMAP
+
+
+## CURRENT DEV RECONCILIATION — 2026-08-29
+
+This note records implementation evidence without changing Canonical scope or the roadmap's dependency rules.
+
+### Workstream audit state
+
+- Workstream A — **CLOSED / RECONCILED** per its audit document.
+- Workstream B — **CLOSED FOR IMPLEMENTATION / AUTOMATED ACCEPTANCE**; manual APK visual review is explicitly not claimed as completed acceptance.
+- Workstream C — **CLOSED at implementation/verification boundary**; C8 image-generation provider/runtime is implemented behind an explicit paid-capability gate, while future rendering/storage lifecycle remains separately bounded.
+- Workstream D — **CLOSED / VERIFIED** per its audit document.
+- Workstream E — **ACTIVE / IMPLEMENTATION RECONCILIATION**. R4 now has a bounded Google Calendar CREATE_EVENT implementation and green automated verification; live runtime proof remains open. R1–R3 are not inferred complete from R4.
+
+### R4 current evidence
+
+Latest DEV head: `c0bc185034a04384ba0466fac0af172e9ebd2b03`.
+
+GREEN automated verification: R4 #2, Runtime Controlled #411, App Chat #397.
+
+R4 remains a bounded representative action only. Final V1.0/R4 acceptance still requires applicable runtime-backed verification and documented evidence; CI green alone is not sufficient.
+
+### Execution discipline
+
+The absence of an APK/manual device inspection does not invalidate repository-level implementation or CI verification. Where a workstream explicitly requires device/runtime proof, that gate remains open rather than being silently marked complete.
