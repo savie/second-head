@@ -1666,3 +1666,132 @@ Yang penting:
 > **Jangan membuat V1.0 UX yang secara tidak perlu mengunci SH hanya pada Android jika ada kemungkinan SH juga akan hadir sebagai web experience.**
 
 Ini adalah brainstorming Resume 69, bukan perubahan Canonical dan bukan keputusan implementation.
+
+
+---
+
+# UPDATE TERBARU — C8 IMAGE GENERATION & PROVIDER/MODEL CONFIGURATION
+
+Workstream C sekarang sudah mencapai C-Close. Seluruh C1–C8 telah dilaporkan GREEN melalui DEV verification, termasuk C8 image-generation provider/runtime path.
+
+## Yang sudah terealisasi dari brainstorming Resume 69
+
+### Multimodal capability
+
+Resume 69 sebelumnya membayangkan evolusi:
+
+```
+image → question → reasoning → answer
+```
+
+Sekarang jalur tersebut sudah mempunyai implementation evidence melalui C3/C6/C7: first-class image input, multimodal conversation continuity, dan explicit image-understanding task routing.
+
+### Image generation
+
+Ide yang sebelumnya masih berupa:
+
+```
+user → "buatkan gambar..."
+→ SH Runtime
+→ image generation capability
+→ hasil gambar
+→ save/share/download
+```
+
+sekarang sudah mempunyai provider/runtime implementation path pada C8.
+
+Provider yang dipilih untuk implementation saat ini adalah **OpenRouter Unified Image API**. Ini adalah implementation choice, bukan Canonical provider lock.
+
+C8 juga sengaja memakai **explicit paid-capability gate**. Image generation tidak dimasukkan ke automatic zero-budget routing.
+
+## Ide baru yang muncul dari implementasi C8
+
+Pengalaman provider image menunjukkan pentingnya memisahkan **provider/model configuration** dari APK/client code.
+
+Arah yang layak dieksplorasi:
+
+```
+SH App
+   ↓
+SH Runtime / Contracts
+   ↓
+Provider / Model Registry
+   ├── Provider A
+   │    ├── model 1
+   │    └── model 2
+   ├── Provider B
+   └── Provider C
+```
+
+Target konseptualnya:
+
+> Ganti provider/model sebisa mungkin melalui runtime/configuration surface tanpa rebuild APK hanya karena model/provider berubah.
+
+Namun ini **belum implemented dan belum menjadi keputusan arsitektur**.
+
+Hal yang masih perlu dipikirkan:
+- siapa yang boleh melakukan override;
+- automatic routing vs manual override;
+- fallback behavior;
+- cost/zero-budget policy;
+- capability compatibility;
+- image vs text vs vision provider contract;
+- bagaimana configuration tetap berada di bawah authority SH.
+
+Referensi pola dari proyek MiRA hanya dipakai sebagai inspiration/pattern reference. MiRA tetap proyek terpisah dan tidak menjadi dependency SH.
+
+## Audit Resume 69 — status brainstorming vs implementation
+
+```
+SUDAH PUNYA IMPLEMENTATION EVIDENCE
+├── Modern UX / contextual surfaces — Workstream B
+├── Journey continuity surface — Workstream B
+├── Attachment lifecycle
+├── Multiple attachments
+├── Image input
+├── File intelligence — bounded supported classes
+├── Camera input
+├── Multimodal conversation continuity
+├── Image understanding
+└── Image generation provider/runtime path
+
+MASIH PARTIAL / PERLU REFINEMENT
+├── Memory / Knowledge / Experience owner experience
+├── Global continuity semantics
+├── Error/loading/empty UX consistency
+├── Hands / Tools / Authority
+└── Lifecycle end-to-end semantics
+
+MASIH BRAINSTORMING / BELUM IMPLEMENTED
+├── Global SH Search
+├── Voice / Audio
+├── broad Plugins / Extensions / Integrations
+├── Projects sebagai full product capability
+├── general provider/database switching
+├── full Offline / Local-first SH
+├── integrated local GGUF runtime
+├── official Web client
+└── runtime-configurable Provider / Model Registry
+```
+
+Catatan penting: **implementation evidence tidak otomatis mengubah ide Resume 69 menjadi Canonical.** Resume 69 tetap non-Canonical dan berfungsi sebagai living brainstorming record.
+
+## Workstream C closure
+
+```
+C1 🟢
+C2 🟢
+C3 🟢
+C4 🟢
+C5 🟢
+C6 🟢
+C7 🟢
+C8 🟢
+C-Close 🟢 CLOSED
+```
+
+C-Close berarti implementation/verification boundary Workstream C sudah ditutup. Future multimodal ideas tetap dapat muncul di Resume 69 tanpa membuka kembali Workstream C.
+
+---
+
+END UPDATE
