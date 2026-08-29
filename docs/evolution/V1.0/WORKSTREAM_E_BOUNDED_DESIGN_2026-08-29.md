@@ -610,3 +610,13 @@ E5 audit/reconciliation completed. Dedicated document:
 **E5 = 🟡 BOUNDED DESIGN ACCEPTED / IMPLEMENTATION BLOCKED.** Existing Runtime has a result path for the model/conversation flow, but no verified generic Tool adapter/result contract.
 
 Next candidate: **E6 — Tool/Action Registry & Capability Binding**, subject to a fresh dependency audit. Registry remains deferred until evidence proves it is required.
+
+
+## 29. E6 dedicated document
+
+E6 audit/reconciliation completed. Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E6_REGISTRY_BINDING_2026-08-29.md
+
+**E6 = 🟢 AUDIT / BOUNDED DESIGN CLOSED — REGISTRY DEFERRED.** Stable semantic identity and Capability/Tool/Action binding are required, but a physical generic registry is not evidenced or yet proven necessary. No registry implementation is authorized.
+
+Next candidate: **E7 — Concrete V1.0 Tool/Action Vertical Slice**, to test the complete E lifecycle and resolve only the generic contracts actually required.
