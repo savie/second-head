@@ -122,7 +122,7 @@ A D1 implementation is GREEN only when runtime retrieval, authorization boundary
 
 ### Current decision
 
-**D1 IMPLEMENTED — PENDING DEV VERIFICATION.**
+**D1 CLOSED / GREEN (verified externally).**
 
 ## D2 — Knowledge owner experience
 
