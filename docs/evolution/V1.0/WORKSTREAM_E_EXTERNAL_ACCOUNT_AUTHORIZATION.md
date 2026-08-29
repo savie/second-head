@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — EXTERNAL ACCOUNT AUTHORIZATION
 
-Status: **BOUNDED DESIGN / IMPLEMENTATION PREREQUISITE**
+Status: **IMPLEMENTED / RUNTIME VERIFICATION PENDING**
 Date: 2026-08-29
 Branch: `dev`
 
@@ -106,3 +106,11 @@ Required runtime proof:
 Owner → Connect Google → Google consent → callback → CONNECTED state → Disconnect → REVOKED state
 
 No R4 CREATE EVENT mutation is executed as part of this authorization verification.
+
+## CURRENT DEV RECONCILIATION — 2026-08-29
+
+The authorization implementation prerequisite described above is now implemented in DEV. Latest DEV verification is GREEN, including R4-specific verification #2.
+
+The remaining gate is live runtime proof: Owner → Connect Google → Google consent → callback → CONNECTED, followed separately by the R4 action proof. No live Google-account E2E or real Calendar mutation is claimed yet.
+
+An APK download is not required to establish the repository/CI implementation state; device-level verification remains a separate runtime gate when the actual client flow is exercised.
