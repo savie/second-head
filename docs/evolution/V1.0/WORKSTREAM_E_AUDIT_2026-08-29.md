@@ -881,3 +881,71 @@ MASTER E = AUDIT + BOUNDED DESIGN + E1–E20 RECONCILIATION
 Implementation remains BLOCKED.
 
 Next operational step is final verification of this consolidation, then retirement of redundant E design files if no unique information remains outside this Master.
+
+# RECONCILIATION PASS — DEV CROSS-CHECK
+Date: 2026-08-29
+
+## Runtime evidence verified
+
+### GitHub DEV
+- `app/app/search.tsx` is a client UI for the existing Global Search vertical slice.
+- `app/services/global-search.ts` defines a bounded client contract: SH_ID is required; query is required and capped at 2000 characters; limit is bounded to 1–50; offset to 0–200; calls `global_search_bounded`; returns a normalized page envelope.
+- The UI explicitly presents Global Search as a bounded backend contract and states that Private Memory is not downloaded for client-side search.
+
+### Supabase DEV
+Read-only schema/function inspection confirms:
+- `public.accounts`, `public.sh_instances`, and `public.sh_ownership` exist with RLS enabled.
+- `public.permission_matrix` exists with 45 rows; its comment identifies it as a Phase 2 governance permission matrix with default DENY when no valid allow rule matches.
+- `public.runtime_high_risk_confirmations` exists with 6 rows and HIGH-only risk, lifecycle states PENDING/CONFIRMED/EXECUTED/CANCELLED/EXPIRED, plus action/account/SH/actor/target correlation fields.
+- `public.global_search_bounded` exists as SECURITY DEFINER with a public search_path limited to `public`.
+- The function requires authenticated `auth.uid()`, resolves the current account, requires a supplied SH_ID owned by that account, validates query length and domain vocabulary, and scopes candidates by account/SH/access semantics.
+- The search function exposes only five bounded domains: CONVERSATION, MEMORY, KNOWLEDGE, EXPERIENCE, JOURNEY.
+- Search results are returned as a bounded result envelope containing result_id, domain, title, snippet, source_ref, provenance, occurred_at, relevance_score.
+
+## Reconciliation outcome
+
+### 🟢 Confirmed
+1. A concrete bounded Tool-like capability already exists at the Global Search vertical slice.
+2. SH_ID/account ownership is enforced server-side for that slice.
+3. Private/general visibility constraints are represented in the data model and search function.
+4. Result normalization already exists for Global Search.
+5. The existing permission matrix is a real governance foundation and explicitly defaults to DENY.
+6. RLS is present on the inspected identity/ownership/governance/search-related data surfaces.
+
+### 🟡 Still design/implementation gap
+1. No verified generic Tool/Action authorization evaluator was found in the inspected DEV evidence.
+2. The Global Search RPC is a specialized bounded function, not evidence of a generic Tool execution framework.
+3. The existing high-risk confirmation table is not evidence of a generic Tool confirmation engine; its current schema is specifically HIGH-risk oriented.
+4. No verified generic Tool registry is required or evidenced yet.
+5. A complete generic Invocation → Authorization → Risk/Confirmation → Execution → Result → Audit lifecycle is not yet evidenced by one generic runtime path.
+
+### 🔴 Explicitly outside current E implementation boundary
+- unrestricted autonomous execution;
+- Tool/plugin/provider as authority;
+- capability as private-data permission;
+- app-side authorization;
+- plugin marketplace/ecosystem implementation;
+- direct privileged execution from the model/UI.
+
+## Scope correction
+
+Global Search is retained as a **reference vertical slice**, not as the definition of Workstream E.
+
+The implementation target must therefore be the **smallest reusable governed Tool/Action runtime boundary** that can host Global Search and future Tools without granting Global Search special architectural authority.
+
+## Implementation gate after this pass
+
+E is **not yet implementation-ready**.
+
+The next bounded-design task is to specify the generic contract for:
+1. Invocation;
+2. Authorization decision;
+3. Risk/confirmation decision;
+4. Execution eligibility;
+5. Adapter invocation;
+6. normalized result/error;
+7. audit correlation.
+
+Only after those contracts are reconciled against the existing DEV foundations should an implementation slice be authorized.
+
+No Supabase mutation was performed in this reconciliation pass.
