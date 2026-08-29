@@ -1689,3 +1689,35 @@ The DEV implementation reuses the existing runtime image capability/adapter rath
 R5 implementation is currently **IMPLEMENTED / CI VERIFICATION PENDING**. No runtime acceptance is claimed until the DEV verification workflow proves a valid generated image result and client presentation.
 
 R5 does not alter Canonical scope.
+
+
+## R6 — Family E Representative — 2026-08-29
+
+R6 is the selected representative capability for **Family E — Productivity & Communication**.
+
+Primary record:
+- `WORKSTREAM_E_TOOL_TASK_REMINDER.md`
+
+Bounded capability:
+- authenticated owner request → create persistent SH-owned task/reminder → future due time → result → audit.
+
+R6 is materially distinct from R4:
+- R4 mutates an external Google Calendar state;
+- R6 creates an internal SH-owned productivity object.
+
+DEV implementation:
+- `public.r6_tasks` owner-scoped table;
+- authenticated `r6_create_task` RPC;
+- owner-scoped `r6_list_tasks` RPC;
+- Runtime R6 CREATE_TASK operation;
+- deterministic ISO-datetime reminder phrase;
+- action/audit metadata;
+- R6 contract regression coverage.
+
+Scheduling boundary:
+- due-time persistence is in scope;
+- background/OS notification delivery and autonomous execution are explicitly out of scope for this representative slice.
+
+Current status: **IMPLEMENTED / CI VERIFICATION PENDING**.
+
+R6 does not alter Canonical scope.
