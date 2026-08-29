@@ -1795,3 +1795,287 @@ C-Close berarti implementation/verification boundary Workstream C sudah ditutup.
 ---
 
 END UPDATE
+
+
+---
+
+# UPDATE TERBARU — WORKSTREAM E: 7 FAMILY HANDS / TOOL LANDSCAPE
+
+Diskusi terbaru kembali ke Workstream E setelah audit E dilakukan di sesi lain. Fokus brainstorming bukan mempersempit Hands menjadi R1–R4, tetapi menjaga agar **7 capability family A–G** yang sudah didefinisikan tetap terlihat sebagai landscape yang lebih besar.
+
+## SH TOOL LANDSCAPE — working map
+
+SH TOOL LANDSCAPE
+│
+├── A. Search & Discovery
+│    ├── Global Search [✓] R1
+│    └── Web Search
+│
+├── B. Knowledge & Retrieval
+│    └── Authorized Read / Retrieve [✓] R2
+│
+├── C. Files & Content
+│    └── File Content / Extract / Transform [✓] R3
+│
+├── D. Creation & Generation
+│    └── Image Generation
+│
+├── E. Productivity & Communication
+│    └── Email / Calendar / Docs / Tasks
+│
+├── F. External Actions
+│    └── Create / Update / Send / Submit [✓] R4
+│
+└── G. Integration & Extension
+     ├── Connector / Adapter
+     ├── Plugin / Extension
+     └── MCP
+
+## R1–R4 bukan keseluruhan Hands
+
+Poin yang ingin dijaga dari diskusi:
+
+> **R1–R4 sebaiknya dipandang sebagai representative/bounded slices yang sudah direalisasikan, bukan inventory final dari seluruh Hands.**
+
+Karena family A–G memang sudah menjadi landscape capability, target brainstorming berikutnya adalah mencari cara agar minimal setiap family A–G mempunyai **setidaknya satu capability yang benar-benar terwakili/berfungsi**, tanpa harus membuat seluruh sub-capability sekaligus.
+
+Contoh arah yang muncul:
+
+- A → Global Search sudah menjadi representative; Web Search dapat menjadi perluasan.
+- B → Authorized Read/Retrieve sudah menjadi representative; Connected Retrieval dapat dieksplorasi.
+- C → File Content/Extract/Transform sudah menjadi representative; File Creation dapat menjadi perluasan.
+- D → Image Generation menjadi kandidat representative yang jelas.
+- E → Email / Calendar / Docs / Tasks menjadi landscape productivity/communication.
+- F → R4 sudah memberi representative External Action melalui Calendar CREATE_EVENT; family F tetap lebih luas daripada satu action.
+- G → Connector/Adapter, Plugin/Extension, dan MCP tetap perlu dieksplorasi; jangan mengecilkannya hanya karena implementation pertama belum ada.
+
+Ini semua masih **brainstorming**, bukan commitment scope.
+
+## E vs F — pertanyaan taxonomy
+
+Muncul kebingungan yang perlu dicatat, bukan langsung diselesaikan:
+
+R4 saat ini memakai Calendar API dan melakukan CREATE_EVENT, tetapi ditempatkan pada **F — External Actions**, sementara **E — Productivity & Communication** juga mencakup Calendar.
+
+Pertanyaan yang muncul:
+
+> Apakah E seharusnya menjelaskan **domain/productivity capability** (Calendar, Email, Docs, Tasks), sedangkan F menjelaskan **action semantics** (Create / Update / Send / Submit)?
+
+Kalau mental model ini benar, satu integrasi seperti Google Calendar memang bisa menyentuh E dan F sekaligus:
+
+E = apa domain/capability-nya?
+F = tindakan apa yang dilakukan terhadap domain tersebut?
+
+Contoh konseptual:
+
+Calendar capability (E)
+        ↓
+CREATE_EVENT action (F)
+        ↓
+Google Calendar connector/provider
+
+Ini **belum keputusan taxonomy**. Dicatat sebagai pertanyaan desain agar family tidak dibuat saling eksklusif secara artifisial.
+
+## Google integration — pengalaman implementation
+
+Google Calendar sudah pernah berhasil di-enable dan dipakai melalui Google authentication/API flow. Dari pengalaman itu muncul observasi:
+
+> setup authorization/provider awal memang lumayan ribet, tetapi setelah boundary/connector dasar tersedia, penambahan capability Google lain mungkin dapat menjadi incremental work daripada membuat integrasi dari nol setiap kali.
+
+Ini belum berarti semua Google Cloud capability otomatis mudah ditambahkan. Setiap API tetap perlu dicek: authorization/scope, API enablement, contract, data/action boundary, confirmation/risk, dan implementation effort.
+
+## D — kenapa Image Generation harus terlihat di landscape?
+
+Pertanyaan muncul karena Image Generation sebelumnya masih dianggap candidate, padahal Workstream C sudah mempunyai implementation path untuk image generation.
+
+Brainstorming yang ingin dipertahankan:
+
+> **Image Generation bukan sekadar attachment kebalikan dan bukan fitur UI tempelan; ia adalah capability creation/generation milik SH.**
+
+Mental model:
+
+user request
+   ↓
+SH Runtime
+   ↓
+image generation capability
+   ↓
+image result / artifact
+   ↓
+save / share / reuse / attach
+
+Karena itu D layak menjadi family yang memiliki representative capability, bukan dihilangkan hanya karena capability-nya memakai provider eksternal.
+
+## G — Connector / Plugin / Extension / MCP
+
+Bagian G dianggap masih terlalu mudah dikecilkan jika hanya dilihat dari implementation pertama.
+
+Pertanyaan brainstorming:
+
+> Apa alasan kuat untuk memiliki G sebagai family sendiri?
+
+Arah pemikiran yang muncul:
+
+**Connector / Adapter** dapat menjadi boundary untuk menghubungkan SH dengan service/provider tertentu.
+
+**Plugin / Extension** dapat menjadi mekanisme untuk menambahkan capability secara modular, bukan sekadar tombol tambahan.
+
+**MCP** dapat menjadi salah satu mekanisme integration/tool interoperability, tetapi tidak otomatis disamakan dengan authority SH atau seluruh plugin system.
+
+Mental model sementara:
+
+SH
+ ↓
+Capability
+ ↓
+Integration boundary
+ ├── Connector / Adapter
+ ├── Plugin / Extension
+ └── MCP
+ ↓
+Authorization / Authority
+ ↓
+Execution
+ ↓
+Result / Record
+
+Ini masih ide. Belum diputuskan apakah ketiganya harus masuk V1.0, bagaimana contract-nya, atau apakah MCP menjadi bagian native atau adapter boundary.
+
+## Ide: 7-family coverage, bukan 7 menu
+
+Muncul prinsip baru:
+
+> **A–G sebaiknya dipandang sebagai capability families, bukan tujuh menu UI yang wajib terlihat user.**
+
+Satu user request dapat melewati beberapa family.
+
+Contoh:
+
+"cari data → baca file → analisis → buat gambar → simpan"
+
+A Search
+ ↓
+C Files
+ ↓
+D Creation
+ ↓
+C Artifact
+
+Atau:
+
+"baca dokumen → buat task/calendar event → kirim email"
+
+C Files
+ ↓
+E Productivity
+ ↓
+F External Action
+ ↓
+G Connector/Integration
+
+Jadi coverage A–G lebih menarik jika dibuktikan melalui **vertical capability slices**, bukan sekadar menambahkan tujuh halaman UI.
+
+## Ide: Hands sebagai SH Action System
+
+Brainstorming berkembang dari sekadar "Tools" menjadi kemungkinan konsep:
+
+CAPABILITY
+Apa yang SH bisa lakukan?
+
+AUTHORITY
+Apa yang SH boleh lakukan?
+
+EXECUTION
+Bagaimana SH melakukannya?
+
+Dengan alur:
+
+request
+ ↓
+capability selection
+ ↓
+authority / permission check
+ ↓
+confirmation bila diperlukan
+ ↓
+execution
+ ↓
+structured result
+ ↓
+record / provenance
+
+Ini masih conceptual model, bukan Canonical replacement.
+
+## Tool chaining / multi-step work
+
+Ide yang muncul:
+
+SH tidak harus melakukan satu tool call untuk satu pertanyaan. Satu request dapat membutuhkan beberapa capability:
+
+User request
+ ↓
+plan / action selection
+ ↓
+tool A
+ ↓
+tool B
+ ↓
+tool C
+ ↓
+result / artifact
+ ↓
+SH response
+
+Yang boleh terlihat user adalah progress/action status, bukan hidden chain-of-thought.
+
+## Artifact sebagai output Hands
+
+Hands tidak harus selalu menghasilkan text reply.
+
+Kemungkinan output:
+- file
+- image
+- document
+- spreadsheet
+- structured data
+- link
+- perubahan pada external resource
+
+Artifact dapat menjadi objek yang bisa dilihat, disimpan, dibagikan, diunduh, atau digunakan kembali sebagai input.
+
+## Authority semakin penting ketika Hands membesar
+
+Semakin banyak capability yang bisa melakukan action, semakin penting:
+
+WHO
+ ↓
+WHAT
+ ↓
+ON WHAT
+ ↓
+WITH WHICH AUTHORITY
+ ↓
+UNDER WHICH SCOPE
+ ↓
+EXECUTE
+ ↓
+EVIDENCE / RECORD
+
+Ide ini konsisten dengan arah SH bahwa tool access tidak boleh disamakan dengan ownership atau authority.
+
+## STATUS BRAINSTORMING WORKSTREAM E
+
+**Belum ada keputusan bahwa semua A–G harus selesai penuh untuk V1.0.**
+
+Yang ingin dipertahankan dari sesi ini:
+
+1. **Jangan mengkerutkan Workstream E menjadi R1–R4.**
+2. R1–R4 adalah implementation slices/representatives, bukan batas capability SH.
+3. Cari kemungkinan **minimal A–G masing-masing punya representative capability**.
+4. E dan F boleh beririsan secara praktis; taxonomy perlu dipahami sebelum diubah.
+5. D Image Generation harus tetap terlihat sebagai capability family.
+6. G Connector / Adapter / Plugin / Extension / MCP perlu alasan desain yang kuat, bukan dibuang hanya karena belum implemented.
+7. Hands lebih menarik jika dipikirkan sebagai **capability + authority + execution system**, bukan kumpulan tombol.
+8. Semua poin di atas tetap **brainstorming**, tidak mengubah Canonical dan belum otomatis menjadi implementation commitment.
+
+END UPDATE
