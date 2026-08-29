@@ -1721,3 +1721,37 @@ Scheduling boundary:
 Current status: **IMPLEMENTED / CI VERIFICATION PENDING**.
 
 R6 does not alter Canonical scope.
+
+
+## R7 — Family G Representative — 2026-08-29
+
+R7 is the selected representative capability for **Family G — Integration & Extension**.
+
+Primary record:
+- `WORKSTREAM_E_TOOL_CONNECTOR_ADAPTER.md`
+
+Bounded capability:
+- existing R4 authorized Calendar action → explicit SH connector/adapter → Google Calendar API → normalized provider result → R4 persistence/audit.
+
+Implementation:
+- `runtime/p4g/connectors/google_calendar.ts`
+- `connectorRegistry.google_calendar`
+- R4 CREATE_EVENT now routes provider execution through the connector adapter.
+- R7 contract tests cover registry identity and provider success/error normalization.
+
+This is intentionally a real connector boundary, not a mock-only feature. Reusing Google Calendar avoids duplicating an external integration merely to demonstrate Family G.
+
+Authority remains outside the connector:
+- identity;
+- ownership;
+- authorization;
+- risk;
+- confirmation;
+- action lifecycle;
+- audit.
+
+Plugin marketplace, dynamic extension loading, generic MCP platform, arbitrary remote code execution, and provider-defined authority remain out of scope.
+
+Current status: **IMPLEMENTED / CI VERIFICATION PENDING**.
+
+R7 does not alter Canonical scope.
