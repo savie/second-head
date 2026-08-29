@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — WORKSTREAM E AUDIT
 
-Status: **OPEN / AUDIT / NON-CANONICAL**
+Status: **OPEN / IMPLEMENTATION RECONCILIATION / NON-CANONICAL**
 Date: 2026-08-29
 Branch: `dev`
 
@@ -1637,3 +1637,27 @@ The implementation path must start from actual DEV source/schema verification an
 **FINAL BOUNDED-DESIGN CHECK → STOP.**
 
 Do not expand the taxonomy, add new representative Tools, lock providers, or mutate Supabase as part of this check.
+
+
+## CURRENT DEV RECONCILIATION — 2026-08-29 — R4 IMPLEMENTATION PASS
+
+Latest DEV head: `c0bc185034a04384ba0466fac0af172e9ebd2b03`.
+
+R4 is now implemented as a bounded Google Calendar CREATE_EVENT slice. Evidence includes the R4 Edge Function, action-state migration, bounded input contract/tests, and dedicated verification workflow.
+
+Lifecycle: CONNECTED authorization → prepare → PENDING confirmation → CONFIRMED → EXECUTING → Google Calendar create → EXECUTED/FAILED → result/audit.
+
+The implementation binds account/SH/actor context, primary-calendar target, CREATE_EVENT operation, HIGH risk, confirmation expiry, input hash, external result, and audit metadata. SEND/SUBMIT/DELETE remain outside this slice.
+
+Latest DEV verification is GREEN: SH R4 Google Calendar Verification #2, SH Runtime Controlled Verification #411, and SH App Chat Verification #397.
+
+Status discipline:
+- Authorization implementation: IMPLEMENTED.
+- CREATE_EVENT implementation: IMPLEMENTED.
+- R4 confirmation boundary: IMPLEMENTED for this bounded slice.
+- Automated verification: CI VERIFIED.
+- Live Google OAuth E2E: NOT RUNTIME VERIFIED.
+- Real Calendar CREATE_EVENT mutation: NOT RUNTIME VERIFIED.
+- Final R4 acceptance: NOT YET ACCEPTED.
+
+Therefore R4 must no longer be described as implementation-blocked. Its remaining gate is runtime verification. R1–R3 are not inferred complete from this R4 pass and require their own evidence.
