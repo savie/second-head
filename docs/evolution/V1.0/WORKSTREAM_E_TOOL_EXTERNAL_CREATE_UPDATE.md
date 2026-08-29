@@ -83,3 +83,17 @@ Latest DEV head `c0bc185034a04384ba0466fac0af172e9ebd2b03` is GREEN across R4 Ve
 Remaining: live Google OAuth E2E, live Calendar CREATE_EVENT mutation proof, and final R4 acceptance. CI GREEN is classified as CI VERIFIED, not RUNTIME VERIFIED or ACCEPTED/CLEAR.
 
 Bounded scope is unchanged: no generic workflow engine, plugin marketplace, arbitrary third-party execution, broad provider abstraction, SEND/SUBMIT, or DELETE.
+
+
+## SUPPORTING R4 DOCUMENTS — 2026-08-29
+
+The following existing documents are supporting records of this R4 slice and are not separate Workstream E/R implementations:
+
+- `WORKSTREAM_E_EXTERNAL_ACCOUNT_AUTHORIZATION.md` — detailed Google authorization implementation, security boundary, operator prerequisites, and runtime authorization proof.
+- `WORKSTREAM_E_GOOGLE_AUTH_OPERATOR_SETUP.md` — operator setup/runbook for Google OAuth configuration and credential wiring.
+
+The primary R4 record is this document. Supporting documents retain their detail/history; they do not define a separate R4 scope or override the current implementation. The current implementation uses the deployed SH Edge Function callback specified in the authorization record, so earlier Android/mobile-client wording in the operator runbook is historical and does not override the current implementation.
+
+## R4 CURRENT DEV AUDIT — 2026-08-29
+
+Current DEV CI line is GREEN. R4 implementation is present and automated verification is green. Remaining R4 gates are live Google OAuth E2E and live Google Calendar mutation proof. CI does not imply runtime acceptance.
