@@ -130,6 +130,55 @@ App already uses a backend/runtime service boundary. The App is not treated as e
 
 **Important:** 🟡 and 🔴 are audit labels, not final decisions. Yellow must be audited; red must have an explicit evidence-based reason for deferral or prohibition.
 
+## E0 trace — RLS / function security / enforcement semantics — 2026-08-29
+
+### Direct DEV database finding
+
+RLS is enabled on all four audited tables:
+- `private.authority_assignments`
+- `public.permission_matrix`
+- `public.audit_events`
+- `public.runtime_high_risk_confirmations`
+
+However, `pg_policies` returns **no explicit policy rows** for `permission_matrix`, `authority_assignments`, or `runtime_high_risk_confirmations`. Therefore their RLS configuration does not, by itself, establish an authenticated-user policy/evaluator path.
+
+`audit_events` does have explicit ownership-scoped INSERT/SELECT policies using `current_account_id()` and SH ownership.
+
+### Function-security finding
+
+The audited runtime security functions are `SECURITY DEFINER`, owned by `postgres`, with controlled `search_path='public'`.
+
+The high-risk functions enforce identity/SH ownership boundaries internally. However, their semantics are explicitly **recovery-specific** today:
+- creation accepts only `RECOVERY_RESTORE`;
+- target validation is against `recovery_snapshots`;
+- execution calls `runtime_restore_recovery_snapshot`.
+
+Therefore the existing high-risk confirmation infrastructure is **not a generic Tool/Action confirmation engine**. It is a reusable governance/security pattern with a recovery-specific implementation.
+
+### Permission enforcement conclusion
+
+The audit still has **no verified generic path**:
+
+```
+permission_matrix
+      🟢 policy data
+          ↓
+generic evaluator / decision function
+      🟡 NOT VERIFIED
+          ↓
+generic Tool/Action authorization
+      🟡 NOT VERIFIED
+```
+
+Do not treat RLS alone as the missing evaluator, and do not treat recovery high-risk functions as generic E infrastructure.
+
+### Stronger E0 implication
+
+There is now enough evidence to distinguish two things:
+
+1. **Reusable primitives/patterns already exist:** identity resolution, ownership checks, SECURITY DEFINER runtime boundaries, audit recording, confirmation state lifecycle.
+2. **The generic Hands authorization/execution contract does not yet have verified implementation:** permission evaluation, Tool/Action authorization bridge, generic risk/confirmation semantics, and generic execution/result lifecycle remain bounded-design candidates.
+
 ## E0 trace result — DB → runtime → caller → enforcement
 
 ### What is verified
