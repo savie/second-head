@@ -44,6 +44,92 @@ Tool access should therefore remain a capability surface of Runtime, not become 
 The strongest visual direction is the Hybrid Concept C2 / Essence-style human + infinity mark because it aligns with the stated Brand Essence and is already used consistently in primary/application mockups.
 This is a provisional design preference only, not a frozen Canonical brand decision.
 
+## 1.5 E0 re-audit correction — DEV/Supabase evidence
+
+A second DEV/Supabase pass changes several earlier 🟡 classifications.
+
+### Generic runtime access boundary — 🟢 existing
+
+Supabase DEV contains `private.runtime_access_boundary(target_domain, target_sh_id, actor_account_id)`.
+
+Verified behavior:
+- resolves trusted auth identity;
+- resolves ACCOUNT_ID;
+- rejects caller-supplied account mismatch;
+- classifies target SH as SYSTEM / SELF / OTHER;
+- fails closed for OTHER;
+- explicitly states runtime execution does not grant or transfer ownership;
+- private-memory/private-conversation/private-context access to another SH requires an explicit scoped authorization source, which is not implemented in this function.
+
+Therefore the generic **runtime access boundary** is already a foundation primitive.
+
+It is **not** the same thing as a complete Tool/Action authorization evaluator.
+
+### Permission matrix — 🟢 existing policy source
+
+Supabase DEV contains `public.permission_matrix` with:
+- actor;
+- authority_domain;
+- action;
+- target_domain;
+- target_sh;
+- scope_conditions;
+- decision.
+
+The table comment states that static authorization rules use default DENY when no valid ALLOW rule matches.
+
+Therefore the earlier wording "permission_matrix exists but generic authorization is not verified" is refined:
+
+**Policy source exists and is verified.**
+
+What remains unverified is a generic runtime evaluator that maps a Tool/Action invocation context into this matrix and returns the effective authorization decision.
+
+### High-risk confirmation infrastructure — 🟡 / stronger than previously classified
+
+Supabase DEV contains `runtime_high_risk_confirmations` and these functions:
+- `runtime_create_high_risk_confirmation`
+- `runtime_confirm_high_risk_action`
+- `runtime_execute_high_risk_action`
+
+The lifecycle is explicitly:
+PENDING -> CONFIRMED -> EXECUTED, with CANCELLED/EXPIRED states.
+
+The important boundary is that creation currently accepts only:
+`RECOVERY_RESTORE`
+and validates a recovery snapshot target.
+
+Therefore:
+
+**Generic confirmation state machine = 🟢 existing foundation**
+
+**Generic high-risk Tool/Action confirmation contract = 🟡 design gap**
+
+Do not rebuild the state machine blindly. Generalize only where the existing contract is semantically compatible.
+
+### Audit infrastructure — 🟢 existing and Tool-aware
+
+`runtime_record_audit` already accepts `TOOL_INVOCATION` and `RUNTIME_ACTION` event types in addition to runtime request/response and memory decision events.
+
+Therefore the earlier statement that Tool/Action audit vocabulary was entirely missing is too strong.
+
+Current result:
+
+**Audit transport/persistence = 🟢**
+
+**Generic Tool/Action lifecycle semantics = 🟡**
+
+### Runtime execution — 🟢 bounded security foundation / 🟡 generic Tool execution
+
+The DEV database already has runtime functions for high-risk execution and a private runtime access boundary.
+
+This proves an execution/security pattern exists.
+
+It does not prove a generic:
+Tool -> Action -> authorization -> execution adapter
+contract exists.
+
+That generic layer remains a design target.
+
 ## 2. E bounded model
 Candidate lifecycle:
 Capability -> Tool -> Action -> Authorization Decision -> Risk -> Confirmation (if required) -> Execution -> Result -> Audit
@@ -138,12 +224,12 @@ Plugin marketplace and broad third-party ecosystem are deferred.
 | SH ownership | Existing ownership enforcement | 🟢 |
 | Authority | Authority assignment foundation | 🟢 |
 | Policy data | permission_matrix | 🟢 |
-| Generic permission evaluator | Not verified | 🟡 |
-| Audit | Existing audit infrastructure | 🟢 |
-| Confirmation pattern | Existing recovery confirmation | 🟡 reusable pattern, not generic contract |
+| Generic permission evaluator | Policy source verified; generic invocation evaluator not verified | 🟡 |
+| Audit | Existing audit infrastructure + TOOL_INVOCATION/RUNTIME_ACTION event types | 🟢 |
+| Confirmation pattern | Generic state machine exists; creation/execution constrained to RECOVERY_RESTORE | 🟡 reusable foundation, generic contract not frozen |
 | Generic Tool | Not verified | 🟡 |
 | Generic Action | Not verified | 🟡 |
-| Generic execution lifecycle | Not verified | 🟡 |
+| Generic execution lifecycle | Runtime execution/security patterns exist; generic Tool execution contract not verified | 🟡 |
 | Result normalization | Not verified | 🟡 |
 
 ## 16. Proposed design work packages — NOT YET FROZEN
@@ -167,7 +253,7 @@ These labels are provisional.
 6. Then implement and verify one vertical slice.
 
 ## 18. Current status
-E0 — Existing Foundation Audit: READY TO CLOSE
+E0 — Existing Foundation Audit: RE-AUDITED / READY TO CLOSE
 Bounded Design: IN PROGRESS
 Implementation: NOT AUTHORIZED YET
 
