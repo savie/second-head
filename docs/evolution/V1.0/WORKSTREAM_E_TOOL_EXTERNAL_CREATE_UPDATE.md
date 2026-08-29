@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — WORKSTREAM E TOOL — R4 EXTERNAL ACTION
 
-Status: VERIFIED CANDIDATE / IMPLEMENTATION BLOCKED — EXTERNAL CAPABILITY GAP
+Status: **IMPLEMENTED / CI VERIFIED / RUNTIME VERIFICATION PENDING**
 Date: 2026-08-29
 Branch: dev
 
@@ -70,3 +70,16 @@ Google's official Calendar API supports `events.insert` for creating an event. T
 The six existing model-provider secrets remain generation capabilities and are not reused for R4.
 
 **Operator prerequisite:** Google OAuth authorization must be connected for the DEV test account. No Google password or OAuth refresh token should be sent in chat; the resulting credential must be stored in the approved DEV secret/credential mechanism.
+
+
+## CURRENT DEV RECONCILIATION — 2026-08-29
+
+The external-capability implementation gap identified in the earlier bounded-design check is now crossed for the bounded Google Calendar slice.
+
+Implemented: primary-calendar CREATE_EVENT action; PENDING/CONFIRMED/EXECUTING/EXECUTED/FAILED/EXPIRED state lifecycle; explicit confirmation and expiry; Vault-backed OAuth token retrieval; Google Calendar `events.insert`; normalized result; failure recording; audit events; bounded input contract/tests; dedicated R4 CI verification.
+
+Latest DEV head `c0bc185034a04384ba0466fac0af172e9ebd2b03` is GREEN across R4 Verification #2, Runtime Controlled Verification #411, and App Chat Verification #397.
+
+Remaining: live Google OAuth E2E, live Calendar CREATE_EVENT mutation proof, and final R4 acceptance. CI GREEN is classified as CI VERIFIED, not RUNTIME VERIFIED or ACCEPTED/CLEAR.
+
+Bounded scope is unchanged: no generic workflow engine, plugin marketplace, arbitrary third-party execution, broad provider abstraction, SEND/SUBMIT, or DELETE.
