@@ -1382,3 +1382,125 @@ Canonical + frozen E contract
 READY TO START IMPLEMENTATION PLANNING, NOT YET AUTHORIZED TO MUTATE DEV.
 
 The next execution step is to inspect and document the exact source-level insertion points for Work Preparation and Contract-to-Implementation Mapping. Only after that bounded implementation plan is accepted should code or Supabase mutation begin.
+
+# TOOL CANDIDATE AUDIT — EXTERNAL / NON-GITHUB SOURCES — 2026-08-29
+
+## Scope
+This pass is intentionally narrow: only candidate Tool/Action patterns that materially relate to the frozen E contract are retained. External material is reference input only; it does not become SH authority.
+
+## Candidate shortlist
+
+### T1 — Global Search
+Status: SELECTED — reference implementation candidate.
+
+Already exists in SH DEV and is the lowest-risk first slice because it is read-oriented, bounded, and already has runtime/server-side controls.
+
+Why it fits E:
+- clear invocation;
+- bounded input/output;
+- server-side authorization/ownership boundary;
+- normalized result pattern;
+- audit evidence;
+- no inherent external side effect.
+
+Next document: WORKSTREAM_E_TOOL_GLOBAL_SEARCH.md
+
+### T2 — Read / Retrieve from an explicitly authorized connected source
+Status: CANDIDATE — retain for later.
+
+Pattern: a Tool retrieves information from a connected source under explicit scope.
+
+Why it fits E:
+- exercises Action identity;
+- authorization is materially important;
+- capability and private-data permission must remain distinct;
+- result normalization and provenance matter.
+
+Important boundary: a connection/capability must never be treated as blanket permission to read all private data.
+
+### T3 — Create / Update an external record
+Status: CANDIDATE — HIGH-RISK REFERENCE.
+
+Pattern: create/update a ticket, task, note, calendar item, or similar external record.
+
+Why it fits E:
+- exercises write-side execution eligibility;
+- naturally tests risk classification;
+- provides a meaningful confirmation-gate test;
+- requires strong target/scope binding and audit.
+
+Not selected as first implementation because it introduces side effects before the read-only reference slice is verified.
+
+### T4 — Human-confirmed sensitive Action
+Status: CANDIDATE PATTERN — not a standalone Tool.
+
+External research consistently treats human approval as a useful control for sensitive tool calls. MCP's current specification recommends a human-in-the-loop ability to deny tool invocations and clear confirmation for operations. citeturn0search4turn0search16
+
+This maps directly to E's risk/confirmation contract, but does not justify importing an external approval product or protocol as SH architecture.
+
+### T5 — MCP-compatible Tool/Server boundary
+Status: REFERENCE PATTERN — DO NOT ADOPT AS E ARCHITECTURE.
+
+Current MCP material provides useful patterns for tool discovery/listing, explicit tool invocation, authorization scopes, human approval, and separating host/client/server concerns. citeturn0search4turn0search5turn0search0
+
+Useful lesson: Tool protocol is not SH authority.
+
+MCP can inform an adapter/transport boundary later, but E must retain SH Runtime authorization and governance as the authority.
+
+## Deferred candidates
+
+Deliberately not retained as active E Tool candidates yet:
+- broad plugin marketplace/ecosystem;
+- arbitrary autonomous agents;
+- unrestricted agent-to-agent execution;
+- generic task orchestration;
+- broad external connector marketplace.
+
+Reason: they expand the system surface before the core governed Tool lifecycle is proven.
+
+## External-source design signals worth carrying forward
+
+1. Tool metadata can describe risk characteristics such as read-only, destructive, idempotent, or external side effects, but annotations are hints and should not become the authorization authority. citeturn0search10
+2. Modern MCP authorization work emphasizes centralized policy and audit rather than leaving authorization fragmented across individual tools/connectors. citeturn0search2
+3. Tool integrations commonly fall into simple API/plugin, MCP-style dynamic tool, or more complex agent-to-agent patterns; E should start with the simplest bounded integration pattern and only expand when the governance contract remains intact. citeturn0search1
+
+## Current shortlist for SH
+
+Keep active:
+1. Global Search — first reference Tool.
+2. Authorized Read/Retrieve — second candidate family.
+3. External Record Create/Update — later write-side candidate.
+
+Keep as architecture references, not Tools:
+- MCP-style Tool boundary;
+- human confirmation/approval pattern;
+- risk annotations.
+
+Do not expand now:
+- marketplace/ecosystem;
+- unrestricted autonomy;
+- broad A2A/task orchestration.
+
+## Decision rule for new candidates
+
+A future candidate enters E only if it can be mapped to the frozen contract:
+
+Action Identity → Invocation → Authorization → Risk/Confirmation → Eligibility → Adapter → Result/Error → Audit
+
+and remains compatible with Canonical.
+
+If a candidate requires changing the E contract, that is a contract-revision proposal, not an implementation shortcut.
+
+## Document rule
+
+Selected Tool candidates get their own bounded document:
+WORKSTREAM_E_TOOL_<NAME>.md
+
+The E master retains only:
+- candidate/selected Tool name;
+- status;
+- rationale;
+- dependency/blocker;
+- link to Tool-specific document.
+
+No Tool-specific implementation detail should be copied into the master unless it changes an E-wide contract or boundary.
