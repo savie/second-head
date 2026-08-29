@@ -630,3 +630,13 @@ E7 audit/reconciliation completed. Dedicated document:
 **E7 = 🟡 BOUNDED DESIGN ACCEPTED / CONCRETE TOOL SELECTION OPEN.** The complete vertical-slice test is defined, but DEV evidence does not establish an already-existing concrete external Tool/Action suitable for promotion without inventing provider/implementation dependencies.
 
 Next candidate: **E8 — Concrete Tool/Action Selection + Contract Freeze**, using current DEV capability/provider evidence to select one bounded first Action.
+
+
+## 31. E8 dedicated document
+
+E8 audit/reconciliation completed. Dedicated document:
+    docs/evolution/V1.0/WORKSTREAM_E8_TOOL_ACTION_SELECTION_2026-08-29.md
+
+**E8 = 🟡 BOUNDED DESIGN ACCEPTED / CONCRETE SELECTION BLOCKED BY EVIDENCE.** Current DEV evidence does not justify promoting Web, Calendar, Image Generation, or File Processing to an implementation-ready first Tool/Action. Minimum semantic lifecycle is frozen; physical contract remains open.
+
+Next candidate: **E9 — Existing DEV Capability-to-Action Mining**, to inspect existing working capabilities for a suitable internal first governed Action before inventing a new Tool.
