@@ -1261,3 +1261,124 @@ After this freeze, the normal SH execution pattern applies:
 8. Close E only when the complete governed lifecycle is verified.
 
 Until step 1 is formally accepted, no implementation mutation is authorized.
+
+
+# CONTRACT FREEZE + IMPLEMENTATION CHECKLIST — 2026-08-29
+
+## Freeze decision
+
+The Workstream E bounded technical contract is now FROZEN AS AN EVOLUTION/TECHNICAL CONTRACT, subject to the Canonical compatibility boundary already reconciled above.
+
+This freeze does not modify Canonical and does not authorize unrestricted Tool infrastructure.
+
+## Frozen contract
+
+1. Action Identity
+   - Action is the atomic governed operation.
+   - Stable identity: tool_id.action_name.
+   - Action metadata declares input/output, target semantics, risk class, capability/context requirement, execution mode, and confirmation policy reference.
+   - Action identity is descriptive/governed metadata, never authority.
+
+2. Invocation
+   - Runtime-governed request carrying actor/account, SH, Action, target/resource, input, provenance, and correlation identity.
+   - Invocation requests execution; it does not authorize or execute.
+
+3. Authorization
+   - Runtime/governance evaluates the concrete Action in context.
+   - Output: ALLOW | DENY | ESCALATE.
+   - Existing identity, ownership, and permission_matrix semantics remain the foundation.
+   - Client, Tool, adapter, provider, and model cannot authorize.
+
+4. Risk / Confirmation
+   - Risk resolves at Action + context.
+   - Initial classes: LOW | HIGH.
+   - Confirmation state: NOT_REQUIRED | PENDING | CONFIRMED | REJECTED | EXPIRED.
+   - Required confirmation is bound to the intended invocation/action/context and freshness.
+   - Existing recovery confirmation remains a pattern, not a generic authority.
+
+5. Execution Eligibility
+   - Runtime creates the eligible execution request only after all required gates pass.
+   - Eligibility binds invocation, identity, SH, Action/Tool, target, authorization, confirmation when required, freshness, and correlation.
+   - No eligible request from DENY or unmet required confirmation.
+
+6. Adapter
+   - Controlled bridge: eligible_request → raw_outcome.
+   - No authorization, identity/SH substitution, scope broadening, Action substitution, or governance bypass.
+
+7. Result / Error
+   - Normalized envelope carries execution/invocation/tool/action identity, status, data, error, metadata, correlation, and completion time.
+   - Status: SUCCEEDED | FAILED | REJECTED_BEFORE_EXECUTION | RESULT_UNAVAILABLE.
+   - Tool output is untrusted data.
+
+8. Audit / Trace
+   - One correlation identity through the governed lifecycle.
+   - Reuse audit_events / runtime_record_audit().
+   - No parallel audit authority.
+
+## Implementation checklist
+
+### Phase 0 — pre-implementation verification
+- [ ] Re-read frozen E contract.
+- [ ] Verify exact existing permission_matrix semantics before touching authorization code.
+- [ ] Verify exact Runtime entry point/caller for the first bounded slice.
+- [ ] Verify current Global Search contract and preserve its behavior.
+- [ ] Verify audit event schema and existing event vocabulary.
+- [ ] Verify recovery confirmation boundary remains isolated.
+
+### Phase 1 — minimal governance bridge
+- [ ] Define the concrete invocation object/contract.
+- [ ] Define Action identity for the reference slice.
+- [ ] Map authorization inputs to existing identity/ownership/permission primitives.
+- [ ] Define the generic authorization decision boundary.
+- [ ] Define risk/confirmation decision without assuming every Action is HIGH.
+- [ ] Define execution eligibility object/contract.
+- [ ] Define adapter boundary around the concrete reference Tool.
+- [ ] Define normalized result/error envelope.
+- [ ] Map lifecycle correlation to existing audit infrastructure.
+
+### Phase 2 — first bounded reference slice
+Reference candidate: Global Search.
+
+- [ ] Wrap existing Global Search behind the E governance boundary.
+- [ ] Do not redesign Global Search semantics.
+- [ ] Keep search read-only and bounded.
+- [ ] Prove authorization before execution.
+- [ ] Prove eligibility before adapter invocation.
+- [ ] Prove normalized result/error handling.
+- [ ] Prove audit correlation.
+- [ ] Prove failure paths do not execute the Tool.
+
+### Phase 3 — verification
+- [ ] GitHub source verification.
+- [ ] Supabase schema/function/policy verification.
+- [ ] Runtime/Android verification.
+- [ ] Evidence capture.
+- [ ] Reconcile implementation against frozen contract.
+- [ ] Record discrepancies; do not silently repair them.
+- [ ] Close only after governed lifecycle is demonstrated end-to-end.
+
+## Explicit non-scope
+
+This implementation checklist does not authorize plugin marketplace/ecosystem, arbitrary plugin installation, unrestricted autonomous execution, provider/model authority, capability-as-private-data permission, app-side authorization, migration of existing recovery confirmation into a generic system, replacement of existing audit authority, or broad multi-Tool rollout before the reference slice is verified.
+
+## Dependency order
+
+Canonical + frozen E contract
+→ existing authority/permission semantics
+→ Runtime entry point
+→ invocation
+→ authorization
+→ risk/confirmation
+→ eligibility
+→ adapter
+→ result/error
+→ audit
+→ DEV verification
+→ Android verification
+→ E close
+
+## Implementation gate
+
+READY TO START IMPLEMENTATION PLANNING, NOT YET AUTHORIZED TO MUTATE DEV.
+
+The next execution step is to inspect and document the exact source-level insertion points for Phase 0/1. Only after that bounded implementation plan is accepted should code or Supabase mutation begin.
