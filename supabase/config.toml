@@ -1,0 +1,2 @@
+[functions.r4-google-oauth]
+verify_jwt = false
