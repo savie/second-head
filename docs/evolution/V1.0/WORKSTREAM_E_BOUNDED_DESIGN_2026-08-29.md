@@ -545,3 +545,12 @@ Not yet implementation-authorized.
 Not yet a database contract.
 Not Canonical amendment.
 
+
+
+## 23. E1 dedicated document
+
+E1 has been split into its own living document for clarity and long-term maintainability:
+
+    docs/evolution/V1.0/WORKSTREAM_E1_CAPABILITY_TOOL_ACTION_2026-08-29.md
+
+The master E document remains the orchestration/index document. The dedicated E1 document contains the E1 bounded-design material. No authority level changes by this split.
