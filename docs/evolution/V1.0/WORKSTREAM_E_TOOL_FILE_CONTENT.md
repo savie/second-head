@@ -1,6 +1,6 @@
 # SECOND HEAD V1.0 — WORKSTREAM E TOOL — R3 FILE CONTENT / EXTRACT / TRANSFORM
 
-Status: SELECTED CANDIDATE / TOOL-SPECIFIC BOUNDED DESIGN
+Status: IMPLEMENTED / BOUNDED
 Date: 2026-08-29
 Branch: dev
 
@@ -40,7 +40,7 @@ Preferred order:
 4. otherwise adapt it through the SH Runtime boundary;
 5. build only SH-specific behavior that cannot reasonably be reused/adapted.
 
-The exact parser/provider is not locked by this document. A source must be verified before implementation.
+The first verified implementation is the existing SH Runtime attachment path. It accepts exactly one explicitly supplied artifact and currently supports text/plain, text/markdown, text/csv, application/json, application/xml, and text/xml. No generic filesystem or external file provider is introduced.
 
 ## 5. Boundary
 
@@ -160,10 +160,10 @@ R3 does not establish a generic filesystem abstraction, document-management syst
 
 ## 15. Exit Condition
 
-R3 bounded design is ready for later implementation when one existing, verified file/attachment capability can be mapped end-to-end:
+R3 implementation is complete for the first bounded supplied-artifact slice:
 
 WHO → SH/account → artifact → operation → scope → AUTHORIZED → PROCESS → NORMALIZE + PROVENANCE → AUDIT.
 
-No parser/provider is locked until that verification occurs.
+No external parser/provider is required for this first bounded slice; parsing/transformation is limited to the explicitly supported text-based classes.
 
-R3 conclusion: File Content / Extract / Transform remains the selected representative of Family C because it tests bounded artifact processing and resource containment while remaining separate from export, sharing, creation, and external mutation. The implementation strategy remains reuse/adapt, with SH Runtime retaining governance and authority boundaries.
+R3 conclusion: File Content / Extract / Transform is implemented as the selected representative of Family C. It exercises one-artifact binding, bounded operations, resource limits, normalization, provenance, and audit while remaining separate from export, sharing, creation, and external mutation.
