@@ -24,7 +24,7 @@ begin
       case when lower(c.content)=lower(v_query) then 100 when position(lower(v_query) in lower(c.content))=1 then 80 else 60 end::numeric
     from public.conversations c
     where 'CONVERSATION'=any(v_domains) and c.account_id=v_account_id and c.sh_id=p_sh_id and position(lower(v_query) in lower(c.content))>0
-      and coalesce((c.metadata->>'verification_only')::boolean,false)=false
+      and coalesce(c.metadata->>'verification_only','false') <> 'true'
     union all
     select m.memory_id::text,'MEMORY'::text,m.memory_type,m.content,'memory:'||m.memory_id::text,
       jsonb_build_object('source',m.source,'scope',m.scope,'visibility',m.visibility,'provenance',m.provenance),m.updated_at,
