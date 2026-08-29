@@ -1607,3 +1607,158 @@ The master retains only the classification, candidate/status, rationale, depende
 Tool-specific implementation detail belongs in: docs/evolution/V1.0/WORKSTREAM_E_TOOL_<NAME>.md
 
 This keeps the E master bounded while allowing each selected Tool to be fully designed and verified independently.
+
+
+# CANDIDATE MAPPING → EXISTING CAPABILITY DISCOVERY → CONTRACT COVERAGE — 2026-08-29
+
+## Scope of this pass
+
+This pass stops at Tool-specific Bounded Design. It does not authorize implementation, schema migration, new external subscriptions, marketplace/ecosystem work, or broad platform abstraction.
+
+Evidence sources reconciled:
+- Resume 69 candidate pool;
+- current E Audit / bounded E direction;
+- current DEV evidence available through the repository and runtime database;
+- Canonical/contract guardrails already recorded in E;
+- external platform/protocol material only as reference, never as SH authority.
+
+Resume 69 remains a candidate source, not authority.
+
+## 1. Candidate mapping
+
+| Family | Candidate | Resume 69 support | Existing SH/DEV evidence | Contract coverage | Disposition |
+|---|---|---|---|---|---|
+| A Search & Discovery | Global Search | explicit | existing bounded runtime capability | high | REPRESENTATIVE / SELECTED |
+| A Search & Discovery | Web Search | explicit | no SH-native implementation verified in this pass | high potential | CANDIDATE |
+| B Knowledge & Retrieval | Authorized Read/Retrieve | explicit via tools/knowledge direction | knowledge + privacy/permission primitives exist; connected external source not verified | high | REPRESENTATIVE / SELECTED FOR BOUNDED DESIGN |
+| C Files & Content | File Read / Extract / Transform | explicit | attachment/file flow exists; generic Tool boundary not verified | high | REPRESENTATIVE / SELECTED FOR BOUNDED DESIGN |
+| D Creation & Generation | Image Generation | explicit | capability concept present; provider binding not verified | medium/high | CANDIDATE |
+| E Productivity & Communication | Email / Calendar / Tasks / Docs | external-service direction | no concrete SH integration verified in this pass | high potential | CANDIDATE |
+| F External Actions | Create / Update / Send / Submit | explicit | permission + audit + high-risk confirmation foundations exist | very high | REPRESENTATIVE / SELECTED FOR BOUNDED DESIGN |
+| G Integration & Extension | Connector / Adapter | explicit | runtime boundary exists; generic adapter registry not verified | architectural | REFERENCE / CANDIDATE |
+| G Integration & Extension | Plugin / Extension | explicit | no generic marketplace/extension runtime verified | architectural | DEFER / BOUNDARY ONLY |
+| G Integration & Extension | MCP boundary | not a capability family in Resume 69 | external reference pattern | architectural | REFERENCE ONLY |
+
+### Discovery finding
+
+The DEV database currently contains reusable governance/data primitives including:
+
+- accounts
+- sh_instances
+- sh_ownership
+- permission_matrix
+- memories
+- knowledge
+- audit_events
+- runtime_high_risk_confirmations
+- conversations
+- journey_events
+- experiences
+
+These are existing foundations, not evidence that a generic Tool framework already exists.
+
+The current permission_matrix explicitly models actors, authority domains, actions including READ, WRITE, and EXECUTE, target domains, target SH scope, and ALLOW/DENY/ESCALATE decisions. The current high-risk confirmation table is explicitly present, but the existing verified operation is recovery-oriented rather than a generic Tool confirmation framework.
+
+Conclusion: E should reuse these primitives where their contracts fit; it must not create parallel identity, permission, private-data, or audit systems merely to support Tools.
+
+## 2. Contract coverage matrix
+
+| Contract concern | Existing foundation | Representative test | Remaining design gap |
+|---|---|---|---|
+| Identity / SH context | 🟢 existing | all selected | bind invocation to resolved context |
+| Ownership | 🟢 existing | all selected | no new ownership model |
+| Authorization | 🟢 permission matrix + runtime checks | Search / Read / Action | generic Tool→Action authorization bridge |
+| Default deny / private-data boundary | 🟢 existing governance foundation | Read / Action | concrete evaluation semantics per source |
+| Tool ≠ Authority | 🟢 contract principle | all selected | preserve at adapter/runtime boundary |
+| Invocation | 🟡 bounded Global Search exists | Search | generic invocation envelope |
+| Risk classification | 🟡 direction/foundation | Action | generic classification contract |
+| Confirmation | 🟡 recovery-specific foundation | Action | generic confirmation applicability |
+| Execution | 🟡 runtime boundary exists | Action | generic eligibility/execution boundary |
+| Result normalization | 🟡 concrete Search result exists | Search / Read / File | common result/error envelope |
+| Audit / provenance | 🟢 audit primitive | all selected | common Tool lifecycle correlation |
+| Adapter/source boundary | 🟡 concrete Search implementation | Read / File / Action | generic adapter contract |
+| Capability registry | 🟡 candidate only | future | no registry implementation in this pass |
+| Plugin / extension boundary | 🟡 conceptual | future | bounded adapter model only |
+| MCP | 🟡 external reference | future | protocol must not become SH authority |
+| Automation | 🟡 execution pattern | future | no workflow engine |
+
+## 3. Representative Tool selection
+
+The minimum useful representative set for the current E design is:
+
+### R1 — Global Search
+Selected. Existing bounded capability; lowest-risk reference slice.
+
+Tests: INVOCATION → AUTHORIZATION → EXECUTION → NORMALIZED RESULT → AUDIT
+
+### R2 — Authorized Read / Retrieve
+Selected for bounded design. Tests the crucial boundary:
+
+CAPABILITY TO READ ≠ PERMISSION TO READ PRIVATE DATA
+
+It may use an external/connected source later, but source/provider selection is not silently fixed here.
+
+### R3 — File Content Read / Extract / Transform
+Selected for bounded design. Uses the already-proven file/attachment direction to test artifact input without forcing a new external service. The bounded design must distinguish read/extract from creating or exporting artifacts.
+
+### R4 — External Create / Update
+Selected for bounded design only; not implementation-ready. This is the representative side-effect Tool/Action that validates:
+
+PLAN → AUTHORIZATION → CONFIRMATION → EXECUTE → AUDIT
+
+It is intentionally not first implementation.
+
+### Non-tool patterns retained
+
+- T4 Human-confirmed Sensitive Action = governance pattern used by R4.
+- T5 MCP-compatible boundary = integration reference used only when a later source requires it.
+
+### Deferred candidates
+
+Image Generation, Productivity/Communication integrations, broad Web Search providers, Plugin/Extension ecosystem, and generic Automation remain candidates but are not required to complete the current representative contract coverage.
+
+## 4. Selection rationale
+
+This set is deliberately small but crosses materially different boundaries:
+
+R1 READ/DISCOVER
+R2 AUTHORIZED PRIVATE-SOURCE READ
+R3 ARTIFACT PROCESSING
+R4 EXTERNAL STATE CHANGE
+
+Together they test more of E than implementing four similar search providers.
+
+The selection does not mean these four are the permanent V1.0 Tool inventory. A later evolution may replace, add, or remove representatives when evidence or real product need justifies it.
+
+## 5. Tool-specific bounded design status
+
+The following Tool-specific design documents are now the next working layer:
+
+- WORKSTREAM_E_TOOL_GLOBAL_SEARCH.md
+- WORKSTREAM_E_TOOL_AUTHORIZED_READ.md
+- WORKSTREAM_E_TOOL_FILE_CONTENT.md
+- WORKSTREAM_E_TOOL_EXTERNAL_CREATE_UPDATE.md
+
+Each document is design-only. Implementation remains separately gated.
+
+## 6. Design completion criteria
+
+A Tool-specific bounded design is considered complete only when it defines:
+
+1. capability purpose and non-goals;
+2. Tool vs Action distinction;
+3. source/provider strategy;
+4. input/output boundary;
+5. identity/SH binding;
+6. authorization decision point;
+7. risk class;
+8. confirmation requirement;
+9. execution boundary;
+10. result/error normalization;
+11. audit/provenance expectations;
+12. private-data boundary;
+13. failure/containment behavior;
+14. dependencies and blockers;
+15. what remains explicitly out of scope.
+
+No design may weaken Canonical invariants or delegate authorization to the App/UI/provider.
