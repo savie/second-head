@@ -1169,3 +1169,95 @@ E does not define plugin marketplace; autonomous unrestricted execution; Tool/pr
 Perform final source-level reconciliation of each proposed contract against actual DEV source/schema and SH Canonical.
 Classify each as: FROZEN / REUSE-AS-IS / ADAPT / NEW-BRIDGE / BLOCKED.
 No implementation is authorized by this document.
+
+# FINAL SOURCE-LEVEL RECONCILIATION — 2026-08-29
+
+## Authority reconciliation
+
+Canonical review confirms the E boundary is compatible with the protected SH Core principles visible in the canonical architecture:
+- Runtime access is not ownership.
+- Creator/Core authority is not automatic private-data access.
+- Private data is isolated by default.
+- implementation-specific infrastructure may change without changing SH identity.
+- governance and authority boundaries are protected; implementation mechanisms may evolve through controlled governance.
+
+The Canonical documents do not define a generic Tool/Action execution contract. Therefore E may define an evolution-layer technical contract without claiming it is Canonical, provided it preserves those invariants.
+
+Resume 69 is treated only as brainstorming/reference material. Its Tools/Plugins/Extensions discussion supports exploring a governed capability layer, but does not itself establish a requirement or authority.
+
+ROADMAP defines E as Hands / Tools / Authority and explicitly requires capability identity, invocation, actor/SH context, authorization, risk classification, confirmation when required, execution, result normalization, and audit/event recording. It also explicitly requires separation of built-in Tools, Extensions/Plugins, and provider/model capabilities and forbids a broad plugin ecosystem before the authority/execution contract is stable.
+
+## Seven-contract classification
+
+| Contract | Final classification | Rationale |
+|---|---|---|
+| Action Identity | **ADAPT** | Needed as E technical contract; no Canonical generic Action identity found. Must remain non-authoritative. |
+| Invocation | **NEW-BRIDGE** | Existing TOOL_INVOCATION audit evidence is useful, but no generic invocation boundary was verified. |
+| Authorization | **ADAPT** | Reuse identity/ownership/permission foundations; add only generic evaluator boundary. |
+| Risk / Confirmation | **ADAPT** | Reuse existing high-risk pattern, but do not generalize recovery-specific semantics without a bounded contract. |
+| Execution Eligibility | **NEW-BRIDGE** | Existing Global Search gates are specialized; generic eligibility boundary not verified. |
+| Adapter | **NEW-BRIDGE** | No generic adapter abstraction verified; Global Search RPC remains the reference concrete execution path. |
+| Result / Error | **ADAPT** | Reuse Global Search normalized result pattern and existing error conventions; define generic envelope. |
+| Audit / Trace | **ADAPT** | Reuse audit_events/runtime_record_audit(); define E lifecycle correlation and event mapping without new audit authority. |
+
+## Canonical compatibility decision
+
+**COMPATIBLE — NOT CANONICAL.**
+
+The proposed E contract does not modify Canonical identity, ownership, privacy, authority, or governance principles. It operationalizes a bounded technical layer beneath those principles.
+
+No Canonical document is changed by this pass.
+
+## Final E boundary
+
+E may define:
+- governed Tool/Action contracts;
+- runtime-side authorization boundary;
+- risk/confirmation decision boundary;
+- execution eligibility;
+- controlled adapters;
+- normalized results/errors;
+- audit correlation;
+- a bounded reference Tool implementation.
+
+E may not redefine:
+- SH identity;
+- ownership;
+- Creator/Core authority;
+- private-data access semantics;
+- Canonical governance;
+- the App as an authorization authority.
+
+E also does not authorize:
+- unrestricted autonomous execution;
+- marketplace/ecosystem;
+- arbitrary plugin installation;
+- provider/model authority;
+- capability-as-private-data permission.
+
+## Contract-freeze readiness
+
+**🟢 READY FOR CONTRACT FREEZE**
+
+This means the design boundary can now be frozen as an Evolution/technical contract.
+
+It does NOT yet mean:
+- implementation is complete;
+- a generic Tool framework must be built;
+- all future Tools are specified;
+- Supabase schema changes are authorized.
+
+## Next stage
+
+After this freeze, the normal SH execution pattern applies:
+
+1. Freeze E technical contract.
+2. Produce implementation checklist/scope from the frozen contract.
+3. Select one bounded reference vertical slice (Global Search is the current candidate).
+4. Implement only the required bridge components.
+5. Verify GitHub + Supabase DEV.
+6. Android/runtime verification.
+7. Reconcile evidence.
+8. Close E only when the complete governed lifecycle is verified.
+
+Until step 1 is formally accepted, no implementation mutation is authorized.
