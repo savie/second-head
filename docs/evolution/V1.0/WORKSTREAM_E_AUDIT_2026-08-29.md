@@ -1755,3 +1755,32 @@ Plugin marketplace, dynamic extension loading, generic MCP platform, arbitrary r
 Current status: **IMPLEMENTED / CI VERIFICATION PENDING**.
 
 R7 does not alter Canonical scope.
+
+
+## R8 — Family G MCP Representative — 2026-08-30
+
+R8 extends Family G from the R7 connector/adapter boundary into an actual MCP client/server integration slice.
+
+Primary record:
+- `WORKSTREAM_E_TOOL_MCP_YOUTUBE.md`
+
+Bounded capability:
+- authenticated SH runtime → MCP Client → Streamable HTTP → SH-controlled YouTube MCP Server → public YouTube Data API → normalized read-only result → YouTube link.
+
+Implementation artifacts:
+- `runtime/p4g/mcp/youtube_mcp_client.ts`
+- `runtime/p4g/r8_youtube_mcp_contract.test.ts`
+- `functions/r8-youtube-mcp/index.ts`
+- `functions/r8-youtube-mcp/index.test.ts`
+- `.github/workflows/sh-r8-youtube-mcp-verification.yml`
+- R8 route in `functions/runtime-p4a-001/index.ts`
+
+DEV deployment:
+- Supabase function `r8-youtube-mcp` is ACTIVE with JWT verification enabled.
+- Provider secret `YOUTUBE_API_KEY` is required for live YouTube calls and is not committed to Git.
+
+R8 deliberately does not alter R4 Calendar OAuth, does not create YouTube OAuth, and does not duplicate Global Search. The first MCP surface is read-only and bounded to `youtube_search` and `youtube_get_video`.
+
+Current status: **IMPLEMENTED / CI VERIFICATION PENDING / LIVE PROVIDER VERIFICATION BLOCKED until DEV `YOUTUBE_API_KEY` is configured.**
+
+R8 does not alter Canonical scope.
