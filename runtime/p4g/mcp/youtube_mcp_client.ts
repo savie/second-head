@@ -1,0 +1,11 @@
+export type McpTool = { name: string; title?: string; description?: string; inputSchema: Record<string, unknown> };
+export type McpResponse = { jsonrpc: "2.0"; id?: string|number|null; result?: Record<string, unknown>; error?: { code:number; message:string; data?:unknown } };
+const PROTOCOL_VERSION = "2025-11-25";
+export async function mcpRequest(endpoint: string, request: Record<string, unknown>, options: { authorization?: string; timeoutMs?: number } = {}): Promise<McpResponse> {
+  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 10000);
+  try { const headers: Record<string,string> = {"Content-Type":"application/json","Accept":"application/json, text/event-stream","MCP-Protocol-Version":PROTOCOL_VERSION}; if(options.authorization) headers.Authorization=options.authorization; const response=await fetch(endpoint,{method:"POST",headers,body:JSON.stringify(request),signal:controller.signal}); const text=await response.text(); if(!response.ok) throw new Error("R8_MCP_HTTP_"+response.status); if(!text) throw new Error("R8_MCP_EMPTY_RESPONSE"); const parsed=JSON.parse(text) as McpResponse; if(parsed.error) throw new Error("R8_MCP_PROTOCOL_ERROR: "+parsed.error.message); return parsed; }
+  catch(error){ if(error instanceof DOMException && error.name==="AbortError") throw new Error("R8_MCP_TIMEOUT"); throw error; } finally { clearTimeout(timeout); }
+}
+export async function initializeMcp(endpoint:string, authorization?:string){ return mcpRequest(endpoint,{jsonrpc:"2.0",id:1,method:"initialize",params:{protocolVersion:PROTOCOL_VERSION,capabilities:{},clientInfo:{name:"second-head",version:"r8"}}},{authorization}); }
+export async function listMcpTools(endpoint:string, authorization?:string):Promise<McpTool[]>{ const r=await mcpRequest(endpoint,{jsonrpc:"2.0",id:2,method:"tools/list",params:{}},{authorization}); return Array.isArray(r.result?.tools)?r.result.tools as McpTool[]:[]; }
+export async function callMcpTool(endpoint:string,name:string,args:Record<string,unknown>,authorization?:string){ return mcpRequest(endpoint,{jsonrpc:"2.0",id:3,method:"tools/call",params:{name,arguments:args}},{authorization}); }
