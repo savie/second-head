@@ -24,7 +24,7 @@ if(r8Operation){
   if(!endpoint) return new Response(JSON.stringify({error:"R8_MCP_CONFIGURATION_ERROR"}),{status:500,headers:jsonHeaders});
   try{
     const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),10000);
-    const headers={"Content-Type":"application/json","Accept":"application/json, text/event-stream","MCP-Protocol-Version":"2025-11-25"};
+    const headers:Record<string,string>={"Content-Type":"application/json","Accept":"application/json, text/event-stream","MCP-Protocol-Version":"2025-11-25"}; const incomingAuthorization=req.headers.get("Authorization"); if(incomingAuthorization) headers.Authorization=incomingAuthorization;
     const initResponse=await fetch(endpoint,{method:"POST",headers,body:JSON.stringify({jsonrpc:"2.0",id:1,method:"initialize",params:{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"second-head-runtime",version:"r8"}}}),signal:controller.signal});
     if(!initResponse.ok) throw new Error("R8_MCP_INITIALIZE_HTTP_"+initResponse.status);
     const initBody=await initResponse.json();
