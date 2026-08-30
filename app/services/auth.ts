@@ -26,6 +26,10 @@ export async function signUpWithPassword(email: string, password: string) {
   return backend.auth.signUp({ email, password });
 }
 
+export async function requestPasswordReset(email: string) {
+  return backend.auth.resetPasswordForEmail(email);
+}
+
 export async function signOut() {
   return backend.auth.signOut();
 }
