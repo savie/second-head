@@ -1,0 +1,28 @@
+name: SH R8 YouTube MCP Verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [dev]
+    paths:
+      - "runtime/p4g/mcp/**"
+      - "runtime/p4g/r8_youtube_mcp_contract.test.ts"
+      - "functions/r8-youtube-mcp/**"
+      - ".github/workflows/sh-r8-youtube-mcp-verification.yml"
+
+jobs:
+  r8-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.x
+      - name: Verify R8 MCP client contract
+        run: deno test runtime/p4g/r8_youtube_mcp_contract.test.ts
+      - name: Verify R8 MCP server contract
+        run: deno test functions/r8-youtube-mcp/index.test.ts
