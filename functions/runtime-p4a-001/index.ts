@@ -17,6 +17,39 @@ async function retrieveConversationContext(s:ReturnType<typeof createClient>,sh:
 Deno.serve(async(req:Request)=>{if(req.method!=="POST")return new Response(JSON.stringify({error:"METHOD_NOT_ALLOWED"}),{status:405,headers:jsonHeaders});const resolved=await resolveIdentity(req);if(resolved.error)return resolved.error;let body:{user_message?:string;stream?:boolean;journey_only?:boolean;explicit_journey_capture?:boolean;journey_representation?:string;verification_only?:boolean;verification_marker?:string;r6_operation?:string;r6_title?:string;r6_due_at?:string;attachments?:{uri?:string;name?:string;mimeType?:string;base64?:string}[]};try{body=await req.json();}catch{return new Response(JSON.stringify({error:"RUNTIME_REJECTED: invalid JSON"}),{status:400,headers:jsonHeaders});}const identity=resolved.identity,supabase=resolved.supabase;const verificationOnly=body.verification_only===true;const supportedFileMimes=['text/plain','text/markdown','text/csv','application/json','application/xml','text/xml'];const fileInputs=(body.attachments??[]).filter(a=>!(a.mimeType??'').startsWith('image/'));const unsupportedFiles=fileInputs.filter(a=>!supportedFileMimes.includes(a.mimeType??''));const failedFiles=fileInputs.filter(a=>!!a.mimeType&&!!a.base64===false);if(unsupportedFiles.length>0)return new Response(JSON.stringify({error:'FILE_UNSUPPORTED',files:unsupportedFiles.map(a=>({name:a.name,mimeType:a.mimeType,state:'unsupported'}))}),{status:415,headers:jsonHeaders});if(failedFiles.length>0)return new Response(JSON.stringify({error:'FILE_PROCESSING_FAILED',files:failedFiles.map(a=>({name:a.name,mimeType:a.mimeType,state:'failed'}))}),{status:422,headers:jsonHeaders});const verificationMarker=typeof body.verification_marker==="string"&&body.verification_marker.trim()?body.verification_marker.trim():undefined;
 if(body.journey_only===true){if(body.explicit_journey_capture!==true)return new Response(JSON.stringify({error:"JOURNEY_REJECTED: explicit capture is required"}),{status:400,headers:jsonHeaders});const representation=body.journey_representation?.trim();if(!representation)return new Response(JSON.stringify({error:"JOURNEY_REJECTED: representation is required"}),{status:400,headers:jsonHeaders});try{const experienceId=await recordExperience(supabase,identity,representation,verificationMarker);const sink=createJourneySink(()=>undefined,createRecorder(supabase,verificationMarker));const decision=await sink.decideAndRecord({sh_id:identity.sh_id,user_message:representation,response:null,explicit:true,source_record_id:experienceId});if(!verificationOnly){await recordAudit(supabase,identity.sh_id,"RUNTIME_REQUEST",{journey_only:true,explicit_journey_capture:true,experience_id:experienceId});await recordAudit(supabase,identity.sh_id,"RUNTIME_RESPONSE",{journey_only:true,journey_decision:decision.reason,experience_id:experienceId});}return new Response(JSON.stringify({sh_id:identity.sh_id,journey_decision:decision.reason,experience_id:experienceId,event_id:decision.candidate?"recorded":null}),{status:200,headers:jsonHeaders});}catch(e){return new Response(JSON.stringify({error:e instanceof Error?e.message:"JOURNEY_CAPTURE_FAILED"}),{status:500,headers:jsonHeaders});}}
 const userMessage=body.user_message?.trim(); const r6ReminderMatch=/^(?:remind me|ingatkan aku|ingatkan saya)\\s+(?:at\\s+)?(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(?::\\d{2})?(?:Z|[+-]\\d{2}:\\d{2}))\\s+(?:to\\s+)?(.+)$/i.exec(userMessage??"");
+const r8Operation=typeof (body as any).r8_operation==="string"?(body as any).r8_operation.trim().toUpperCase():null;
+if(r8Operation){
+  if(!["SEARCH_YOUTUBE","GET_YOUTUBE_VIDEO"].includes(r8Operation)) return new Response(JSON.stringify({error:"R8_INVALID_OPERATION"}),{status:400,headers:jsonHeaders});
+  const endpoint=Deno.env.get("R8_YOUTUBE_MCP_ENDPOINT");
+  if(!endpoint) return new Response(JSON.stringify({error:"R8_MCP_CONFIGURATION_ERROR"}),{status:500,headers:jsonHeaders});
+  try{
+    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),10000);
+    const headers={"Content-Type":"application/json","Accept":"application/json, text/event-stream","MCP-Protocol-Version":"2025-11-25"};
+    const initResponse=await fetch(endpoint,{method:"POST",headers,body:JSON.stringify({jsonrpc:"2.0",id:1,method:"initialize",params:{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"second-head-runtime",version:"r8"}}}),signal:controller.signal});
+    if(!initResponse.ok) throw new Error("R8_MCP_INITIALIZE_HTTP_"+initResponse.status);
+    const initBody=await initResponse.json();
+    if(initBody.error) throw new Error("R8_MCP_INITIALIZE_FAILED");
+    const toolName=r8Operation==="SEARCH_YOUTUBE"?"youtube_search":"youtube_get_video";
+    const toolArguments=r8Operation==="SEARCH_YOUTUBE"?{query:body.user_message?.trim()||"",max_results:5}:{video_id:body.r8_video_id};
+    const callResponse=await fetch(endpoint,{method:"POST",headers,body:JSON.stringify({jsonrpc:"2.0",id:2,method:"tools/call",params:{name:toolName,arguments:toolArguments}}),signal:controller.signal});
+    clearTimeout(timer);
+    if(!callResponse.ok) throw new Error("R8_MCP_CALL_HTTP_"+callResponse.status);
+    const callBody=await callResponse.json();
+    if(callBody.error) throw new Error("R8_MCP_CALL_FAILED");
+    if(callBody.result?.isError===true) throw new Error(callBody.result?.content?.[0]?.text||"R8_YOUTUBE_PROVIDER_ERROR");
+    const structured=callBody.result?.structuredContent??{};
+    if(!verificationOnly){
+      await recordConversation(supabase,identity.sh_id,"user",userMessage??toolName,verificationMarker,{r8_operation:r8Operation});
+      await recordConversation(supabase,identity.sh_id,"assistant",JSON.stringify(structured),verificationMarker,{r8_operation:r8Operation});
+      await recordAudit(supabase,identity.sh_id,"RUNTIME_REQUEST",{tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,authorization:"OWNER_AUTHENTICATED"});
+      await recordAudit(supabase,identity.sh_id,"RUNTIME_RESPONSE",{status:"SUCCESS",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,provider:"YOUTUBE"});
+    }
+    return new Response(JSON.stringify({sh_id:identity.sh_id,r8:{operation:r8Operation,provider:"YOUTUBE",result:structured},meta:{phase:"P4A-001",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",transport:"STREAMABLE_HTTP",protocol:"2025-11-25"}}),{status:200,headers:jsonHeaders});
+  }catch(e){
+    try{if(!verificationOnly)await recordAudit(supabase,identity.sh_id,"RUNTIME_RESPONSE",{status:"FAILED",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,error:e instanceof Error?e.message:"R8_MCP_FAILED"});}catch{}
+    return new Response(JSON.stringify({error:e instanceof Error?e.message:"R8_MCP_FAILED"}),{status:502,headers:jsonHeaders});
+  }
+}
 const r6Operation=typeof (body as any).r6_operation==="string"?(body as any).r6_operation.trim().toUpperCase():null;
 if(r6Operation==="CREATE_TASK"||r6ReminderMatch){
   const title=((body as any).r6_title??r6ReminderMatch?.[2]??"").trim();
