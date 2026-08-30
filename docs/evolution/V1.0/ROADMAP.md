@@ -506,3 +506,22 @@ R4 remains a bounded representative action only. Final V1.0/R4 acceptance still 
 ### Execution discipline
 
 The absence of an APK/manual device inspection does not invalidate repository-level implementation or CI verification. Where a workstream explicitly requires device/runtime proof, that gate remains open rather than being silently marked complete.
+
+
+## R8 CURRENT DEV RECONCILIATION — 2026-08-30
+
+R8 is the selected MCP representative for Family G. It is a deliberate extension beyond R7's connector/adapter boundary and does not replace or redefine R7.
+
+Current implementation:
+- SH MCP Client boundary;
+- SH-controlled YouTube MCP Server;
+- Streamable HTTP;
+- MCP 2025-11-25 baseline;
+- read-only `youtube_search` and `youtube_get_video` tools;
+- runtime route;
+- contract verification workflow;
+- Supabase DEV deployment active with JWT verification.
+
+R8 is **IMPLEMENTED** but not yet accepted as live provider-verified. `YOUTUBE_API_KEY` must exist in DEV before the YouTube provider path can be runtime-verified. This configuration requirement is not represented as a code/documentation completion claim.
+
+R8 intentionally does not duplicate Global Search and does not modify R4 Calendar authorization.
