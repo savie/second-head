@@ -677,7 +677,7 @@ export default function ChatScreen() {
           <Text style={{ color: attachmentState === 'failed' ? '#B45309' : '#6B6A66', fontSize: 12 }}>
             {attachmentState === 'preparing' ? 'Preparing attachment…' : attachmentState === 'ready' ? 'Ready to send' : attachmentState === 'failed' ? (attachmentError ?? 'Attachment failed') : ''}
           </Text>
-          {attachmentState !== 'preparing' ? <View style={{ flexDirection: 'row', gap: 8 }}><Button title="Remove all" onPress={() => { setAttachments([]); setAttachmentState('idle'); setAttachmentError(null); }} /><Button title="Replace" onPress={() => Alert.alert('Replace attachment', 'Pilih attachment baru', [{ text: 'File', onPress: () => void handleAttachment('File') }, { text: 'Photo', onPress: () => void handleAttachment('Photo') }, { text: 'Camera', onPress: () => void handleAttachment('Camera') }, { text: 'Cancel', style: 'cancel' }], { cancelable: false })} /></View> : null}
+          {attachmentState !== 'preparing' ? <View style={{ flexDirection: 'row', gap: 8 }}><Button title="Remove all" onPress={() => { setAttachments([]); setAttachmentState('idle'); setAttachmentError(null); }} /><Button title="Replace" onPress={() => Alert.alert('Replace attachment', 'Pilih attachment baru', [{ text: 'File', onPress: () => void handleAttachment('File') }, { text: 'Photo', onPress: () => void handleAttachment('Photo') }, { text: 'Camera', onPress: () => void handleAttachment('Camera') }, { text: 'Cancel', style: 'cancel' }], { cancelable: true })} /></View> : null}
         </View> : null}
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
           <View style={{ gap: 4 }}>
