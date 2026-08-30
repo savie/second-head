@@ -1,4 +1,5 @@
 import { backend } from './backend';
+import * as Linking from 'expo-linking';
 
 export async function signInWithPassword(email: string, password: string) {
   const result = await backend.auth.signInWithPassword({ email, password });
@@ -27,7 +28,16 @@ export async function signUpWithPassword(email: string, password: string) {
 }
 
 export async function requestPasswordReset(email: string) {
-  return backend.auth.resetPasswordForEmail(email);
+  const redirectTo = Linking.createURL('reset-password');
+  return backend.auth.resetPasswordForEmail(email, { redirectTo });
+}
+
+export async function exchangePasswordRecoveryCode(code: string) {
+  return backend.auth.exchangeCodeForSession(code);
+}
+
+export async function setPassword(password: string) {
+  return backend.auth.updateUser({ password });
 }
 
 export async function signOut() {
