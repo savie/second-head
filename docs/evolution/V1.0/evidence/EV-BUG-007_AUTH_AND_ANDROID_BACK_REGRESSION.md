@@ -1,6 +1,6 @@
 # EV-BUG-007 — WS-A AUTH & ANDROID BACK REGRESSION
 
-Status: **OPEN — APK AUDIT / FIX REQUIRED**
+Status: **OPEN — REMEDIATION IMPLEMENTED, DEVICE VERIFICATION REQUIRED**
 
 ## Scope
 WS-A manual APK verification covering authentication/account entry and Android Back behavior on attachment-related surfaces.
@@ -49,6 +49,16 @@ Therefore the current attachment/file/photo Android Back finding is recorded as 
 
 The current audit does **not** invalidate the historical EV-BUG-006 evidence. It establishes that the behavior needs to be re-investigated against the current V1.0.0 APK.
 
+## Additional finding — recovery redirect
+
+The first remediation added a password-reset request from Login, but device verification exposed a second gap: the Supabase recovery email redirected to `localhost:3000`, which is not reachable from the Android APK. The email delivery itself succeeded; recovery completion did not.
+
+This establishes that password recovery is a new SH capability gap requiring an end-to-end contract:
+
+`Login → Supabase recovery email → SH Android deep link → Reset Password screen → password update → Login`
+
+The current app already declares the `secondhead` custom scheme. The remediation now routes `resetPasswordForEmail` to the native `secondhead://reset-password` URL and adds a dedicated Reset Password route that handles recovery session establishment and password update. This requires a new APK because Expo custom-scheme/deep-link behavior is build-time configuration. The corresponding `secondhead://reset-password` redirect URI must also be allowlisted in the Supabase Auth URL configuration before device verification.
+
 ## Required fix scope
 
 ### A. Login
@@ -81,7 +91,10 @@ Historical reference:
 Current evidence:
 
 - Manual V1.0.0 APK audit performed before the WS-A remediation work.
-- No fix is claimed by this document.
+- Password-reset request was implemented and device-tested; email delivery passed.
+- Device test then exposed the `localhost:3000` recovery redirect failure.
+- Native recovery redirect and Reset Password route are now implemented in DEV.
+- Android APK verification and Supabase redirect allowlist verification remain pending.
 
 ## Final status
 **🔴 OPEN — WS-A remediation required**
