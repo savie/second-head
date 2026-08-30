@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createJourneySink, executeModel, journeyCandidateFromResponse } from "./sh_runtime_bundle.ts";
 import { deleteRequestedMemory, deleteRequestedRecord, hasExplicitExperienceRequest, recordSemanticLifecycle } from "./semantic_lifecycle.ts";
+import { initializeMcp, listMcpTools, notifyMcpInitialized, callMcpTool } from "../../runtime/p4g/mcp/youtube_mcp_client.ts";
 
 type Identity={account_id:string;sh_id:string;ownership_role:string};
 const jsonHeaders={"Content-Type":"application/json"};
@@ -23,28 +24,24 @@ if(r8Operation){
   const endpoint=Deno.env.get("R8_YOUTUBE_MCP_ENDPOINT");
   if(!endpoint) return new Response(JSON.stringify({error:"R8_MCP_CONFIGURATION_ERROR"}),{status:500,headers:jsonHeaders});
   try{
-    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),10000);
-    const headers:Record<string,string>={"Content-Type":"application/json","Accept":"application/json, text/event-stream","MCP-Protocol-Version":"2025-11-25"}; const incomingAuthorization=req.headers.get("Authorization"); if(incomingAuthorization) headers.Authorization=incomingAuthorization;
-    const initResponse=await fetch(endpoint,{method:"POST",headers,body:JSON.stringify({jsonrpc:"2.0",id:1,method:"initialize",params:{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"second-head-runtime",version:"r8"}}}),signal:controller.signal});
-    if(!initResponse.ok) throw new Error("R8_MCP_INITIALIZE_HTTP_"+initResponse.status);
-    const initBody=await initResponse.json();
-    if(initBody.error) throw new Error("R8_MCP_INITIALIZE_FAILED");
+    const authorization=req.headers.get("Authorization")??undefined;
+    const init=await initializeMcp(endpoint,authorization);
+    if(!init.result?.protocolVersion) throw new Error("R8_MCP_INITIALIZE_FAILED");
+    await notifyMcpInitialized(endpoint,authorization);
+    const discovered=await listMcpTools(endpoint,authorization);
     const toolName=r8Operation==="SEARCH_YOUTUBE"?"youtube_search":"youtube_get_video";
-    const toolArguments=r8Operation==="SEARCH_YOUTUBE"?{query:body.user_message?.trim()||"",max_results:5}:{video_id:body.r8_video_id};
-    const callResponse=await fetch(endpoint,{method:"POST",headers,body:JSON.stringify({jsonrpc:"2.0",id:2,method:"tools/call",params:{name:toolName,arguments:toolArguments}}),signal:controller.signal});
-    clearTimeout(timer);
-    if(!callResponse.ok) throw new Error("R8_MCP_CALL_HTTP_"+callResponse.status);
-    const callBody=await callResponse.json();
-    if(callBody.error) throw new Error("R8_MCP_CALL_FAILED");
-    if(callBody.result?.isError===true) throw new Error(callBody.result?.content?.[0]?.text||"R8_YOUTUBE_PROVIDER_ERROR");
-    const structured=callBody.result?.structuredContent??{};
+    if(!discovered.some(tool=>tool.name===toolName)) throw new Error("R8_MCP_TOOL_NOT_AVAILABLE:"+toolName);
+    const toolArguments=r8Operation==="SEARCH_YOUTUBE"?{query:body.user_message?.trim()||"",max_results:5}:{video_id:(body as any).r8_video_id};
+    const call=await callMcpTool(endpoint,toolName,toolArguments,authorization);
+    if(call.result?.isError===true) throw new Error(String((call.result.content as any)?.[0]?.text??"R8_YOUTUBE_PROVIDER_ERROR"));
+    const structured=call.result?.structuredContent??{};
     if(!verificationOnly){
       await recordConversation(supabase,identity.sh_id,"user",(body.user_message?.trim()||toolName),verificationMarker,{r8_operation:r8Operation});
       await recordConversation(supabase,identity.sh_id,"assistant",JSON.stringify(structured),verificationMarker,{r8_operation:r8Operation});
-      await recordAudit(supabase,identity.sh_id,"RUNTIME_REQUEST",{tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,authorization:"OWNER_AUTHENTICATED"});
+      await recordAudit(supabase,identity.sh_id,"RUNTIME_REQUEST",{tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,authorization:"OWNER_AUTHENTICATED",mcp_tool_discovered:true});
       await recordAudit(supabase,identity.sh_id,"RUNTIME_RESPONSE",{status:"SUCCESS",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,provider:"YOUTUBE"});
     }
-    return new Response(JSON.stringify({sh_id:identity.sh_id,r8:{operation:r8Operation,provider:"YOUTUBE",result:structured},meta:{phase:"P4A-001",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",transport:"STREAMABLE_HTTP",protocol:"2025-11-25"}}),{status:200,headers:jsonHeaders});
+    return new Response(JSON.stringify({sh_id:identity.sh_id,r8:{operation:r8Operation,provider:"YOUTUBE",result:structured},meta:{phase:"P4A-001",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",transport:"STREAMABLE_HTTP",protocol:"2025-11-25",mcp_tool_discovered:true}}),{status:200,headers:jsonHeaders});
   }catch(e){
     try{if(!verificationOnly)await recordAudit(supabase,identity.sh_id,"RUNTIME_RESPONSE",{status:"FAILED",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,error:e instanceof Error?e.message:"R8_MCP_FAILED"});}catch{}
     return new Response(JSON.stringify({error:e instanceof Error?e.message:"R8_MCP_FAILED"}),{status:502,headers:jsonHeaders});
