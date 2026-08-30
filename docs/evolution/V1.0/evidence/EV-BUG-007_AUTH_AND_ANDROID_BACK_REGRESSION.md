@@ -93,10 +93,10 @@ Current evidence:
 - Manual V1.0.0 APK audit performed before the WS-A remediation work.
 - Password-reset request was implemented and device-tested; email delivery passed.
 - Device test then exposed the `localhost:3000` recovery redirect failure.
-- Native recovery redirect and Reset Password route are now implemented in DEV.
-- Android APK verification and Supabase redirect allowlist verification remain pending.
+- Native recovery redirect and Reset Password route are implemented in DEV. Device verification then exposed a legacy `secondhead://reset` deep link, which had no matching route.
+- A compatibility route for `secondhead://reset` now redirects to `/reset-password`, while the canonical recovery target is explicitly `secondhead://reset-password`. Supabase redirect allowlisting has been completed by the project owner. A fresh Android APK is still required for final device verification.
 
 ## Final status
-**🔴 OPEN — WS-A remediation required**
+**🟡 OPEN — FINAL APK DEVICE VERIFICATION REQUIRED**
 
 This evidence is intentionally recorded before remediation so a recurrence can be compared against the historical BUG-006 fix rather than losing the regression history.
