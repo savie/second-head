@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createJourneySink, executeModel, journeyCandidateFromResponse } from "./sh_runtime_bundle.ts";
 import { deleteRequestedMemory, deleteRequestedRecord, hasExplicitExperienceRequest, recordSemanticLifecycle } from "./semantic_lifecycle.ts";
-import { initializeMcp, listMcpTools, notifyMcpInitialized, callMcpTool } from "../../runtime/p4g/mcp/youtube_mcp_client.ts";
+import { initializeMcp, listMcpTools, notifyMcpInitialized, callMcpTool } from "../../../runtime/p4g/mcp/youtube_mcp_client.ts";
 
 type Identity={account_id:string;sh_id:string;ownership_role:string};
 const jsonHeaders={"Content-Type":"application/json"};
