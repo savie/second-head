@@ -1,13 +1,32 @@
 import { useState } from 'react';
 import { ActivityIndicator, Button, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { signInWithPassword, signUpWithPassword } from '../services/auth';
+import { requestPasswordReset, signInWithPassword, signUpWithPassword } from '../services/auth';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function resetPassword() {
+    const target = email.trim();
+    if (!target) {
+      setError('Enter your account email first.');
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await requestPasswordReset(target);
+      if (result.error) throw result.error;
+      setError('Password reset email sent. Check your inbox and follow the recovery link.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Password reset failed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(mode: 'signIn' | 'signUp') {
     setBusy(true);
@@ -42,6 +61,7 @@ export default function LoginScreen() {
       {busy ? <ActivityIndicator /> : (
         <>
           <Button title="Sign in" onPress={() => void submit('signIn')} />
+          <Button title="Forgot password?" onPress={() => void resetPassword()} />
           <Button title="Create account" onPress={() => void submit('signUp')} />
         </>
       )}
