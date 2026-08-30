@@ -1,0 +1,2 @@
+import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
+Deno.test("R8 tool surface is read-only and bounded",async()=>{const source=await Deno.readTextFile(new URL("./index.ts",import.meta.url));assertStringIncludes(source,'name:"youtube_search"');assertStringIncludes(source,'name:"youtube_get_video"');assertStringIncludes(source,"readOnlyHint:true");assertStringIncludes(source,"destructiveHint:false");assertEquals(/youtube_(upload|delete|update|comment|like)/i.test(source),false);});
