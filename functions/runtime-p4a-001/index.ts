@@ -39,7 +39,7 @@ if(r8Operation){
     if(callBody.result?.isError===true) throw new Error(callBody.result?.content?.[0]?.text||"R8_YOUTUBE_PROVIDER_ERROR");
     const structured=callBody.result?.structuredContent??{};
     if(!verificationOnly){
-      await recordConversation(supabase,identity.sh_id,"user",userMessage??toolName,verificationMarker,{r8_operation:r8Operation});
+      await recordConversation(supabase,identity.sh_id,"user",(body.user_message?.trim()||toolName),verificationMarker,{r8_operation:r8Operation});
       await recordConversation(supabase,identity.sh_id,"assistant",JSON.stringify(structured),verificationMarker,{r8_operation:r8Operation});
       await recordAudit(supabase,identity.sh_id,"RUNTIME_REQUEST",{tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,authorization:"OWNER_AUTHENTICATED"});
       await recordAudit(supabase,identity.sh_id,"RUNTIME_RESPONSE",{status:"SUCCESS",tool_id:"R8",capability:"MCP_YOUTUBE_READ_ONLY",operation:r8Operation,provider:"YOUTUBE"});
