@@ -9,40 +9,79 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - uses: android-actions/setup-android@v3
-      - name: Install Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.13'
-      - name: Generate minimal KMP project
+
+      - name: Install Gradle 8.13
         run: |
+          set -euo pipefail
+          GRADLE_HOME="$RUNNER_TEMP/gradle-8.13"
+          if [ ! -x "$GRADLE_HOME/bin/gradle" ]; then
+            curl --fail --silent --show-error --location \
+              https://services.gradle.org/distributions/gradle-8.13-bin.zip \
+              --output "$RUNNER_TEMP/gradle-8.13-bin.zip"
+            rm -rf "$GRADLE_HOME"
+            unzip -q "$RUNNER_TEMP/gradle-8.13-bin.zip" -d "$RUNNER_TEMP"
+          fi
+          echo "$GRADLE_HOME/bin" >> "$GITHUB_PATH"
+          "$GRADLE_HOME/bin/gradle" --version
+
+      - name: Generate minimal KMP Compose project
+        run: |
+          set -euo pipefail
           rm -rf /tmp/SHCandidate
-          cat > /tmp/gradle.properties <<'EOF'
+          mkdir -p /tmp/SHCandidate/androidApp/src/main/java/sh/poc
+
+          cat > /tmp/SHCandidate/gradle.properties <<'EOF'
           android.useAndroidX=true
           android.enableJetifier=true
           EOF
-          cat > /tmp/settings.gradle.kts <<'EOF'
-          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
-          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
-          rootProject.name = "SHCandidate"
+
+          cat > /tmp/SHCandidate/settings.gradle.kts <<'EOF'
+          import org.gradle.api.initialization.resolve.RepositoriesMode
+
+          pluginManagement {
+            repositories {
+              google()
+              mavenCentral()
+              gradlePluginPortal()
+            }
+          }
+
+          dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+              google()
+              mavenCentral()
+            }
+          }
+
+          rootProject.name = "shcandidate"
           include(":androidApp")
           EOF
-          mkdir -p /tmp/androidApp/src/main/java/sh/poc
-          cat > /tmp/build.gradle.kts <<'EOF'
+
+          cat > /tmp/SHCandidate/build.gradle.kts <<'EOF'
           plugins {
             id("com.android.application") version "8.13.0" apply false
             id("org.jetbrains.kotlin.android") version "2.2.20" apply false
           }
           EOF
-          cat > /tmp/androidApp/build.gradle.kts <<'EOF'
-          plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
+
+          cat > /tmp/SHCandidate/androidApp/build.gradle.kts <<'EOF'
+          plugins {
+            id("com.android.application")
+            id("org.jetbrains.kotlin.android")
+          }
+
           android {
             namespace = "sh.poc"
             compileSdk = 35
+
             defaultConfig {
               applicationId = "sh.poc"
               minSdk = 21
@@ -51,40 +90,70 @@ jobs:
               versionName = "1.0"
             }
           }
+
           dependencies {
             implementation("androidx.activity:activity-compose:1.10.1")
             implementation("androidx.compose.ui:ui:1.8.2")
             implementation("androidx.compose.material3:material3:1.3.2")
           }
           EOF
-          mkdir -p /tmp/androidApp/src/main/res/values
-          cat > /tmp/androidApp/src/main/res/values/styles.xml <<'EOF'
-          <resources><style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar"/></resources>
+
+          mkdir -p /tmp/SHCandidate/androidApp/src/main/res/values
+
+          cat > /tmp/SHCandidate/androidApp/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+            <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar"/>
+          </resources>
           EOF
-          cat > /tmp/androidApp/src/main/AndroidManifest.xml <<'EOF'
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:theme="@style/AppTheme" android:label="SH POC"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity></application></manifest>
+
+          cat > /tmp/SHCandidate/androidApp/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <application
+              android:theme="@style/AppTheme"
+              android:label="SH POC">
+              <activity
+                android:name=".MainActivity"
+                android:exported="true">
+                <intent-filter>
+                  <action android:name="android.intent.action.MAIN"/>
+                  <category android:name="android.intent.category.LAUNCHER"/>
+                </intent-filter>
+              </activity>
+            </application>
+          </manifest>
           EOF
-          cat > /tmp/androidApp/src/main/java/sh/poc/MainActivity.kt <<'EOF'
+
+          cat > /tmp/SHCandidate/androidApp/src/main/java/sh/poc/MainActivity.kt <<'EOF'
           package sh.poc
+
           import android.os.Bundle
           import androidx.activity.ComponentActivity
           import androidx.activity.compose.setContent
           import androidx.compose.material3.Text
+
           class MainActivity : ComponentActivity() {
             override fun onCreate(savedInstanceState: Bundle?) {
               super.onCreate(savedInstanceState)
-              setContent { Text("SECOND HEAD POC") }
+              setContent {
+                Text("SECOND HEAD POC")
+              }
             }
           }
           EOF
-      - name: Verify pinned Gradle
-        working-directory: /tmp
-        run: gradle --version
+
+      - name: Verify Gradle runtime
+        run: |
+          set -euo pipefail
+          command -v gradle
+          gradle --version
+          test "$(gradle --version | awk '/Gradle / {print $2; exit}')" = "8.13"
+
       - name: Build debug APK
-        working-directory: /tmp
-        run: gradle :androidApp:assembleDebug --no-daemon -Dandroid.useAndroidX=true -Dandroid.enableJetifier=true
+        working-directory: /tmp/SHCandidate
+        run: gradle :androidApp:assembleDebug --no-daemon
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: sh-poc-kmp-compose-apk
-          path: /tmp/androidApp/build/outputs/apk/debug/androidApp-debug.apk
+          path: /tmp/SHCandidate/androidApp/build/outputs/apk/debug/androidApp-debug.apk
