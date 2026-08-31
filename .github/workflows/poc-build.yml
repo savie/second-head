@@ -69,8 +69,19 @@ jobs:
             override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { Text("SECOND HEAD POC") } }
           }
           EOF
-          cd /tmp/SHCandidate
+          # Generate the wrapper from an isolated minimal Gradle project.
+          # The runner's system Gradle may be newer than the AGP used by the POC.
+          rm -rf /tmp/SHWrapper
+          mkdir -p /tmp/SHWrapper
+          cat > /tmp/SHWrapper/settings.gradle.kts <<'EOF'
+          rootProject.name = "SHWrapper"
+          EOF
+          cd /tmp/SHWrapper
           gradle wrapper --gradle-version 8.13
+          cp -R /tmp/SHWrapper/gradle /tmp/SHCandidate/
+          cp /tmp/SHWrapper/gradlew /tmp/SHCandidate/gradlew
+          cp /tmp/SHWrapper/gradlew.bat /tmp/SHCandidate/gradlew.bat
+          chmod +x /tmp/SHCandidate/gradlew
       - name: Build debug APK
         working-directory: /tmp/SHCandidate
         run: ./gradlew assembleDebug --no-daemon -Dandroid.useAndroidX=true -Dandroid.enableJetifier=true
