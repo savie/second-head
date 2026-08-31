@@ -66,8 +66,20 @@ jobs:
             override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { Text("SECOND HEAD POC") } }
           }
           EOF
-          cd /tmp
+          # Generate the wrapper from an isolated project so the runner's
+          # system Gradle never evaluates the candidate's Android plugin.
+          rm -rf /tmp/SHWrapper
+          mkdir -p /tmp/SHWrapper
+          cat > /tmp/SHWrapper/settings.gradle.kts <<'EOF'
+          rootProject.name = "SHWrapper"
+          EOF
+          cd /tmp/SHWrapper
           gradle wrapper --gradle-version 8.13
+          cp -R /tmp/SHWrapper/gradle /tmp/
+          cp /tmp/SHWrapper/gradlew /tmp/gradlew
+          cp /tmp/SHWrapper/gradlew.bat /tmp/gradlew.bat
+          chmod +x /tmp/gradlew
+          cd /tmp
       - name: Build debug APK
         working-directory: /tmp
         run: ./gradlew :androidApp:assembleDebug --no-daemon -Dandroid.useAndroidX=true -Dandroid.enableJetifier=true
