@@ -1,0 +1,76 @@
+name: SH POC — Kotlin + Jetpack Compose Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Create minimal Android Compose project
+        run: |
+          mkdir -p /tmp/SHCandidate/app/src/main/java/sh/poc
+          cat > /tmp/SHCandidate/settings.gradle.kts <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name = "SHCandidate"
+          include(":app")
+          EOF
+          cat > /tmp/SHCandidate/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.13.0" apply false
+              id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+          }
+          EOF
+          cat > /tmp/SHCandidate/app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+          android { namespace = "sh.poc"; compileSdk = 35
+              defaultConfig { applicationId = "sh.poc"; minSdk = 21; targetSdk = 35; versionCode = 1; versionName = "1.0" }
+              buildFeatures { compose = true }
+          }
+          dependencies {
+              val composeBom = platform("androidx.compose:compose-bom:2026.08.00")
+              implementation(composeBom)
+              androidTestImplementation(composeBom)
+              implementation("androidx.activity:activity-compose:1.10.1")
+              implementation("androidx.compose.ui:ui")
+              implementation("androidx.compose.material3:material3")
+          }
+          EOF
+          cat > /tmp/SHCandidate/app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:theme="@style/AppTheme" android:label="SH POC"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity></application></manifest>
+          EOF
+          mkdir -p /tmp/SHCandidate/app/src/main/res/values
+          cat > /tmp/SHCandidate/app/src/main/res/values/styles.xml <<'EOF'
+          <resources><style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar"/></resources>
+          EOF
+          cat > /tmp/SHCandidate/app/src/main/java/sh/poc/MainActivity.kt <<'EOF'
+          package sh.poc
+          import android.os.Bundle
+          import androidx.activity.ComponentActivity
+          import androidx.activity.compose.setContent
+          import androidx.compose.material3.Text
+          class MainActivity : ComponentActivity() {
+            override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { Text("SECOND HEAD POC") } }
+          }
+          EOF
+          cd /tmp/SHCandidate
+          gradle wrapper --gradle-version 8.13
+      - name: Build debug APK
+        working-directory: /tmp/SHCandidate
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sh-poc-kotlin-compose-apk
+          path: /tmp/SHCandidate/app/build/outputs/apk/debug/app-debug.apk
