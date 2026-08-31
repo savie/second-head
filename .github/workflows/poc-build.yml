@@ -17,6 +17,9 @@ jobs:
       - name: Create minimal Android Compose project
         run: |
           mkdir -p /tmp/SHCandidate/app/src/main/java/sh/poc
+          cat > /tmp/SHCandidate/gradle.properties <<'EOF'
+          android.useAndroidX=true
+          EOF
           cat > /tmp/SHCandidate/settings.gradle.kts <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
