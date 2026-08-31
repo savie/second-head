@@ -73,7 +73,7 @@ jobs:
           gradle wrapper --gradle-version 8.13
       - name: Build debug APK
         working-directory: /tmp/SHCandidate
-        run: ./gradlew assembleDebug --no-daemon -Pandroid.useAndroidX=true
+        run: ./gradlew assembleDebug --no-daemon -Dandroid.useAndroidX=true -Dandroid.enableJetifier=true
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
