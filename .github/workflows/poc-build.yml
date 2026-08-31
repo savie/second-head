@@ -16,9 +16,11 @@ jobs:
       - uses: android-actions/setup-android@v3
       - name: Create minimal Android Compose project
         run: |
+          rm -rf /tmp/SHCandidate
           mkdir -p /tmp/SHCandidate/app/src/main/java/sh/poc
           cat > /tmp/SHCandidate/gradle.properties <<'EOF'
           android.useAndroidX=true
+          android.enableJetifier=true
           EOF
           cat > /tmp/SHCandidate/settings.gradle.kts <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
@@ -71,7 +73,7 @@ jobs:
           gradle wrapper --gradle-version 8.13
       - name: Build debug APK
         working-directory: /tmp/SHCandidate
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon -Pandroid.useAndroidX=true
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
