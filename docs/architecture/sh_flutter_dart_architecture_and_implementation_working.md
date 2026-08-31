@@ -1306,7 +1306,7 @@ Dart digunakan untuk concern implementasi aplikasi seperti:
 
 Flutter tidak boleh memuat ulang governance logic SH secara terpisah dari authority yang semestinya.
 
-Struktur aplikasi awal:
+Struktur folder aplikasi yang digunakan untuk pembangunan SH dengan Flutter + Dart:
 
 ```
 app/
@@ -1315,7 +1315,18 @@ app/
 │   ├── domain/
 │   ├── runtime/
 │   ├── capabilities/
+│   │   ├── conversation/
+│   │   ├── continuity/
+│   │   ├── tools/
+│   │   ├── multimodal/
+│   │   ├── integration/
+│   │   └── lifecycle/
 │   ├── features/
+│   │   ├── chat/
+│   │   ├── journey/
+│   │   ├── lifecycle/
+│   │   ├── account/
+│   │   └── more/
 │   ├── data/
 │   ├── storage/
 │   ├── platform/
@@ -1325,7 +1336,11 @@ app/
 └── integration_test/
 ```
 
-Struktur ini adalah working architectural shape, bukan folder contract yang sudah dibekukan.
+Struktur folder ini ditetapkan sebagai application structure untuk pembangunan SH dengan Flutter + Dart.
+
+Folder dapat tetap kosong sampai capability atau subsystem terkait mulai diimplementasikan. Implementasi harus menggunakan folder yang telah ditetapkan. Folder baru hanya dibuat apabila muncul concern, capability, atau boundary yang memang belum terwakili oleh struktur ini dan pembuatannya dapat dijustifikasi secara arsitektural.
+
+Struktur ini tidak wajib mengikuti struktur dev_old. dev_old tetap menjadi reference/evidence, sedangkan struktur ini menjadi struktur kerja implementation SH dengan Flutter + Dart.
 
 ## 8. Implementation Planning
 
