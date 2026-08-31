@@ -20,6 +20,9 @@ jobs:
           gradle-version: '8.13'
       - name: Generate minimal KMP project
         run: |
+          cat > /tmp/gradle.properties <<'EOF'
+          android.useAndroidX=true
+          EOF
           cat > /tmp/settings.gradle.kts <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
