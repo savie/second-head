@@ -1,0 +1,30 @@
+name: SH POC — Flutter Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Create minimal Flutter project
+        run: flutter create --platforms=android /tmp/SHCandidate
+      - name: Build debug APK
+        working-directory: /tmp/SHCandidate
+        run: flutter build apk --debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sh-poc-flutter-apk
+          path: /tmp/SHCandidate/build/app/outputs/flutter-apk/app-debug.apk
