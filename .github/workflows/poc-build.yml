@@ -1,0 +1,36 @@
+name: SH POC — React Native CLI Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Create minimal React Native CLI project
+        run: |
+          npx @react-native-community/cli@latest init SHCandidate --skip-install --skip-git --directory /tmp/SHCandidate
+      - name: Install dependencies
+        working-directory: /tmp/SHCandidate
+        run: npm install
+      - name: Build debug APK
+        working-directory: /tmp/SHCandidate
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sh-poc-rn-cli-apk
+          path: /tmp/SHCandidate/android/app/build/outputs/apk/debug/app-debug.apk
