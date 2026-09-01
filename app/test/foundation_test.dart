@@ -8,8 +8,8 @@ void main() {
     AuthSession.isAuthenticated = false;
     await tester.pumpWidget(const SecondHeadApp());
 
-    expect(find.text('Welcome back'), findsOneWidget);
-    expect(find.text('Sign in to continue to SECOND HEAD'), findsOneWidget);
+    expect(find.text('Second Head'), findsOneWidget);
+    expect(find.text('Human - AI Unity'), findsOneWidget);
     expect(find.byType(ShBrandMark), findsOneWidget);
   });
 }
