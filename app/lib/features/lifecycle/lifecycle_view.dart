@@ -85,18 +85,11 @@ class LifecycleViewState extends State<LifecycleView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 88,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
-            child: Row(
-              children: [
-                IconButton(
-                  tooltip: 'Menu',
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                  icon: const Icon(Icons.menu, size: 30),
-                ),
-                Expanded(
+        ShTopBar(
+          title: 'Lifecycle',
+          onSearch: () => _search(context),
+        ),
+        Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
