@@ -75,7 +75,7 @@ class JourneyViewState extends State<JourneyView> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  mainAxisExtent: 156,
+                  mainAxisExtent: 142,
                 ),
                 itemBuilder: (_, index) {
                   final itemIndex = visible[index];
@@ -327,15 +327,15 @@ class JourneyCard extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+              padding: const EdgeInsets.fromLTRB(14, 11, 12, 11),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Container(
-                        width: 46,
-                        height: 46,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: shBackground.withValues(alpha: .82),
@@ -352,7 +352,7 @@ class JourneyCard extends StatelessWidget {
                           ],
                         ),
                         alignment: Alignment.center,
-                        child: Icon(_icon, size: 22, color: accent),
+                        child: Icon(_icon, size: 20, color: accent),
                       ),
                       const Spacer(),
                       Text(
@@ -365,14 +365,14 @@ class JourneyCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.15,
+                      fontSize: 13,
+                      height: 1.1,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -380,8 +380,8 @@ class JourneyCard extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 34,
-                        height: 34,
+                        width: 30,
+                        height: 30,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: accent.withValues(alpha: .04),
@@ -391,7 +391,7 @@ class JourneyCard extends StatelessWidget {
                         ),
                         child: Icon(
                           Icons.arrow_forward_rounded,
-                          size: 17,
+                          size: 15,
                           color: accent,
                         ),
                       ),
@@ -399,7 +399,7 @@ class JourneyCard extends StatelessWidget {
                       Text(
                         item.date,
                         style: const TextStyle(
-                          fontSize: 8.5,
+                          fontSize: 8,
                           color: shMuted,
                         ),
                       ),
@@ -665,14 +665,16 @@ class JourneyDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     // Detail screens own horizontal gestures so the global tab-swipe
     // recognizer cannot hijack Android back / in-page horizontal gestures.
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onHorizontalDragStart: (_) {},
-      onHorizontalDragUpdate: (_) {},
-      onHorizontalDragEnd: (_) {},
-      child: Column(
-        children: [
-          ShTopBar(
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragStart: (_) {},
+        onHorizontalDragUpdate: (_) {},
+        onHorizontalDragEnd: (_) {},
+        child: Column(
+          children: [
+            ShTopBar(
           title: item.type,
           leading: IconButton(
             tooltip: 'Back',
@@ -750,7 +752,8 @@ class JourneyDetail extends StatelessWidget {
             ),
           ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
