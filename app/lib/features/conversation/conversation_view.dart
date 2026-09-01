@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -97,7 +95,7 @@ class ConversationViewState extends State<ConversationView> {
               ],
             ),
           ),
-        const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: CompanionCard()),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: const CompanionCard()),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
