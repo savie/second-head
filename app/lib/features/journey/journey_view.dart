@@ -102,7 +102,7 @@ class JourneyViewState extends State<JourneyView> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: .82,
+                  childAspectRatio: 1.55,
                 ),
                 itemBuilder: (_, index) {
                   final itemIndex = visible[index];
@@ -163,133 +163,39 @@ class JourneyViewState extends State<JourneyView> {
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (sheet) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Align(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Create new',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
-            ),
-            for (final type in const ['Memory', 'Knowledge', 'Experience'])
-              ListTile(
-                leading: const Icon(Icons.add_circle_outline),
-                title: Text(type),
-                onTap: () => Navigator.pop(sheet, type),
-              ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-
-    if (!mounted || type == null) return;
-
-    final titleController = TextEditingController();
-    final contentController = TextEditingController();
-    var privatePolicy = true;
-
-    final draft = await showModalBottomSheet<JourneyDraft>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (sheet) => StatefulBuilder(
-        builder: (_, setLocal) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            18,
-            8,
-            18,
-            MediaQuery.of(sheet).viewInsets.bottom + 18,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Create $type',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(height: 8),
+              for (final type in const ['Memory', 'Knowledge', 'Experience'])
+                ListTile(
+                  leading: const Icon(Icons.add_circle_outline),
+                  title: Text(type),
+                  onTap: () => Navigator.of(sheet).pop(type),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: titleController,
-                autofocus: true,
-                decoration: const InputDecoration(hintText: 'Title'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: contentController,
-                maxLines: 7,
-                decoration: const InputDecoration(hintText: 'Write content...'),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: PolicyOption(
-                      label: 'Private',
-                      icon: Icons.lock_outline,
-                      selected: privatePolicy,
-                      onTap: () => setLocal(() => privatePolicy = true),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: PolicyOption(
-                      label: 'Public',
-                      icon: Icons.public,
-                      selected: !privatePolicy,
-                      onTap: () => setLocal(() => privatePolicy = false),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(sheet),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        final title = titleController.text.trim();
-                        final content = contentController.text.trim();
-                        if (title.isEmpty || content.isEmpty) return;
-                        Navigator.pop(
-                          sheet,
-                          JourneyDraft(
-                            title: title,
-                            content: content,
-                            isPrivate: privatePolicy,
-                          ),
-                        );
-                      },
-                      child: const Text('Save'),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
       ),
     );
 
-    titleController.dispose();
-    contentController.dispose();
+    if (!mounted || type == null) return;
+
+    final draft = await _showJourneyEditor(
+      context,
+      title: 'Create $type',
+    );
 
     if (!mounted || draft == null) return;
 
@@ -307,6 +213,124 @@ class JourneyViewState extends State<JourneyView> {
       ),
     );
   }
+
+  Future<JourneyDraft?> _showJourneyEditor(
+    BuildContext context, {
+    required String title,
+    String initialTitle = '',
+    String initialContent = '',
+    bool initialPrivate = true,
+  }) async {
+    final titleController = TextEditingController(text: initialTitle);
+    final contentController = TextEditingController(text: initialContent);
+    var privatePolicy = initialPrivate;
+
+    final draft = await showModalBottomSheet<JourneyDraft>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (sheet) => StatefulBuilder(
+        builder: (_, setLocal) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            18,
+            8,
+            18,
+            MediaQuery.viewInsetsOf(sheet).bottom + 18,
+          ),
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: titleController,
+                  autofocus: initialTitle.isEmpty,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(hintText: 'Title'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: contentController,
+                  minLines: 4,
+                  maxLines: 7,
+                  textInputAction: TextInputAction.newline,
+                  decoration: const InputDecoration(hintText: 'Write content...'),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: PolicyOption(
+                        label: 'Private',
+                        icon: Icons.lock_outline,
+                        selected: privatePolicy,
+                        onTap: () => setLocal(() => privatePolicy = true),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: PolicyOption(
+                        label: 'Public',
+                        icon: Icons.public,
+                        selected: !privatePolicy,
+                        onTap: () => setLocal(() => privatePolicy = false),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(sheet).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          final newTitle = titleController.text.trim();
+                          final content = contentController.text.trim();
+                          if (newTitle.isEmpty || content.isEmpty) {
+                            return;
+                          }
+                          Navigator.of(sheet).pop(
+                            JourneyDraft(
+                              title: newTitle,
+                              content: content,
+                              isPrivate: privatePolicy,
+                            ),
+                          );
+                        },
+                        child: const Text('Save'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    titleController.dispose();
+    contentController.dispose();
+    return draft;
+  }
+
 }
 
 class JourneyFilters extends StatelessWidget {
@@ -321,36 +345,39 @@ class JourneyFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
       child: Row(
         children: [
           for (final label in const ['All', 'Memory', 'Knowledge', 'Experience'])
-            Padding(
-              padding: const EdgeInsets.only(right: 7),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () => onChanged(label),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color: value == label
-                        ? shPurple.withValues(alpha: .16)
-                        : shSurface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: value == label ? shPurple : shBorder,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(22),
+                  onTap: () => onChanged(label),
+                  child: Container(
+                    height: 46,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: value == label
+                          ? shPurple.withValues(alpha: .16)
+                          : shSurface,
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: value == label ? shPurple : shBorder,
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: value == label ? Colors.white : shMuted,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: value == label ? Colors.white : shMuted,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -463,26 +490,15 @@ class JourneyCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 8),
                   Text(
                     item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       height: 1.15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    item.subtitle,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 10.5,
-                      color: shMuted,
-                      height: 1.4,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const Spacer(),
@@ -696,104 +712,13 @@ class JourneyDetail extends StatelessWidget {
   }
 
   Future<void> _edit(BuildContext context) async {
-    final titleController = TextEditingController(text: item.title);
-    final contentController = TextEditingController(text: item.content);
-    var privatePolicy = item.isPrivate;
-
-    final draft = await showModalBottomSheet<JourneyDraft>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (sheet) => StatefulBuilder(
-        builder: (_, setLocal) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            18,
-            8,
-            18,
-            MediaQuery.of(sheet).viewInsets.bottom + 18,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Edit ' + item.type,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(hintText: 'Title'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: contentController,
-                maxLines: 7,
-                decoration: const InputDecoration(hintText: 'Write content...'),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: PolicyOption(
-                      label: 'Private',
-                      icon: Icons.lock_outline,
-                      selected: privatePolicy,
-                      onTap: () => setLocal(() => privatePolicy = true),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: PolicyOption(
-                      label: 'Public',
-                      icon: Icons.public,
-                      selected: !privatePolicy,
-                      onTap: () => setLocal(() => privatePolicy = false),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(sheet),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        final title = titleController.text.trim();
-                        final content = contentController.text.trim();
-                        if (title.isEmpty || content.isEmpty) return;
-                        Navigator.pop(
-                          sheet,
-                          JourneyDraft(
-                            title: title,
-                            content: content,
-                            isPrivate: privatePolicy,
-                          ),
-                        );
-                      },
-                      child: const Text('Save'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+    final draft = await _showJourneyEditor(
+      context,
+      title: 'Edit ${item.type}',
+      initialTitle: item.title,
+      initialContent: item.content,
+      initialPrivate: item.isPrivate,
     );
-
-    titleController.dispose();
-    contentController.dispose();
 
     if (!context.mounted || draft == null) return;
 
