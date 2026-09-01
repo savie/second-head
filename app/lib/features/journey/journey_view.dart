@@ -131,6 +131,24 @@ class JourneyViewState extends State<JourneyView> {
     _openDetail(context, result);
   }
 
+  void _openDetail(BuildContext context, int itemIndex) {
+    if (itemIndex < 0 || itemIndex >= items.length) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => JourneyDetail(
+          item: items[itemIndex],
+          onChanged: () => setState(() {}),
+          onDelete: () {
+            if (itemIndex < 0 || itemIndex >= items.length) return;
+            setState(() => items.removeAt(itemIndex));
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _create(BuildContext context) async {
     final type = await showModalBottomSheet<String>(
       context: context,
