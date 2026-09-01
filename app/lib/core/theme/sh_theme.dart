@@ -46,10 +46,20 @@ ThemeData buildShTheme() {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: shSurface,
-      indicatorColor: shPurple.withValues(alpha: .18),
-      labelTextStyle: WidgetStateProperty.all(
-        const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-      ),
+      indicatorColor: Colors.transparent,
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: shPurple, size: 22);
+        }
+        return const IconThemeData(color: Colors.white70, size: 22);
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        return TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: states.contains(WidgetState.selected) ? shPurple : Colors.white70,
+        );
+      }),
     ),
   );
 }
