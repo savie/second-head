@@ -88,34 +88,61 @@ class ShTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
-      child: Row(
+      height: 88,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          leading ??
-              IconButton(
-                tooltip: 'Menu',
-                onPressed: () => Scaffold.of(context).openDrawer(),
-                icon: const Icon(Icons.menu, size: 21),
+          Positioned(
+            left: 4,
+            top: 0,
+            bottom: 0,
+            child: leading ??
+                IconButton(
+                  tooltip: 'Menu',
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  icon: const Icon(Icons.menu, size: 30),
+                ),
+          ),
+          Positioned(
+            left: 72,
+            right: 72,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
-          if (onSearch != null)
-            IconButton(
-              tooltip: 'Search',
-              onPressed: onSearch,
-              icon: const Icon(Icons.search_outlined, size: 21),
+          Positioned(
+            right: 4,
+            top: 0,
+            bottom: 0,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onSearch != null)
+                  IconButton(
+                    tooltip: 'Search',
+                    onPressed: onSearch,
+                    icon: const Icon(Icons.search_outlined, size: 30),
+                  ),
+                ...actions,
+              ],
             ),
-          ...actions,
+          ),
         ],
       ),
     );
   }
 }
-
 
 class ShSearchResult<T> {
   const ShSearchResult({
