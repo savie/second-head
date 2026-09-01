@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
 
 void main() => runApp(const SecondHeadApp());
 
@@ -494,14 +495,28 @@ class _HomeScreenState extends State<_HomeScreen> {
     _ProfileView(),
   ];
 
+  void _selectPage(int value) => setState(() => index = value);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const _SideMenu(),
-      body: SafeArea(child: pages[index]),
+      body: SafeArea(
+        child: GestureDetector(
+          onHorizontalDragEnd: (details) {
+            final velocity = details.primaryVelocity ?? 0;
+            if (velocity < -250 && index < pages.length - 1) {
+              _selectPage(index + 1);
+            } else if (velocity > 250 && index > 0) {
+              _selectPage(index - 1);
+            }
+          },
+          child: pages[index],
+        ),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
-        onDestinationSelected: (value) => setState(() => index = value),
+        onDestinationSelected: _selectPage,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.chat_bubble_outline, size: 19), selectedIcon: Icon(Icons.chat_bubble, size: 19), label: 'Chat'),
           NavigationDestination(icon: Icon(Icons.hexagon_outlined, size: 19), selectedIcon: Icon(Icons.hexagon, size: 19), label: 'Journey'),
@@ -631,31 +646,105 @@ class _DateLabel extends StatelessWidget {
 }
 
 class _Message extends StatelessWidget {
-  const _Message({required this.text, required this.time, required this.assistant});
+  const _Message({
+    required this.text,
+    required this.time,
+    required this.assistant,
+    this.image,
+  });
+
   final String text;
   final String time;
   final bool assistant;
+  final Uint8List? image;
+
+  void _showActions(BuildContext context) {
+    final actions = assistant
+        ? const ['Copy', 'Delete', 'Regenerate']
+        : const ['Copy', 'Delete', 'Edit'];
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _surface,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final action in actions)
+              ListTile(
+                leading: Icon(
+                  action == 'Delete'
+                      ? Icons.delete_outline
+                      : action == 'Edit'
+                          ? Icons.edit_outlined
+                          : action == 'Regenerate'
+                              ? Icons.refresh_rounded
+                              : Icons.copy_outlined,
+                  color: action == 'Delete' ? Colors.redAccent : Colors.white70,
+                ),
+                title: Text(action),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: assistant ? Alignment.centerLeft : Alignment.centerRight,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 290),
-        margin: const EdgeInsets.only(bottom: 9),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-        decoration: BoxDecoration(
-          color: assistant ? _surface2 : _purple,
-          borderRadius: BorderRadius.circular(9),
-          border: assistant ? Border.all(color: _border) : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Align(alignment: Alignment.centerLeft, child: Text(text, style: const TextStyle(fontSize: 11, height: 1.35))),
-            const SizedBox(height: 4),
-            Text(time, style: const TextStyle(fontSize: 8, color: _muted)),
-          ],
+    return GestureDetector(
+      onLongPress: () => _showActions(context),
+      child: Align(
+        alignment: assistant ? Alignment.centerLeft : Alignment.centerRight,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 300),
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            gradient: assistant
+                ? null
+                : const LinearGradient(colors: [_purple, _electric]),
+            color: assistant ? _surface2 : null,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(18),
+              topRight: const Radius.circular(18),
+              bottomLeft: Radius.circular(assistant ? 5 : 18),
+              bottomRight: Radius.circular(assistant ? 18 : 5),
+            ),
+            border: assistant ? Border.all(color: _border) : null,
+          ),
+          child: Column(
+            crossAxisAlignment:
+                assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            children: [
+              if (image != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    image!,
+                    width: 245,
+                    height: 175,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              if (image != null && text.isNotEmpty) const SizedBox(height: 7),
+              if (text.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    text,
+                    style: const TextStyle(fontSize: 11, height: 1.4),
+                  ),
+                ),
+              const SizedBox(height: 4),
+              Text(time, style: const TextStyle(fontSize: 8, color: _muted)),
+            ],
+          ),
         ),
       ),
     );
@@ -690,8 +779,37 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-class _Composer extends StatelessWidget {
+class _Composer extends StatefulWidget {
   const _Composer();
+
+  @override
+  State<_Composer> createState() => _ComposerState();
+}
+
+class _ComposerState extends State<_Composer> {
+  void _showAttachments() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _surface,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 22),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _AttachAction(icon: Icons.camera_alt_outlined, label: 'Camera'),
+              _AttachAction(icon: Icons.photo_library_outlined, label: 'Photos'),
+              _AttachAction(icon: Icons.attach_file_rounded, label: 'File'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -699,7 +817,7 @@ class _Composer extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 9),
       child: Row(
         children: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.add_circle_outline, size: 22)),
+          IconButton(onPressed: _showAttachments, icon: const Icon(Icons.add_circle_outline, size: 22)),
           Expanded(
             child: SizedBox(
               height: 40,
@@ -713,6 +831,39 @@ class _Composer extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AttachAction extends StatelessWidget {
+  const _AttachAction({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: () => Navigator.of(context).pop(),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(colors: [_purple, _electric]),
+              ),
+              child: Icon(icon),
+            ),
+            const SizedBox(height: 7),
+            Text(label, style: const TextStyle(fontSize: 10)),
+          ],
+        ),
       ),
     );
   }
