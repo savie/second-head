@@ -182,7 +182,7 @@ class _ProfileHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 224,
+      height: 176,
       decoration: BoxDecoration(
         color: shSurface,
         borderRadius: BorderRadius.circular(22),
@@ -212,13 +212,13 @@ class _ProfileHero extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 42,
+            top: 31,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
-                width: 92,
-                height: 92,
+                width: 112,
+                height: 112,
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -235,8 +235,10 @@ class _ProfileHero extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: ClipOval(
-                  child: photo != null
+                child: GestureDetector(
+                  onTap: onEdit,
+                  child: ClipOval(
+                    child: photo != null
                       ? Image.memory(
                           photo!,
                           fit: BoxFit.cover,
@@ -247,28 +249,16 @@ class _ProfileHero extends StatelessWidget {
                           fit: BoxFit.contain,
                           filterQuality: FilterQuality.high,
                         ),
+                  ),
                 ),
               ),
             ),
           ),
           Positioned(
-            top: 10,
-            right: 10,
-            child: Material(
-              color: shBackground.withValues(alpha: .32),
-              shape: const CircleBorder(),
-              child: IconButton(
-                tooltip: 'Edit profile photo',
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_outlined, size: 21),
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const Positioned(
             left: 16,
             right: 16,
-            bottom: 22,
+            bottom: 12,
+
             child: Column(
               children: [
                 Text(
@@ -283,7 +273,7 @@ class _ProfileHero extends StatelessWidget {
                 Text(
                   'savie@secondhead.app',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     color: shMuted,
                     fontWeight: FontWeight.w400,
                   ),
@@ -405,7 +395,7 @@ class _SettingItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 88,
+      height: 76,
       child: InkWell(
         onTap: () {},
         child: Padding(
