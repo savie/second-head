@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import '../../core/theme/sh_theme.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 
-class LifecycleView extends StatelessWidget {
-  static void _search(BuildContext context) { final ctl=TextEditingController(); showModalBottomSheet<void>(context: context, isScrollControlled: true, backgroundColor: shSurface, showDragHandle: true, builder: (c) => Padding(padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(c).viewInsets.bottom + 18), child: TextField(controller: ctl, autofocus: true, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search lifecycle')))); }
+class LifecycleView extends StatefulWidget {
+  const LifecycleView({super.key});
+  @override State<LifecycleView> createState()=>LifecycleViewState();
+}
 
-  const LifecycleView();
+class LifecycleViewState extends State<LifecycleView> {
+  void _search(BuildContext context) async { final ctl=TextEditingController(); final result=await showModalBottomSheet<String>(context: context, isScrollControlled: true, backgroundColor: shSurface, showDragHandle: true, builder: (c) => Padding(padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(c).viewInsets.bottom + 18), child: TextField(controller: ctl, autofocus: true, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search lifecycle')))); }
 
-  void _showDetail(BuildContext context, LifecycleStage stage) { showModalBottomSheet<void>(context: context, backgroundColor: shSurface, showDragHandle: true, builder: (_) => Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 28), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(stage.icon, size: 24), const SizedBox(width: 10), Text(stage.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))]), const SizedBox(height: 12), Text(stage.subtitle, style: const TextStyle(color: shMuted, height: 1.5))]))); }
+  String query='';
+
+  void _showDetail(BuildContext context, LifecycleStage stage) { showModalBottomSheet<void>(context: context, backgroundColor: shSurface, showDragHandle: true, builder: (_) => Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 28), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(stage.icon, size: 24), const SizedBox(width: 10), Text(stage.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))]), const SizedBox(height: 12), Text(stage.subtitle, style: const TextStyle(color: shMuted, height: 1.5))]))); ctl.dispose(); if(mounted&&result!=null)setState(()=>query=result.trim()); }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +36,7 @@ class LifecycleView extends StatelessWidget {
                       minHeight: constraints.maxHeight - 26,
                       maxWidth: 520,
                     ),
-                    child: const LifecycleMap(),
+                    child: LifecycleMap(query: query),
                   ),
                 ),
               );
@@ -44,48 +49,51 @@ class LifecycleView extends StatelessWidget {
 }
 
 class LifecycleMap extends StatelessWidget {
-  const LifecycleMap();
+  const LifecycleMap({super.key, required this.query});
+  final String query;
 
   @override
   Widget build(BuildContext context) {
-    final stages = const [
-      LifecycleStage(
+    final stages = [
+      const LifecycleStage(
         'Clone',
         'Duplicate your Second Head state',
         Icons.copy_all_rounded,
         Alignment.centerLeft,
       ),
-      LifecycleStage(
+      const LifecycleStage(
         'Recovery',
         'Restore continuity when something changes',
         Icons.restore_rounded,
         Alignment.centerRight,
       ),
-      LifecycleStage(
+      const LifecycleStage(
         'Inheritance',
         'Pass knowledge and identity forward',
         Icons.account_tree_rounded,
         Alignment.centerLeft,
       ),
-      LifecycleStage(
+      const LifecycleStage(
         'Succession',
         'Continue the role beyond one instance',
         Icons.swap_horiz_rounded,
         Alignment.centerRight,
       ),
-      LifecycleStage(
+      const LifecycleStage(
         'Legacy',
         'Preserve what should remain meaningful',
         Icons.auto_awesome_rounded,
         Alignment.centerLeft,
       ),
-      LifecycleStage(
+      const LifecycleStage(
         'End of Life',
         'Close the lifecycle with dignity and control',
         Icons.trip_origin_rounded,
         Alignment.centerRight,
       ),
     ];
+    final q=query.toLowerCase();
+    final visible=stages.where((s)=>q.isEmpty||('${s.title} ${s.subtitle}').toLowerCase().contains(q)).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -124,9 +132,9 @@ class LifecycleMap extends StatelessWidget {
               ),
               Column(
                 children: [
-                  for (var i = 0; i < stages.length; i++)
+                  for (var i = 0; i < visible.length; i++)
                     LifecycleCard(
-                      stage: stages[i],
+                      stage: visible[i],
                       index: i,
                       wide: wide,
                     ),
