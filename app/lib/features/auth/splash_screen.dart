@@ -17,14 +17,14 @@ class SplashScreen extends StatefulWidget {
   State<_SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<_SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
     Future<void>.delayed(const Duration(milliseconds: 1400), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const _LoginScreen()),
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
       }
     });

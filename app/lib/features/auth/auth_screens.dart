@@ -118,8 +118,8 @@ class _AuthField extends StatelessWidget {
   }
 }
 
-class _LoginScreen extends StatelessWidget {
-  const _LoginScreen();
+class LoginScreen extends StatelessWidget {
+  const LoginScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +146,7 @@ class _LoginScreen extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton(
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const _ForgotPasswordScreen()),
+                MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
               ),
               style: TextButton.styleFrom(padding: EdgeInsets.zero),
               child: const Text('Forgot password?', style: TextStyle(fontSize: 10)),
@@ -156,7 +156,7 @@ class _LoginScreen extends StatelessWidget {
           Center(
             child: TextButton(
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const _SignUpScreen()),
+                MaterialPageRoute(builder: (_) => const SignUpScreen()),
               ),
               child: const Text.rich(
                 TextSpan(
@@ -179,8 +179,8 @@ class _LoginScreen extends StatelessWidget {
   }
 }
 
-class _ForgotPasswordScreen extends StatelessWidget {
-  const _ForgotPasswordScreen();
+class ForgotPasswordScreen extends StatelessWidget {
+  const ForgotPasswordScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -201,8 +201,8 @@ class _ForgotPasswordScreen extends StatelessWidget {
   }
 }
 
-class _SignUpScreen extends StatelessWidget {
-  const _SignUpScreen();
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen();
 
   @override
   Widget build(BuildContext context) {
