@@ -435,7 +435,7 @@ class MenuTile extends StatelessWidget {
       leading: customIcon ??
           Icon(
             icon,
-            size: 19,
+            size: 25,
             color: danger ? Colors.redAccent : shMuted,
           ),
       title: Text(
