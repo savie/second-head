@@ -160,7 +160,7 @@ class LifecycleMap extends StatelessWidget {
       const LifecycleStage(
         'Clone',
         'Buat salinan Second Head untuk tujuan tertentu atau skenario spesifik.',
-        Icons.copy_all_rounded,
+        Icons.copy_all_outlined,
         Color(0xFF9A45FF),
       ),
       const LifecycleStage(
@@ -172,7 +172,7 @@ class LifecycleMap extends StatelessWidget {
       const LifecycleStage(
         'Inheritance',
         'Teruskan memori, pengetahuan, dan nilai kepada generasi berikutnya.',
-        Icons.account_tree_rounded,
+        Icons.account_tree_outlined,
         Color(0xFF22D3EE),
       ),
       const LifecycleStage(
