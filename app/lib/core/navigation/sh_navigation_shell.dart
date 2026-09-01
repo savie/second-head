@@ -236,7 +236,7 @@ class _ShInternalSearchSheetState<T>
                               overflow: TextOverflow.ellipsis,
                             ),
                       trailing: const Icon(Icons.chevron_right_outlined),
-                      onTap: () => Navigator.pop(sheet, result.value),
+                      onTap: () => Navigator.pop(context, result.value),
                     );
                   },
                 ),
