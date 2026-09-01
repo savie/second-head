@@ -563,36 +563,68 @@ class _TopBar extends StatelessWidget {
 class _ConversationView extends StatelessWidget {
   const _ConversationView();
 
+  void _rename(BuildContext context) {
+    final controller = TextEditingController(text: _conversationTitle.value);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _surface,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (sheet) => Padding(
+        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 12),
+          TextField(controller: controller, autofocus: true),
+          const SizedBox(height: 14),
+          Row(children: [
+            Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
+            const SizedBox(width: 10),
+            Expanded(child: FilledButton(onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                _conversationTitle.value = name;
+                final list = [..._recentConversations.value];
+                final i = list.indexWhere((x) => x.title == _conversationTitle.value);
+                if (i >= 0) list[i] = _ConversationEntry(name, list[i].preview);
+                _recentConversations.value = list;
+              }
+              Navigator.pop(sheet);
+            }, child: const Text('Save'))),
+          ]),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _TopBar(
-          title: 'SECOND HEAD',
+    return Column(children: [
+      ValueListenableBuilder<String>(
+        valueListenable: _conversationTitle,
+        builder: (context, title, _) => _TopBar(
+          title: title,
           actions: [
             IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 19)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.edit_square, size: 19)),
+            IconButton(onPressed: () => _rename(context), icon: const Icon(Icons.edit_square, size: 19)),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: _CompanionCard(),
-        ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-            children: const [
-              _DateLabel('Today'),
-              _Message(text: 'Hi, Savie! 👋\nHow can I help you today?', time: '09:41', assistant: true),
-              _Message(text: 'Help me summarize my main plan for today and top priorities.', time: '09:41', assistant: false),
-              _Message(text: 'Sure! Here is your summary and top priorities.', time: '09:42', assistant: true),
-              _SummaryCard(),
-            ],
-          ),
-        ),
-        const _Composer(),
-      ],
-    );
+      ),
+      const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: _CompanionCard()),
+      Expanded(child: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+        children: const [
+          _DateLabel('Today'),
+          _Message(text: 'Hi, Savie! 👋\nHow can I help you today?', time: '09:41', assistant: true),
+          _Message(text: 'Help me summarize my main plan for today and top priorities.', time: '09:41', assistant: false),
+          _Message(text: 'Sure! Here is your summary and top priorities.', time: '09:42', assistant: true),
+          _SummaryCard(),
+        ],
+      )),
+      const _Composer(),
+    ]);
   }
 }
 
@@ -918,48 +950,172 @@ class _AttachAction extends StatelessWidget {
   }
 }
 
+class _ConversationEntry {
+  const _ConversationEntry(this.title, this.preview);
+  final String title;
+  final String preview;
+}
+
+final ValueNotifier<List<_ConversationEntry>> _recentConversations =
+    ValueNotifier<List<_ConversationEntry>>([
+  const _ConversationEntry('Today Priorities', 'Summary and top priorities'),
+  const _ConversationEntry('SH Roadmap', 'Project planning and milestones'),
+  const _ConversationEntry('Ideas & Notes', 'Personalized ideas and notes'),
+]);
+
+final ValueNotifier<String> _conversationTitle =
+    ValueNotifier<String>('Today Priorities');
+
 class _SideMenu extends StatelessWidget {
   const _SideMenu();
+
+  void _openPage(BuildContext context, int index) {
+    Navigator.of(context).pop();
+    final home = context.findAncestorStateOfType<_HomeScreenState>();
+    home?._selectPage(index);
+  }
+
+  void _rename(BuildContext context, int index) {
+    final item = _recentConversations.value[index];
+    final controller = TextEditingController(text: item.title);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _surface,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (sheet) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Rename conversation',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 12),
+            TextField(controller: controller, autofocus: true),
+            const SizedBox(height: 14),
+            Row(children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(sheet),
+                  child: const Text('Cancel'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () {
+                    final name = controller.text.trim();
+                    if (name.isNotEmpty) {
+                      final list = [..._recentConversations.value];
+                      list[index] = _ConversationEntry(name, item.preview);
+                      _recentConversations.value = list;
+                      if (_conversationTitle.value == item.title) {
+                        _conversationTitle.value = name;
+                      }
+                    }
+                    Navigator.pop(sheet);
+                  },
+                  child: const Text('Save'),
+                ),
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: _bg,
-      width: 285,
+      width: 292,
       child: SafeArea(
         child: Column(
           children: [
             const Padding(
               padding: EdgeInsets.all(18),
-              child: Row(
-                children: [
-                  _BrandMark(),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Savie', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                        Text('savie@secondhead.app', style: TextStyle(fontSize: 9, color: _muted)),
-                      ],
-                    ),
+              child: Row(children: [
+                _BrandMark(),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Savie', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text('savie@secondhead.app', style: TextStyle(fontSize: 9, color: _muted)),
+                    ],
                   ),
-                ],
+                ),
+              ]),
+            ),
+            const Divider(color: _border),
+            _MenuTile(
+              icon: Icons.chat_bubble_outline,
+              label: 'Conversation',
+              onTap: () => _openPage(context, 0),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: ValueListenableBuilder<List<_ConversationEntry>>(
+                valueListenable: _recentConversations,
+                builder: (context, conversations, _) => Column(
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => _openPage(context, 0),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        child: Row(children: [
+                          Icon(Icons.add_rounded, size: 18, color: _cyan),
+                          SizedBox(width: 10),
+                          Text('New Conversation',
+                              style: TextStyle(fontSize: 11, color: _cyan)),
+                        ]),
+                      ),
+                    ),
+                    for (var i = 0; i < conversations.length; i++)
+                      GestureDetector(
+                        onLongPress: () => _rename(context, i),
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.only(left: 30, right: 4),
+                          leading: const Icon(Icons.chat_bubble_outline, size: 14, color: _muted),
+                          title: Text(conversations[i].title,
+                              maxLines: 1, overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 10)),
+                          subtitle: Text(conversations[i].preview,
+                              maxLines: 1, overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 8, color: _muted)),
+                          onTap: () {
+                            _conversationTitle.value = conversations[i].title;
+                            _openPage(context, 0);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             const Divider(color: _border),
-            _MenuTile(icon: Icons.add_comment_outlined, label: 'New Conversation'),
-            _MenuTile(icon: Icons.hexagon_outlined, label: 'Journey'),
-            _MenuTile(icon: Icons.event_note_outlined, label: 'Lifecycle'),
-            _MenuTile(icon: Icons.hub_outlined, label: 'Integrations'),
-            _MenuTile(icon: Icons.person_outline, label: 'Profile'),
-            _MenuTile(icon: Icons.settings_outlined, label: 'Settings'),
-            _MenuTile(icon: Icons.help_outline, label: 'Help & Support'),
-            _MenuTile(icon: Icons.info_outline, label: 'About Second Head'),
+            _MenuTile(icon: Icons.hexagon_outlined, label: 'Journey', onTap: () => _openPage(context, 1)),
+            _MenuTile(icon: Icons.event_note_outlined, label: 'Lifecycle', onTap: () => _openPage(context, 2)),
+            _MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(context, 3)),
+            _MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () => Navigator.pop(context)),
+            _MenuTile(icon: Icons.info_outline, label: 'About', onTap: () => Navigator.pop(context)),
             const Spacer(),
             const Divider(color: _border),
-            _MenuTile(icon: Icons.logout, label: 'Log Out', danger: true),
-            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 2, 10, 10),
+              child: Row(children: [
+                Expanded(child: _MenuTile(icon: Icons.settings_outlined, label: 'Settings', onTap: () => Navigator.pop(context))),
+                Expanded(child: _MenuTile(icon: Icons.logout_rounded, label: 'Log Out', onTap: () => Navigator.popUntil(context, (route) => route.isFirst))),
+              ]),
+            ),
           ],
         ),
       ),
