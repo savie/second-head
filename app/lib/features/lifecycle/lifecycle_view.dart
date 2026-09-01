@@ -13,34 +13,30 @@ class LifecycleViewState extends State<LifecycleView> {
   String query = '';
 
   Future<void> _search(BuildContext context) async {
-    final controller = TextEditingController(text: query);
-    final result = await showModalBottomSheet<String>(
+    const stages = [
+      LifecycleStage('Clone', 'Buat salinan Second Head untuk tujuan tertentu atau skenario spesifik.', Icons.copy_all_outlined, Color(0xFF9A45FF)),
+      LifecycleStage('Recovery', 'Pulihkan data, memori, atau keadaan Second Head dari cadangan.', Icons.shield_moon_outlined, Color(0xFF3B82F6)),
+      LifecycleStage('Inheritance', 'Teruskan memori, pengetahuan, dan nilai kepada generasi berikutnya.', Icons.account_tree_outlined, Color(0xFF22D3EE)),
+      LifecycleStage('Succession', 'Siapkan dan kelola transisi kepemilikan atau pengelolaan Second Head.', Icons.people_outline, Color(0xFF6366F1)),
+      LifecycleStage('Legacy', 'Kelola warisan digital yang bermakna dan berdampak jangka panjang.', Icons.menu_book_outlined, Color(0xFFF59E0B)),
+      LifecycleStage('End of Life', 'Atur penutupan, penghapusan, atau penyerahan Second Head secara aman dan terhormat.', Icons.favorite_border_outlined, Color(0xFFEC4899)),
+    ];
+    final result = await showShInternalSearch<LifecycleStage>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (sheet) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.of(sheet).viewInsets.bottom + 18,
-        ),
-        child: TextField(
-          controller: controller,
-          autofocus: true,
-          textInputAction: TextInputAction.search,
-          onSubmitted: (_) => Navigator.pop(sheet, controller.text),
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.search),
-            hintText: 'Search lifecycle',
-          ),
-        ),
-      ),
+      hintText: 'Search Lifecycle',
+      search: (query) => [
+        for (final stage in stages)
+          if (query.isEmpty ||
+              '${stage.title} ${stage.subtitle}'.toLowerCase().contains(query))
+            ShSearchResult<LifecycleStage>(
+              value: stage,
+              title: stage.title,
+              subtitle: stage.subtitle,
+            ),
+      ],
     );
-    controller.dispose();
     if (!mounted || result == null) return;
-    setState(() => query = result.trim());
+    _showDetail(context, result);
   }
 
   void _showDetail(BuildContext context, LifecycleStage stage) {
@@ -124,7 +120,7 @@ class LifecycleViewState extends State<LifecycleView> {
                 IconButton(
                   tooltip: 'Search',
                   onPressed: () => _search(context),
-                  icon: const Icon(Icons.search, size: 30),
+                  icon: const Icon(Icons.search_outlined, size: 23),
                 ),
               ],
             ),
