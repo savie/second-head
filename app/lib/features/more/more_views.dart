@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../conversation/conversation_view.dart';
-import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
 import '../../core/widgets/sh_brand_mark.dart';
 
@@ -261,9 +260,10 @@ class AboutRow extends StatelessWidget {
 }
 
 class MenuTile extends StatelessWidget {
-  const MenuTile({required this.icon, required this.label, this.danger = false});
+  const MenuTile({required this.icon, required this.label, this.onTap, this.danger = false});
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
   final bool danger;
 
   @override
@@ -272,7 +272,7 @@ class MenuTile extends StatelessWidget {
       dense: true,
       leading: Icon(icon, size: 19, color: danger ? Colors.redAccent : shMuted),
       title: Text(label, style: TextStyle(fontSize: 12, color: danger ? Colors.redAccent : Colors.white)),
-      onTap: () => Navigator.of(context).pop(),
+      onTap: onTap ?? () => Navigator.of(context).pop(),
     );
   }
 }
