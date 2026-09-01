@@ -453,7 +453,7 @@ class MenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 46,
+      height: 52,
       child: ListTile(
         dense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 18),
@@ -461,12 +461,13 @@ class MenuTile extends StatelessWidget {
         horizontalTitleGap: 12,
         leading: IconTheme.merge(
           data: const IconThemeData(size: 28, color: Colors.white),
-          child: customIcon ??
-              Icon(
+          child: customIcon == null
+              ? Icon(
                 icon,
                 size: 28,
                 color: danger ? Colors.redAccent : Colors.white,
-              ),
+              )
+              : Transform.scale(scale: 1.12, child: customIcon),
         ),
         title: Text(
           label,
