@@ -629,9 +629,16 @@ class JourneyDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ShTopBar(
+    // Detail screens own horizontal gestures so the global tab-swipe
+    // recognizer cannot hijack Android back / in-page horizontal gestures.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragStart: (_) {},
+      onHorizontalDragUpdate: (_) {},
+      onHorizontalDragEnd: (_) {},
+      child: Column(
+        children: [
+          ShTopBar(
           title: item.type,
           leading: IconButton(
             tooltip: 'Back',
@@ -708,8 +715,9 @@ class JourneyDetail extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
