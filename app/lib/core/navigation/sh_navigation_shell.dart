@@ -61,13 +61,13 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
               label: 'Chat',
             ),
             NavigationDestination(
-              icon: Icon(Icons.event_repeat_outlined, size: 22),
-              selectedIcon: Icon(Icons.event_repeat_outlined, size: 22),
+              icon: ShSectionNavIcon.journey(),
+              selectedIcon: ShSectionNavIcon.journey(),
               label: 'Journey',
             ),
             NavigationDestination(
-              icon: Icon(Icons.hexagon_outlined, size: 22),
-              selectedIcon: Icon(Icons.hexagon_outlined, size: 22),
+              icon: ShSectionNavIcon.lifecycle(),
+              selectedIcon: ShSectionNavIcon.lifecycle(),
               label: 'Lifecycle',
             ),
             NavigationDestination(
@@ -77,6 +77,38 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ShSectionNavIcon extends StatelessWidget {
+  const ShSectionNavIcon._({required this.lifecycle});
+
+  factory ShSectionNavIcon.journey() => const ShSectionNavIcon._(lifecycle: false);
+  factory ShSectionNavIcon.lifecycle() => const ShSectionNavIcon._(lifecycle: true);
+
+  final bool lifecycle;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!lifecycle) {
+      return const Icon(Icons.event_repeat_outlined, size: 25);
+    }
+
+    return SizedBox(
+      width: 25,
+      height: 25,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          const Icon(Icons.hexagon_outlined, size: 25),
+          Icon(
+            Icons.shield_outlined,
+            size: 11,
+            color: IconTheme.of(context).color,
+          ),
+        ],
       ),
     );
   }
