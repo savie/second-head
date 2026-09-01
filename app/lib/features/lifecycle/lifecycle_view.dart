@@ -224,11 +224,6 @@ class _WideLifecycle extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _LifecycleBackdropPainter(),
-            ),
-          ),
           for (var i = 0; i < 6; i++)
             if (ordered[i] != LifecycleStage.empty)
               Positioned(
@@ -246,11 +241,6 @@ class _WideLifecycle extends StatelessWidget {
                   onTap: () => onStageTap(ordered[i]),
                 ),
               ),
-          Positioned(
-            left: (width - 128) / 2,
-            top: 274,
-            child: const _LifecycleHub(),
-          ),
         ],
       ),
     );
@@ -278,11 +268,6 @@ class _MobileLifecycle extends StatelessWidget {
               onTap: () => onStageTap(stages[i]),
             ),
           ),
-          if (i == 2)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: _LifecycleHub(compact: true),
-            ),
         ],
       ],
     );
@@ -397,42 +382,6 @@ class _StageIcon extends StatelessWidget {
   }
 }
 
-class _LifecycleHub extends StatelessWidget {
-  const _LifecycleHub({this.compact = false});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = compact ? 76.0 : 118.0;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: shBackground.withValues(alpha: .96),
-        border: Border.all(
-          color: shPurple.withValues(alpha: .8),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: shPurple.withValues(alpha: .18),
-            blurRadius: 28,
-            spreadRadius: 4,
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(compact ? 13 : 20),
-      child: Image.asset(
-        'assets/brand/unity.png',
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-      ),
-    );
-  }
-}
-
 class _OrganicCardClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -490,34 +439,4 @@ class _OrganicCardPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _OrganicCardPainter oldDelegate) =>
       oldDelegate.accent != accent;
-}
-
-class _LifecycleBackdropPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, 430);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = shPurple.withValues(alpha: .14);
-
-    for (var i = 0; i < 4; i++) {
-      canvas.drawCircle(center, 115.0 + (i * 20), paint);
-    }
-
-    final line = Paint()
-      ..strokeWidth = 1
-      ..shader = const LinearGradient(
-        colors: [shPurple, shElectric, shCyan, shPurple],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    canvas.drawLine(
-      Offset(size.width / 2, 50),
-      Offset(size.width / 2, size.height - 40),
-      line,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _LifecycleBackdropPainter oldDelegate) => false;
 }
