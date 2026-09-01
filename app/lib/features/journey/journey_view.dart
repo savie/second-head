@@ -513,7 +513,7 @@ class JourneyCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             const Icon(
-              Icons.chevron_right_rounded,
+              Icons.chevron_right,
               size: 25,
               color: shMuted,
             ),
