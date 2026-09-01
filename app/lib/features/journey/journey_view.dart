@@ -493,17 +493,23 @@ Future<JourneyDraft?> _showJourneyEditor(
   String initialContent = '',
   bool initialPrivate = true,
 }) {
-  return showModalBottomSheet<JourneyDraft>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: shSurface,
-    showDragHandle: true,
-    builder: (_) => JourneyEditorSheet(
-      title: title,
-      initialTitle: initialTitle,
-      initialContent: initialContent,
-      initialPrivate: initialPrivate,
+  // Editor is a real route, not an overlay bottom-sheet. This keeps its
+  // inherited-widget lifecycle isolated from the navigation shell and avoids
+  // the framework _dependents.isEmpty assertion when saving/cancelling or
+  // changing policy.
+  return Navigator.of(context).push<JourneyDraft>(
+    MaterialPageRoute<JourneyDraft>(
+      builder: (_) => Scaffold(
+        backgroundColor: shBackground,
+        body: SafeArea(
+          child: JourneyEditorSheet(
+            title: title,
+            initialTitle: initialTitle,
+            initialContent: initialContent,
+            initialPrivate: initialPrivate,
+          ),
+        ),
+      ),
     ),
   );
 }
