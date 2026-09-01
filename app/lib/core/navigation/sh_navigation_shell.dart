@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class ShNavigationShell extends StatefulWidget {
@@ -75,63 +74,6 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
       ),
     );
   }
-}
-
-class _LifecycleNavGlyph extends StatelessWidget {
-  const _LifecycleNavGlyph({this.selected = false});
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(25, 25),
-      painter: _LifecycleNavPainter(
-        color: selected
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-}
-
-class _LifecycleNavPainter extends CustomPainter {
-  _LifecycleNavPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final radius = size.shortestSide * .38;
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round;
-
-    final hex = Path();
-    for (var i = 0; i < 6; i++) {
-      final a = -math.pi / 2 + (i * math.pi / 3);
-      final p = Offset(
-        center.dx + radius * 1.05 * math.cos(a),
-        center.dy + radius * 1.05 * math.sin(a),
-      );
-      if (i == 0) {
-        hex.moveTo(p.dx, p.dy);
-      } else {
-        hex.lineTo(p.dx, p.dy);
-      }
-    }
-    hex.close();
-    canvas.drawPath(hex, paint);
-    canvas.drawCircle(center, radius * .32, paint);
-    canvas.drawCircle(center, radius * .12, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _LifecycleNavPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 class ShTopBar extends StatelessWidget {
