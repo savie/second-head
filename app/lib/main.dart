@@ -935,115 +935,20 @@ class _MenuTile extends StatelessWidget {
   }
 }
 
-class _JourneyView extends StatelessWidget {
-  const _JourneyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const _TopBar(
-          title: 'Journey',
-          actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 19)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.refresh_rounded, size: 20)),
-          ],
-        ),
-        const _FilterChips(),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-            children: const [
-              _JourneyCard(title: 'Project SH Roadmap', subtitle: 'Documented roadmap and key milestones', date: '2 days ago'),
-              _JourneyCard(title: 'Client Meeting Notes', subtitle: 'Important notes from the meeting about feature priorities.', date: 'Yesterday'),
-              _JourneyCard(title: 'Ideas – AI Personalization', subtitle: 'Ideas about personalization based on user behavior.', date: 'May 29'),
-              _JourneyCard(title: 'Reference – Runtime Contract', subtitle: 'Notes about runtime contract and future calling.', date: 'May 25'),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+class _JourneyView extends StatefulWidget { const _JourneyView(); @override State<_JourneyView> createState()=>_JourneyViewState(); }
+class _JourneyViewState extends State<_JourneyView> {
+ String filter='All'; int? selected;
+ final items=const [_JourneyItem('Project SH Roadmap','Documented roadmap and key milestones','2 days ago','Knowledge','The documented roadmap and key milestones for Second Head.',true),_JourneyItem('Client Meeting Notes','Important notes from the meeting about feature priorities.','Yesterday','Experience','Important notes captured from the client meeting and its feature priorities.',false),_JourneyItem('Ideas – AI Personalization','Ideas about personalization based on user behavior.','May 29','Memory','Ideas and retained context about personalization based on user behavior.',true),_JourneyItem('Reference – Runtime Contract','Notes about runtime contract and future calling.','May 25','Knowledge','Reference material describing the runtime contract and future calling.',false)];
+ @override Widget build(BuildContext context){if(selected!=null)return _JourneyDetail(item:items[selected!],onBack:()=>setState(()=>selected=null));final visible=[for(var i=0;i<items.length;i++)if(filter=='All'||items[i].type==filter)i];return Stack(children:[Column(children:[const _TopBar(title:'Journey',actions:[IconButton(onPressed:(){},icon:Icon(Icons.search,size:19)),IconButton(onPressed:(){},icon:Icon(Icons.refresh_rounded,size:20))]),_JourneyFilters(value:filter,onChanged:(v)=>setState(()=>filter=v)),Expanded(child:ListView.builder(padding:const EdgeInsets.fromLTRB(12,8,12,88),itemCount:visible.length,itemBuilder:(_,i)=>_JourneyCard(item:items[visible[i]],onTap:()=>setState(()=>selected=visible[i]))))]),Positioned(right:18,bottom:18,child:FloatingActionButton(heroTag:'journey-add',onPressed:()=>_create(context),child:const Icon(Icons.add)))]);}
+ void _create(BuildContext context)=>showModalBottomSheet<void>(context:context,backgroundColor:_surface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(24))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[const Padding(padding:EdgeInsets.all(16),child:Align(alignment:Alignment.centerLeft,child:Text('Create new',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)))),for(final t in const ['Memory','Knowledge','Experience'])ListTile(leading:const Icon(Icons.add_circle_outline),title:Text(t),onTap:(){Navigator.pop(context);_edit(context,t,'');}),const SizedBox(height:8)])));
+ void _edit(BuildContext context,String type,String initial){final ctl=TextEditingController(text:initial);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:_surface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(24))),builder:(sc)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sc).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[Text('Edit '+type,style:const TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:ctl,maxLines:7,autofocus:true,decoration:const InputDecoration(hintText:'Write content...')),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sc),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:()=>Navigator.pop(sc),child:const Text('Save')))])])));}
 }
-
-class _FilterChips extends StatelessWidget {
-  const _FilterChips();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: [
-          _Chip(label: 'All', selected: true),
-          _Chip(label: 'Memory'),
-          _Chip(label: 'Knowledge'),
-          _Chip(label: 'Experience'),
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.label, this.selected = false});
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 7),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: selected ? _purple.withOpacity(.15) : _surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: selected ? _purple : _border),
-      ),
-      child: Text(label, style: TextStyle(fontSize: 9, color: selected ? Colors.white : _muted)),
-    );
-  }
-}
-
-class _JourneyCard extends StatelessWidget {
-  const _JourneyCard({required this.title, required this.subtitle, required this.date});
-  final String title;
-  final String subtitle;
-  final String date;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(11),
-      decoration: BoxDecoration(
-        color: _surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _border),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(subtitle, style: const TextStyle(fontSize: 9, color: _muted, height: 1.35)),
-                const SizedBox(height: 5),
-                Text(date, style: const TextStyle(fontSize: 8, color: _muted)),
-              ],
-            ),
-          ),
-          const Icon(Icons.star, size: 17, color: _cyan),
-        ],
-      ),
-    );
-  }
-}
-
+class _JourneyFilters extends StatelessWidget { const _JourneyFilters({required this.value,required this.onChanged}); final String value; final ValueChanged<String> onChanged; @override Widget build(BuildContext context)=>SingleChildScrollView(scrollDirection:Axis.horizontal,padding:const EdgeInsets.symmetric(horizontal:12),child:Row(children:[for(final l in const ['All','Memory','Knowledge','Experience'])Padding(padding:const EdgeInsets.only(right:7),child:InkWell(borderRadius:BorderRadius.circular(20),onTap:()=>onChanged(l),child:Container(padding:const EdgeInsets.symmetric(horizontal:12,vertical:7),decoration:BoxDecoration(color:value==l?_purple.withOpacity(.16):_surface,borderRadius:BorderRadius.circular(20),border:Border.all(color:value==l?_purple:_border)),child:Text(l,style:TextStyle(fontSize:9,color:value==l?Colors.white:_muted)))))])); }
+class _JourneyItem { const _JourneyItem(this.title,this.subtitle,this.date,this.type,this.content,this.isPrivate); final String title,subtitle,date,type,content; final bool isPrivate; }
+class _JourneyCard extends StatelessWidget { const _JourneyCard({required this.item,required this.onTap}); final _JourneyItem item; final VoidCallback onTap; @override Widget build(BuildContext context)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(16),child:Container(margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(13),decoration:BoxDecoration(color:_surface,borderRadius:BorderRadius.circular(16),border:Border.all(color:_border)),child:Row(children:[Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Row(children:[Container(padding:const EdgeInsets.symmetric(horizontal:7,vertical:4),decoration:BoxDecoration(color:_purple.withOpacity(.12),borderRadius:BorderRadius.circular(8)),child:Text(item.type,style:const TextStyle(fontSize:8,color:_muted))),const SizedBox(width:7),Expanded(child:Text(item.title,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w600)))]),const SizedBox(height:5),Text(item.subtitle,style:const TextStyle(fontSize:9,color:_muted,height:1.35)),const SizedBox(height:6),Text(item.date,style:const TextStyle(fontSize:8,color:_muted))])),const Icon(Icons.chevron_right_rounded,color:_muted)]))); }
+class _JourneyDetail extends StatefulWidget { const _JourneyDetail({required this.item,required this.onBack}); final _JourneyItem item; final VoidCallback onBack; @override State<_JourneyDetail> createState()=>_JourneyDetailState(); }
+class _JourneyDetailState extends State<_JourneyDetail>{ late bool privatePolicy; @override void initState(){super.initState();privatePolicy=widget.item.isPrivate;} @override Widget build(BuildContext context)=>Column(children:[_TopBar(title:widget.item.type,leading:IconButton(onPressed:widget.onBack,icon:const Icon(Icons.arrow_back))),Expanded(child:SingleChildScrollView(padding:const EdgeInsets.fromLTRB(16,8,16,20),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(widget.item.title,style:const TextStyle(fontSize:19,fontWeight:FontWeight.w700)),const SizedBox(height:14),Container(width:double.infinity,padding:const EdgeInsets.all(15),decoration:BoxDecoration(color:_surface,borderRadius:BorderRadius.circular(16),border:Border.all(color:_border)),child:Text(widget.item.content,style:const TextStyle(fontSize:12,height:1.5))),const SizedBox(height:20),const Text('Policy',style:TextStyle(fontSize:12,fontWeight:FontWeight.w700)),const SizedBox(height:8),Row(children:[Expanded(child:_PolicyOption(label:'Private',icon:Icons.lock_outline,selected:privatePolicy,onTap:()=>setState(()=>privatePolicy=true))),const SizedBox(width:10),Expanded(child:_PolicyOption(label:'Public',icon:Icons.public,selected:!privatePolicy,onTap:()=>setState(()=>privatePolicy=false)))])])),Padding(padding:const EdgeInsets.fromLTRB(16,8,16,14),child:Align(alignment:Alignment.centerRight,child:FloatingActionButton.small(heroTag:'journey-edit',onPressed:_edit,child:const Icon(Icons.edit_outlined))))]); void _edit(){final ctl=TextEditingController(text:widget.item.content);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:_surface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(24))),builder:(sc)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sc).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[Text('Edit '+widget.item.type,style:const TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:ctl,maxLines:7),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sc),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:()=>Navigator.pop(sc),child:const Text('Save')))])])));} }
+class _PolicyOption extends StatelessWidget { const _PolicyOption({required this.label,required this.icon,required this.selected,required this.onTap}); final String label; final IconData icon; final bool selected; final VoidCallback onTap; @override Widget build(BuildContext context)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(14),child:Container(padding:const EdgeInsets.symmetric(vertical:13,horizontal:12),decoration:BoxDecoration(color:selected?_purple.withOpacity(.13):_surface,borderRadius:BorderRadius.circular(14),border:Border.all(color:selected?_purple:_border)),child:Row(children:[Icon(icon,size:18),const SizedBox(width:8),Text(label,style:const TextStyle(fontSize:10))]))); }
 class _LifecycleView extends StatelessWidget {
   const _LifecycleView();
 
