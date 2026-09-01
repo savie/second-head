@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
 
 class LifecycleView extends StatefulWidget {
