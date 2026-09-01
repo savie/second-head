@@ -164,8 +164,8 @@ class _SideMenuState extends State<SideMenu> {
               onTap: () => setState(() => _conversationExpanded = true),
             ),
             const Divider(color: shBorder),
-            MenuTile(icon: Icons.hexagon_outlined, label: 'Journey', onTap: () => _openPage(1)),
-            MenuTile(icon: Icons.event_note_outlined, label: 'Lifecycle', onTap: () => _openPage(2)),
+            MenuTile(customIcon: const ShSectionNavIcon.journey(), label: 'Journey', onTap: () => _openPage(1)),
+            MenuTile(customIcon: const ShSectionNavIcon.lifecycle(), label: 'Lifecycle', onTap: () => _openPage(2)),
             MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(3)),
             MenuTile(
               icon: Icons.help_outline,
@@ -413,8 +413,9 @@ class AboutRow extends StatelessWidget {
 }
 
 class MenuTile extends StatelessWidget {
-  const MenuTile({required this.icon, required this.label, this.onTap, this.danger = false});
-  final IconData icon;
+  const MenuTile({this.icon, this.customIcon, required this.label, this.onTap, this.danger = false});
+  final IconData? icon;
+  final Widget? customIcon;
   final String label;
   final VoidCallback? onTap;
   final bool danger;
@@ -423,7 +424,7 @@ class MenuTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
-      leading: Icon(icon, size: 19, color: danger ? Colors.redAccent : shMuted),
+      leading: customIcon ?? Icon(icon, size: 19, color: danger ? Colors.redAccent : shMuted),
       title: Text(label, style: TextStyle(fontSize: 12, color: danger ? Colors.redAccent : Colors.white)),
       onTap: onTap ?? () => Navigator.of(context).pop(),
     );
