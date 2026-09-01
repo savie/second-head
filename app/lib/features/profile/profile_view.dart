@@ -72,13 +72,49 @@ class ProfileViewState extends State<ProfileView> {
     );
   }
 
+  Future<void> _search(BuildContext context) async {
+    const settings = [
+      _SettingItem(Icons.person_outline, 'Account', 'Manage your personal information'),
+      _SettingItem(Icons.palette_outlined, 'Appearance', 'Choose theme and language'),
+      _SettingItem(Icons.notifications_none, 'Notifications', 'Manage your notification preferences'),
+      _SettingItem(Icons.lock_outline, 'Security', 'Password and security settings'),
+      _SettingItem(Icons.hub_outlined, 'Integrations', 'Manage connected services'),
+      _SettingItem(Icons.shield_outlined, 'Data & Privacy', 'Manage your data and privacy'),
+    ];
+    final result = await showShInternalSearch<_SettingItem>(
+      context: context,
+      hintText: 'Search Profile',
+      search: (query) => [
+        for (final item in settings)
+          if (query.isEmpty ||
+              '${item.title} ${item.subtitle}'.toLowerCase().contains(query))
+            ShSearchResult<_SettingItem>(
+              value: item,
+              title: item.title,
+              subtitle: item.subtitle,
+            ),
+      ],
+    );
+    if (!mounted || result == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (_) => ListTile(
+        leading: Icon(result.icon),
+        title: Text(result.title),
+        subtitle: Text(result.subtitle),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         ShTopBar(
           title: 'Profile',
-          actions: const [],
+          onSearch: () => _search(context),
         ),
         Expanded(
           child: ListView(
