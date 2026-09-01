@@ -745,7 +745,7 @@ class JourneyDetail extends StatelessWidget {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -870,27 +870,43 @@ class PolicyOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
-        decoration: BoxDecoration(
-          color: selected ? shPurple.withValues(alpha: .13) : shSurface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected ? shPurple : shBorder,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 10),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
+          decoration: BoxDecoration(
+            color: selected ? shPurple.withValues(alpha: .13) : shSurface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected ? shPurple : shBorder,
+              width: selected ? 1.4 : 1.0,
             ),
-          ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: Colors.white),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (selected)
+                const Icon(
+                  Icons.check_rounded,
+                  size: 18,
+                ),
+            ],
+          ),
         ),
       ),
     );
