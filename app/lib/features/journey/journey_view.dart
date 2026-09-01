@@ -734,7 +734,10 @@ class JourneyDetail extends StatelessWidget {
                         label: 'Private',
                         icon: Icons.lock_outline,
                         selected: item.isPrivate,
-                        onTap: null,
+                        onTap: () {
+                          item.isPrivate = true;
+                          onChanged();
+                        },
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -743,7 +746,10 @@ class JourneyDetail extends StatelessWidget {
                         label: 'Public',
                         icon: Icons.public,
                         selected: !item.isPrivate,
-                        onTap: null,
+                        onTap: () {
+                          item.isPrivate = false;
+                          onChanged();
+                        },
                       ),
                     ),
                   ],
