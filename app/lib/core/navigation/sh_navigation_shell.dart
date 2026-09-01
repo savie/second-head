@@ -35,20 +35,16 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 180),
           child: GestureDetector(
-          onHorizontalDragEnd: (details) {
-            final velocity = details.primaryVelocity ?? 0;
-            if (velocity < -250 && index < widget.pages.length - 1) {
-              _selectPage(index + 1);
-            } else if (velocity > 250 && index > 0) {
-              _selectPage(index - 1);
-            }
-          },
-          child: widget.pages[index],
+            key: ValueKey(index),
             onHorizontalDragEnd: (details) {
               final velocity = details.primaryVelocity ?? 0;
-              if (velocity < -250 && index < widget.pages.length - 1) _selectPage(index + 1);
-              if (velocity > 250 && index > 0) _selectPage(index - 1);
+              if (velocity < -250 && index < widget.pages.length - 1) {
+                _selectPage(index + 1);
+              } else if (velocity > 250 && index > 0) {
+                _selectPage(index - 1);
+              }
             },
+            child: widget.pages[index],
           ),
         ),
       ),
