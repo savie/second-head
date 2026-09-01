@@ -7,6 +7,8 @@ import '../../core/theme/sh_theme.dart';
 final ValueNotifier<String> conversationTitle =
     ValueNotifier<String>('Today Priorities');
 
+final ValueNotifier<Uint8List?> _profilePhoto = ValueNotifier<Uint8List?>(null);
+
 class ConversationView extends StatefulWidget {
   const ConversationView({super.key});
 
