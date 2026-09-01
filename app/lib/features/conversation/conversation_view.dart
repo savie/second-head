@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/sh_theme.dart';
 
@@ -26,6 +28,9 @@ class ConversationViewState extends State<ConversationView> {
  final TextEditingController _composerController = TextEditingController();
  final ImagePicker _picker = ImagePicker();
  final TextEditingController _searchController=TextEditingController();
+ void _send(){final t=_composerController.text.trim();if(t.isEmpty)return;setState((){_messages.add(ConversationMessage(t,false,'Now'));_composerController.clear();});}
+ Future<void> _pick(ImageSource source) async {Navigator.pop(context);final f=await _picker.pickImage(source:source,imageQuality:88);if(f==null)return;final b=await f.readAsBytes();setState(()=>_messages.add(ConversationMessage('',false,'Now',image:b)));}
+ void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_rounded,label:'File',onTap:(){Navigator.pop(context);ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('File picker integration pending'),behavior:SnackBarBehavior.floating));})])));}
  void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ActionTile(Icons.copy_outlined,'Copy',()=>Navigator.pop(context)),ActionTile(Icons.clear_all_rounded,'Clear',()=>Navigator.pop(context)),ActionTile(Icons.delete_outline,'Delete',()=>Navigator.pop(context)),ActionTile(Icons.share_outlined,'Share',()=>Navigator.pop(context)),const SizedBox(height:8)])));
  void _copyText(String text){ if(text.trim().isEmpty)return; Clipboard.setData(ClipboardData(text:text)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Copied'),behavior:SnackBarBehavior.floating)); }
  void _messageActions(int index,{required bool assistant}){final actions=assistant?const ['Copy','Regenerate','Delete']:const ['Copy','Edit','Delete'];showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[for(final a in actions)ActionTile(a=='Copy'?Icons.copy_outlined:a=='Edit'?Icons.edit_outlined:a=='Regenerate'?Icons.refresh_rounded:Icons.delete_outline,a,()=>Navigator.pop(context)),const SizedBox(height:8)])));}
@@ -147,7 +152,7 @@ class Message extends StatelessWidget {
                   color: action == 'Delete' ? Colors.redAccent : Colors.white70,
                 ),
                 title: Text(action),
-                onTap: onTap,
+                onTap: () {},
               ),
             const SizedBox(height: 8),
           ],
