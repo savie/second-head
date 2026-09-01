@@ -182,7 +182,7 @@ class _ProfileHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 176,
+      height: 184,
       decoration: BoxDecoration(
         color: shSurface,
         borderRadius: BorderRadius.circular(22),
@@ -212,13 +212,13 @@ class _ProfileHero extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 31,
+            top: 20,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
-                width: 112,
-                height: 112,
+                width: 104,
+                height: 104,
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -257,7 +257,7 @@ class _ProfileHero extends StatelessWidget {
           Positioned(
             left: 16,
             right: 16,
-            bottom: 12,
+            bottom: 10,
 
             child: Column(
               children: [
@@ -395,15 +395,15 @@ class _SettingItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 76,
+      height: 68,
       child: InkWell(
         onTap: () {},
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
           child: Row(
             children: [
-              Icon(icon, size: 27, color: Colors.white70),
-              const SizedBox(width: 20),
+              Icon(icon, size: 25, color: Colors.white70),
+              const SizedBox(width: 18),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
