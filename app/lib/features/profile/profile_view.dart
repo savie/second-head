@@ -3,10 +3,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
-import '../../core/navigation/sh_navigation_shell.dart';
 
 class ProfileView extends StatefulWidget {
-  const ProfileView();
+  const ProfileView({super.key});
 
   @override
   State<ProfileView> createState() => ProfileViewState();
@@ -53,10 +52,12 @@ class ProfileViewState extends State<ProfileView> {
               _ProfilePhotoAction(
                 icon: Icons.delete_outline,
                 label: 'Remove',
-                onTap: () {
-                  Navigator.pop(context);
-                  _profilePhoto.value = null;
-                },
+                onTap: _profilePhoto.value == null
+                    ? null
+                    : () {
+                        Navigator.pop(context);
+                        _profilePhoto.value = null;
+                      },
               ),
             ],
           ),
@@ -71,9 +72,7 @@ class ProfileViewState extends State<ProfileView> {
       children: [
         ShTopBar(
           title: 'Profile',
-          actions: [
-            
-          ],
+          actions: [] ,
         ),
         Expanded(
           child: ListView(
@@ -162,7 +161,7 @@ class _ProfilePhotoAction extends StatelessWidget {
   const _ProfilePhotoAction({required this.icon, required this.label, required this.onTap});
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +182,7 @@ class _ProfilePhotoAction extends StatelessWidget {
               ),
               child: Icon(icon),
             ),
+          ),
             const SizedBox(height: 7),
             Text(label, style: const TextStyle(fontSize: 10)),
           ],
