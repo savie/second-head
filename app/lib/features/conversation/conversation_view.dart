@@ -287,97 +287,47 @@ class SummaryCard extends StatelessWidget {
 }
 
 class Composer extends StatelessWidget {
-  const Composer({required this.controller,required this.onSend,required this.onAttach});
+  const Composer({super.key, required this.controller, required this.onSend, required this.onAttach});
+  final TextEditingController controller;
+  final VoidCallback onSend;
+  final VoidCallback onAttach;
 
   @override
-  final TextEditingController controller; final VoidCallback onSend; final VoidCallback onAttach;
-}
-  void _showAttachments() {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 4, 18, 22),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              AttachAction(icon: Icons.camera_alt_outlined, label: 'Camera'),
-              AttachAction(icon: Icons.photo_library_outlined, label: 'Photos'),
-              AttachAction(icon: Icons.attach_file_rounded, label: 'File'),
-            ],
-          ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(12, 0, 12, 9),
+    child: Row(children: [
+      IconButton(onPressed: onAttach, icon: const Icon(Icons.add_circle_outline, size: 22)),
+      Expanded(child: SizedBox(height: 40, child: TextField(
+        controller: controller,
+        textInputAction: TextInputAction.send,
+        onSubmitted: (_) => onSend(),
+        decoration: InputDecoration(
+          hintText: 'Message SH...',
+          contentPadding: const EdgeInsets.symmetric(horizontal: 13),
+          suffixIcon: IconButton(onPressed: onSend, icon: const Icon(Icons.arrow_upward, size: 18)),
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 9),
-      child: Row(
-        children: [
-          IconButton(onPressed: onAttach, icon: const Icon(Icons.add_circle_outline, size: 22)),
-          Expanded(
-            child: SizedBox(
-              height: 40,
-              child: TextField(
-                controller: controller,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
-                decoration: InputDecoration(
-                  hintText: 'Message SH...',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 13),
-                  suffixIcon: IconButton(onPressed: onSend, icon: const Icon(Icons.arrow_upward, size: 18)),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+      ))),
+    ]),
+  );
 }
 
 class AttachAction extends StatelessWidget {
-  const AttachAction({required this.icon, required this.label, required this.onTap});
+  const AttachAction({super.key, required this.icon, required this.label, required this.onTap});
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: () => Navigator.of(context).pop(),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(colors: [shPurple, shElectric]),
-              ),
-              child: Icon(icon),
-            ),
-            const SizedBox(height: 7),
-            Text(label, style: const TextStyle(fontSize: 10)),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => InkWell(
+    borderRadius: BorderRadius.circular(18),
+    onTap: onTap,
+    child: Padding(padding: const EdgeInsets.all(12), child: Column(mainAxisSize: MainAxisSize.min, children: [
+      Container(width: 52, height: 52, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [shPurple, shElectric])), child: Icon(icon)),
+      const SizedBox(height: 7),
+      Text(label, style: const TextStyle(fontSize: 10)),
+    ])),
+  );
 }
-
 
 class RecentConversationEntry {
   const RecentConversationEntry(this.title, this.preview);
