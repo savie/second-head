@@ -1072,6 +1072,102 @@ class _SideMenu extends StatelessWidget {
   }
 }
 
+class _AboutView extends StatelessWidget {
+  const _AboutView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const _TopBar(title: 'About'),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(18, 26, 18, 24),
+            children: [
+              const SizedBox(height: 8),
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 82,
+                      height: 82,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [_purple, _electric],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _purple.withOpacity(.22),
+                            blurRadius: 28,
+                          ),
+                        ],
+                      ),
+                      child: const _BrandMark(),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'SECOND HEAD',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 5),
+                    const Text(
+                      'Your second head, built for continuity.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 10, color: _muted),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Container(
+                decoration: BoxDecoration(
+                  color: _surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: _border),
+                ),
+                child: const Column(
+                  children: [
+                    _AboutRow('Version', '1.0.0'),
+                    Divider(height: 1, color: _border),
+                    _AboutRow('Build', '#1'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              const Center(
+                child: Text(
+                  'Second Head',
+                  style: TextStyle(fontSize: 9, color: _muted),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AboutRow extends StatelessWidget {
+  const _AboutRow(this.label, this.value);
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    child: Row(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 11)),
+        const Spacer(),
+        Text(value, style: const TextStyle(fontSize: 10, color: _muted)),
+      ],
+    ),
+  );
+}
+
 class _MenuTile extends StatelessWidget {
   const _MenuTile({required this.icon, required this.label, this.danger = false});
   final IconData icon;
