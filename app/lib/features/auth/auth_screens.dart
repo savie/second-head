@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 import '../../core/theme/sh_theme.dart';
 import '../../core/widgets/sh_brand_mark.dart';
@@ -349,7 +348,7 @@ class _SocialButtons extends StatelessWidget {
         const SizedBox(height: 10),
         const _SocialButton(
           label: 'Apple',
-          leading: Icon(CupertinoIcons.logo_apple, size: 23),
+          leading: Icon(Icons.apple, size: 23),
         ),
       ],
     );
