@@ -12,7 +12,6 @@ class JourneyView extends StatefulWidget {
 
 class JourneyViewState extends State<JourneyView> {
   String filter = 'All';
-  int? selected;
 
   final List<JourneyItem> items = [
     JourneyItem(
@@ -51,32 +50,6 @@ class JourneyViewState extends State<JourneyView> {
 
   @override
   Widget build(BuildContext context) {
-    if (selected != null) {
-      final item = items[selected!];
-
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          if (!didPop && mounted) {
-            setState(() => selected = null);
-          }
-        },
-        child: JourneyDetail(
-          item: item,
-          onBack: () => setState(() => selected = null),
-          onChanged: () => setState(() {}),
-          onDelete: () {
-            final index = selected;
-            if (index == null || index < 0 || index >= items.length) return;
-            setState(() {
-              items.removeAt(index);
-              selected = null;
-            });
-          },
-        ),
-      );
-    }
-
     final visible = [
       for (var i = 0; i < items.length; i++)
         if (filter == 'All' || items[i].type == filter) i,
@@ -102,13 +75,13 @@ class JourneyViewState extends State<JourneyView> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 1.55,
+                  mainAxisExtent: 156,
                 ),
                 itemBuilder: (_, index) {
                   final itemIndex = visible[index];
                   return JourneyCard(
                     item: items[itemIndex],
-                    onTap: () => setState(() => selected = itemIndex),
+                    onTap: () => _openDetail(context, itemIndex),
                   );
                 },
               ),
@@ -501,129 +474,166 @@ Future<JourneyDraft?> _showJourneyEditor(
   String initialTitle = '',
   String initialContent = '',
   bool initialPrivate = true,
-}) async {
-  final titleController = TextEditingController(text: initialTitle);
-  final contentController = TextEditingController(text: initialContent);
-  var privatePolicy = initialPrivate;
-
-  final draft = await showModalBottomSheet<JourneyDraft>(
+}) {
+  return showModalBottomSheet<JourneyDraft>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: shSurface,
     showDragHandle: true,
-    builder: (sheet) => StatefulBuilder(
-      builder: (_, setLocal) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.viewInsetsOf(sheet).bottom + 18,
-        ),
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: titleController,
-                autofocus: initialTitle.isEmpty,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(hintText: 'Title'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: contentController,
-                minLines: 4,
-                maxLines: 7,
-                textInputAction: TextInputAction.newline,
-                decoration: const InputDecoration(hintText: 'Write content...'),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: PolicyOption(
-                      label: 'Private',
-                      icon: Icons.lock_outline,
-                      selected: privatePolicy,
-                      onTap: () => setLocal(() => privatePolicy = true),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: PolicyOption(
-                      label: 'Public',
-                      icon: Icons.public,
-                      selected: !privatePolicy,
-                      onTap: () => setLocal(() => privatePolicy = false),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(sheet).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        final newTitle = titleController.text.trim();
-                        final content = contentController.text.trim();
-                        if (newTitle.isEmpty || content.isEmpty) {
-                          return;
-                        }
-                        Navigator.of(sheet).pop(
-                          JourneyDraft(
-                            title: newTitle,
-                            content: content,
-                            isPrivate: privatePolicy,
-                          ),
-                        );
-                      },
-                      child: const Text('Save'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+    builder: (_) => JourneyEditorSheet(
+      title: title,
+      initialTitle: initialTitle,
+      initialContent: initialContent,
+      initialPrivate: initialPrivate,
     ),
   );
-
-  titleController.dispose();
-  contentController.dispose();
-  return draft;
 }
 
+class JourneyEditorSheet extends StatefulWidget {
+  const JourneyEditorSheet({
+    super.key,
+    required this.title,
+    this.initialTitle = '',
+    this.initialContent = '',
+    this.initialPrivate = true,
+  });
+
+  final String title;
+  final String initialTitle;
+  final String initialContent;
+  final bool initialPrivate;
+
+  @override
+  State<JourneyEditorSheet> createState() => _JourneyEditorSheetState();
+}
+
+class _JourneyEditorSheetState extends State<JourneyEditorSheet> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
+  late bool _privatePolicy;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _contentController = TextEditingController(text: widget.initialContent);
+    _privatePolicy = widget.initialPrivate;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final newTitle = _titleController.text.trim();
+    final content = _contentController.text.trim();
+    if (newTitle.isEmpty || content.isEmpty) return;
+
+    Navigator.of(context).pop(
+      JourneyDraft(
+        title: newTitle,
+        content: content,
+        isPrivate: _privatePolicy,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        18,
+        8,
+        18,
+        MediaQuery.viewInsetsOf(context).bottom + 18,
+      ),
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _titleController,
+              autofocus: widget.initialTitle.isEmpty,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(hintText: 'Title'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _contentController,
+              minLines: 4,
+              maxLines: 7,
+              textInputAction: TextInputAction.newline,
+              decoration: const InputDecoration(hintText: 'Write content...'),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: PolicyOption(
+                    label: 'Private',
+                    icon: Icons.lock_outline,
+                    selected: _privatePolicy,
+                    onTap: () => setState(() => _privatePolicy = true),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: PolicyOption(
+                    label: 'Public',
+                    icon: Icons.public,
+                    selected: !_privatePolicy,
+                    onTap: () => setState(() => _privatePolicy = false),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _save,
+                    child: const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class JourneyDetail extends StatelessWidget {
   const JourneyDetail({
     super.key,
     required this.item,
-    required this.onBack,
     required this.onChanged,
     required this.onDelete,
   });
 
   final JourneyItem item;
-  final VoidCallback onBack;
   final VoidCallback onChanged;
   final VoidCallback onDelete;
 
@@ -642,7 +652,7 @@ class JourneyDetail extends StatelessWidget {
           title: item.type,
           leading: IconButton(
             tooltip: 'Back',
-            onPressed: onBack,
+            onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.arrow_back),
           ),
           actions: [
