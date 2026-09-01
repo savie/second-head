@@ -32,11 +32,22 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
         drawer: widget.drawerBuilder(context, _selectPage),
         drawerEdgeDragWidth: 96,
         body: SafeArea(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            child: KeyedSubtree(
-              key: ValueKey(index),
-              child: widget.pages[index],
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragEnd: (details) {
+              final velocity = details.primaryVelocity ?? 0;
+              if (velocity < -450 && index < widget.pages.length - 1) {
+                _selectPage(index + 1);
+              } else if (velocity > 450 && index > 0) {
+                _selectPage(index - 1);
+              }
+            },
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              child: KeyedSubtree(
+                key: ValueKey(index),
+                child: widget.pages[index],
+              ),
             ),
           ),
         ),
