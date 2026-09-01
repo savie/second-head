@@ -217,10 +217,10 @@ class _WideLifecycle extends StatelessWidget {
 
     final width = MediaQuery.sizeOf(context).width - 20;
     final cardWidth = width * .47;
-    final cardHeight = 196.0;
+    final cardHeight = 204.0;
 
     return SizedBox(
-      height: 640,
+      height: 650,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -236,8 +236,8 @@ class _WideLifecycle extends StatelessWidget {
                 right: i.isOdd ? 8 : null,
                 top: switch (i) {
                   0 || 1 => 8,
-                  2 || 3 => 222,
-                  _ => 436,
+                  2 || 3 => 220,
+                  _ => 432,
                 },
                 width: cardWidth,
                 height: cardHeight,
@@ -247,8 +247,8 @@ class _WideLifecycle extends StatelessWidget {
                 ),
               ),
           Positioned(
-            left: (width - 150) / 2,
-            top: 276,
+            left: (width - 128) / 2,
+            top: 274,
             child: const _LifecycleHub(),
           ),
         ],
@@ -322,34 +322,37 @@ class LifecycleCard extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+              padding: const EdgeInsets.fromLTRB(22, 20, 22, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  _StageIcon(stage: stage, size: 50),
+                  const SizedBox(height: 8),
                   Text(
                     stage.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 19,
                       height: 1.1,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   Text(
                     stage.subtitle,
-                    maxLines: 4,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: shMuted,
-                      height: 1.45,
+                      height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const Spacer(),
                   Icon(
                     Icons.arrow_forward_rounded,
-                    size: 22,
+                    size: 21,
                     color: stage.accent,
                   ),
                 ],
