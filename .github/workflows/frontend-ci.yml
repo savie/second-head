@@ -25,6 +25,12 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
+      - name: Generate Android build scaffolding
+        run: |
+          cp -R . /tmp/second-head-build
+          flutter create --platforms=android --org com.secondhead --project-name app --no-pub /tmp/second-head-build
+          cp -R /tmp/second-head-build/android ./android
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -35,4 +41,4 @@ jobs:
         run: flutter test
 
       - name: Build APK
-        run: flutter build apk --debug
+        run: flutter build apk --debug --build-number=${{ github.run_number }}
