@@ -95,7 +95,7 @@ class JourneyViewState extends State<JourneyView> {
               onChanged: (value) => setState(() => filter = value),
             ),
             Expanded(
-              child: ListView.builder(
+              child: GridView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 88),
                 itemCount: visible.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
