@@ -69,6 +69,8 @@ class SideMenu extends StatelessWidget {
     );
   }
 
+  void _showInfo(BuildContext context, String title, String body) { showModalBottomSheet<void>(context: context, backgroundColor: shSurface, showDragHandle: true, builder: (_) => Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 28), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)), const SizedBox(height: 12), Text(body, style: const TextStyle(color: shMuted, height: 1.5)), const SizedBox(height: 18), SizedBox(width: double.infinity, child: FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Close')))]))); }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -145,8 +147,7 @@ class SideMenu extends StatelessWidget {
             MenuTile(icon: Icons.hexagon_outlined, label: 'Journey', onTap: () => _openPage(context, 1)),
             MenuTile(icon: Icons.event_note_outlined, label: 'Lifecycle', onTap: () => _openPage(context, 2)),
             MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(context, 3)),
-            MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () => Navigator.pop(context)),
-            MenuTile(icon: Icons.info_outline, label: 'About', onTap: () => Navigator.pop(context)),
+            MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () => _showInfo(context, 'Help & Support', 'Help, guidance, and support for SECOND HEAD.')),\n            MenuTile(icon: Icons.info_outline, label: 'About', onTap: () => _showInfo(context, 'About', 'SECOND HEAD\nVersion 1.0.0\nBuild #1')),
             const Spacer(),
             const Divider(color: shBorder),
             Padding(
@@ -164,7 +165,7 @@ class SideMenu extends StatelessWidget {
 }
 
 class AboutView extends StatelessWidget {
-  const AboutView();
+  const AboutView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +196,7 @@ class AboutView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const _BrandMark(),
+                      child: const ShBrandMark(),
                     ),
                     const SizedBox(height: 18),
                     const Text(
