@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import '../core/theme/sh_theme.dart';
+import '../../core/theme/sh_theme.dart';
 
 final ValueNotifier<String> conversationTitle =
     ValueNotifier<String>('Today Priorities');
@@ -14,7 +14,7 @@ class ConversationView extends StatefulWidget {
   State<ConversationView> createState() => ConversationViewState();
 }
 
-class ConversationViewState extends State<_ConversationView> {
+class ConversationViewState extends State<ConversationView> {
  final Set<int> selected={};
  void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ActionTile(Icons.copy_outlined,'Copy',()=>Navigator.pop(context)),ActionTile(Icons.clear_all_rounded,'Clear',()=>Navigator.pop(context)),ActionTile(Icons.delete_outline,'Delete',()=>Navigator.pop(context)),ActionTile(Icons.share_outlined,'Share',()=>Navigator.pop(context)),const SizedBox(height:8)])));
  void _messageActions(int index,{required bool assistant}){final actions=assistant?const ['Copy','Regenerate','Delete']:const ['Copy','Edit','Delete'];showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[for(final a in actions)ActionTile(a=='Copy'?Icons.copy_outlined:a=='Edit'?Icons.edit_outlined:a=='Regenerate'?Icons.refresh_rounded:Icons.delete_outline,a,()=>Navigator.pop(context)),const SizedBox(height:8)])));}
