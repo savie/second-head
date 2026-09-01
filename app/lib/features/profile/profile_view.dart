@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
@@ -68,9 +70,9 @@ class ProfileViewState extends State<ProfileView> {
     return Column(
       children: [
         ShTopBar(
-          title: 'Profile / Settings',
+          title: 'Profile',
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.open_in_new, size: 18)),
+            
           ],
         ),
         Expanded(
@@ -123,7 +125,7 @@ class ProfileViewState extends State<ProfileView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Savie', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                            Text('Your Profile', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                             SizedBox(height: 3),
                             Text('savie@secondhead.app', style: TextStyle(fontSize: 9, color: shMuted)),
                             SizedBox(height: 5),
@@ -140,7 +142,7 @@ class ProfileViewState extends State<ProfileView> {
                 ),
               ),
               const SizedBox(height: 10),
-              const _SettingsGroup(title: 'Account', items: [
+              const _SettingsGroup(title: 'Settings', items: [
                 _SettingItem(Icons.person_outline, 'Account', 'Manage your personal information'),
                 _SettingItem(Icons.palette_outlined, 'Appearance', 'Choose theme and language'),
                 _SettingItem(Icons.notifications_none, 'Notifications', 'Manage your notification preferences'),
