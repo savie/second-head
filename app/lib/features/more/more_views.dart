@@ -6,16 +6,17 @@ import '../../core/theme/sh_theme.dart';
 import '../../core/widgets/sh_brand_mark.dart';
 
 class SideMenu extends StatelessWidget {
-  const SideMenu();
+  const SideMenu({super.key, required this.onSelectPage});
+
+  final ValueChanged<int> onSelectPage;
 
   void _openPage(BuildContext context, int index) {
     Navigator.of(context).pop();
-    final home = context.findAncestorStateOfType<_HomeScreenState>();
-    home?._selectPage(index);
+    onSelectPage(index);
   }
 
   void _rename(BuildContext context, int index) {
-    final item = _recentConversations.value[index];
+    final item = recentConversations.value[index];
     final controller = TextEditingController(text: item.title);
     showModalBottomSheet<void>(
       context: context,
@@ -49,9 +50,9 @@ class SideMenu extends StatelessWidget {
                   onPressed: () {
                     final name = controller.text.trim();
                     if (name.isNotEmpty) {
-                      final list = [..._recentConversations.value];
-                      list[index] = _ConversationEntry(name, item.preview);
-                      _recentConversations.value = list;
+                      final list = [...recentConversations.value];
+                      list[index] = RecentConversationEntry(name, item.preview);
+                      recentConversations.value = list;
                       if (conversationTitle.value == item.title) {
                         conversationTitle.value = name;
                       }
@@ -100,8 +101,8 @@ class SideMenu extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: ValueListenableBuilder<List<_ConversationEntry>>(
-                valueListenable: _recentConversations,
+              child: ValueListenableBuilder<List<RecentConversationEntry>>(
+                valueListenable: recentConversations,
                 builder: (context, conversations, _) => Column(
                   children: [
                     InkWell(

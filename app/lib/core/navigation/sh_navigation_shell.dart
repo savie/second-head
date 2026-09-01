@@ -6,11 +6,11 @@ class ShNavigationShell extends StatefulWidget {
   const ShNavigationShell({
     super.key,
     required this.pages,
-    required this.drawer,
+    required this.drawerBuilder,
   });
 
   final List<Widget> pages;
-  final Widget drawer;
+  final Widget Function(BuildContext context, ValueChanged<int> onSelectPage) drawerBuilder;
 
   @override
   State<ShNavigationShell> createState() => _ShNavigationShellState();
@@ -24,7 +24,7 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: widget.drawer,
+      drawer: widget.drawerBuilder(context, _selectPage),
       body: SafeArea(
         child: GestureDetector(
           onHorizontalDragEnd: (details) {
