@@ -126,12 +126,12 @@ class LifecycleMap extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: shSurface.withOpacity(.62),
+        color: shSurface.withValues(alpha: .62),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: shBorder),
         boxShadow: [
           BoxShadow(
-            color: shPurple.withOpacity(.08),
+            color: shPurple.withValues(alpha: .08),
             blurRadius: 30,
             spreadRadius: 1,
           ),
@@ -205,7 +205,7 @@ class LifecycleCard extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 82),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           decoration: BoxDecoration(
-            color: shSurface2.withOpacity(.82),
+            color: shSurface2.withValues(alpha: .82),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: shBorder),
           ),
@@ -221,7 +221,7 @@ class LifecycleCard extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: shPurple.withOpacity(.22),
+                      color: shPurple.withValues(alpha: .22),
                       blurRadius: 14,
                     ),
                   ],

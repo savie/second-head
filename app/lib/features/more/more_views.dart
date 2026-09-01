@@ -192,7 +192,7 @@ class AboutView extends StatelessWidget {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: shPurple.withOpacity(.22),
+                            color: shPurple.withValues(alpha: .22),
                             blurRadius: 28,
                           ),
                         ],

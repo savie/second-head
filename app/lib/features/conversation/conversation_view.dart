@@ -95,7 +95,7 @@ class ConversationViewState extends State<ConversationView> {
               ],
             ),
           ),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: const CompanionCard()),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: CompanionCard()),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
