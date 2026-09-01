@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'core/navigation/sh_navigation_shell.dart';
 import 'core/theme/sh_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
@@ -439,81 +440,19 @@ class _SocialButton extends StatelessWidget {
   }
 }
 
-class _HomeScreen extends StatefulWidget {
+class _HomeScreen extends StatelessWidget {
   const _HomeScreen();
 
   @override
-  State<_HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<_HomeScreen> {
-  int index = 0;
-
-  final pages = const [
-    _ConversationView(),
-    _JourneyView(),
-    _LifecycleView(),
-    _ProfileView(),
-  ];
-
-  void _selectPage(int value) => setState(() => index = value);
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ShNavigationShell(
       drawer: const _SideMenu(),
-      body: SafeArea(
-        child: GestureDetector(
-          onHorizontalDragEnd: (details) {
-            final velocity = details.primaryVelocity ?? 0;
-            if (velocity < -250 && index < pages.length - 1) {
-              _selectPage(index + 1);
-            } else if (velocity > 250 && index > 0) {
-              _selectPage(index - 1);
-            }
-          },
-          child: pages[index],
-        ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        onDestinationSelected: _selectPage,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline, size: 19), selectedIcon: Icon(Icons.chat_bubble, size: 19), label: 'Chat'),
-          NavigationDestination(icon: Icon(Icons.hexagon_outlined, size: 19), selectedIcon: Icon(Icons.hexagon, size: 19), label: 'Journey'),
-          NavigationDestination(icon: Icon(Icons.event_note_outlined, size: 19), selectedIcon: Icon(Icons.event_note, size: 19), label: 'Lifecycle'),
-          NavigationDestination(icon: Icon(Icons.person_outline, size: 19), selectedIcon: Icon(Icons.person, size: 19), label: 'Profile'),
-        ],
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.title, this.leading, this.actions = const []});
-
-  final String title;
-  final Widget? leading;
-  final List<Widget> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: Row(
-        children: [
-          leading ??
-              IconButton(
-                tooltip: 'Menu',
-                onPressed: () => Scaffold.of(context).openDrawer(),
-                icon: const Icon(Icons.menu, size: 21),
-              ),
-          Expanded(
-            child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-          ),
-          ...actions,
-        ],
-      ),
+      pages: const [
+        _ConversationView(),
+        _JourneyView(),
+        _LifecycleView(),
+        _ProfileView(),
+      ],
     );
   }
 }
@@ -528,7 +467,7 @@ class _ConversationViewState extends State<_ConversationView> {
  void _deleteSelected(){setState(()=>selected.clear());}
  @override Widget build(BuildContext context){final selecting=selected.isNotEmpty;return Column(children:[
  if(selecting)Container(height:56,padding:const EdgeInsets.symmetric(horizontal:8),decoration:const BoxDecoration(color:shSurface),child:Row(children:[IconButton(onPressed:()=>setState(()=>selected.clear()),icon:const Icon(Icons.close)),Text(selected.length.toString(),style:const TextStyle(fontSize:15,fontWeight:FontWeight.w700)),const Spacer(),IconButton(onPressed:_deleteSelected,icon:const Icon(Icons.delete_outline))]))
- else ValueListenableBuilder<String>(valueListenable:_conversationTitle,builder:(context,title,_)=>_TopBar(title:title,actions:[IconButton(onPressed:(){},icon:const Icon(Icons.search,size:19)),IconButton(onPressed:_conversationMenu,icon:const Icon(Icons.more_vert,size:21)),IconButton(onPressed:(){final controller=TextEditingController(text:title);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(sheet)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sheet).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('Rename conversation',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:controller,autofocus:true),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sheet),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:(){final name=controller.text.trim();if(name.isNotEmpty)_conversationTitle.value=name;Navigator.pop(sheet);},child:const Text('Save')))])])));},icon:const Icon(Icons.edit_square,size:19))]))),
+ else ValueListenableBuilder<String>(valueListenable:_conversationTitle,builder:(context,title,_)=>ShTopBar(title:title,actions:[IconButton(onPressed:(){},icon:const Icon(Icons.search,size:19)),IconButton(onPressed:_conversationMenu,icon:const Icon(Icons.more_vert,size:21)),IconButton(onPressed:(){final controller=TextEditingController(text:title);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(sheet)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sheet).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('Rename conversation',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:controller,autofocus:true),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sheet),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:(){final name=controller.text.trim();if(name.isNotEmpty)_conversationTitle.value=name;Navigator.pop(sheet);},child:const Text('Save')))])])));},icon:const Icon(Icons.edit_square,size:19))]))),
  const Padding(padding:EdgeInsets.symmetric(horizontal:12),child:_CompanionCard()),
  Expanded(child:ListView(padding:const EdgeInsets.fromLTRB(12,12,12,10),children:[const _DateLabel('Today'),_SelectableMessage(index:0,assistant:true,selected:selected.contains(0),onLongPress:()=>_enterSelection(0),onTap:()=>selecting?_toggleSelection(0):_messageActions(0,assistant:true),child:_Message(text:'Hi, Savie! 👋\\nHow can I help you today?',time:'09:41',assistant:true)),_SelectableMessage(index:1,assistant:false,selected:selected.contains(1),onLongPress:()=>_enterSelection(1),onTap:()=>selecting?_toggleSelection(1):_messageActions(1,assistant:false),child:_Message(text:'Help me summarize my main plan for today and top priorities.',time:'09:41',assistant:false)),_SelectableMessage(index:2,assistant:true,selected:selected.contains(2),onLongPress:()=>_enterSelection(2),onTap:()=>selecting?_toggleSelection(2):_messageActions(2,assistant:true),child:_Message(text:'Sure! Here is your summary and top priorities.',time:'09:42',assistant:true)),const _SummaryCard()])),
  if(!selecting)const _Composer(),]);}
@@ -1037,7 +976,7 @@ class _AboutView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const _TopBar(title: 'About'),
+        const ShTopBar(title: 'About'),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(18, 26, 18, 24),
@@ -1147,7 +1086,7 @@ class _JourneyView extends StatefulWidget { const _JourneyView(); @override Stat
 class _JourneyViewState extends State<_JourneyView> {
  String filter='All'; int? selected;
  final items=const [_JourneyItem('Project SH Roadmap','Documented roadmap and key milestones','2 days ago','Knowledge','The documented roadmap and key milestones for Second Head.',true),_JourneyItem('Client Meeting Notes','Important notes from the meeting about feature priorities.','Yesterday','Experience','Important notes captured from the client meeting and its feature priorities.',false),_JourneyItem('Ideas – AI Personalization','Ideas about personalization based on user behavior.','May 29','Memory','Ideas and retained context about personalization based on user behavior.',true),_JourneyItem('Reference – Runtime Contract','Notes about runtime contract and future calling.','May 25','Knowledge','Reference material describing the runtime contract and future calling.',false)];
- @override Widget build(BuildContext context){if(selected!=null)return _JourneyDetail(item:items[selected!],onBack:()=>setState(()=>selected=null));final visible=[for(var i=0;i<items.length;i++)if(filter=='All'||items[i].type==filter)i];return Stack(children:[Column(children:[const _TopBar(title:'Journey',actions:[IconButton(onPressed:(){},icon:Icon(Icons.search,size:19)),IconButton(onPressed:(){},icon:Icon(Icons.refresh_rounded,size:20))]),_JourneyFilters(value:filter,onChanged:(v)=>setState(()=>filter=v)),Expanded(child:ListView.builder(padding:const EdgeInsets.fromLTRB(12,8,12,88),itemCount:visible.length,itemBuilder:(_,i)=>_JourneyCard(item:items[visible[i]],onTap:()=>setState(()=>selected=visible[i]))))]),Positioned(right:18,bottom:18,child:FloatingActionButton(heroTag:'journey-add',onPressed:()=>_create(context),child:const Icon(Icons.add)))]);}
+ @override Widget build(BuildContext context){if(selected!=null)return _JourneyDetail(item:items[selected!],onBack:()=>setState(()=>selected=null));final visible=[for(var i=0;i<items.length;i++)if(filter=='All'||items[i].type==filter)i];return Stack(children:[Column(children:[const ShTopBar(title:'Journey',actions:[IconButton(onPressed:(){},icon:Icon(Icons.search,size:19)),IconButton(onPressed:(){},icon:Icon(Icons.refresh_rounded,size:20))]),_JourneyFilters(value:filter,onChanged:(v)=>setState(()=>filter=v)),Expanded(child:ListView.builder(padding:const EdgeInsets.fromLTRB(12,8,12,88),itemCount:visible.length,itemBuilder:(_,i)=>_JourneyCard(item:items[visible[i]],onTap:()=>setState(()=>selected=visible[i]))))]),Positioned(right:18,bottom:18,child:FloatingActionButton(heroTag:'journey-add',onPressed:()=>_create(context),child:const Icon(Icons.add)))]);}
  void _create(BuildContext context)=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(24))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[const Padding(padding:EdgeInsets.all(16),child:Align(alignment:Alignment.centerLeft,child:Text('Create new',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)))),for(final t in const ['Memory','Knowledge','Experience'])ListTile(leading:const Icon(Icons.add_circle_outline),title:Text(t),onTap:(){Navigator.pop(context);_edit(context,t,'');}),const SizedBox(height:8)])));
  void _edit(BuildContext context,String type,String initial){final ctl=TextEditingController(text:initial);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(24))),builder:(sc)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sc).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[Text('Edit '+type,style:const TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:ctl,maxLines:7,autofocus:true,decoration:const InputDecoration(hintText:'Write content...')),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sc),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:()=>Navigator.pop(sc),child:const Text('Save')))])])));}
 }
@@ -1155,7 +1094,7 @@ class _JourneyFilters extends StatelessWidget { const _JourneyFilters({required 
 class _JourneyItem { const _JourneyItem(this.title,this.subtitle,this.date,this.type,this.content,this.isPrivate); final String title,subtitle,date,type,content; final bool isPrivate; }
 class _JourneyCard extends StatelessWidget { const _JourneyCard({required this.item,required this.onTap}); final _JourneyItem item; final VoidCallback onTap; @override Widget build(BuildContext context)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(16),child:Container(margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(13),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(16),border:Border.all(color:shBorder)),child:Row(children:[Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Row(children:[Container(padding:const EdgeInsets.symmetric(horizontal:7,vertical:4),decoration:BoxDecoration(color:shPurple.withOpacity(.12),borderRadius:BorderRadius.circular(8)),child:Text(item.type,style:const TextStyle(fontSize:8,color:shMuted))),const SizedBox(width:7),Expanded(child:Text(item.title,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w600)))]),const SizedBox(height:5),Text(item.subtitle,style:const TextStyle(fontSize:9,color:shMuted,height:1.35)),const SizedBox(height:6),Text(item.date,style:const TextStyle(fontSize:8,color:shMuted))])),const Icon(Icons.chevron_right_rounded,color:shMuted)]))); }
 class _JourneyDetail extends StatefulWidget { const _JourneyDetail({required this.item,required this.onBack}); final _JourneyItem item; final VoidCallback onBack; @override State<_JourneyDetail> createState()=>_JourneyDetailState(); }
-class _JourneyDetailState extends State<_JourneyDetail>{ late bool privatePolicy; @override void initState(){super.initState();privatePolicy=widget.item.isPrivate;} @override Widget build(BuildContext context)=>Column(children:[_TopBar(title:widget.item.type,leading:IconButton(onPressed:widget.onBack,icon:const Icon(Icons.arrow_back))),Expanded(child:SingleChildScrollView(padding:const EdgeInsets.fromLTRB(16,8,16,20),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(widget.item.title,style:const TextStyle(fontSize:19,fontWeight:FontWeight.w700)),const SizedBox(height:14),Container(width:double.infinity,padding:const EdgeInsets.all(15),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(16),border:Border.all(color:shBorder)),child:Text(widget.item.content,style:const TextStyle(fontSize:12,height:1.5))),const SizedBox(height:20),const Text('Policy',style:TextStyle(fontSize:12,fontWeight:FontWeight.w700)),const SizedBox(height:8),Row(children:[Expanded(child:_PolicyOption(label:'Private',icon:Icons.lock_outline,selected:privatePolicy,onTap:()=>setState(()=>privatePolicy=true))),const SizedBox(width:10),Expanded(child:_PolicyOption(label:'Public',icon:Icons.public,selected:!privatePolicy,onTap:()=>setState(()=>privatePolicy=false)))])])),Padding(padding:const EdgeInsets.fromLTRB(16,8,16,14),child:Align(alignment:Alignment.centerRight,child:FloatingActionButton.small(heroTag:'journey-edit',onPressed:_edit,child:const Icon(Icons.edit_outlined))))]); void _edit(){final ctl=TextEditingController(text:widget.item.content);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(24))),builder:(sc)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sc).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[Text('Edit '+widget.item.type,style:const TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:ctl,maxLines:7),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sc),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:()=>Navigator.pop(sc),child:const Text('Save')))])])));} }
+class _JourneyDetailState extends State<_JourneyDetail>{ late bool privatePolicy; @override void initState(){super.initState();privatePolicy=widget.item.isPrivate;} @override Widget build(BuildContext context)=>Column(children:[ShTopBar(title:widget.item.type,leading:IconButton(onPressed:widget.onBack,icon:const Icon(Icons.arrow_back))),Expanded(child:SingleChildScrollView(padding:const EdgeInsets.fromLTRB(16,8,16,20),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(widget.item.title,style:const TextStyle(fontSize:19,fontWeight:FontWeight.w700)),const SizedBox(height:14),Container(width:double.infinity,padding:const EdgeInsets.all(15),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(16),border:Border.all(color:shBorder)),child:Text(widget.item.content,style:const TextStyle(fontSize:12,height:1.5))),const SizedBox(height:20),const Text('Policy',style:TextStyle(fontSize:12,fontWeight:FontWeight.w700)),const SizedBox(height:8),Row(children:[Expanded(child:_PolicyOption(label:'Private',icon:Icons.lock_outline,selected:privatePolicy,onTap:()=>setState(()=>privatePolicy=true))),const SizedBox(width:10),Expanded(child:_PolicyOption(label:'Public',icon:Icons.public,selected:!privatePolicy,onTap:()=>setState(()=>privatePolicy=false)))])])),Padding(padding:const EdgeInsets.fromLTRB(16,8,16,14),child:Align(alignment:Alignment.centerRight,child:FloatingActionButton.small(heroTag:'journey-edit',onPressed:_edit,child:const Icon(Icons.edit_outlined))))]); void _edit(){final ctl=TextEditingController(text:widget.item.content);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(24))),builder:(sc)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sc).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[Text('Edit '+widget.item.type,style:const TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:ctl,maxLines:7),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sc),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:()=>Navigator.pop(sc),child:const Text('Save')))])])));} }
 class _PolicyOption extends StatelessWidget { const _PolicyOption({required this.label,required this.icon,required this.selected,required this.onTap}); final String label; final IconData icon; final bool selected; final VoidCallback onTap; @override Widget build(BuildContext context)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(14),child:Container(padding:const EdgeInsets.symmetric(vertical:13,horizontal:12),decoration:BoxDecoration(color:selected?shPurple.withOpacity(.13):shSurface,borderRadius:BorderRadius.circular(14),border:Border.all(color:selected?shPurple:shBorder)),child:Row(children:[Icon(icon,size:18),const SizedBox(width:8),Text(label,style:const TextStyle(fontSize:10))]))); }
 class _LifecycleView extends StatelessWidget {
   const _LifecycleView();
@@ -1164,7 +1103,7 @@ class _LifecycleView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const _TopBar(
+        const ShTopBar(
           title: 'Lifecycle',
           actions: [
             IconButton(onPressed: () {}, icon: Icon(Icons.search, size: 19)),
@@ -1466,7 +1405,7 @@ class _ProfileViewState extends State<_ProfileView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _TopBar(
+        ShTopBar(
           title: 'Profile / Settings',
           actions: [
             IconButton(onPressed: () {}, icon: const Icon(Icons.open_in_new, size: 18)),
