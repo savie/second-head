@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../conversation/conversation_view.dart';
 import '../../core/theme/sh_theme.dart';
@@ -27,7 +28,12 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   void _startNewConversation() {
-    conversationTitle.value = 'New Conversation';
+    const entry = RecentConversationEntry('New Conversation', 'New conversation');
+    recentConversations.value = [
+      entry,
+      ...recentConversations.value.where((item) => item.title != entry.title),
+    ];
+    conversationTitle.value = entry.title;
     conversationRevision.value++;
     _closeDrawer();
     widget.onSelectPage(0);
@@ -117,14 +123,34 @@ class _SideMenuState extends State<SideMenu> {
             ),
             const SizedBox(height: 12),
             Text(body, style: const TextStyle(color: shMuted, height: 1.5)),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAbout(BuildContext context) async {
+    final info = await PackageInfo.fromPlatform();
+    if (!context.mounted) return;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'About',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
+            const SizedBox(height: 14),
+            AboutRow('Version', info.version),
+            const Divider(height: 1, color: shBorder),
+            AboutRow('Build', '#' + info.buildNumber),
           ],
         ),
       ),
@@ -276,15 +302,11 @@ class _SideMenuState extends State<SideMenu> {
             MenuTile(
               icon: Icons.info_outline,
               label: 'About',
-              onTap: () => _showInfo(
-                context,
-                'About',
-                'SECOND HEAD\\nVersion 1.0.0\\nBuild #1',
-              ),
+              onTap: () => _showAbout(context),
             ),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 2, 10, 10),
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: MenuTile(
@@ -430,22 +452,31 @@ class MenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      dense: true,
-      leading: customIcon ??
-          Icon(
-            icon,
-            size: 25,
-            color: danger ? Colors.redAccent : shMuted,
-          ),
-      title: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          color: danger ? Colors.redAccent : Colors.white,
+    return SizedBox(
+      height: 46,
+      child: ListTile(
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18),
+        minLeadingWidth: 34,
+        horizontalTitleGap: 12,
+        leading: IconTheme.merge(
+          data: const IconThemeData(size: 28, color: Colors.white),
+          child: customIcon ??
+              Icon(
+                icon,
+                size: 28,
+                color: danger ? Colors.redAccent : Colors.white,
+              ),
         ),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: danger ? Colors.redAccent : Colors.white,
+          ),
+        ),
+        onTap: onTap ?? () => Navigator.of(context).pop(),
       ),
-      onTap: onTap ?? () => Navigator.of(context).pop(),
     );
   }
 }
