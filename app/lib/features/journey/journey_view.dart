@@ -569,7 +569,7 @@ class JourneyDetail extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Edit \${item.type}',
+                'Edit ' + item.type,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
