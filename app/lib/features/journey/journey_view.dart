@@ -88,13 +88,7 @@ class JourneyViewState extends State<JourneyView> {
           children: [
             ShTopBar(
               title: 'Journey',
-              actions: [
-                IconButton(
-                  tooltip: 'Search',
-                  onPressed: () => _search(context),
-                  icon: const Icon(Icons.search, size: 23),
-                ),
-              ],
+              onSearch: () => _search(context),
             ),
             JourneyFilters(
               value: filter,
