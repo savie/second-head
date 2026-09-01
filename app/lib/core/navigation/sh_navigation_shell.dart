@@ -48,13 +48,13 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
               label: 'Chat',
             ),
             NavigationDestination(
-              icon: Icon(Icons.hexagon_outlined, size: 22),
-              selectedIcon: Icon(Icons.hexagon_outlined, size: 22),
+              icon: Icon(Icons.event_repeat_outlined, size: 22),
+              selectedIcon: Icon(Icons.event_repeat_outlined, size: 22),
               label: 'Journey',
             ),
             NavigationDestination(
               icon: Icon(Icons.hexagon_outlined, size: 22),
-              selectedIcon: Icon(Icons.event_note, size: 22),
+              selectedIcon: Icon(Icons.hexagon_outlined, size: 22),
               label: 'Lifecycle',
             ),
             NavigationDestination(
