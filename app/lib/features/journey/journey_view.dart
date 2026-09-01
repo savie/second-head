@@ -75,7 +75,7 @@ class JourneyDetailState extends State<JourneyDetail>{
     const SizedBox(width:10),
     Expanded(child:PolicyOption(label:'Public',icon:Icons.public,selected:!privatePolicy,onTap:()=>_setPolicy(false))),
    ]),
-  ])),
+  ]))),
  ]);
  void _setPolicy(bool value){setState(()=>privatePolicy=value);widget.item.isPrivate=value;widget.onChanged();}
  Future<void> _edit() async {
