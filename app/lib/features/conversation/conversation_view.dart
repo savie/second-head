@@ -3,12 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/sh_theme.dart';
+import '../../core/state/sh_profile_state.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 
 final ValueNotifier<String> conversationTitle =
     ValueNotifier<String>('Today Priorities');
 
-final ValueNotifier<Uint8List?> _profilePhoto = ValueNotifier<Uint8List?>(null);
+final ValueNotifier<int> conversationRevision = ValueNotifier<int>(0);
 
 class ConversationView extends StatefulWidget {
   const ConversationView({super.key});
@@ -18,6 +19,25 @@ class ConversationView extends StatefulWidget {
 }
 
 class ConversationViewState extends State<ConversationView> {
+  @override
+  void initState() {
+    super.initState();
+    conversationRevision.addListener(_resetConversation);
+  }
+
+  void _resetConversation() {
+    if (!mounted) return;
+    setState(() {
+      _messages
+        ..clear()
+        ..add(ConversationMessage(
+          'Hi, Savie! 👋\\nHow can I help you today?',
+          true,
+          'Now',
+        ));
+    });
+  }
+
  final Set<int> selected={};
  final List<ConversationMessage> _messages = [
    ConversationMessage('Hi, Savie! 👋\nHow can I help you today?', true, '09:41'),
@@ -47,6 +67,7 @@ class ConversationViewState extends State<ConversationView> {
  }
   @override
   void dispose() {
+    conversationRevision.removeListener(_resetConversation);
     _composerController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -362,7 +383,7 @@ class ChatAvatar extends StatelessWidget {
       );
     }
     return ValueListenableBuilder<Uint8List?>(
-      valueListenable: _profilePhoto,
+      valueListenable: profilePhoto,
       builder: (context, photo, _) => CircleAvatar(
         radius: 11,
         backgroundColor: shSurface2,
