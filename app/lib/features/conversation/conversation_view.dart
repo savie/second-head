@@ -45,6 +45,7 @@ class ConversationViewState extends State<ConversationView> {
    ConversationMessage('Sure! Here is your summary and top priorities.', true, '09:42'),
  ];
  final TextEditingController _composerController = TextEditingController();
+ final ScrollController _messageScrollController = ScrollController();
  final ImagePicker _picker = ImagePicker();
  final TextEditingController _searchController=TextEditingController();
  void _send(){final t=_composerController.text.trim();if(t.isEmpty)return;setState((){_messages.add(ConversationMessage(t,false,'Now'));_composerController.clear();});}
@@ -70,6 +71,7 @@ class ConversationViewState extends State<ConversationView> {
     conversationRevision.removeListener(_resetConversation);
     _composerController.dispose();
     _searchController.dispose();
+    _messageScrollController.dispose();
     super.dispose();
   }
 
@@ -109,8 +111,8 @@ class ConversationViewState extends State<ConversationView> {
             valueListenable: conversationTitle,
             builder: (context, title, _) => ShTopBar(
               title: title,
+              onSearch: () => _showSearch(context),
               actions: [
-                IconButton(onPressed: () => _showSearch(context), icon: const Icon(Icons.search, size: 19)),
                 IconButton(onPressed: _conversationMenu, icon: const Icon(Icons.more_vert, size: 21)),
                 IconButton(onPressed: () => _renameConversation(context, title), icon: const Icon(Icons.edit_square, size: 19)),
               ],
@@ -120,6 +122,7 @@ class ConversationViewState extends State<ConversationView> {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            controller: _messageScrollController,
             children: [
               const DateLabel('Today'),
               for (var i = 0; i < _messages.length; i++)
@@ -141,16 +144,38 @@ class ConversationViewState extends State<ConversationView> {
     );
   }
 
-  void _showSearch(BuildContext context) {
-    showModalBottomSheet<void>(
+  Future<void> _showSearch(BuildContext context) async {
+    final result = await showShInternalSearch<int>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
-        child: TextField(controller: _searchController, autofocus: true, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search conversation')),
+      hintText: 'Search conversation',
+      search: (query) {
+        return [
+          for (var i = 0; i < _messages.length; i++)
+            if (query.isEmpty ||
+                _messages[i].text.toLowerCase().contains(query) ||
+                _messages[i].time.toLowerCase().contains(query))
+              ShSearchResult<int>(
+                value: i,
+                title: _messages[i].text.isEmpty
+                    ? 'Image message'
+                    : _messages[i].text,
+                subtitle: _messages[i].time,
+              ),
+        ];
+      },
+    );
+
+    if (!mounted || result == null || !_messageScrollController.hasClients) {
+      return;
+    }
+
+    await _messageScrollController.animateTo(
+      (result * 115.0).clamp(
+        0.0,
+        _messageScrollController.position.maxScrollExtent,
       ),
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOut,
     );
   }
 
