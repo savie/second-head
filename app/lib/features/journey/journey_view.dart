@@ -128,7 +128,7 @@ class JourneyViewState extends State<JourneyView> {
       return;
     }
 
-    setState(() => selected = result);
+    _openDetail(context, result);
   }
 
   Future<void> _create(BuildContext context) async {
