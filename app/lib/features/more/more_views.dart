@@ -146,7 +146,8 @@ class SideMenu extends StatelessWidget {
             MenuTile(icon: Icons.hexagon_outlined, label: 'Journey', onTap: () => _openPage(context, 1)),
             MenuTile(icon: Icons.event_note_outlined, label: 'Lifecycle', onTap: () => _openPage(context, 2)),
             MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(context, 3)),
-            MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () => _showInfo(context, 'Help & Support', 'Help, guidance, and support for SECOND HEAD.')),\n            MenuTile(icon: Icons.info_outline, label: 'About', onTap: () => _showInfo(context, 'About', 'SECOND HEAD\nVersion 1.0.0\nBuild #1')),
+            MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () => _showInfo(context, 'Help & Support', 'Help, guidance, and support for SECOND HEAD.')),
+            MenuTile(icon: Icons.info_outline, label: 'About', onTap: () => _showInfo(context, 'About', 'SECOND HEAD\nVersion 1.0.0\nBuild #1')),
             const Spacer(),
             const Divider(color: shBorder),
             Padding(
