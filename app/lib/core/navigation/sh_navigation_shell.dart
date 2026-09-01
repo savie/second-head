@@ -18,6 +18,7 @@ class ShNavigationShell extends StatefulWidget {
 
 class _ShNavigationShellState extends State<ShNavigationShell> {
   int index = 0;
+  bool _horizontalSwipeStartedAtSystemEdge = false;
 
   void _selectPage(int value) => setState(() => index = value);
 
@@ -30,17 +31,31 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
       },
       child: Scaffold(
         drawer: widget.drawerBuilder(context, _selectPage),
-        drawerEdgeDragWidth: 96,
+        // Keep the system-back edge free from the app's tab-swipe recognizer.
+        // The drawer/menu can still be opened normally from the top-left button.
+        drawerEdgeDragWidth: 28,
         body: SafeArea(
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
+            onHorizontalDragStart: (details) {
+              final width = MediaQuery.sizeOf(context).width;
+              _horizontalSwipeStartedAtSystemEdge =
+                  details.globalPosition.dx <= 28 ||
+                  details.globalPosition.dx >= width - 28;
+            },
             onHorizontalDragEnd: (details) {
+              if (_horizontalSwipeStartedAtSystemEdge) {
+                _horizontalSwipeStartedAtSystemEdge = false;
+                return;
+              }
+
               final velocity = details.primaryVelocity ?? 0;
               if (velocity < -450 && index < widget.pages.length - 1) {
                 _selectPage(index + 1);
               } else if (velocity > 450 && index > 0) {
                 _selectPage(index - 1);
               }
+              _horizontalSwipeStartedAtSystemEdge = false;
             },
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 180),
