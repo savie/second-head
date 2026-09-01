@@ -283,7 +283,6 @@ class _WideLifecycle extends StatelessWidget {
                 height: 190,
                 child: LifecycleCard(
                   stage: ordered[i],
-                  index: i,
                   onTap: () => onStageTap(ordered[i]),
                 ),
               ),
@@ -316,7 +315,6 @@ class _MobileLifecycle extends StatelessWidget {
             height: 220,
             child: LifecycleCard(
               stage: stages[i],
-              index: i,
               onTap: () => onStageTap(stages[i]),
             ),
           ),
@@ -347,12 +345,10 @@ class LifecycleCard extends StatelessWidget {
   const LifecycleCard({
     super.key,
     required this.stage,
-    required this.index,
     required this.onTap,
   });
 
   final LifecycleStage stage;
-  final int index;
   final VoidCallback onTap;
 
   @override
@@ -369,31 +365,6 @@ class LifecycleCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 20, 20, 20),
               child: Stack(
                 children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: shBackground.withValues(alpha: .92),
-                        border: Border.all(
-                          color: stage.accent.withValues(alpha: .7),
-                          width: 1.5,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${index + 1}'.padLeft(2, '0'),
-                        style: TextStyle(
-                          color: stage.accent,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: Column(
