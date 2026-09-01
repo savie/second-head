@@ -2,10 +2,8 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
-
-final ValueNotifier<Uint8List?> _profilePhoto = ValueNotifier<Uint8List?>(null);
+import '../../core/state/sh_profile_state.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -23,7 +21,7 @@ class ProfileViewState extends State<ProfileView> {
       maxWidth: 900,
     );
     if (file == null) return;
-    _profilePhoto.value = await file.readAsBytes();
+    profilePhoto.value = await file.readAsBytes();
   }
 
   void _showPhotoOptions() {
@@ -59,11 +57,11 @@ class ProfileViewState extends State<ProfileView> {
               _ProfilePhotoAction(
                 icon: Icons.delete_outline,
                 label: 'Remove',
-                onTap: _profilePhoto.value == null
+                onTap: profilePhoto.value == null
                     ? null
                     : () {
                         Navigator.pop(context);
-                        _profilePhoto.value = null;
+                        profilePhoto.value = null;
                       },
               ),
             ],
@@ -86,7 +84,7 @@ class ProfileViewState extends State<ProfileView> {
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 28),
             children: [
               ValueListenableBuilder<Uint8List?>(
-                valueListenable: _profilePhoto,
+                valueListenable: profilePhoto,
                 builder: (context, photo, _) => _ProfileHero(
                   photo: photo,
                   onEdit: _showPhotoOptions,
