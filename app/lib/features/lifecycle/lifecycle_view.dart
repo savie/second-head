@@ -4,7 +4,11 @@ import '../../core/theme/sh_theme.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 
 class LifecycleView extends StatelessWidget {
+  static void _search(BuildContext context) { final ctl=TextEditingController(); showModalBottomSheet<void>(context: context, isScrollControlled: true, backgroundColor: shSurface, showDragHandle: true, builder: (c) => Padding(padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(c).viewInsets.bottom + 18), child: TextField(controller: ctl, autofocus: true, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search lifecycle')))); }
+
   const LifecycleView();
+
+  void _showDetail(BuildContext context, LifecycleStage stage) { showModalBottomSheet<void>(context: context, backgroundColor: shSurface, showDragHandle: true, builder: (_) => Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 28), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(stage.icon, size: 24), const SizedBox(width: 10), Text(stage.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))]), const SizedBox(height: 12), Text(stage.subtitle, style: const TextStyle(color: shMuted, height: 1.5))]))); }
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +17,7 @@ class LifecycleView extends StatelessWidget {
         const ShTopBar(
           title: 'Lifecycle',
           actions: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.search, size: 19)),
-            IconButton(onPressed: () {}, icon: Icon(Icons.fullscreen, size: 18)),
+            IconButton(onPressed: () => _search(context), icon: const Icon(Icons.search, size: 19)),
           ],
         ),
         Expanded(
@@ -162,7 +165,7 @@ class LifecycleCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () {},
+        onTap: () => _showDetail(context, stage),
         child: Container(
           constraints: const BoxConstraints(minHeight: 82),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
