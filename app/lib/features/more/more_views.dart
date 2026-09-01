@@ -130,8 +130,12 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Widget _primaryPanel(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final panelWidth = _conversationExpanded
+        ? screenWidth * .52
+        : 292.0;
     return SizedBox(
-      width: 292,
+      width: panelWidth,
       child: SafeArea(
         child: Column(
           children: [
@@ -301,7 +305,7 @@ class _SideMenuState extends State<SideMenu> {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: shBackground,
-      width: _conversationExpanded ? 560 : 292,
+      width: _conversationExpanded ? MediaQuery.sizeOf(context).width : 292,
       child: Row(
         children: [
           _primaryPanel(context),
