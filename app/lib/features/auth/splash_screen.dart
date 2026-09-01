@@ -72,7 +72,7 @@ class _WavePainter extends CustomPainter {
                 progress * .8 * edge;
         path.lineTo(x, y);
       }
-      canvas.drawPath(path, paint..opacity = .32);
+      canvas.drawPath(path, paint..color = Colors.white.withValues(alpha: .32));
     }
   }
 

@@ -53,13 +53,115 @@ class ConversationViewState extends State<ConversationView> {
     super.dispose();
   }
 
- @override Widget build(BuildContext context){final selecting=selected.isNotEmpty;return Column(children:[
- if (selecting)
-        Container(height: 56, padding: const EdgeInsets.symmetric(horizontal: 4), decoration: const BoxDecoration(color: shSurface), child: Row(children: [IconButton(tooltip: 'Close selection', onPressed: () => setState(() => selected.clear()), icon: const Icon(Icons.arrow_back_rounded)), Text(selected.length.toString(), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)), const Spacer(), IconButton(tooltip: 'Copy', onPressed: () { final ids = selected.toList()..sort(); _copyText(ids.where((i) => i >= 0 && i < _messages.length).map((i) => _messages[i].text).where((t) => t.trim().isNotEmpty).join('\n')); }, icon: const Icon(Icons.copy_outlined)), IconButton(tooltip: 'Delete', onPressed: _deleteSelected, icon: const Icon(Icons.delete_outline)), PopupMenuButton<String>(tooltip: 'More', onSelected: (action) { if (action == 'clear') setState(() => selected.clear()); }, itemBuilder: (_) => const [PopupMenuItem(value: 'clear', child: Text('Clear selection'))])])) else ValueListenableBuilder<String>(valueListenable:conversationTitle,builder:(context,title,_)=>ShTopBar(title:title,actions:[IconButton(onPressed:()=>showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:TextField(controller:_searchController,autofocus:true,decoration:const InputDecoration(prefixIcon:Icon(Icons.search),hintText:'Search conversation')))),icon:const Icon(Icons.search,size:19)),IconButton(onPressed:_conversationMenu,icon:const Icon(Icons.more_vert,size:21)),IconButton(onPressed:(){final controller=TextEditingController(text:title);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(sheet)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sheet).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('Rename conversation',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:controller,autofocus:true),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sheet),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:(){final name=controller.text.trim();if(name.isNotEmpty)conversationTitle.value=name;Navigator.pop(sheet);},child:const Text('Save')))])])));},icon:const Icon(Icons.edit_square,size:19))]))),
- const Padding(padding:EdgeInsets.symmetric(horizontal:12),child:CompanionCard()),
- Expanded(child:ListView(padding:const EdgeInsets.fromLTRB(12,12,12,10),children:[const DateLabel('Today'),SelectableMessage(index:0,assistant:true,selected:selected.contains(0),onLongPress:()=>_enterSelection(0),onTap:()=>selecting?_toggleSelection(0):_messageActions(0,assistant:true),child:Message(text:'Hi, Savie! 👋\\nHow can I help you today?',time:'09:41',assistant:true)),SelectableMessage(index:1,assistant:false,selected:selected.contains(1),onLongPress:()=>_enterSelection(1),onTap:()=>selecting?_toggleSelection(1):_messageActions(1,assistant:false),child:Message(text:'Help me summarize my main plan for today and top priorities.',time:'09:41',assistant:false)),SelectableMessage(index:2,assistant:true,selected:selected.contains(2),onLongPress:()=>_enterSelection(2),onTap:()=>selecting?_toggleSelection(2):_messageActions(2,assistant:true),child:Message(text:'Sure! Here is your summary and top priorities.',time:'09:42',assistant:true)),SummaryCard()])),
- if(!selecting) Composer(controller:_composerController,onSend:_send,onAttach:_showAttachments),]);}
-}
+  @override
+  Widget build(BuildContext context) {
+    final selecting = selected.isNotEmpty;
+    return Column(
+      children: [
+        if (selecting)
+          Container(
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: const BoxDecoration(color: shSurface),
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: 'Close selection',
+                  onPressed: () => setState(() => selected.clear()),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                ),
+                Text('${selected.length}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const Spacer(),
+                IconButton(
+                  tooltip: 'Copy',
+                  onPressed: () {
+                    final ids = selected.toList()..sort();
+                    _copyText(ids.map((i) => _messages[i].text).where((t) => t.trim().isNotEmpty).join('\n'));
+                  },
+                  icon: const Icon(Icons.copy_outlined),
+                ),
+                IconButton(tooltip: 'Delete', onPressed: _deleteSelected, icon: const Icon(Icons.delete_outline)),
+              ],
+            ),
+          )
+        else
+          ValueListenableBuilder<String>(
+            valueListenable: conversationTitle,
+            builder: (context, title, _) => ShTopBar(
+              title: title,
+              actions: [
+                IconButton(onPressed: () => _showSearch(context), icon: const Icon(Icons.search, size: 19)),
+                IconButton(onPressed: _conversationMenu, icon: const Icon(Icons.more_vert, size: 21)),
+                IconButton(onPressed: () => _renameConversation(context, title), icon: const Icon(Icons.edit_square, size: 19)),
+              ],
+            ),
+          ),
+        const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: CompanionCard()),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            children: [
+              const DateLabel('Today'),
+              for (var i = 0; i < _messages.length; i++)
+                SelectableMessage(
+                  index: i,
+                  assistant: _messages[i].assistant,
+                  selected: selected.contains(i),
+                  onLongPress: () => _enterSelection(i),
+                  onTap: () => selecting ? _toggleSelection(i) : _messageActions(i, assistant: _messages[i].assistant),
+                  child: Message(text: _messages[i].text, time: _messages[i].time, assistant: _messages[i].assistant, image: _messages[i].image),
+                ),
+              const SummaryCard(),
+            ],
+          ),
+        ),
+        if (!selecting)
+          Composer(controller: _composerController, onSend: _send, onAttach: _showAttachments),
+      ],
+    );
+  }
+
+  void _showSearch(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
+        child: TextField(controller: _searchController, autofocus: true, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search conversation')),
+      ),
+    );
+  }
+
+  void _renameConversation(BuildContext context, String title) {
+    final controller = TextEditingController(text: title);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (sheet) => Padding(
+        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 12),
+            TextField(controller: controller, autofocus: true),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
+                const SizedBox(width: 10),
+                Expanded(child: FilledButton(onPressed: () { final name = controller.text.trim(); if (name.isNotEmpty) conversationTitle.value = name; Navigator.pop(sheet); }, child: const Text('Save'))),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 class SelectableMessage extends StatelessWidget { const SelectableMessage({required this.index,required this.assistant,required this.selected,required this.onLongPress,required this.onTap,required this.child}); final int index; final bool assistant,selected; final VoidCallback onLongPress,onTap; final Widget child; @override Widget build(BuildContext context)=>GestureDetector(onLongPress:onLongPress,onTap:onTap,child:AnimatedContainer(duration:const Duration(milliseconds:160),decoration:BoxDecoration(borderRadius:BorderRadius.circular(18),color:selected?shPurple.withOpacity(.12):Colors.transparent),child:Stack(children:[child,if(selected)const Positioned(right:4,top:4,child:Icon(Icons.check_circle,size:17))]))); }
 class ConversationMessage {
  ConversationMessage(this.text,this.assistant,this.time,{this.image});

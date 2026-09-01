@@ -39,7 +39,7 @@ ThemeData buildShTheme() {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: shSurface,
-      indicatorColor: shPurple.withOpacity(.18),
+      indicatorColor: shPurple.withValues(alpha: .18),
       labelTextStyle: WidgetStateProperty.all(
         const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
       ),

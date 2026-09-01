@@ -8,6 +8,7 @@ class LifecycleView extends StatefulWidget {
 }
 
 class LifecycleViewState extends State<LifecycleView> {
+  String query = '';
   Future<void> _search(BuildContext context) async {
     final controller = TextEditingController(text: query);
     final result = await showModalBottomSheet<String>(
@@ -172,10 +173,11 @@ class LifecycleMap extends StatelessWidget {
 }
 
 class LifecycleStage {
-  const LifecycleStage(this.title, this.subtitle, this.icon);
+  const LifecycleStage(this.title, this.subtitle, this.icon, [this.alignment = Alignment.center]);
   final String title;
   final String subtitle;
   final IconData icon;
+  final Alignment alignment;
 }
 
 class LifecycleCard extends StatelessWidget {

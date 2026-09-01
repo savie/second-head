@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/sh_theme.dart';
-
 
 class ShNavigationShell extends StatefulWidget {
   const ShNavigationShell({
@@ -73,6 +71,7 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
             label: 'Profile',
           ),
         ],
+      ),
       ),
     );
   }

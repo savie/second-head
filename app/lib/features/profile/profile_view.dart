@@ -185,7 +185,6 @@ class _ProfilePhotoAction extends StatelessWidget {
               child: Icon(icon),
             ),
           ),
-            const SizedBox(height: 7),
             Text(label, style: const TextStyle(fontSize: 10)),
           ],
         ),
