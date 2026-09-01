@@ -44,22 +44,22 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.chat_bubble_outline, size: 22),
-              selectedIcon: Icon(Icons.chat_bubble, size: 22),
+              selectedIcon: Icon(Icons.chat_bubble_outline, size: 22),
               label: 'Chat',
             ),
             NavigationDestination(
               icon: Icon(Icons.hexagon_outlined, size: 22),
-              selectedIcon: Icon(Icons.hexagon, size: 22),
+              selectedIcon: Icon(Icons.hexagon_outlined, size: 22),
               label: 'Journey',
             ),
             NavigationDestination(
-              icon: Icon(Icons.event_note_outlined, size: 22),
+              icon: Icon(Icons.hexagon_outlined, size: 22),
               selectedIcon: Icon(Icons.event_note, size: 22),
               label: 'Lifecycle',
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline, size: 22),
-              selectedIcon: Icon(Icons.person, size: 22),
+              selectedIcon: Icon(Icons.person_outline, size: 22),
               label: 'Profile',
             ),
           ],
