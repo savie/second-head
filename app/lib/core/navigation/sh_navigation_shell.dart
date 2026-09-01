@@ -34,9 +34,8 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
         // Keep the system-back edge free from the app's tab-swipe recognizer.
         // The drawer/menu can still be opened normally from the top-left button.
         drawerEdgeDragWidth: 28,
-        body: SafeArea(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
             onHorizontalDragStart: (details) {
               final width = MediaQuery.sizeOf(context).width;
               _horizontalSwipeStartedAtSystemEdge =
@@ -63,7 +62,6 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
                 key: ValueKey(index),
                 child: widget.pages[index],
               ),
-            ),
           ),
         ),
         bottomNavigationBar: NavigationBar(
@@ -143,14 +141,19 @@ class ShTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+    const contentHeight = 64.0;
+
     return SizedBox(
-      // Shared header height stays at 88; lift the visible chrome within
-      // the header so it remains visually close to the status bar.
-      height: 88,
-      child: Transform.translate(
-        offset: const Offset(0, -10),
-        child: Stack(
-        alignment: Alignment.center,
+      // The top inset is owned by the shared header so every screen
+      // (shell pages and pushed detail routes) gets the same vertical rhythm.
+      height: topInset + contentHeight,
+      child: Padding(
+        padding: EdgeInsets.only(top: topInset),
+        child: SizedBox(
+          height: contentHeight,
+          child: Stack(
+          alignment: Alignment.center,
         children: [
           Positioned(
             left: 4,
@@ -199,7 +202,8 @@ class ShTopBar extends StatelessWidget {
             ),
           ),
         ],
-      ),
+          ),
+        ),
       ),
     );
   }
