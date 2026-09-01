@@ -90,37 +90,6 @@ class LifecycleViewState extends State<LifecycleView> {
           onSearch: () => _search(context),
         ),
         Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        'Lifecycle',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Kelola siklus penuh Second Head',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: shMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Search',
-                  onPressed: () => _search(context),
-                  icon: const Icon(Icons.search_outlined, size: 23),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(10, 2, 10, 18),
             child: LifecycleMap(
