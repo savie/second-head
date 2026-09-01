@@ -168,8 +168,8 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _AuthScaffold(
-      title: 'Welcome back',
-      subtitle: 'Sign in to continue to SECOND HEAD',
+      title: 'Second Head',
+      subtitle: 'Human - AI Unity',
       fields: const [
         _AuthField(hint: 'Email'),
         _AuthField(
@@ -239,9 +239,8 @@ class ForgotPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _AuthScaffold(
-      title: 'Forgot password?',
-      subtitle:
-          'No worries! Enter your email and we’ll send you a link to reset your password.',
+      title: 'Forgot password',
+      subtitle: 'Enter your email and we’ll send you a link to reset your password.',
       fields: const [_AuthField(hint: 'Email')],
       primaryLabel: 'Send Reset Link',
       onPrimary: () => Navigator.of(context).pop(),
@@ -265,7 +264,7 @@ class SignUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _AuthScaffold(
-      title: 'Create your account',
+      title: 'Create Second Head Account',
       subtitle: 'Let’s get you started',
       fields: const [
         _AuthField(hint: 'Full name', icon: Icons.person_outline),
