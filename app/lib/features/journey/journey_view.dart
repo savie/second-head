@@ -98,6 +98,12 @@ class JourneyViewState extends State<JourneyView> {
               child: ListView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 88),
                 itemCount: visible.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: .82,
+                ),
                 itemBuilder: (_, index) {
                   final itemIndex = visible[index];
                   return JourneyCard(
@@ -384,88 +390,197 @@ class JourneyCard extends StatelessWidget {
   final JourneyItem item;
   final VoidCallback onTap;
 
+  Color get _accent {
+    switch (item.type) {
+      case 'Memory':
+        return shPurple;
+      case 'Experience':
+        return shCyan;
+      default:
+        return shElectric;
+    }
+  }
+
+  IconData get _icon {
+    switch (item.type) {
+      case 'Memory':
+        return Icons.psychology_outlined;
+      case 'Experience':
+        return Icons.auto_awesome_outlined;
+      default:
+        return Icons.menu_book_outlined;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(15),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.fromLTRB(13, 11, 10, 11),
-        decoration: BoxDecoration(
-          color: shSurface,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: shBorder),
-        ),
-        child: Row(
-          children: [
-            Expanded(
+    final accent = _accent;
+
+    return CustomPaint(
+      painter: _JourneyCardPainter(accent: accent),
+      child: ClipPath(
+        clipper: _JourneyCardClipper(),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 4,
-                        ),
+                        width: 46,
+                        height: 46,
                         decoration: BoxDecoration(
-                          color: shPurple.withValues(alpha: .12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          item.type,
-                          style: const TextStyle(
-                            fontSize: 9,
-                            color: shMuted,
+                          shape: BoxShape.circle,
+                          color: shBackground.withValues(alpha: .82),
+                          border: Border.all(
+                            color: accent.withValues(alpha: .48),
+                            width: 1.3,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accent.withValues(alpha: .12),
+                              blurRadius: 14,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
+                        alignment: Alignment.center,
+                        child: Icon(_icon, size: 22, color: accent),
                       ),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      const Spacer(),
+                      Text(
+                        item.type,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          color: accent,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const Spacer(),
                   Text(
-                    item.subtitle,
+                    item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 10,
-                      color: shMuted,
-                      height: 1.3,
+                      fontSize: 16,
+                      height: 1.15,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 7),
                   Text(
-                    item.date,
-                    style: const TextStyle(fontSize: 9, color: shMuted),
+                    item.subtitle,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      color: shMuted,
+                      height: 1.4,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: accent.withValues(alpha: .04),
+                          border: Border.all(
+                            color: accent.withValues(alpha: .42),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 17,
+                          color: accent,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        item.date,
+                        style: const TextStyle(
+                          fontSize: 8.5,
+                          color: shMuted,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            const Icon(
-              Icons.chevron_right,
-              size: 25,
-              color: shMuted,
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _JourneyCardClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    return Path()
+      ..moveTo(20, 0)
+      ..lineTo(size.width - 48, 0)
+      ..quadraticBezierTo(size.width - 8, 2, size.width - 3, 25)
+      ..lineTo(size.width, size.height - 42)
+      ..quadraticBezierTo(
+        size.width - 2,
+        size.height - 7,
+        size.width - 38,
+        size.height - 3,
+      )
+      ..lineTo(40, size.height)
+      ..quadraticBezierTo(4, size.height - 3, 2, size.height - 36)
+      ..lineTo(0, 38)
+      ..quadraticBezierTo(2, 4, 20, 0)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant _JourneyCardClipper oldClipper) => false;
+}
+
+class _JourneyCardPainter extends CustomPainter {
+  _JourneyCardPainter({required this.accent});
+
+  final Color accent;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = _JourneyCardClipper().getClip(size);
+    final fill = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          accent.withValues(alpha: .12),
+          shSurface.withValues(alpha: .96),
+          accent.withValues(alpha: .07),
+        ],
+      ).createShader(Offset.zero & size);
+
+    canvas.drawPath(path, fill);
+
+    final border = Paint()
+      ..color = accent.withValues(alpha: .76)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    canvas.drawPath(path, border);
+  }
+
+  @override
+  bool shouldRepaint(covariant _JourneyCardPainter oldDelegate) =>
+      oldDelegate.accent != accent;
 }
 
 class JourneyDraft {
