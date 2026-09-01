@@ -61,8 +61,8 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
               label: 'Journey',
             ),
             NavigationDestination(
-              icon: _LifecycleNavGlyph(),
-              selectedIcon: _LifecycleNavGlyph(selected: true),
+              icon: Icon(Icons.event_note_outlined, size: 22),
+              selectedIcon: Icon(Icons.event_note, size: 22),
               label: 'Lifecycle',
             ),
             NavigationDestination(
