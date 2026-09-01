@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
 import '../../core/state/sh_profile_state.dart';
+import '../../core/navigation/sh_navigation_shell.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
