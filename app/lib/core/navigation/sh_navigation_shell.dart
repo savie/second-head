@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/sh_theme.dart';
 
+
+
 class ShNavigationShell extends StatefulWidget {
   const ShNavigationShell({
     super.key,
@@ -23,7 +25,12 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: index == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && index > 0) _selectPage(index - 1);
+      },
+      child: Scaffold(
       drawer: widget.drawerBuilder(context, _selectPage),
       body: SafeArea(
         child: GestureDetector(
