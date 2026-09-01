@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../conversation/conversation_view.dart';
 import '../../core/theme/sh_theme.dart';
+import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/widgets/sh_brand_mark.dart';
 
 class SideMenu extends StatelessWidget {
@@ -81,7 +82,7 @@ class SideMenu extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.all(18),
               child: Row(children: [
-                _BrandMark(),
+                ShBrandMark(),
                 SizedBox(width: 10),
                 Expanded(
                   child: Column(

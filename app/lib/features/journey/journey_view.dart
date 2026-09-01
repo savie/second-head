@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
+import '../../core/navigation/sh_navigation_shell.dart';
 
 class JourneyView extends StatefulWidget { const JourneyView({super.key}); @override State<JourneyView> createState()=>JourneyViewState(); }
 class JourneyViewState extends State<JourneyView> {

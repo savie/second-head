@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
+import '../../core/navigation/sh_navigation_shell.dart';
 
 class LifecycleView extends StatefulWidget {
   const LifecycleView({super.key});
@@ -69,7 +70,7 @@ class LifecycleViewState extends State<LifecycleView> {
         ShTopBar(
           title: 'Lifecycle',
           actions: [
-            IconButton(onPressed: _search, icon: const Icon(Icons.search, size: 19)),
+            IconButton(onPressed: () => _search(context), icon: const Icon(Icons.search, size: 19)),
           ],
         ),
         Expanded(
@@ -83,7 +84,7 @@ class LifecycleViewState extends State<LifecycleView> {
                       minHeight: constraints.maxHeight - 26,
                       maxWidth: 520,
                     ),
-                    child: LifecycleMap(query: query, onStageTap: _showDetail),
+                    child: LifecycleMap(query: query, onStageTap: (stage) => _showDetail(context, stage)),
                   ),
                 ),
               );

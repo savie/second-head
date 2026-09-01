@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/sh_theme.dart';
+import '../../core/navigation/sh_navigation_shell.dart';
 
 final ValueNotifier<String> conversationTitle =
     ValueNotifier<String>('Today Priorities');
@@ -162,7 +163,9 @@ class ConversationViewState extends State<ConversationView> {
       ),
     );
   }
-class SelectableMessage extends StatelessWidget { const SelectableMessage({required this.index,required this.assistant,required this.selected,required this.onLongPress,required this.onTap,required this.child}); final int index; final bool assistant,selected; final VoidCallback onLongPress,onTap; final Widget child; @override Widget build(BuildContext context)=>GestureDetector(onLongPress:onLongPress,onTap:onTap,child:AnimatedContainer(duration:const Duration(milliseconds:160),decoration:BoxDecoration(borderRadius:BorderRadius.circular(18),color:selected?shPurple.withOpacity(.12):Colors.transparent),child:Stack(children:[child,if(selected)const Positioned(right:4,top:4,child:Icon(Icons.check_circle,size:17))]))); }
+}
+
+class SelectableMessage extends StatelessWidget { const SelectableMessage({required this.index,required this.assistant,required this.selected,required this.onLongPress,required this.onTap,required this.child}); final int index; final bool assistant,selected; final VoidCallback onLongPress,onTap; final Widget child; @override Widget build(BuildContext context)=>GestureDetector(onLongPress:onLongPress,onTap:onTap,child:AnimatedContainer(duration:const Duration(milliseconds:160),decoration:BoxDecoration(borderRadius:BorderRadius.circular(18),color:selected?shPurple.withValues(alpha: .12):Colors.transparent),child:Stack(children:[child,if(selected)const Positioned(right:4,top:4,child:Icon(Icons.check_circle,size:17))]))); }
 class ConversationMessage {
  ConversationMessage(this.text,this.assistant,this.time,{this.image});
  String text; final bool assistant; final String time; final Uint8List? image;
@@ -357,7 +360,7 @@ class ChatAvatar extends StatelessWidget {
           shape: BoxShape.circle,
           gradient: const LinearGradient(colors: [shPurple, shElectric]),
         ),
-        child: ClipOval(child: Image.asset('assets/brand/unity.png', fit: BoxFit.contain)),
+        child: ClipOval(child: Image.asset('assets/brand/unity@2x.png', fit: BoxFit.contain)),
       );
     }
     return ValueListenableBuilder<Uint8List?>(
