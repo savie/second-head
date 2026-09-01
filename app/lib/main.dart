@@ -713,7 +713,7 @@ class _Message extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 6),
                 child: _ChatAvatar(assistant: true),
               ),
-            child: Container(
+            Container(
           constraints: const BoxConstraints(maxWidth: 300),
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(10),
