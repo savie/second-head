@@ -8,5 +8,10 @@ void main() {
 
     expect(find.text('SECOND HEAD'), findsOneWidget);
     expect(find.byType(ShBrandMark), findsOneWidget);
+
+    // Allow SplashScreen's startup navigation timer to complete before
+    // the widget test tears down, avoiding a pending FakeTimer failure.
+    await tester.pump(const Duration(milliseconds: 1400));
+    await tester.pump();
   });
 }
