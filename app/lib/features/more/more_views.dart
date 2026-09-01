@@ -29,14 +29,16 @@ class _SideMenuState extends State<SideMenu> {
   void _startNewConversation() {
     conversationTitle.value = 'New Conversation';
     conversationRevision.value++;
-    _openPage(0);
+    _closeDrawer();
+    widget.onSelectPage(0);
   }
 
   void _openRecent(int index) {
     final conversations = recentConversations.value;
     if (index < 0 || index >= conversations.length) return;
     conversationTitle.value = conversations[index].title;
-    _openPage(0);
+    _closeDrawer();
+    widget.onSelectPage(0);
   }
 
   void _rename(BuildContext context, int index) {
@@ -56,37 +58,42 @@ class _SideMenuState extends State<SideMenu> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Rename conversation',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const Text(
+              'Rename conversation',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
             TextField(controller: controller, autofocus: true),
             const SizedBox(height: 14),
-            Row(children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(sheet),
-                  child: const Text('Cancel'),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(sheet),
+                    child: const Text('Cancel'),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () {
-                    final name = controller.text.trim();
-                    if (name.isNotEmpty) {
-                      final list = [...recentConversations.value];
-                      list[index] = RecentConversationEntry(name, item.preview);
-                      recentConversations.value = list;
-                      if (conversationTitle.value == item.title) {
-                        conversationTitle.value = name;
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {
+                      final name = controller.text.trim();
+                      if (name.isNotEmpty) {
+                        final list = [...recentConversations.value];
+                        list[index] =
+                            RecentConversationEntry(name, item.preview);
+                        recentConversations.value = list;
+                        if (conversationTitle.value == item.title) {
+                          conversationTitle.value = name;
+                        }
                       }
-                    }
-                    Navigator.pop(sheet);
-                  },
-                  child: const Text('Save'),
+                      Navigator.pop(sheet);
+                    },
+                    child: const Text('Save'),
+                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
           ],
         ),
       ),
@@ -104,7 +111,10 @@ class _SideMenuState extends State<SideMenu> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
             Text(body, style: const TextStyle(color: shMuted, height: 1.5)),
             const SizedBox(height: 18),
@@ -129,13 +139,72 @@ class _SideMenuState extends State<SideMenu> {
     );
   }
 
+  Widget _conversationEntries() {
+    return ValueListenableBuilder<List<RecentConversationEntry>>(
+      valueListenable: recentConversations,
+      builder: (context, conversations, _) => Padding(
+        padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 38, bottom: 4),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: _startNewConversation,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.add, size: 18, color: shCyan),
+                      SizedBox(width: 9),
+                      Text(
+                        'New Conversation',
+                        style: TextStyle(fontSize: 11, color: shCyan),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            for (var i = 0; i < conversations.length; i++)
+              GestureDetector(
+                onLongPress: () => _rename(context, i),
+                child: ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(vertical: -2),
+                  contentPadding: const EdgeInsets.only(left: 36, right: 4),
+                  leading: const Icon(
+                    Icons.chat_bubble_outline,
+                    size: 16,
+                    color: shMuted,
+                  ),
+                  title: Text(
+                    conversations[i].title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                  onTap: () => _openRecent(i),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _primaryPanel(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final panelWidth = _conversationExpanded
-        ? screenWidth * .52
-        : 292.0;
     return SizedBox(
-      width: panelWidth,
+      width: 292,
       child: SafeArea(
         child: Column(
           children: [
@@ -149,8 +218,17 @@ class _SideMenuState extends State<SideMenu> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Savie', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                        Text('savie@secondhead.app', style: TextStyle(fontSize: 9, color: shMuted)),
+                        Text(
+                          'Savie',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'savie@secondhead.app',
+                          style: TextStyle(fontSize: 9, color: shMuted),
+                        ),
                       ],
                     ),
                   ),
@@ -161,141 +239,63 @@ class _SideMenuState extends State<SideMenu> {
             MenuTile(
               icon: Icons.chat_bubble_outline,
               label: 'Conversation',
-              onTap: () => setState(() => _conversationExpanded = true),
+              onTap: () => setState(
+                () => _conversationExpanded = !_conversationExpanded,
+              ),
             ),
-            const Divider(color: shBorder),
-            MenuTile(customIcon: const ShSectionNavIcon.journey(), label: 'Journey', onTap: () => _openPage(1)),
-            MenuTile(customIcon: const ShSectionNavIcon.lifecycle(), label: 'Lifecycle', onTap: () => _openPage(2)),
-            MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(3)),
+            if (_conversationExpanded) _conversationEntries(),
+            MenuTile(
+              customIcon: const ShSectionNavIcon.journey(),
+              label: 'Journey',
+              onTap: () => _openPage(1),
+            ),
+            MenuTile(
+              customIcon: const ShSectionNavIcon.lifecycle(),
+              label: 'Lifecycle',
+              onTap: () => _openPage(2),
+            ),
+            MenuTile(
+              icon: Icons.person_outline,
+              label: 'Profile',
+              onTap: () => _openPage(3),
+            ),
+            MenuTile(
+              icon: Icons.settings_outlined,
+              label: 'Settings',
+              onTap: () => Navigator.pop(context),
+            ),
             MenuTile(
               icon: Icons.help_outline,
               label: 'Help & Support',
-              onTap: () => _showInfo(context, 'Help & Support', 'Help, guidance, and support for SECOND HEAD.'),
+              onTap: () => _showInfo(
+                context,
+                'Help & Support',
+                'Help, guidance, and support for SECOND HEAD.',
+              ),
             ),
             MenuTile(
               icon: Icons.info_outline,
               label: 'About',
-              onTap: () => _showInfo(context, 'About', 'SECOND HEAD\\nVersion 1.0.0\\nBuild #1'),
+              onTap: () => _showInfo(
+                context,
+                'About',
+                'SECOND HEAD\\nVersion 1.0.0\\nBuild #1',
+              ),
             ),
             const Spacer(),
-            const Divider(color: shBorder),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 2, 10, 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: MenuTile(
-                      icon: Icons.settings_outlined,
-                      label: 'Settings',
-                      onTap: () => Navigator.pop(context),
-                    ),
-                  ),
-                  Expanded(
-                    child: MenuTile(
-                      icon: Icons.logout_outlined,
-                      label: 'Log Out',
-                      onTap: _logout,
-                    ),
-                  ),
-                ],
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: MenuTile(
+                  icon: Icons.logout_outlined,
+                  label: 'Log Out',
+                  onTap: _logout,
+                  danger: true,
+                ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _conversationPanel(BuildContext context) {
-    return Expanded(
-      child: Container(
-        decoration: const BoxDecoration(
-          border: Border(left: BorderSide(color: shBorder)),
-        ),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 22, 12, 12),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Conversation',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Close',
-                      onPressed: () => setState(() => _conversationExpanded = false),
-                      icon: const Icon(Icons.close, size: 20),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: _startNewConversation,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
-                    decoration: BoxDecoration(
-                      color: shSurface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: shBorder),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.add, size: 20, color: shCyan),
-                        SizedBox(width: 10),
-                        Text('New Conversation', style: TextStyle(fontSize: 13, color: shCyan)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                child: Text(
-                  'Recent',
-                  style: TextStyle(fontSize: 12, color: shMuted, fontWeight: FontWeight.w600),
-                ),
-              ),
-              Expanded(
-                child: ValueListenableBuilder<List<RecentConversationEntry>>(
-                  valueListenable: recentConversations,
-                  builder: (context, conversations, _) => ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 2, 12, 16),
-                    itemCount: conversations.length,
-                    itemBuilder: (context, i) => GestureDetector(
-                      onLongPress: () => _rename(context, i),
-                      child: ListTile(
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                        leading: const Icon(Icons.chat_bubble_outline, size: 17, color: shMuted),
-                        title: Text(
-                          conversations[i].title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        subtitle: Text(
-                          conversations[i].preview,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 9, color: shMuted),
-                        ),
-                        onTap: () => _openRecent(i),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -305,13 +305,8 @@ class _SideMenuState extends State<SideMenu> {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: shBackground,
-      width: _conversationExpanded ? MediaQuery.sizeOf(context).width : 292,
-      child: Row(
-        children: [
-          _primaryPanel(context),
-          if (_conversationExpanded) _conversationPanel(context),
-        ],
-      ),
+      width: 292,
+      child: _primaryPanel(context),
     );
   }
 }
@@ -353,7 +348,10 @@ class AboutView extends StatelessWidget {
                     const SizedBox(height: 18),
                     const Text(
                       'SECOND HEAD',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 5),
                     const Text(
@@ -401,19 +399,29 @@ class AboutRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    child: Row(
-      children: [
-        Text(label, style: const TextStyle(fontSize: 11)),
-        const Spacer(),
-        Text(value, style: const TextStyle(fontSize: 10, color: shMuted)),
-      ],
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 11)),
+            const Spacer(),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 10, color: shMuted),
+            ),
+          ],
+        ),
+      );
 }
 
 class MenuTile extends StatelessWidget {
-  const MenuTile({this.icon, this.customIcon, required this.label, this.onTap, this.danger = false});
+  const MenuTile({
+    this.icon,
+    this.customIcon,
+    required this.label,
+    this.onTap,
+    this.danger = false,
+  });
+
   final IconData? icon;
   final Widget? customIcon;
   final String label;
@@ -424,11 +432,20 @@ class MenuTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
-      leading: customIcon ?? Icon(icon, size: 19, color: danger ? Colors.redAccent : shMuted),
-      title: Text(label, style: TextStyle(fontSize: 12, color: danger ? Colors.redAccent : Colors.white)),
+      leading: customIcon ??
+          Icon(
+            icon,
+            size: 19,
+            color: danger ? Colors.redAccent : shMuted,
+          ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: danger ? Colors.redAccent : Colors.white,
+        ),
+      ),
       onTap: onTap ?? () => Navigator.of(context).pop(),
     );
   }
 }
-
-
