@@ -323,15 +323,40 @@ class _LoginScreen extends StatelessWidget {
       onPrimary: () => Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const _HomeScreen()),
       ),
-      footer: Align(
-        alignment: Alignment.centerLeft,
-        child: TextButton(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const _ForgotPasswordScreen()),
+      footer: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const _ForgotPasswordScreen()),
+              ),
+              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              child: const Text('Forgot password?', style: TextStyle(fontSize: 10)),
+            ),
           ),
-          style: TextButton.styleFrom(padding: EdgeInsets.zero),
-          child: const Text('Forgot password?', style: TextStyle(fontSize: 10)),
-        ),
+          const SizedBox(height: 4),
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const _SignUpScreen()),
+              ),
+              child: const Text.rich(
+                TextSpan(
+                  text: 'Don’t have an account? ',
+                  style: TextStyle(fontSize: 10, color: _muted),
+                  children: [
+                    TextSpan(
+                      text: 'Sign up',
+                      style: TextStyle(color: _cyan),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       secondary: const _SocialButtons(),
     );
@@ -378,7 +403,23 @@ class _SignUpScreen extends StatelessWidget {
       onPrimary: () => Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const _HomeScreen()),
       ),
-      footer: const SizedBox.shrink(),
+      footer: Center(
+        child: TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text.rich(
+            TextSpan(
+              text: 'Already have an account? ',
+              style: TextStyle(fontSize: 10, color: _muted),
+              children: [
+                TextSpan(
+                  text: 'Sign in',
+                  style: TextStyle(color: _cyan),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       secondary: const _SocialButtons(),
     );
   }
