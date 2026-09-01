@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/navigation/sh_navigation_shell.dart';
-import 'features/chat/conversation/conversation_view.dart';
+import 'features/conversation/conversation_view.dart';
 import 'features/journey/journey_view.dart';
 import 'features/lifecycle/lifecycle_view.dart';
 import 'features/profile/profile_view.dart';
