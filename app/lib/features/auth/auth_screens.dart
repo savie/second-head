@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
 import '../../core/widgets/sh_brand_mark.dart';
-import 'splash_screen.dart';
+import '../home/home_screen.dart';
 
 class _AuthScaffold extends StatelessWidget {
   const _AuthScaffold({
@@ -119,7 +119,7 @@ class _AuthField extends StatelessWidget {
 }
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen();
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +137,7 @@ class LoginScreen extends StatelessWidget {
       ],
       primaryLabel: 'Sign In',
       onPrimary: () => Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const _HomeScreen()),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       ),
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -180,7 +180,7 @@ class LoginScreen extends StatelessWidget {
 }
 
 class ForgotPasswordScreen extends StatelessWidget {
-  const ForgotPasswordScreen();
+  const ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +202,7 @@ class ForgotPasswordScreen extends StatelessWidget {
 }
 
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen();
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
