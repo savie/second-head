@@ -8,8 +8,6 @@ import 'core/theme/sh_theme.dart';
 import 'features/more/more_views.dart';
 import 'features/auth/splash_screen.dart';
 import 'features/auth/auth_screens.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:typed_data';
 
 final ValueNotifier<Uint8List?> _profilePhoto = ValueNotifier<Uint8List?>(null);
 
