@@ -9,11 +9,58 @@ class LifecycleView extends StatefulWidget {
 }
 
 class LifecycleViewState extends State<LifecycleView> {
-  void _search(BuildContext context) async { final ctl=TextEditingController(); final result=await showModalBottomSheet<String>(context: context, isScrollControlled: true, backgroundColor: shSurface, showDragHandle: true, builder: (c) => Padding(padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(c).viewInsets.bottom + 18), child: TextField(controller: ctl, autofocus: true, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search lifecycle')))); }
+  Future<void> _search(BuildContext context) async {
+    final controller = TextEditingController(text: query);
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (sheet) => Padding(
+        padding: EdgeInsets.fromLTRB(18, 8, 18,
+            MediaQuery.of(sheet).viewInsets.bottom + 18),
+        child: TextField(
+          controller: controller,
+          autofocus: true,
+          textInputAction: TextInputAction.search,
+          onSubmitted: (_) => Navigator.pop(sheet, controller.text),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.search),
+            hintText: 'Search lifecycle',
+          ),
+        ),
+      ),
+    );
+    controller.dispose();
+    if (!mounted || result == null) return;
+    setState(() => query = result.trim());
+  }
 
-  String query='';
-
-  void _showDetail(BuildContext context, LifecycleStage stage) { showModalBottomSheet<void>(context: context, backgroundColor: shSurface, showDragHandle: true, builder: (_) => Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 28), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(stage.icon, size: 24), const SizedBox(width: 10), Text(stage.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))]), const SizedBox(height: 12), Text(stage.subtitle, style: const TextStyle(color: shMuted, height: 1.5))]))); ctl.dispose(); if(mounted&&result!=null)setState(()=>query=result.trim()); }
+  void _showDetail(BuildContext context, LifecycleStage stage) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(stage.icon, size: 24),
+              const SizedBox(width: 10),
+              Expanded(child: Text(stage.title,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))),
+            ]),
+            const SizedBox(height: 12),
+            Text(stage.subtitle,
+              style: const TextStyle(color: shMuted, height: 1.5)),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
