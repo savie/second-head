@@ -463,9 +463,4 @@ class _HomeScreen extends StatelessWidget {
   }
 }
 
-final ValueNotifier<List<RecentConversationEntry>> recentConversations =
-    ValueNotifier<List<RecentConversationEntry>>([
-  const RecentConversationEntry('Today Priorities', 'Summary and top priorities'),
-  const RecentConversationEntry('SH Roadmap', 'Project planning and milestones'),
-  const RecentConversationEntry('Ideas & Notes', 'Personalized ideas and notes'),
-]);
+
