@@ -949,16 +949,6 @@ class _JourneyView extends StatelessWidget {
             IconButton(onPressed: () {}, icon: const Icon(Icons.refresh_rounded, size: 20)),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 2, 12, 8),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search your journey...',
-              prefixIcon: const Icon(Icons.search, size: 18),
-              suffixIcon: IconButton(onPressed: () {}, icon: const Icon(Icons.tune, size: 17)),
-            ),
-          ),
-        ),
         const _FilterChips(),
         Expanded(
           child: ListView(
@@ -987,9 +977,9 @@ class _FilterChips extends StatelessWidget {
       child: Row(
         children: [
           _Chip(label: 'All', selected: true),
-          _Chip(label: 'Important'),
-          _Chip(label: 'Pinned'),
-          _Chip(label: 'Recent'),
+          _Chip(label: 'Memory'),
+          _Chip(label: 'Knowledge'),
+          _Chip(label: 'Experience'),
         ],
       ),
     );
