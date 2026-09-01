@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
+
+final ValueNotifier<Uint8List?> _profilePhoto = ValueNotifier<Uint8List?>(null);
 
 void main() => runApp(const SecondHeadApp());
 
@@ -701,7 +704,16 @@ class _Message extends StatelessWidget {
       onLongPress: () => _showActions(context),
       child: Align(
         alignment: assistant ? Alignment.centerLeft : Alignment.centerRight,
-        child: Container(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (assistant)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: _ChatAvatar(assistant: true),
+              ),
+            child: Container(
           constraints: const BoxConstraints(maxWidth: 300),
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(10),
@@ -746,6 +758,43 @@ class _Message extends StatelessWidget {
             ],
           ),
         ),
+            if (!assistant)
+              Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: _ChatAvatar(assistant: false),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatAvatar extends StatelessWidget {
+  const _ChatAvatar({required this.assistant});
+  final bool assistant;
+
+  @override
+  Widget build(BuildContext context) {
+    if (assistant) {
+      return Container(
+        width: 22,
+        height: 22,
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(colors: [_purple, _electric]),
+        ),
+        child: ClipOval(child: Image.asset('assets/brand/unity.png', fit: BoxFit.contain)),
+      );
+    }
+    return ValueListenableBuilder<Uint8List?>(
+      valueListenable: _profilePhoto,
+      builder: (context, photo, _) => CircleAvatar(
+        radius: 11,
+        backgroundColor: _surface2,
+        backgroundImage: photo != null ? MemoryImage(photo) : null,
+        child: photo == null ? const Icon(Icons.person_outline, size: 13, color: _muted) : null,
       ),
     );
   }
@@ -1194,8 +1243,65 @@ class _LifecycleCard extends StatelessWidget {
   }
 }
 
-class _ProfileView extends StatelessWidget {
+class _ProfileView extends StatefulWidget {
   const _ProfileView();
+
+  @override
+  State<_ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<_ProfileView> {
+  Future<void> _pickPhoto(ImageSource source) async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: source, imageQuality: 88, maxWidth: 900);
+    if (file == null) return;
+    _profilePhoto.value = await file.readAsBytes();
+  }
+
+  void _showPhotoOptions() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: _surface,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 6, 18, 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _ProfilePhotoAction(
+                icon: Icons.camera_alt_outlined,
+                label: 'Camera',
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickPhoto(ImageSource.camera);
+                },
+              ),
+              _ProfilePhotoAction(
+                icon: Icons.photo_library_outlined,
+                label: 'Photos',
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickPhoto(ImageSource.gallery);
+                },
+              ),
+              _ProfilePhotoAction(
+                icon: Icons.delete_outline,
+                label: 'Remove',
+                onTap: () {
+                  Navigator.pop(context);
+                  _profilePhoto.value = null;
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1211,30 +1317,66 @@ class _ProfileView extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
             children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
-                decoration: BoxDecoration(
-                  color: _surface,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: _border),
-                ),
-                child: const Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 23,
-                      backgroundColor: _purple,
-                      child: Icon(Icons.person, size: 24),
-                    ),
-                    SizedBox(width: 11),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Savie', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                        SizedBox(height: 3),
-                        Text('savie@secondhead.app', style: TextStyle(fontSize: 9, color: _muted)),
-                      ],
-                    ),
-                  ],
+              ValueListenableBuilder<Uint8List?>(
+                valueListenable: _profilePhoto,
+                builder: (context, photo, _) => Container(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 12, 16),
+                  decoration: BoxDecoration(
+                    color: _surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: _border),
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: _showPhotoOptions,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            CircleAvatar(
+                              radius: 29,
+                              backgroundColor: _surface2,
+                              backgroundImage: photo != null ? MemoryImage(photo) : null,
+                              child: photo == null
+                                  ? const Icon(Icons.person_outline, size: 27, color: _muted)
+                                  : null,
+                            ),
+                            Positioned(
+                              right: -2,
+                              bottom: -2,
+                              child: Container(
+                                width: 23,
+                                height: 23,
+                                decoration: BoxDecoration(
+                                  color: _purple,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: _surface, width: 2),
+                                ),
+                                child: const Icon(Icons.camera_alt_outlined, size: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Savie', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                            SizedBox(height: 3),
+                            Text('savie@secondhead.app', style: TextStyle(fontSize: 9, color: _muted)),
+                            SizedBox(height: 5),
+                            Text('Tap your photo to change it', style: TextStyle(fontSize: 8, color: _muted)),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _showPhotoOptions,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -1250,6 +1392,40 @@ class _ProfileView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ProfilePhotoAction extends StatelessWidget {
+  const _ProfilePhotoAction({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(colors: [_purple, _electric]),
+              ),
+              child: Icon(icon),
+            ),
+            const SizedBox(height: 7),
+            Text(label, style: const TextStyle(fontSize: 10)),
+          ],
+        ),
+      ),
     );
   }
 }
