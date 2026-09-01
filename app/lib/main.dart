@@ -793,7 +793,10 @@ class _JourneyView extends StatelessWidget {
       children: [
         const _TopBar(
           title: 'Journey',
-          actions: [Icon(Icons.refresh_rounded, size: 20)],
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 19)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.refresh_rounded, size: 20)),
+          ],
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 2, 12, 8),
@@ -909,7 +912,10 @@ class _LifecycleView extends StatelessWidget {
       children: [
         const _TopBar(
           title: 'Lifecycle',
-          actions: [Icon(Icons.fullscreen, size: 18)],
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 19)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.fullscreen, size: 18)),
+          ],
         ),
         const _Tabs(),
         Expanded(
