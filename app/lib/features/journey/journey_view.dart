@@ -161,20 +161,26 @@ class JourneyViewState extends State<JourneyView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Create new',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  JourneyCreateAction(
+                    icon: Icons.psychology_outlined,
+                    label: 'Memory',
+                    onTap: () => Navigator.of(sheet).pop('Memory'),
+                  ),
+                  JourneyCreateAction(
+                    icon: Icons.menu_book_outlined,
+                    label: 'Knowledge',
+                    onTap: () => Navigator.of(sheet).pop('Knowledge'),
+                  ),
+                  JourneyCreateAction(
+                    icon: Icons.auto_awesome_outlined,
+                    label: 'Experience',
+                    onTap: () => Navigator.of(sheet).pop('Experience'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              for (final type in const ['Memory', 'Knowledge', 'Experience'])
-                ListTile(
-                  leading: const Icon(Icons.add_circle_outline),
-                  title: Text(type),
-                  onTap: () => Navigator.of(sheet).pop(type),
-                ),
             ],
           ),
         ),
@@ -472,6 +478,49 @@ class _JourneyCardPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _JourneyCardPainter oldDelegate) =>
       oldDelegate.accent != accent;
+}
+
+class JourneyCreateAction extends StatelessWidget {
+  const JourneyCreateAction({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [shPurple, shElectric],
+                  ),
+                ),
+                child: Icon(icon),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 10),
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 class JourneyDraft {
