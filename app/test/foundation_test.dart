@@ -9,9 +9,9 @@ void main() {
     expect(find.text('SECOND HEAD'), findsOneWidget);
     expect(find.byType(ShBrandMark), findsOneWidget);
 
-    // Allow SplashScreen's startup navigation timer to complete before
-    // the widget test tears down, avoiding a pending FakeTimer failure.
-    await tester.pump(const Duration(milliseconds: 1400));
+    // Splash is intentionally shown on every app entry.
+    // Allow its session-routing timer to complete before teardown.
+    await tester.pump(const Duration(milliseconds: 1600));
     await tester.pump();
   });
 }
