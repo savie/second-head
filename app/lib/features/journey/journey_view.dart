@@ -86,7 +86,16 @@ class JourneyViewState extends State<JourneyView> {
       children: [
         Column(
           children: [
-            const ShTopBar(title: 'Journey'),
+            ShTopBar(
+              title: 'Journey',
+              actions: [
+                IconButton(
+                  tooltip: 'Search',
+                  onPressed: () => _search(context),
+                  icon: const Icon(Icons.search, size: 23),
+                ),
+              ],
+            ),
             JourneyFilters(
               value: filter,
               onChanged: (value) => setState(() => filter = value),
@@ -117,6 +126,86 @@ class JourneyViewState extends State<JourneyView> {
         ),
       ],
     );
+  }
+
+  Future<void> _search(BuildContext context) async {
+    final result = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) {
+        var query = '';
+        return StatefulBuilder(
+          builder: (_, setLocal) {
+            final normalized = query.trim().toLowerCase();
+            final matches = <int>[
+              for (var i = 0; i < items.length; i++)
+                if (normalized.isEmpty ||
+                    [
+                      items[i].title,
+                      items[i].subtitle,
+                      items[i].content,
+                      items[i].type,
+                    ].any((value) => value.toLowerCase().contains(normalized)))
+                  i,
+            ];
+
+            return AlertDialog(
+              title: const Text('Search Journey'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      autofocus: true,
+                      onChanged: (value) => setLocal(() => query = value),
+                      decoration: const InputDecoration(
+                        hintText: 'Search journey...',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (matches.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 18),
+                        child: Text('No journey found.'),
+                      )
+                    else
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 300),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: matches.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (_, index) {
+                            final item = items[matches[index]];
+                            return ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(item.title),
+                              subtitle: Text(item.type),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () => Navigator.pop(
+                                dialogContext,
+                                matches[index],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted || result == null || result < 0 || result >= items.length) {
+      return;
+    }
+
+    setState(() => selected = result);
   }
 
   Future<void> _create(BuildContext context) async {
