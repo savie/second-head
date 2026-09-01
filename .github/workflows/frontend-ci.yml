@@ -31,6 +31,12 @@ jobs:
           flutter create --platforms=android --org com.secondhead --project-name app --no-pub /tmp/second-head-build
           cp -R /tmp/second-head-build/android ./android
 
+          # Generated Android shell must use SH branding, not Flutter's project name.
+          sed -i 's/android:label="app"/android:label="SECOND HEAD"/' android/app/src/main/AndroidManifest.xml
+          mkdir -p android/app/src/main/res/drawable
+          cp assets/brand/unity.png android/app/src/main/res/drawable/sh_launcher.png
+          sed -i 's#android:icon="@mipmap/ic_launcher"#android:icon="@drawable/sh_launcher"#' android/app/src/main/AndroidManifest.xml
+
       - name: Install dependencies
         run: flutter pub get
 
