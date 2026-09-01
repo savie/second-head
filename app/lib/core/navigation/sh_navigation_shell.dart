@@ -83,10 +83,8 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
 }
 
 class ShSectionNavIcon extends StatelessWidget {
-  const ShSectionNavIcon._({required this.lifecycle});
-
-  factory ShSectionNavIcon.journey() => const ShSectionNavIcon._(lifecycle: false);
-  factory ShSectionNavIcon.lifecycle() => const ShSectionNavIcon._(lifecycle: true);
+  const ShSectionNavIcon.journey() : lifecycle = false;
+  const ShSectionNavIcon.lifecycle() : lifecycle = true;
 
   final bool lifecycle;
 
