@@ -31,7 +31,7 @@ class ConversationViewState extends State<ConversationView> {
       _messages
         ..clear()
         ..add(ConversationMessage(
-          'Hi, Savie! 👋\\nHow can I help you today?',
+          'Hi, Savie! 👋\nHow can I help you today?',
           true,
           'Now',
         ));
