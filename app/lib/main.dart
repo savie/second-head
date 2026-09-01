@@ -959,102 +959,236 @@ class _LifecycleView extends StatelessWidget {
         const _TopBar(
           title: 'Lifecycle',
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 19)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.fullscreen, size: 18)),
+            IconButton(onPressed: () {}, icon: Icon(Icons.search, size: 19)),
+            IconButton(onPressed: () {}, icon: Icon(Icons.fullscreen, size: 18)),
           ],
         ),
-        const _Tabs(),
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            children: const [
-              _SectionLabel('Today'),
-              _Task(title: 'Meeting with team SH', time: '10:00 AM'),
-              _Task(title: 'Review document R6', time: '01:00 PM'),
-              _Task(title: 'Implement feature A', time: '03:00 PM'),
-              SizedBox(height: 10),
-              _SectionLabel('Tomorrow'),
-              _Task(title: 'Update documentation', time: '09:00 AM'),
-              _Task(title: 'Test & validation', time: '02:00 PM'),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 26,
+                      maxWidth: 520,
+                    ),
+                    child: const _LifecycleMap(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LifecycleMap extends StatelessWidget {
+  const _LifecycleMap();
+
+  @override
+  Widget build(BuildContext context) {
+    final stages = const [
+      _LifecycleStage(
+        'Clone',
+        'Duplicate your Second Head state',
+        Icons.copy_all_rounded,
+        Alignment.centerLeft,
+      ),
+      _LifecycleStage(
+        'Recovery',
+        'Restore continuity when something changes',
+        Icons.restore_rounded,
+        Alignment.centerRight,
+      ),
+      _LifecycleStage(
+        'Inheritance',
+        'Pass knowledge and identity forward',
+        Icons.account_tree_rounded,
+        Alignment.centerLeft,
+      ),
+      _LifecycleStage(
+        'Succession',
+        'Continue the role beyond one instance',
+        Icons.swap_horiz_rounded,
+        Alignment.centerRight,
+      ),
+      _LifecycleStage(
+        'Legacy',
+        'Preserve what should remain meaningful',
+        Icons.auto_awesome_rounded,
+        Alignment.centerLeft,
+      ),
+      _LifecycleStage(
+        'End of Life',
+        'Close the lifecycle with dignity and control',
+        Icons.trip_origin_rounded,
+        Alignment.centerRight,
+      ),
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: _surface.withOpacity(.62),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: _border),
+        boxShadow: [
+          BoxShadow(
+            color: _purple.withOpacity(.08),
+            blurRadius: 30,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 18),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 400;
+          return Stack(
+            children: [
+              Positioned(
+                top: 22,
+                bottom: 22,
+                left: wide ? constraints.maxWidth / 2 - 1 : 22,
+                child: Container(
+                  width: 2,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [_purple, _electric, _cyan, _purple],
+                    ),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Column(
+                children: [
+                  for (var i = 0; i < stages.length; i++)
+                    _LifecycleCard(
+                      stage: stages[i],
+                      index: i,
+                      wide: wide,
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _LifecycleStage {
+  const _LifecycleStage(this.title, this.subtitle, this.icon, this.alignment);
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Alignment alignment;
+}
+
+class _LifecycleCard extends StatelessWidget {
+  const _LifecycleCard({
+    required this.stage,
+    required this.index,
+    required this.wide,
+  });
+
+  final _LifecycleStage stage;
+  final int index;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    final card = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {},
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 82),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          decoration: BoxDecoration(
+            color: _surface2.withOpacity(.82),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: _border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [_purple, _electric],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _purple.withOpacity(.22),
+                      blurRadius: 14,
+                    ),
+                  ],
+                ),
+                child: Icon(stage.icon, size: 20),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      stage.title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      stage.subtitle,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        color: _muted,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 5),
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 19,
+                color: _muted,
+              ),
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 14, bottom: 8),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: FloatingActionButton.small(
-              onPressed: () {},
-              backgroundColor: _purple,
-              child: const Icon(Icons.add),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Tabs extends StatelessWidget {
-  const _Tabs();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(child: _Tab(label: 'To Do', selected: true)),
-        Expanded(child: _Tab(label: 'In Progress')),
-        Expanded(child: _Tab(label: 'Done')),
-      ],
-    );
-  }
-}
-
-class _Tab extends StatelessWidget {
-  const _Tab({required this.label, this.selected = false});
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 9),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: selected ? _purple : _border, width: selected ? 2 : 1)),
       ),
-      child: Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 9, color: selected ? Colors.white : _muted)),
     );
-  }
-}
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 5),
-        child: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+    if (!wide) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 9),
+        child: card,
       );
-}
+    }
 
-class _Task extends StatelessWidget {
-  const _Task({required this.title, required this.time});
-  final String title;
-  final String time;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 11),
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: _border))),
-      child: Row(
-        children: [
-          const Icon(Icons.radio_button_unchecked, size: 18, color: _muted),
-          const SizedBox(width: 10),
-          Expanded(child: Text(title, style: const TextStyle(fontSize: 10))),
-          Text(time, style: const TextStyle(fontSize: 9, color: _muted)),
-        ],
+    final left = index.isEven;
+    return SizedBox(
+      height: 96,
+      child: Align(
+        alignment: left ? Alignment.centerLeft : Alignment.centerRight,
+        child: FractionallySizedBox(
+          widthFactor: .84,
+          child: card,
+        ),
       ),
     );
   }
