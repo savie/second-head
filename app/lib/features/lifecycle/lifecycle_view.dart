@@ -66,10 +66,10 @@ class LifecycleViewState extends State<LifecycleView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const ShTopBar(
+        ShTopBar(
           title: 'Lifecycle',
           actions: [
-            IconButton(onPressed: () => _search(context), icon: const Icon(Icons.search, size: 19)),
+            IconButton(onPressed: _search, icon: const Icon(Icons.search, size: 19)),
           ],
         ),
         Expanded(
@@ -83,7 +83,7 @@ class LifecycleViewState extends State<LifecycleView> {
                       minHeight: constraints.maxHeight - 26,
                       maxWidth: 520,
                     ),
-                    child: LifecycleMap(query: query),
+                    child: LifecycleMap(query: query, onStageTap: _showDetail),
                   ),
                 ),
               );
@@ -96,48 +96,29 @@ class LifecycleViewState extends State<LifecycleView> {
 }
 
 class LifecycleMap extends StatelessWidget {
-  const LifecycleMap({super.key, required this.query});
+  const LifecycleMap({super.key, required this.query, required this.onStageTap});
   final String query;
+  final ValueChanged<LifecycleStage> onStageTap;
 
   @override
   Widget build(BuildContext context) {
     final stages = [
-      const LifecycleStage(
-        'Clone',
-        'Duplicate your Second Head state',
-        Icons.copy_all_rounded,
-        Alignment.centerLeft,
-      ),
-      const LifecycleStage(
-        'Recovery',
-        'Restore continuity when something changes',
-        Icons.restore_rounded,
-        Alignment.centerRight,
-      ),
+      const LifecycleStage('Clone','Duplicate your Second Head state',Icons.copy_all_rounded),
+      const LifecycleStage('Recovery','Restore continuity when something changes',Icons.restore_rounded),
       const LifecycleStage(
         'Inheritance',
         'Pass knowledge and identity forward',
         Icons.account_tree_rounded,
         Alignment.centerLeft,
       ),
-      const LifecycleStage(
-        'Succession',
-        'Continue the role beyond one instance',
-        Icons.swap_horiz_rounded,
-        Alignment.centerRight,
-      ),
+      const LifecycleStage('Succession','Continue the role beyond one instance',Icons.swap_horiz_rounded),
       const LifecycleStage(
         'Legacy',
         'Preserve what should remain meaningful',
         Icons.auto_awesome_rounded,
         Alignment.centerLeft,
       ),
-      const LifecycleStage(
-        'End of Life',
-        'Close the lifecycle with dignity and control',
-        Icons.trip_origin_rounded,
-        Alignment.centerRight,
-      ),
+      const LifecycleStage('End of Life','Close the lifecycle with dignity and control',Icons.trip_origin_rounded),
     ];
     final q=query.toLowerCase();
     final visible=stages.where((s)=>q.isEmpty||('${s.title} ${s.subtitle}').toLowerCase().contains(q)).toList();
@@ -180,11 +161,7 @@ class LifecycleMap extends StatelessWidget {
               Column(
                 children: [
                   for (var i = 0; i < visible.length; i++)
-                    LifecycleCard(
-                      stage: visible[i],
-                      index: i,
-                      wide: wide,
-                    ),
+                    LifecycleCard(stage: visible[i], index: i, wide: wide, onTap: () => onStageTap(visible[i])),
                 ],
               ),
             ],
@@ -196,11 +173,10 @@ class LifecycleMap extends StatelessWidget {
 }
 
 class LifecycleStage {
-  const LifecycleStage(this.title, this.subtitle, this.icon, this.alignment);
+  const LifecycleStage(this.title, this.subtitle, this.icon);
   final String title;
   final String subtitle;
   final IconData icon;
-  final Alignment alignment;
 }
 
 class LifecycleCard extends StatelessWidget {
@@ -208,11 +184,13 @@ class LifecycleCard extends StatelessWidget {
     required this.stage,
     required this.index,
     required this.wide,
+    required this.onTap,
   });
 
   final LifecycleStage stage;
   final int index;
   final bool wide;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +198,7 @@ class LifecycleCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () => _showDetail(context, stage),
+        onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 82),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
