@@ -560,74 +560,23 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _ConversationView extends StatelessWidget {
-  const _ConversationView();
-
-  void _rename(BuildContext context) {
-    final controller = TextEditingController(text: _conversationTitle.value);
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: _surface,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (sheet) => Padding(
-        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 12),
-          TextField(controller: controller, autofocus: true),
-          const SizedBox(height: 14),
-          Row(children: [
-            Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
-            const SizedBox(width: 10),
-            Expanded(child: FilledButton(onPressed: () {
-              final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                _conversationTitle.value = name;
-                final list = [..._recentConversations.value];
-                final i = list.indexWhere((x) => x.title == _conversationTitle.value);
-                if (i >= 0) list[i] = _ConversationEntry(name, list[i].preview);
-                _recentConversations.value = list;
-              }
-              Navigator.pop(sheet);
-            }, child: const Text('Save'))),
-          ]),
-        ]),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      ValueListenableBuilder<String>(
-        valueListenable: _conversationTitle,
-        builder: (context, title, _) => _TopBar(
-          title: title,
-          actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 19)),
-            IconButton(onPressed: () => _rename(context), icon: const Icon(Icons.edit_square, size: 19)),
-          ],
-        ),
-      ),
-      const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: _CompanionCard()),
-      Expanded(child: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-        children: const [
-          _DateLabel('Today'),
-          _Message(text: 'Hi, Savie! 👋\nHow can I help you today?', time: '09:41', assistant: true),
-          _Message(text: 'Help me summarize my main plan for today and top priorities.', time: '09:41', assistant: false),
-          _Message(text: 'Sure! Here is your summary and top priorities.', time: '09:42', assistant: true),
-          _SummaryCard(),
-        ],
-      )),
-      const _Composer(),
-    ]);
-  }
+class _ConversationView extends StatefulWidget { const _ConversationView(); @override State<_ConversationView> createState()=>_ConversationViewState(); }
+class _ConversationViewState extends State<_ConversationView> {
+ final Set<int> selected={};
+ void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:_surface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[_ActionTile(Icons.copy_outlined,'Copy',()=>Navigator.pop(context)),_ActionTile(Icons.clear_all_rounded,'Clear',()=>Navigator.pop(context)),_ActionTile(Icons.delete_outline,'Delete',()=>Navigator.pop(context)),_ActionTile(Icons.share_outlined,'Share',()=>Navigator.pop(context)),const SizedBox(height:8)])));
+ void _messageActions(int index,{required bool assistant}){final actions=assistant?const ['Copy','Regenerate','Delete']:const ['Copy','Edit','Delete'];showModalBottomSheet<void>(context:context,backgroundColor:_surface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[for(final a in actions)_ActionTile(a=='Copy'?Icons.copy_outlined:a=='Edit'?Icons.edit_outlined:a=='Regenerate'?Icons.refresh_rounded:Icons.delete_outline,a,()=>Navigator.pop(context)),const SizedBox(height:8)])));}
+ void _enterSelection(int index)=>setState(()=>selected.add(index));
+ void _toggleSelection(int index)=>setState((){if(selected.contains(index)){selected.remove(index);}else{selected.add(index);}});
+ void _deleteSelected(){setState(()=>selected.clear());}
+ @override Widget build(BuildContext context){final selecting=selected.isNotEmpty;return Column(children:[
+ if(selecting)Container(height:56,padding:const EdgeInsets.symmetric(horizontal:8),decoration:const BoxDecoration(color:_surface),child:Row(children:[IconButton(onPressed:()=>setState(()=>selected.clear()),icon:const Icon(Icons.close)),Text(selected.length.toString(),style:const TextStyle(fontSize:15,fontWeight:FontWeight.w700)),const Spacer(),IconButton(onPressed:_deleteSelected,icon:const Icon(Icons.delete_outline))]))
+ else ValueListenableBuilder<String>(valueListenable:_conversationTitle,builder:(context,title,_)=>_TopBar(title:title,actions:[IconButton(onPressed:(){},icon:const Icon(Icons.search,size:19)),IconButton(onPressed:_conversationMenu,icon:const Icon(Icons.more_vert,size:21)),IconButton(onPressed:(){final controller=TextEditingController(text:title);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:_surface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(sheet)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sheet).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('Rename conversation',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:controller,autofocus:true),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sheet),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:(){final name=controller.text.trim();if(name.isNotEmpty)_conversationTitle.value=name;Navigator.pop(sheet);},child:const Text('Save')))])])));},icon:const Icon(Icons.edit_square,size:19))]))),
+ const Padding(padding:EdgeInsets.symmetric(horizontal:12),child:_CompanionCard()),
+ Expanded(child:ListView(padding:const EdgeInsets.fromLTRB(12,12,12,10),children:[const _DateLabel('Today'),_SelectableMessage(index:0,assistant:true,selected:selected.contains(0),onLongPress:()=>_enterSelection(0),onTap:()=>selecting?_toggleSelection(0):_messageActions(0,assistant:true),child:_Message(text:'Hi, Savie! 👋\\nHow can I help you today?',time:'09:41',assistant:true)),_SelectableMessage(index:1,assistant:false,selected:selected.contains(1),onLongPress:()=>_enterSelection(1),onTap:()=>selecting?_toggleSelection(1):_messageActions(1,assistant:false),child:_Message(text:'Help me summarize my main plan for today and top priorities.',time:'09:41',assistant:false)),_SelectableMessage(index:2,assistant:true,selected:selected.contains(2),onLongPress:()=>_enterSelection(2),onTap:()=>selecting?_toggleSelection(2):_messageActions(2,assistant:true),child:_Message(text:'Sure! Here is your summary and top priorities.',time:'09:42',assistant:true)),const _SummaryCard()])),
+ if(!selecting)const _Composer(),]);}
 }
-
+class _SelectableMessage extends StatelessWidget { const _SelectableMessage({required this.index,required this.assistant,required this.selected,required this.onLongPress,required this.onTap,required this.child}); final int index; final bool assistant,selected; final VoidCallback onLongPress,onTap; final Widget child; @override Widget build(BuildContext context)=>GestureDetector(onLongPress:onLongPress,onTap:onTap,child:AnimatedContainer(duration:const Duration(milliseconds:160),decoration:BoxDecoration(borderRadius:BorderRadius.circular(18),color:selected?_purple.withOpacity(.12):Colors.transparent),child:Stack(children:[child,if(selected)const Positioned(right:4,top:4,child:Icon(Icons.check_circle,size:17))]))); }
+class _ActionTile extends StatelessWidget { const _ActionTile(this.icon,this.label,this.onTap); final IconData icon; final String label; final VoidCallback onTap; @override Widget build(BuildContext context)=>ListTile(leading:Icon(icon,size:20),title:Text(label,style:const TextStyle(fontSize:11)),onTap:onTap); }
 class _CompanionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
