@@ -192,7 +192,7 @@ class _SideMenuState extends State<SideMenu> {
                   ),
                   Expanded(
                     child: MenuTile(
-                      icon: Icons.logout_rounded,
+                      icon: Icons.logout_outlined,
                       label: 'Log Out',
                       onTap: _logout,
                     ),
@@ -248,7 +248,7 @@ class _SideMenuState extends State<SideMenu> {
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.add_rounded, size: 20, color: shCyan),
+                        Icon(Icons.add, size: 20, color: shCyan),
                         SizedBox(width: 10),
                         Text('New Conversation', style: TextStyle(fontSize: 13, color: shCyan)),
                       ],
