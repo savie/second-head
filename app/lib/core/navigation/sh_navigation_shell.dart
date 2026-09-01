@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../theme/sh_theme.dart';
 
 
-
 class ShNavigationShell extends StatefulWidget {
   const ShNavigationShell({
     super.key,
@@ -33,7 +32,9 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
       child: Scaffold(
       drawer: widget.drawerBuilder(context, _selectPage),
       body: SafeArea(
-        child: GestureDetector(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          child: GestureDetector(
           onHorizontalDragEnd: (details) {
             final velocity = details.primaryVelocity ?? 0;
             if (velocity < -250 && index < widget.pages.length - 1) {
@@ -43,6 +44,12 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
             }
           },
           child: widget.pages[index],
+            onHorizontalDragEnd: (details) {
+              final velocity = details.primaryVelocity ?? 0;
+              if (velocity < -250 && index < widget.pages.length - 1) _selectPage(index + 1);
+              if (velocity > 250 && index > 0) _selectPage(index - 1);
+            },
+          ),
         ),
       ),
       bottomNavigationBar: NavigationBar(
