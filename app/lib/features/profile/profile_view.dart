@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
 
+final ValueNotifier<Uint8List?> _profilePhoto = ValueNotifier<Uint8List?>(null);
+
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
 
