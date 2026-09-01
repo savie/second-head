@@ -200,7 +200,7 @@ class LifecycleMap extends StatelessWidget {
     final visible = stages
         .where(
           (s) => q.isEmpty ||
-              '\${s.title} \${s.subtitle}'.toLowerCase().contains(q),
+              '${s.title} ${s.subtitle}'.toLowerCase().contains(q),
         )
         .toList();
 
@@ -223,7 +223,7 @@ class LifecycleMap extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 560;
+        final wide = constraints.maxWidth >= 330;
 
         if (!wide) {
           return _MobileLifecycle(
@@ -260,7 +260,7 @@ class _WideLifecycle extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width - 20;
 
     return SizedBox(
-      height: 790,
+      height: 620,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -275,12 +275,12 @@ class _WideLifecycle extends StatelessWidget {
                 left: i.isEven ? 8 : null,
                 right: i.isOdd ? 8 : null,
                 top: switch (i) {
-                  0 || 1 => 4,
-                  2 || 3 => 220,
-                  _ => 500,
+                  0 || 1 => 0,
+                  2 || 3 => 165,
+                  _ => 380,
                 },
                 width: width * .47,
-                height: 250,
+                height: 190,
                 child: LifecycleCard(
                   stage: ordered[i],
                   index: i,
@@ -289,7 +289,7 @@ class _WideLifecycle extends StatelessWidget {
               ),
           Positioned(
             left: (width - 150) / 2,
-            top: 355,
+            top: 275,
             child: const _LifecycleHub(),
           ),
         ],
@@ -373,8 +373,8 @@ class LifecycleCard extends StatelessWidget {
                     top: 0,
                     left: 0,
                     child: Container(
-                      width: 48,
-                      height: 48,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: shBackground.withValues(alpha: .92),
@@ -385,10 +385,10 @@ class LifecycleCard extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        '\${index + 1}'.padLeft(2, '0'),
+                        '${index + 1}'.padLeft(2, '0'),
                         style: TextStyle(
                           color: stage.accent,
-                          fontSize: 16,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -399,12 +399,12 @@ class LifecycleCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _StageIcon(stage: stage, size: 76),
+                        _StageIcon(stage: stage, size: 58),
                         const Spacer(),
                         Text(
                           stage.title,
                           style: const TextStyle(
-                            fontSize: 22,
+                            fontSize: 17,
                             height: 1.1,
                             fontWeight: FontWeight.w500,
                           ),
@@ -415,7 +415,7 @@ class LifecycleCard extends StatelessWidget {
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 11,
                             color: shMuted,
                             height: 1.45,
                           ),
@@ -424,8 +424,8 @@ class LifecycleCard extends StatelessWidget {
                         Align(
                           alignment: Alignment.bottomLeft,
                           child: Container(
-                            width: 44,
-                            height: 44,
+                            width: 36,
+                            height: 36,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: stage.accent.withValues(alpha: .05),
@@ -435,7 +435,7 @@ class LifecycleCard extends StatelessWidget {
                             ),
                             child: Icon(
                               Icons.arrow_forward_rounded,
-                              size: 22,
+                              size: 18,
                               color: stage.accent,
                             ),
                           ),
@@ -492,7 +492,7 @@ class _LifecycleHub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = compact ? 96.0 : 150.0;
+    final size = compact ? 76.0 : 118.0;
     return Container(
       width: size,
       height: size,
@@ -511,7 +511,7 @@ class _LifecycleHub extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.all(compact ? 17 : 24),
+      padding: EdgeInsets.all(compact ? 13 : 20),
       child: Image.asset(
         'assets/brand/unity.png',
         fit: BoxFit.contain,
