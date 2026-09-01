@@ -698,7 +698,7 @@ class _JourneyEditorSheetState extends State<JourneyEditorSheet> {
   }
 }
 
-class JourneyDetail extends StatelessWidget {
+class JourneyDetail extends StatefulWidget {
   const JourneyDetail({
     super.key,
     required this.item,
@@ -711,104 +711,107 @@ class JourneyDetail extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
+  State<JourneyDetail> createState() => _JourneyDetailState();
+}
+
+class _JourneyDetailState extends State<JourneyDetail> {
+  JourneyItem get item => widget.item;
+
+  @override
   Widget build(BuildContext context) {
-    // Detail screens own horizontal gestures so the global tab-swipe
-    // recognizer cannot hijack Android back / in-page horizontal gestures.
     return Scaffold(
       backgroundColor: shBackground,
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onHorizontalDragStart: (_) {},
-        onHorizontalDragUpdate: (_) {},
-        onHorizontalDragEnd: (_) {},
-        child: Column(
-          children: [
-            ShTopBar(
-          title: item.type,
-          leading: IconButton(
-            tooltip: 'Back',
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back),
+      body: Column(
+        children: [
+          ShTopBar(
+            title: item.type,
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+            actions: [
+              IconButton(
+                tooltip: 'Edit',
+                onPressed: () => _edit(context),
+                icon: const Icon(Icons.edit_outlined, size: 19),
+              ),
+              IconButton(
+                tooltip: 'Delete',
+                onPressed: () => _delete(context),
+                icon: const Icon(Icons.delete_outline, size: 19),
+              ),
+            ],
           ),
-          actions: [
-            IconButton(
-              tooltip: 'Edit',
-              onPressed: () => _edit(context),
-              icon: const Icon(Icons.edit_outlined, size: 19),
-            ),
-            IconButton(
-              tooltip: 'Delete',
-              onPressed: () => _delete(context),
-              icon: const Icon(Icons.delete_outline, size: 19),
-            ),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: shSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: shBorder),
-                  ),
-                  child: Text(
-                    item.content,
-                    style: const TextStyle(fontSize: 12, height: 1.5),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Policy',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: PolicyOption(
-                        label: 'Private',
-                        icon: Icons.lock_outline,
-                        selected: item.isPrivate,
-                        onTap: () {
-                          item.isPrivate = true;
-                          onChanged();
-                        },
-                      ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: PolicyOption(
-                        label: 'Public',
-                        icon: Icons.public,
-                        selected: !item.isPrivate,
-                        onTap: () {
-                          item.isPrivate = false;
-                          onChanged();
-                        },
-                      ),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: shSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: shBorder),
                     ),
-                  ],
-                ),
-              ],
+                    child: Text(
+                      item.content,
+                      style: const TextStyle(fontSize: 12, height: 1.5),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Policy',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: PolicyOption(
+                          label: 'Private',
+                          icon: Icons.lock_outline,
+                          selected: item.isPrivate,
+                          onTap: () {
+                            if (!item.isPrivate) {
+                              setState(() => item.isPrivate = true);
+                              widget.onChanged();
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: PolicyOption(
+                          label: 'Public',
+                          icon: Icons.public,
+                          selected: !item.isPrivate,
+                          onTap: () {
+                            if (item.isPrivate) {
+                              setState(() => item.isPrivate = false);
+                              widget.onChanged();
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -824,11 +827,13 @@ class JourneyDetail extends StatelessWidget {
 
     if (!context.mounted || draft == null) return;
 
-    item.title = draft.title;
-    item.content = draft.content;
-    item.subtitle = draft.content;
-    item.isPrivate = draft.isPrivate;
-    onChanged();
+    setState(() {
+      item.title = draft.title;
+      item.content = draft.content;
+      item.subtitle = draft.content;
+      item.isPrivate = draft.isPrivate;
+    });
+    widget.onChanged();
   }
 
   Future<void> _delete(BuildContext context) async {
@@ -850,7 +855,7 @@ class JourneyDetail extends StatelessWidget {
       ),
     );
 
-    if (confirmed == true && context.mounted) onDelete();
+    if (confirmed == true && context.mounted) widget.onDelete();
   }
 }
 
