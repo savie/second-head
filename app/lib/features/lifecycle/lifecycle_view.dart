@@ -15,12 +15,12 @@ class LifecycleViewState extends State<LifecycleView> {
 
   Future<void> _search(BuildContext context) async {
     const stages = [
-      LifecycleStage('Clone', 'Buat salinan Second Head untuk tujuan tertentu atau skenario spesifik.', Icons.copy_all_outlined, Color(0xFF9A45FF)),
-      LifecycleStage('Recovery', 'Pulihkan data, memori, atau keadaan Second Head dari cadangan.', Icons.shield_moon_outlined, Color(0xFF3B82F6)),
-      LifecycleStage('Inheritance', 'Teruskan memori, pengetahuan, dan nilai kepada generasi berikutnya.', Icons.account_tree_outlined, Color(0xFF22D3EE)),
-      LifecycleStage('Succession', 'Siapkan dan kelola transisi kepemilikan atau pengelolaan Second Head.', Icons.people_outline, Color(0xFF6366F1)),
-      LifecycleStage('Legacy', 'Kelola warisan digital yang bermakna dan berdampak jangka panjang.', Icons.menu_book_outlined, Color(0xFFF59E0B)),
-      LifecycleStage('End of Life', 'Atur penutupan, penghapusan, atau penyerahan Second Head secara aman dan terhormat.', Icons.favorite_border_outlined, Color(0xFFEC4899)),
+      LifecycleStage('Clone', 'Create a Second Head copy for a specific purpose or scenario.', Icons.copy_all_outlined, Color(0xFF9A45FF)),
+      LifecycleStage('Recovery', 'Restore Second Head data, memories, or state from a backup.', Icons.shield_moon_outlined, Color(0xFF3B82F6)),
+      LifecycleStage('Inheritance', 'Pass memories, knowledge, and values to the next generation.', Icons.account_tree_outlined, Color(0xFF22D3EE)),
+      LifecycleStage('Succession', 'Prepare and manage the transition of Second Head ownership or stewardship.', Icons.people_outline, Color(0xFF6366F1)),
+      LifecycleStage('Legacy', 'Manage a meaningful digital legacy for the long term.', Icons.menu_book_outlined, Color(0xFFF59E0B)),
+      LifecycleStage('End of Life', 'Handle the closure, deletion, or safe and respectful handover of Second Head.', Icons.favorite_border_outlined, Color(0xFFEC4899)),
     ];
     final result = await showShInternalSearch<LifecycleStage>(
       context: context,
@@ -118,37 +118,37 @@ class LifecycleMap extends StatelessWidget {
     final stages = [
       const LifecycleStage(
         'Clone',
-        'Buat salinan Second Head untuk tujuan tertentu atau skenario spesifik.',
+        'Create a Second Head copy for a specific purpose or scenario.',
         Icons.copy_all_outlined,
         Color(0xFF9A45FF),
       ),
       const LifecycleStage(
         'Recovery',
-        'Pulihkan data, memori, atau keadaan Second Head dari cadangan.',
+        'Restore Second Head data, memories, or state from a backup.',
         Icons.shield_moon_outlined,
         Color(0xFF3B82F6),
       ),
       const LifecycleStage(
         'Inheritance',
-        'Teruskan memori, pengetahuan, dan nilai kepada generasi berikutnya.',
+        'Pass memories, knowledge, and values to the next generation.',
         Icons.account_tree_outlined,
         Color(0xFF22D3EE),
       ),
       const LifecycleStage(
         'Succession',
-        'Siapkan dan kelola transisi kepemilikan atau pengelolaan Second Head.',
+        'Prepare and manage the transition of Second Head ownership or stewardship.',
         Icons.people_outline_rounded,
         Color(0xFF6366F1),
       ),
       const LifecycleStage(
         'Legacy',
-        'Kelola warisan digital yang bermakna dan berdampak jangka panjang.',
+        'Manage a meaningful digital legacy for the long term.',
         Icons.menu_book_rounded,
         Color(0xFFF59E0B),
       ),
       const LifecycleStage(
         'End of Life',
-        'Atur penutupan, penghapusan, atau penyerahan Second Head secara aman dan terhormat.',
+        'Handle the closure, deletion, or safe and respectful handover of Second Head.',
         Icons.favorite_border_rounded,
         Color(0xFFEC4899),
       ),
@@ -216,9 +216,11 @@ class _WideLifecycle extends StatelessWidget {
     );
 
     final width = MediaQuery.sizeOf(context).width - 20;
+    final cardWidth = width * .47;
+    final cardHeight = 196.0;
 
     return SizedBox(
-      height: 620,
+      height: 640,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -233,12 +235,12 @@ class _WideLifecycle extends StatelessWidget {
                 left: i.isEven ? 8 : null,
                 right: i.isOdd ? 8 : null,
                 top: switch (i) {
-                  0 || 1 => 0,
-                  2 || 3 => 165,
-                  _ => 380,
+                  0 || 1 => 8,
+                  2 || 3 => 222,
+                  _ => 436,
                 },
-                width: width * .47,
-                height: 190,
+                width: cardWidth,
+                height: cardHeight,
                 child: LifecycleCard(
                   stage: ordered[i],
                   onTap: () => onStageTap(ordered[i]),
@@ -246,7 +248,7 @@ class _WideLifecycle extends StatelessWidget {
               ),
           Positioned(
             left: (width - 150) / 2,
-            top: 275,
+            top: 276,
             child: const _LifecycleHub(),
           ),
         ],
@@ -320,57 +322,35 @@ class LifecycleCard extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 20, 20, 20),
-              child: Stack(
+              padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _StageIcon(stage: stage, size: 58),
-                        const Spacer(),
-                        Text(
-                          stage.title,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            height: 1.1,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          stage.subtitle,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: shMuted,
-                            height: 1.45,
-                          ),
-                        ),
-                        const Spacer(),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: stage.accent.withValues(alpha: .05),
-                              border: Border.all(
-                                color: stage.accent.withValues(alpha: .42),
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 18,
-                              color: stage.accent,
-                            ),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    stage.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      height: 1.1,
+                      fontWeight: FontWeight.w500,
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    stage.subtitle,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: shMuted,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 22,
+                    color: stage.accent,
                   ),
                 ],
               ),
