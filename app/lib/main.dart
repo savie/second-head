@@ -43,24 +43,12 @@ class _BrandMark extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        SizedBox(
           width: large ? 92 : 52,
           height: large ? 92 : 52,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Theme.of(context).colorScheme.onSurface,
-              width: large ? 3 : 2,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            'V3',
-            style: TextStyle(
-              fontSize: large ? 28 : 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
+          child: Image.asset(
+            'assets/brand/sh_logo_v3_unity.jpg',
+            fit: BoxFit.contain,
           ),
         ),
         const SizedBox(height: 12),

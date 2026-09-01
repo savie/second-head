@@ -6,5 +6,6 @@ void main() {
     await tester.pumpWidget(const SecondHeadApp());
 
     expect(find.text('SECOND HEAD'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
   });
 }
