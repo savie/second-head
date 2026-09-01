@@ -144,10 +144,12 @@ class ShTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      // Compact shared header: keep the app chrome close to the system
-      // status bar while leaving SafeArea responsible for status-bar inset.
-      height: 64,
-      child: Stack(
+      // Shared header height stays at 88; lift the visible chrome within
+      // the header so it remains visually close to the status bar.
+      height: 88,
+      child: Transform.translate(
+        offset: const Offset(0, -10),
+        child: Stack(
         alignment: Alignment.center,
         children: [
           Positioned(
@@ -197,6 +199,7 @@ class ShTopBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
