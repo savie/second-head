@@ -214,122 +214,6 @@ class JourneyViewState extends State<JourneyView> {
     );
   }
 
-  Future<JourneyDraft?> _showJourneyEditor(
-    BuildContext context, {
-    required String title,
-    String initialTitle = '',
-    String initialContent = '',
-    bool initialPrivate = true,
-  }) async {
-    final titleController = TextEditingController(text: initialTitle);
-    final contentController = TextEditingController(text: initialContent);
-    var privatePolicy = initialPrivate;
-
-    final draft = await showModalBottomSheet<JourneyDraft>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (sheet) => StatefulBuilder(
-        builder: (_, setLocal) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            18,
-            8,
-            18,
-            MediaQuery.viewInsetsOf(sheet).bottom + 18,
-          ),
-          child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: titleController,
-                  autofocus: initialTitle.isEmpty,
-                  textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(hintText: 'Title'),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: contentController,
-                  minLines: 4,
-                  maxLines: 7,
-                  textInputAction: TextInputAction.newline,
-                  decoration: const InputDecoration(hintText: 'Write content...'),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: PolicyOption(
-                        label: 'Private',
-                        icon: Icons.lock_outline,
-                        selected: privatePolicy,
-                        onTap: () => setLocal(() => privatePolicy = true),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: PolicyOption(
-                        label: 'Public',
-                        icon: Icons.public,
-                        selected: !privatePolicy,
-                        onTap: () => setLocal(() => privatePolicy = false),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(sheet).pop(),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          final newTitle = titleController.text.trim();
-                          final content = contentController.text.trim();
-                          if (newTitle.isEmpty || content.isEmpty) {
-                            return;
-                          }
-                          Navigator.of(sheet).pop(
-                            JourneyDraft(
-                              title: newTitle,
-                              content: content,
-                              isPrivate: privatePolicy,
-                            ),
-                          );
-                        },
-                        child: const Text('Save'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    titleController.dispose();
-    contentController.dispose();
-    return draft;
-  }
 
 }
 
@@ -610,6 +494,124 @@ class JourneyDraft {
   final String content;
   final bool isPrivate;
 }
+
+Future<JourneyDraft?> _showJourneyEditor(
+  BuildContext context, {
+  required String title,
+  String initialTitle = '',
+  String initialContent = '',
+  bool initialPrivate = true,
+}) async {
+  final titleController = TextEditingController(text: initialTitle);
+  final contentController = TextEditingController(text: initialContent);
+  var privatePolicy = initialPrivate;
+
+  final draft = await showModalBottomSheet<JourneyDraft>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: shSurface,
+    showDragHandle: true,
+    builder: (sheet) => StatefulBuilder(
+      builder: (_, setLocal) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          18,
+          8,
+          18,
+          MediaQuery.viewInsetsOf(sheet).bottom + 18,
+        ),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: titleController,
+                autofocus: initialTitle.isEmpty,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(hintText: 'Title'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: contentController,
+                minLines: 4,
+                maxLines: 7,
+                textInputAction: TextInputAction.newline,
+                decoration: const InputDecoration(hintText: 'Write content...'),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: PolicyOption(
+                      label: 'Private',
+                      icon: Icons.lock_outline,
+                      selected: privatePolicy,
+                      onTap: () => setLocal(() => privatePolicy = true),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: PolicyOption(
+                      label: 'Public',
+                      icon: Icons.public,
+                      selected: !privatePolicy,
+                      onTap: () => setLocal(() => privatePolicy = false),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(sheet).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        final newTitle = titleController.text.trim();
+                        final content = contentController.text.trim();
+                        if (newTitle.isEmpty || content.isEmpty) {
+                          return;
+                        }
+                        Navigator.of(sheet).pop(
+                          JourneyDraft(
+                            title: newTitle,
+                            content: content,
+                            isPrivate: privatePolicy,
+                          ),
+                        );
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+
+  titleController.dispose();
+  contentController.dispose();
+  return draft;
+}
+
 
 class JourneyDetail extends StatelessWidget {
   const JourneyDetail({
