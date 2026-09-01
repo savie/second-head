@@ -47,7 +47,7 @@ class _BrandMark extends StatelessWidget {
           width: large ? 92 : 52,
           height: large ? 92 : 52,
           child: Image.asset(
-            'assets/brand/sh_logo_v3_unity.jpg',
+            'assets/brand/unity.png',
             fit: BoxFit.contain,
           ),
         ),
