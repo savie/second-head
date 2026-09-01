@@ -3,7 +3,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
-import '../../core/navigation/sh_navigation_shell.dart';
 
 final ValueNotifier<Uint8List?> _profilePhoto = ValueNotifier<Uint8List?>(null);
 
@@ -17,7 +16,11 @@ class ProfileView extends StatefulWidget {
 class ProfileViewState extends State<ProfileView> {
   Future<void> _pickPhoto(ImageSource source) async {
     final picker = ImagePicker();
-    final file = await picker.pickImage(source: source, imageQuality: 88, maxWidth: 900);
+    final file = await picker.pickImage(
+      source: source,
+      imageQuality: 88,
+      maxWidth: 900,
+    );
     if (file == null) return;
     _profilePhoto.value = await file.readAsBytes();
   }
@@ -75,83 +78,54 @@ class ProfileViewState extends State<ProfileView> {
       children: [
         ShTopBar(
           title: 'Profile',
-          actions: [] ,
+          actions: const [],
         ),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 28),
             children: [
               ValueListenableBuilder<Uint8List?>(
                 valueListenable: _profilePhoto,
-                builder: (context, photo, _) => Container(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 12, 16),
-                  decoration: BoxDecoration(
-                    color: shSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: shBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: _showPhotoOptions,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            CircleAvatar(
-                              radius: 29,
-                              backgroundColor: shSurface2,
-                              backgroundImage: photo != null ? MemoryImage(photo) : null,
-                              child: photo == null
-                                  ? const Icon(Icons.person_outline, size: 27, color: shMuted)
-                                  : null,
-                            ),
-                            Positioned(
-                              right: -2,
-                              bottom: -2,
-                              child: Container(
-                                width: 23,
-                                height: 23,
-                                decoration: BoxDecoration(
-                                  color: shPurple,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: shSurface, width: 2),
-                                ),
-                                child: const Icon(Icons.camera_alt_outlined, size: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Your Profile', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            SizedBox(height: 3),
-                            Text('savie@secondhead.app', style: TextStyle(fontSize: 9, color: shMuted)),
-                            SizedBox(height: 5),
-                            Text('Tap your photo to change it', style: TextStyle(fontSize: 8, color: shMuted)),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _showPhotoOptions,
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                      ),
-                    ],
-                  ),
+                builder: (context, photo, _) => _ProfileHero(
+                  photo: photo,
+                  onEdit: _showPhotoOptions,
                 ),
               ),
-              const SizedBox(height: 10),
-              const _SettingsGroup(title: 'Settings', items: [
-                _SettingItem(Icons.person_outline, 'Account', 'Manage your personal information'),
-                _SettingItem(Icons.palette_outlined, 'Appearance', 'Choose theme and language'),
-                _SettingItem(Icons.notifications_none, 'Notifications', 'Manage your notification preferences'),
-                _SettingItem(Icons.lock_outline, 'Security', 'Password and security settings'),
-                _SettingItem(Icons.hub_outlined, 'Integrations', 'Manage connected services'),
-                _SettingItem(Icons.shield_outlined, 'Data & Privacy', 'Manage your data and privacy'),
-              ]),
+              const SizedBox(height: 18),
+              const _SettingsGroup(
+                items: [
+                  _SettingItem(
+                    Icons.person_outline,
+                    'Account',
+                    'Manage your personal information',
+                  ),
+                  _SettingItem(
+                    Icons.palette_outlined,
+                    'Appearance',
+                    'Choose theme and language',
+                  ),
+                  _SettingItem(
+                    Icons.notifications_none,
+                    'Notifications',
+                    'Manage your notification preferences',
+                  ),
+                  _SettingItem(
+                    Icons.lock_outline,
+                    'Security',
+                    'Password and security settings',
+                  ),
+                  _SettingItem(
+                    Icons.hub_outlined,
+                    'Integrations',
+                    'Manage connected services',
+                  ),
+                  _SettingItem(
+                    Icons.shield_outlined,
+                    'Data & Privacy',
+                    'Manage your data and privacy',
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -160,8 +134,170 @@ class ProfileViewState extends State<ProfileView> {
   }
 }
 
+class _ProfileHero extends StatelessWidget {
+  const _ProfileHero({
+    required this.photo,
+    required this.onEdit,
+  });
+
+  final Uint8List? photo;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 224,
+      decoration: BoxDecoration(
+        color: shSurface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: shBorder, width: 1.2),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: 112,
+              child: ClipPath(
+                clipper: _ProfileBannerClipper(),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.topRight,
+                      colors: [shPurple, shElectric],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 42,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                width: 92,
+                height: 92,
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: shBackground,
+                  border: Border.all(
+                    color: shBackground.withValues(alpha: .9),
+                    width: 4,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x66000000),
+                      blurRadius: 18,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: photo != null
+                      ? Image.memory(
+                          photo!,
+                          fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
+                        )
+                      : Image.asset(
+                          'assets/brand/unity.png',
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                        ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Material(
+              color: shBackground.withValues(alpha: .32),
+              shape: const CircleBorder(),
+              child: IconButton(
+                tooltip: 'Edit profile photo',
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_outlined, size: 21),
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 16,
+            right: 16,
+            bottom: 22,
+            child: Column(
+              children: [
+                Text(
+                  'Savie',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: .2,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'savie@secondhead.app',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: shMuted,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileBannerClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path()..moveTo(0, 0);
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height * .64);
+    path.cubicTo(
+      size.width * .82,
+      size.height * .88,
+      size.width * .64,
+      size.height * .98,
+      size.width * .47,
+      size.height * .72,
+    );
+    path.cubicTo(
+      size.width * .29,
+      size.height * .46,
+      size.width * .13,
+      size.height * .78,
+      0,
+      size.height * .58,
+    );
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
 class _ProfilePhotoAction extends StatelessWidget {
-  const _ProfilePhotoAction({required this.icon, required this.label, required this.onTap});
+  const _ProfilePhotoAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
@@ -181,11 +317,14 @@ class _ProfilePhotoAction extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(colors: [shPurple, shElectric]),
+                gradient: const LinearGradient(
+                  colors: [shPurple, shElectric],
+                ),
               ),
               child: Icon(icon),
             ),
-            Text(label, style: const TextStyle(fontSize: 10)),
+            const SizedBox(height: 5),
+            Text(label, style: const TextStyle(fontSize: 11)),
           ],
         ),
       ),
@@ -194,8 +333,8 @@ class _ProfilePhotoAction extends StatelessWidget {
 }
 
 class _SettingsGroup extends StatelessWidget {
-  const _SettingsGroup({required this.title, required this.items});
-  final String title;
+  const _SettingsGroup({required this.items});
+
   final List<_SettingItem> items;
 
   @override
@@ -203,14 +342,16 @@ class _SettingsGroup extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: shSurface,
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: shBorder),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: shBorder, width: 1.2),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           for (var i = 0; i < items.length; i++) ...[
             items[i],
-            if (i != items.length - 1) const Divider(height: 1, color: shBorder),
+            if (i != items.length - 1)
+              const Divider(height: 1, color: shBorder),
           ],
         ],
       ),
@@ -220,19 +361,55 @@ class _SettingsGroup extends StatelessWidget {
 
 class _SettingItem extends StatelessWidget {
   const _SettingItem(this.icon, this.title, this.subtitle);
+
   final IconData icon;
   final String title;
   final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      leading: Icon(icon, size: 19, color: shMuted),
-      title: Text(title, style: const TextStyle(fontSize: 11)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 8, color: shMuted)),
-      trailing: const Icon(Icons.chevron_right, size: 17, color: shMuted),
+    return SizedBox(
+      height: 88,
+      child: InkWell(
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Icon(icon, size: 27, color: Colors.white70),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: shMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                size: 26,
+                color: shMuted,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
