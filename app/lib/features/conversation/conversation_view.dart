@@ -109,16 +109,13 @@ class ConversationViewState extends State<ConversationView> {
         else
           ValueListenableBuilder<String>(
             valueListenable: conversationTitle,
-            builder: (context, title, _) => ShTopBar(
+            builder: (context, title, _) => ConversationHeader(
               title: title,
+              onTitleTap: () => _renameConversation(context, title),
               onSearch: () => _showSearch(context),
-              actions: [
-                IconButton(onPressed: _conversationMenu, icon: const Icon(Icons.more_vert, size: 21)),
-                IconButton(onPressed: () => _renameConversation(context, title), icon: const Icon(Icons.edit_square, size: 19)),
-              ],
+              onMenu: _conversationMenu,
             ),
           ),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: CompanionCard()),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
@@ -215,40 +212,124 @@ class ConversationMessage {
  String text; final bool assistant; final String time; final Uint8List? image;
 }
 class ActionTile extends StatelessWidget { const ActionTile(this.icon,this.label,this.onTap); final IconData icon; final String label; final VoidCallback onTap; @override Widget build(BuildContext context)=>ListTile(leading:Icon(icon,size:20),title:Text(label,style:const TextStyle(fontSize:11)),onTap:onTap); }
-class CompanionCard extends StatelessWidget {
+class ConversationHeader extends StatelessWidget {
+  const ConversationHeader({
+    super.key,
+    required this.title,
+    required this.onTitleTap,
+    required this.onSearch,
+    required this.onMenu,
+  });
+
+  final String title;
+  final VoidCallback onTitleTap;
+  final VoidCallback onSearch;
+  final VoidCallback onMenu;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(11),
-      decoration: BoxDecoration(
-        color: shSurface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: shBorder),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(colors: [shPurple, shElectric]),
+    final topInset = MediaQuery.paddingOf(context).top;
+    return SizedBox(
+      height: topInset + 86,
+      child: Padding(
+        padding: EdgeInsets.only(top: topInset),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 54,
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Menu',
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    icon: const Icon(Icons.menu, size: 30),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: onTitleTap,
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Search',
+                    onPressed: onSearch,
+                    icon: const Icon(Icons.search_outlined, size: 29),
+                  ),
+                  IconButton(
+                    tooltip: 'More',
+                    onPressed: onMenu,
+                    icon: const Icon(Icons.more_vert, size: 27),
+                  ),
+                ],
+              ),
             ),
-            child: const Icon(Icons.psychology_outlined, size: 18),
-          ),
-          const SizedBox(width: 10),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('SH Prime', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                SizedBox(height: 2),
-                Row(children: [Icon(Icons.circle, size: 6, color: Colors.green), SizedBox(width: 4), Text('Online', style: TextStyle(fontSize: 9, color: shMuted))]),
-              ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 7),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(colors: [shPurple, shElectric]),
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/brand/unity@2x.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'SH Prime',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                            SizedBox(height: 1),
+                            Row(
+                              children: [
+                                Icon(Icons.circle, size: 6, color: Colors.green),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Online',
+                                  style: TextStyle(fontSize: 10, color: shMuted),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.keyboard_arrow_down, size: 19, color: shMuted),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-          const Icon(Icons.keyboard_arrow_down, size: 18, color: shMuted),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -369,11 +450,11 @@ class Message extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     text,
-                    style: const TextStyle(fontSize: 11, height: 1.4),
+                    style: const TextStyle(fontSize: 14, height: 1.45),
                   ),
                 ),
               const SizedBox(height: 4),
-              Text(time, style: const TextStyle(fontSize: 8, color: shMuted)),
+              Text(time, style: const TextStyle(fontSize: 9, color: shMuted)),
             ],
           ),
         ),
@@ -455,22 +536,48 @@ class Composer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(12, 0, 12, 9),
-    child: Row(children: [
-      IconButton(onPressed: onAttach, icon: const Icon(Icons.add_circle_outline, size: 22)),
-      Expanded(child: SizedBox(height: 40, child: TextField(
-        controller: controller,
-        textInputAction: TextInputAction.send,
-        onSubmitted: (_) => onSend(),
-        decoration: InputDecoration(
-          hintText: 'Message SH...',
-          contentPadding: const EdgeInsets.symmetric(horizontal: 13),
-          suffixIcon: IconButton(onPressed: onSend, icon: const Icon(Icons.arrow_upward, size: 18)),
+    padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        IconButton(
+          onPressed: onAttach,
+          icon: const Icon(Icons.add_circle_outline, size: 28),
+          padding: const EdgeInsets.all(6),
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
         ),
-      ))),
-    ]),
+        const SizedBox(width: 4),
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 50, maxHeight: 130),
+            child: TextField(
+              controller: controller,
+              minLines: 1,
+              maxLines: 5,
+              textInputAction: TextInputAction.newline,
+              keyboardType: TextInputType.multiline,
+              decoration: const InputDecoration(
+                hintText: 'Message SH...',
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 50,
+          height: 50,
+          child: IconButton(
+            onPressed: onSend,
+            tooltip: 'Send',
+            icon: const Icon(Icons.arrow_upward, size: 25),
+          ),
+        ),
+      ],
+    ),
   );
 }
+
 
 class AttachAction extends StatelessWidget {
   const AttachAction({super.key, required this.icon, required this.label, required this.onTap});
