@@ -93,7 +93,39 @@ class ConversationViewState extends State<ConversationView> {
  final ScrollController _messageScrollController = ScrollController();
  final ImagePicker _picker = ImagePicker();
  final TextEditingController _searchController=TextEditingController();
- void _send(){final t=_composerController.text.trim();if(t.isEmpty)return;setState((){_messages.add(ConversationMessage(t,false,'Now'));_composerController.clear();});}
+ bool _staticReplyPending = false;
+
+void _send(){
+  final t=_composerController.text.trim();
+  if(t.isEmpty || _staticReplyPending)return;
+  setState(() {
+    _messages.add(ConversationMessage(t,false,'Now'));
+    _composerController.clear();
+    _staticReplyPending = true;
+  });
+  WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
+  Future<void>.delayed(const Duration(milliseconds: 650), () {
+    if(!mounted)return;
+    setState(() {
+      _messages.add(const ConversationMessage(
+        'Got it. SH menerima pesan ini dan jalur respons aktif. Respons dinamis akan terhubung ke model AI nanti.',
+        true,
+        'Now',
+      ));
+      _staticReplyPending = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
+  });
+}
+
+void _scrollToLatest(){
+  if(!_messageScrollController.hasClients)return;
+  _messageScrollController.animateTo(
+    _messageScrollController.position.maxScrollExtent,
+    duration: const Duration(milliseconds: 260),
+    curve: Curves.easeOut,
+  );
+}
  Future<void> _pickFile() async {
    Navigator.pop(context);
    final result = await FilePicker.platform.pickFiles(withData: true);
