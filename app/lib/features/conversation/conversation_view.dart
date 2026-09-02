@@ -107,7 +107,7 @@ void _send(){
   Future<void>.delayed(const Duration(milliseconds: 650), () {
     if(!mounted)return;
     setState(() {
-      _messages.add(const ConversationMessage(
+      _messages.add(ConversationMessage(
         'Got it. SH menerima pesan ini dan jalur respons aktif. Respons dinamis akan terhubung ke model AI nanti.',
         true,
         'Now',
