@@ -124,36 +124,16 @@ class ConversationViewState extends State<ConversationView> {
     final selecting = selected.isNotEmpty;
     return Column(
       children: [
-        if (selecting)
-          Container(
-            height: 56,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: const BoxDecoration(color: shSurface),
-            child: Row(
-              children: [
-                IconButton(
-                  tooltip: 'Close selection',
-                  onPressed: () => setState(() => selected.clear()),
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                Text(
-                  '${selected.length}',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-          )
-        else
-          ValueListenableBuilder<String>(
-            valueListenable: conversationTitle,
-            builder: (context, title, _) => ConversationHeader(
-              title: title,
-              onTitleTap: () => _renameConversation(context, title),
-              onSearch: () => _showSearch(context),
-              onMenu: _conversationMenu,
-              isOnline: _isOnline,
-            ),
+        ValueListenableBuilder<String>(
+          valueListenable: conversationTitle,
+          builder: (context, title, _) => ConversationHeader(
+            title: title,
+            onTitleTap: () => _renameConversation(context, title),
+            onSearch: () => _showSearch(context),
+            onMenu: _conversationMenu,
+            isOnline: _isOnline,
           ),
+        ),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
@@ -183,22 +163,18 @@ class ConversationViewState extends State<ConversationView> {
           ),
         ),
         if (selecting)
-          SafeArea(
-            top: false,
-            child: Container(
-              height: 82,
-              padding: const EdgeInsets.fromLTRB(18, 6, 18, 10),
-              decoration: const BoxDecoration(color: shSurface),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ActionTile(
-                    icon: Icons.delete_outline,
-                    label: 'Delete',
-                    onTap: _deleteSelected,
-                  ),
-                ],
-              ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 8),
+            decoration: const BoxDecoration(color: shSurface),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ActionTile(
+                  icon: Icons.delete_outline,
+                  label: 'Delete',
+                  onTap: _deleteSelected,
+                ),
+              ],
             ),
           )
         else
