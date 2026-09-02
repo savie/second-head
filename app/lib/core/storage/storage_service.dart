@@ -50,6 +50,15 @@ class StorageService {
     if (await file.exists()) await file.delete();
   }
 
+  static Future<File> saveConversationImage(Uint8List bytes, {String extension = 'jpg'}) async {
+    final dir = await directory('images');
+    final timestamp = DateTime.now().microsecondsSinceEpoch;
+    final safeExtension = extension.toLowerCase().replaceFirst(RegExp(r'^\\.'), '');
+    final file = File('${dir.path}/conversation_$timestamp.$safeExtension');
+    await file.writeAsBytes(bytes, flush: true);
+    return file;
+  }
+
   static Future<List<File>> listFiles({bool includeExports = true}) async {
     final rootDir = await root();
     final files = <File>[];
