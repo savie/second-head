@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -90,6 +91,34 @@ class StorageService {
     if (RegExp(r'\.(mp4|mov|m4v|webm|avi)$').hasMatch(path)) return 'video';
     if (RegExp(r'\.(mp3|m4a|wav|aac|ogg|opus)$').hasMatch(path)) return 'audio';
     return 'documents';
+  }
+
+  static Future<File> conversationStateFile() async {
+    final dir = await directory('temp');
+    return File('${dir.path}/conversation_state.json');
+  }
+
+  static Future<void> saveConversationState({
+    required String title,
+    required List<Map<String, dynamic>> messages,
+  }) async {
+    final file = await conversationStateFile();
+    await file.writeAsString(jsonEncode({
+      'title': title,
+      'messages': messages,
+      'savedAt': DateTime.now().toIso8601String(),
+    }), flush: true);
+  }
+
+  static Future<Map<String, dynamic>?> readConversationState() async {
+    final file = await conversationStateFile();
+    if (!await file.exists()) return null;
+    try {
+      final decoded = jsonDecode(await file.readAsString());
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<int> totalBytes() async {
