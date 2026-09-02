@@ -470,29 +470,31 @@ class _AssistantHeaderIdentity extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 7),
-        const Expanded(
+        Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Second Head',
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: TextOverflow.clip,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Row(
                 children: [
-                  Icon(Icons.circle, size: 6, color: isOnline ? Colors.green : Colors.red),
-                  SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      isOnline ? 'Online' : 'Offline',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 9, color: shMuted),
-                    ),
+                  Icon(
+                    Icons.circle,
+                    size: 6,
+                    color: isOnline ? Colors.green : Colors.red,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isOnline ? 'Online' : 'Offline',
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                    style: const TextStyle(fontSize: 9, color: shMuted),
                   ),
                 ],
               ),
