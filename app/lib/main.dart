@@ -6,8 +6,29 @@ import 'features/home/home_screen.dart';
 
 void main() => runApp(const SecondHeadApp());
 
-class SecondHeadApp extends StatelessWidget {
+final shAppearance = ShAppearanceController();
+
+class SecondHeadApp extends StatefulWidget {
   const SecondHeadApp({super.key});
+
+  @override
+  State<SecondHeadApp> createState() => _SecondHeadAppState();
+}
+
+class _SecondHeadAppState extends State<SecondHeadApp> {
+  @override
+  void initState() {
+    super.initState();
+    shAppearance.addListener(_changed);
+  }
+
+  @override
+  void dispose() {
+    shAppearance.removeListener(_changed);
+    super.dispose();
+  }
+
+  void _changed() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +39,10 @@ class SecondHeadApp extends StatelessWidget {
     return MaterialApp(
       title: 'SECOND HEAD',
       debugShowCheckedModeBanner: false,
-      theme: buildShTheme(),
+      theme: buildShTheme(light: false),
+      darkTheme: buildShTheme(light: false),
+      themeMode: shAppearance.themeMode,
+      locale: Locale(shAppearance.languageCode),
       home: entry,
     );
   }
