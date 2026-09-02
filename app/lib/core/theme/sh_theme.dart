@@ -13,7 +13,7 @@ ThemeData buildShTheme({bool light = false}) {
   return ThemeData(
     useMaterial3: true,
     brightness: light ? Brightness.light : Brightness.dark,
-    scaffoldBackgroundColor: shBackground,
+    scaffoldBackgroundColor: light ? const Color(0xFFF4F7FB) : shBackground,
     fontFamily: 'Poppins',
     colorScheme: ColorScheme.fromSeed(
       seedColor: shPurple,
@@ -21,7 +21,7 @@ ThemeData buildShTheme({bool light = false}) {
     ).copyWith(
       primary: shPurple,
       secondary: shCyan,
-      surface: shSurface,
+      surface: light ? const Color(0xFFFFFFFF) : shSurface,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
