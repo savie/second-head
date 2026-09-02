@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../core/theme/sh_theme.dart';
@@ -100,9 +101,9 @@ class ConversationViewState extends State<ConversationView> {
    final picked = result.files.single;
    final bytes = picked.bytes;
    if (bytes == null) return;
-   final stored = await StorageService.saveConversationImage(bytes, extension: picked.extension ?? 'bin');
+   final stored = await StorageService.saveConversationFile(bytes, filename: picked.name);
    if (!mounted) return;
-   setState(() => _messages.add(ConversationMessage('', false, 'Now', imagePath: stored.path)));
+   setState(() => _messages.add(ConversationMessage('', false, 'Now', attachmentPath: stored.path)));
  }
  Future<void> _pick(ImageSource source) async {
    Navigator.pop(context);
@@ -111,7 +112,7 @@ class ConversationViewState extends State<ConversationView> {
    final b=await f.readAsBytes();
    final stored=await StorageService.saveConversationImage(b,extension:f.path.split('.').last);
    if(!mounted)return;
-   setState(()=>_messages.add(ConversationMessage('',false,'Now',imagePath:stored.path)));
+   setState(()=>_messages.add(ConversationMessage('',false,'Now',attachmentPath:stored.path)));
  }
  void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_outlined,label:'File',onTap:_pickFile)])));}
  void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[ActionTile(icon:Icons.copy_outlined,label:'Copy',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.clear_all,label:'Clear',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.delete_outline,label:'Delete',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.share_outlined,label:'Share',onTap:()=>Navigator.pop(context))]))));
@@ -172,7 +173,7 @@ class ConversationViewState extends State<ConversationView> {
                     text: _messages[i].text,
                     time: _messages[i].time,
                     assistant: _messages[i].assistant,
-                    imagePath: _messages[i].imagePath,
+                    attachmentPath: _messages[i].attachmentPath,
                     onAvatarTap: () => _messageActions(
                       i,
                       assistant: _messages[i].assistant,
@@ -332,8 +333,8 @@ class ConversationViewState extends State<ConversationView> {
 
 class SelectableMessage extends StatelessWidget { const SelectableMessage({required this.index,required this.assistant,required this.selected,required this.onLongPress,required this.onTap,required this.child}); final int index; final bool assistant,selected; final VoidCallback onLongPress,onTap; final Widget child; @override Widget build(BuildContext context)=>GestureDetector(onLongPress:onLongPress,onTap:onTap,child:AnimatedContainer(duration:const Duration(milliseconds:160),decoration:BoxDecoration(borderRadius:BorderRadius.circular(18),color:selected?shPurple.withValues(alpha: .12):Colors.transparent),child:Stack(children:[child,if(selected)const Positioned(right:4,top:4,child:Icon(Icons.check_circle,size:17))]))); }
 class ConversationMessage {
- ConversationMessage(this.text,this.assistant,this.time,{this.imagePath});
- String text; final bool assistant; final String time; final String? imagePath;
+ ConversationMessage(this.text,this.assistant,this.time,{this.attachmentPath});
+ String text; final bool assistant; final String time; final String? attachmentPath;
 }
 class ActionTile extends StatelessWidget {
   const ActionTile({super.key,required this.icon,required this.label,required this.onTap});
@@ -516,20 +517,30 @@ class DateLabel extends StatelessWidget {
       );
 }
 
+Future<void> _openAttachment(BuildContext context, String path) async {
+  final uri = Uri.file(path);
+  final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (!opened && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Tidak ada aplikasi yang dapat membuka file ini.'), behavior: SnackBarBehavior.floating),
+    );
+  }
+}
+
 class Message extends StatelessWidget {
   const Message({
     required this.text,
     required this.time,
     required this.assistant,
     required this.onAvatarTap,
-    this.imagePath,
+    this.attachmentPath,
   });
 
   final String text;
   final String time;
   final bool assistant;
   final VoidCallback onAvatarTap;
-  final String? imagePath;
+  final String? attachmentPath;
 
 
   @override
@@ -570,17 +581,8 @@ class Message extends StatelessWidget {
               crossAxisAlignment:
                   assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end,
               children: [
-                if (imagePath != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      File(imagePath!),
-                      width: 245,
-                      height: 175,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                if (imagePath != null && text.isNotEmpty)
+                if (attachmentPath != null) _AttachmentPreview(path: attachmentPath!, onOpen: () => _openAttachment(context, attachmentPath!)),
+                if (attachmentPath != null && text.isNotEmpty)
                   const SizedBox(height: 7),
                 if (text.isNotEmpty)
                   Align(
@@ -608,6 +610,51 @@ class Message extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _AttachmentPreview extends StatelessWidget {
+  const _AttachmentPreview({required this.path, required this.onOpen});
+  final String path;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final category = StorageService.categoryFor(File(path));
+    if (category == 'images') {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.file(File(path), width: 245, height: 175, fit: BoxFit.cover),
+      );
+    }
+    final icon = category == 'audio'
+        ? Icons.audio_file_outlined
+        : category == 'video'
+            ? Icons.video_file_outlined
+            : Icons.insert_drive_file_outlined;
+    final name = path.split(Platform.pathSeparator).last;
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onOpen,
+      child: Container(
+        width: 245,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: shSurface2,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: shBorder),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 30),
+            const SizedBox(width: 10),
+            Expanded(child: Text(name, maxLines: 2, overflow: TextOverflow.ellipsis)),
+            const SizedBox(width: 6),
+            const Icon(Icons.open_in_new_outlined, size: 18),
+          ],
+        ),
       ),
     );
   }
