@@ -476,7 +476,7 @@ class _AssistantHeaderIdentity extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Second Head',
+                'Status',
                 maxLines: 1,
                 overflow: TextOverflow.clip,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
