@@ -420,7 +420,14 @@ class LifecycleDetailView extends StatelessWidget {
       backgroundColor: shBackground,
       body: Column(
         children: [
-          ShTopBar(title: stage.title),
+          ShTopBar(
+            title: stage.title,
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
