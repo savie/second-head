@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
@@ -1416,53 +1417,135 @@ class DataPrivacyView extends StatelessWidget {
   );
 }
 
-class _ExportDataView extends StatelessWidget {
+class _ExportDataView extends StatefulWidget {
   const _ExportDataView();
+
+  @override
+  State<_ExportDataView> createState() => _ExportDataViewState();
+}
+
+class _ExportDataViewState extends State<_ExportDataView> {
+  bool _busy = false;
+  String? _result;
+
+  Future<void> _export() async {
+    if (_busy) return;
+    setState(() { _busy = true; _result = null; });
+    try {
+      final root = await StorageService.root();
+      final exportDir = await StorageService.directory('exports');
+      final stamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+      final dir = Directory('${exportDir.path}/SH_export_$stamp');
+      await dir.create(recursive: true);
+      final files = await StorageService.listFiles();
+      final manifest = <String, dynamic>{
+        'format': 'second_head_local_export_v1',
+        'created_at': DateTime.now().toIso8601String(),
+        'scope': 'local_files',
+        'source_root': root.path,
+        'files': <Map<String, dynamic>>[],
+      };
+      for (final file in files) {
+        if (file.path.contains('${Platform.pathSeparator}exports${Platform.pathSeparator}')) continue;
+        final category = StorageService.categoryFor(file);
+        final categoryDir = Directory('${dir.path}/$category');
+        await categoryDir.create(recursive: true);
+        final name = file.path.split(Platform.pathSeparator).last;
+        final target = File('${categoryDir.path}/$name');
+        await file.copy(target.path);
+        (manifest['files'] as List<Map<String, dynamic>>).add({
+          'name': name,
+          'category': category,
+          'size': await file.length(),
+        });
+      }
+      await File('${dir.path}/manifest.json').writeAsString(
+        const JsonEncoder.withIndent('  ').convert(manifest),
+        flush: true,
+      );
+      if (!mounted) return;
+      setState(() => _result = 'Export created in SH local storage.');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _result = 'Export could not be created.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) => _DPSubPage(
     title: 'Export Data',
     children: [
-      const _DPSectionLabel('EXPORT'),
+      const _DPSectionLabel('LOCAL EXPORT'),
       const SizedBox(height: 8),
       const _DPInfoCard(
         icon: Icons.file_download_outlined,
-        title: 'Export your SH data',
-        description: 'Create a copy of the SH data available to your account. The export workflow will be connected to the data layer later.',
+        title: 'Export local SH data',
+        description: 'Creates a self-contained copy of files currently stored by SH on this device. Account, conversation and other server data are not included here.',
       ),
       const SizedBox(height: 14),
       const _DPSectionLabel('INCLUDES'),
       const SizedBox(height: 8),
       const _DPOptionCard(
-        icon: Icons.account_circle_outlined,
-        title: 'Account & profile',
-        subtitle: 'Account information and profile data',
+        icon: Icons.folder_copy_outlined,
+        title: 'Local files',
+        subtitle: 'Images, audio, video and documents stored by SH',
       ),
       const SizedBox(height: 10),
       const _DPOptionCard(
-        icon: Icons.auto_awesome_outlined,
-        title: 'SH data',
-        subtitle: 'Journeys and other stored SH data',
-      ),
-      const SizedBox(height: 10),
-      const _DPOptionCard(
-        icon: Icons.history_rounded,
-        title: 'Activity & settings',
-        subtitle: 'Relevant settings and activity data',
+        icon: Icons.list_alt_outlined,
+        title: 'File manifest',
+        subtitle: 'Names, categories and sizes of exported files',
       ),
       const SizedBox(height: 20),
       _DPActionCard(
         icon: Icons.file_download_outlined,
-        title: 'Export Data',
-        subtitle: 'Export is not connected yet.',
-        onTap: () => _showDPNotice(context, 'Export Data'),
+        title: _busy ? 'Creating Export…' : 'Create Export',
+        subtitle: _result ?? 'Save a local export snapshot',
+        onTap: _busy ? () {} : _export,
       ),
     ],
   );
 }
 
-class _DeleteDataView extends StatelessWidget {
+class _DeleteDataView extends StatefulWidget {
   const _DeleteDataView();
+
+  @override
+  State<_DeleteDataView> createState() => _DeleteDataViewState();
+}
+
+class _DeleteDataViewState extends State<_DeleteDataView> {
+  bool _localFiles = true;
+  bool _busy = false;
+
+  Future<void> _delete() async {
+    if (!_localFiles || _busy) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete local files?'),
+        content: const Text('This permanently removes files stored locally by SH on this device. Your account is not deleted.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    setState(() => _busy = true);
+    try {
+      for (final file in await StorageService.listFiles()) {
+        await file.delete();
+      }
+      if (!mounted) return;
+      setState(() => _localFiles = false);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Local SH files deleted.')));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) => _DPSubPage(
@@ -1472,39 +1555,69 @@ class _DeleteDataView extends StatelessWidget {
       const SizedBox(height: 8),
       const _DPInfoCard(
         icon: Icons.delete_outline_rounded,
-        title: 'Delete selected SH data',
-        description: 'Choose what you want to remove. This is data deletion only; SH does not use this action to delete the account.',
+        title: 'Delete local SH data',
+        description: 'This removes local files from this device only. It does not delete the SH account or server-side data.',
         destructive: true,
       ),
       const SizedBox(height: 14),
       const _DPSectionLabel('DATA'),
       const SizedBox(height: 8),
-      const _DPOptionCard(
-        icon: Icons.chat_bubble_outline_rounded,
-        title: 'Conversation data',
-        subtitle: 'Stored conversation and related SH data',
-      ),
-      const SizedBox(height: 10),
-      const _DPOptionCard(
+      _DPSelectableCard(
         icon: Icons.folder_copy_outlined,
         title: 'Local files',
-        subtitle: 'Attachment copies stored on this device',
-      ),
-      const SizedBox(height: 10),
-      const _DPOptionCard(
-        icon: Icons.auto_awesome_outlined,
-        title: 'Generated data',
-        subtitle: 'Generated SH content and related data',
+        subtitle: 'Attachment and generated files stored on this device',
+        selected: _localFiles,
+        onTap: _busy ? null : () => setState(() => _localFiles = !_localFiles),
       ),
       const SizedBox(height: 20),
       _DPActionCard(
         icon: Icons.delete_outline_rounded,
-        title: 'Delete Selected Data',
-        subtitle: 'Deletion workflow is not connected yet.',
+        title: _busy ? 'Deleting…' : 'Delete Selected Data',
+        subtitle: _localFiles ? 'Permanently remove local files' : 'Nothing selected',
         destructive: true,
-        onTap: () => _showDPNotice(context, 'Delete Data'),
+        onTap: _busy || !_localFiles ? () {} : _delete,
       ),
     ],
+  );
+}
+
+class _DPSelectableCard extends StatelessWidget {
+  const _DPSelectableCard({required this.icon, required this.title, required this.subtitle, required this.selected, required this.onTap});
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: shSurface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: selected ? shPurple : shBorder, width: selected ? 1.5 : 1),
+        ),
+        child: Row(children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(color: shSurface2, borderRadius: BorderRadius.circular(14)),
+            child: Icon(icon, size: 21, color: shMuted),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text(subtitle, style: const TextStyle(fontSize: 11.5, color: shMuted)),
+          ])),
+          Icon(selected ? Icons.check_circle : Icons.radio_button_unchecked, color: selected ? shCyan : shMuted, size: 21),
+        ]),
+      ),
+    ),
   );
 }
 
