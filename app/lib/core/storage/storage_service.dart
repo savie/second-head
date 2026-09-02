@@ -14,7 +14,7 @@ class StorageService {
   static Future<Directory> root() async {
     final external = await getExternalStorageDirectory();
     final base = external ?? await getApplicationSupportDirectory();
-    final dir = Directory('${base.path}/$_rootName');
+    final dir = Directory('${base.path}/second_head');
     await dir.create(recursive: true);
     for (final name in ['images', 'audio', 'video', 'documents', 'exports', 'temp']) {
       await Directory('${dir.path}/$name').create(recursive: true);
