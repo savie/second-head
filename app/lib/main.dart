@@ -38,7 +38,7 @@ class _SecondHeadAppState extends State<SecondHeadApp> {
     return MaterialApp(
       title: 'SECOND HEAD',
       debugShowCheckedModeBanner: false,
-      theme: buildShTheme(light: false),
+      theme: buildShTheme(light: true),
       darkTheme: buildShTheme(light: false),
       themeMode: shAppearance.themeMode,
       locale: Locale(shAppearance.languageCode),
