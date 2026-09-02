@@ -219,26 +219,28 @@ class _SideMenuState extends State<SideMenu> {
                 children: [
                   const ShProfileMark(size: 52),
                   const SizedBox(width: 10),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ValueListenableBuilder<String>(
-                          valueListenable: profileName,
-                          builder: (context, name, _) => Text(
-                            name,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                  Expanded(
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: profileName,
+                      builder: (context, name, _) => ValueListenableBuilder<String>(
+                        valueListenable: profileEmail,
+                        builder: (context, email, _) => Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              email,
+                              style: const TextStyle(fontSize: 9, color: shMuted),
+                            ),
+                          ],
                         ),
-                        ValueListenableBuilder<String>(
-                          valueListenable: profileEmail,
-                          builder: (context, email, _) => Text(
-                            email,
-                          style: TextStyle(fontSize: 9, color: shMuted),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
