@@ -92,17 +92,10 @@ class ConversationViewState extends State<ConversationView> {
                   onPressed: () => setState(() => selected.clear()),
                   icon: const Icon(Icons.arrow_back_rounded),
                 ),
-                Text('${selected.length}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                const Spacer(),
-                IconButton(
-                  tooltip: 'Copy',
-                  onPressed: () {
-                    final ids = selected.toList()..sort();
-                    _copyText(ids.map((i) => _messages[i].text).where((t) => t.trim().isNotEmpty).join('\n'));
-                  },
-                  icon: const Icon(Icons.copy_outlined),
+                Text(
+                  '${selected.length}',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
-                IconButton(tooltip: 'Delete', onPressed: _deleteSelected, icon: const Icon(Icons.delete_outline)),
               ],
             ),
           )
@@ -128,15 +121,44 @@ class ConversationViewState extends State<ConversationView> {
                   assistant: _messages[i].assistant,
                   selected: selected.contains(i),
                   onLongPress: () => _enterSelection(i),
-                  onTap: () => selecting ? _toggleSelection(i) : _messageActions(i, assistant: _messages[i].assistant),
-                  child: Message(text: _messages[i].text, time: _messages[i].time, assistant: _messages[i].assistant, image: _messages[i].image),
+                  onTap: () => selecting ? _toggleSelection(i) : null,
+                  child: Message(
+                    text: _messages[i].text,
+                    time: _messages[i].time,
+                    assistant: _messages[i].assistant,
+                    image: _messages[i].image,
+                    onAvatarTap: () => _messageActions(
+                      i,
+                      assistant: _messages[i].assistant,
+                    ),
+                  ),
                 ),
               const SummaryCard(),
             ],
           ),
         ),
-        if (!selecting)
-          Composer(controller: _composerController, onSend: _send, onAttach: _showAttachments),
+        if (selecting)
+          SafeArea(
+            top: false,
+            child: Container(
+              height: 82,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+              decoration: const BoxDecoration(color: shSurface),
+              child: Center(
+                child: ActionTile(
+                  icon: Icons.delete_outline,
+                  label: 'Delete',
+                  onTap: _deleteSelected,
+                ),
+              ),
+            ),
+          )
+        else
+          Composer(
+            controller: _composerController,
+            onSend: _send,
+            onAttach: _showAttachments,
+          ),
       ],
     );
   }
@@ -448,50 +470,16 @@ class Message extends StatelessWidget {
     required this.text,
     required this.time,
     required this.assistant,
+    required this.onAvatarTap,
     this.image,
   });
 
   final String text;
   final String time;
   final bool assistant;
+  final VoidCallback onAvatarTap;
   final Uint8List? image;
 
-  void _showActions(BuildContext context) {
-    final actions = assistant
-        ? const ['Copy', 'Delete', 'Regenerate']
-        : const ['Copy', 'Delete', 'Edit'];
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final action in actions)
-              ListTile(
-                leading: Icon(
-                  action == 'Delete'
-                      ? Icons.delete_outline
-                      : action == 'Edit'
-                          ? Icons.edit_outlined
-                          : action == 'Regenerate'
-                              ? Icons.refresh_outlined
-                              : Icons.copy_outlined,
-                  color: action == 'Delete' ? Colors.redAccent : Colors.white70,
-                ),
-                title: Text(action),
-                onTap: () {},
-              ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -506,7 +494,11 @@ class Message extends StatelessWidget {
             if (assistant)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
-                child: ChatAvatar(assistant: true),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onAvatarTap,
+                  child: ChatAvatar(assistant: true),
+                ),
               ),
             Container(
           constraints: const BoxConstraints(maxWidth: 300),
@@ -556,7 +548,11 @@ class Message extends StatelessWidget {
             if (!assistant)
               Padding(
                 padding: const EdgeInsets.only(left: 6),
-                child: ChatAvatar(assistant: false),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onAvatarTap,
+                  child: ChatAvatar(assistant: false),
+                ),
               ),
           ],
         ),
