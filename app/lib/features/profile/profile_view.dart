@@ -66,8 +66,9 @@ class ProfileViewState extends State<ProfileView> {
                     ? null
                     : () {
                         Navigator.pop(context);
-                        await StorageService.removeProfilePhoto();
-                        profilePhoto.value = null;
+                        StorageService.removeProfilePhoto().then((_) {
+                          if (mounted) setState(() => profilePhoto.value = null);
+                        });
                       },
               ),
             ],
