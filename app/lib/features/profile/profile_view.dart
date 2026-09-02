@@ -1737,107 +1737,234 @@ void _showDPNotice(BuildContext context, String title) {
 class _DataFilesView extends StatefulWidget { const _DataFilesView(); @override State<_DataFilesView> createState()=>_DataFilesViewState(); }
 
 class _DataFilesViewState extends State<_DataFilesView> {
+  bool _loading = true;
+  bool _clearing = false;
+  int _totalBytes = 0;
+  int _images = 0, _videos = 0, _audio = 0, _documents = 0;
+  List<File> _files = [];
 
-  bool _loading=true,_clearing=false; int _total=0,_images=0,_videos=0,_audio=0,_files=0,_uploaded=0,_generated=0;
-
-  @override void initState(){super.initState();_refresh();}
-
-  Future<Directory> _root() async { final base=await getApplicationSupportDirectory(); final dir=Directory(base.path+'/second_head/attachments'); await Directory(dir.path+'/uploaded').create(recursive:true); await Directory(dir.path+'/generated').create(recursive:true); return dir; }
-
-  Future<void> _refresh() async {
-    setState(() => _loading = true);
-    final root = await _root();
-    final files = <File>[];
-    await for (final entity in root.list(recursive: true, followLinks: false)) {
-      if (entity is File) files.add(entity);
-    }
-    int image = 0, video = 0, audio = 0, other = 0;
-    int bytes = 0, uploaded = 0, generated = 0;
-    for (final file in files) {
-      final name = file.path.toLowerCase();
-      final stat = await file.stat();
-      bytes += stat.size;
-      if (name.contains('/uploaded/')) uploaded++;
-      if (name.contains('/generated/')) generated++;
-      if (RegExp(r'\.(jpg|jpeg|png|gif|webp|heic)$').hasMatch(name)) image++;
-      else if (RegExp(r'\.(mp4|mov|m4v|webm|avi)$').hasMatch(name)) video++;
-      else if (RegExp(r'\.(mp3|m4a|wav|aac|ogg|opus)$').hasMatch(name)) audio++;
-      else other++;
-    }
-    if (!mounted) return;
-    setState(() {
-      _total = bytes; _images = image; _videos = video; _audio = audio; _files = other;
-      _uploaded = uploaded; _generated = generated; _loading = false;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
   }
 
-  Future<void> _clearLocalFiles() async { final root=await _root();setState(()=>_clearing=true);await for(final e in root.list(recursive:true,followLinks:false)){if(e is File)await e.delete();}if(!mounted)return;setState(()=>_clearing=false);await _refresh(); }
+  Future<void> _refresh() async {
+    if (mounted) setState(() => _loading = true);
+    try {
+      final files = await StorageService.listFiles();
+      int total = 0, images = 0, videos = 0, audio = 0, documents = 0;
+      for (final file in files) {
+        total += await file.length();
+        switch (StorageService.categoryFor(file)) {
+          case 'images': images++;
+          case 'video': videos++;
+          case 'audio': audio++;
+          default: documents++;
+        }
+      }
+      if (!mounted) return;
+      setState(() {
+        _files = files;
+        _totalBytes = total;
+        _images = images;
+        _videos = videos;
+        _audio = audio;
+        _documents = documents;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
-  String _size(int b){if(b<1024)return '$b B';if(b<1024*1024)return '${(b/1024).toStringAsFixed(1)} KB';if(b<1024*1024*1024)return '${(b/(1024*1024)).toStringAsFixed(1)} MB';return '${(b/(1024*1024*1024)).toStringAsFixed(2)} GB';}
+  Future<void> _clearLocalFiles() async {
+    if (_clearing) return;
+    setState(() => _clearing = true);
+    try {
+      for (final file in await StorageService.listFiles()) {
+        await file.delete();
+      }
+    } finally {
+      if (!mounted) return;
+      setState(() => _clearing = false);
+      await _refresh();
+    }
+  }
+
+  String _size(int b) {
+    if (b < 1024) return '$b B';
+    if (b < 1024 * 1024) return '${(b / 1024).toStringAsFixed(1)} KB';
+    if (b < 1024 * 1024 * 1024) return '${(b / (1024 * 1024)).toStringAsFixed(1)} MB';
+    return '${(b / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+  }
+
+  IconData _iconFor(File file) {
+    switch (StorageService.categoryFor(file)) {
+      case 'images': return Icons.image_outlined;
+      case 'video': return Icons.videocam_outlined;
+      case 'audio': return Icons.graphic_eq_rounded;
+      default: return Icons.insert_drive_file_outlined;
+    }
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: shBackground,
-    body: Column(children: [
-      ShTopBar(title: 'Data & Files', leading: IconButton(
-        tooltip: 'Back', onPressed: () => Navigator.of(context).pop(),
-        icon: const Icon(Icons.arrow_back_rounded),
-      )),
-      Expanded(child: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 32),
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [shSurface2, shSurface]),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: shBorder),
+    body: Column(
+      children: [
+        ShTopBar(
+          title: 'Data & Files',
+          leading: IconButton(
+            tooltip: 'Back',
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+        ),
+        Expanded(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 32),
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: [shSurface2, shSurface]),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: shBorder),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('LOCAL STORAGE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: shMuted)),
+                            const SizedBox(height: 8),
+                            Text(_size(_totalBytes), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+                            Text('${_files.length} file${_files.length == 1 ? '' : 's'} in SH storage', style: const TextStyle(fontSize: 12, color: shMuted)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const _DPSectionLabel('BY TYPE'),
+                      const SizedBox(height: 8),
+                      _DPFileStat(icon: Icons.image_outlined, label: 'Images', count: _images),
+                      _DPFileStat(icon: Icons.videocam_outlined, label: 'Videos', count: _videos),
+                      _DPFileStat(icon: Icons.graphic_eq_rounded, label: 'Audio', count: _audio),
+                      _DPFileStat(icon: Icons.insert_drive_file_outlined, label: 'Documents', count: _documents),
+                      const SizedBox(height: 18),
+                      const _DPSectionLabel('FILES'),
+                      const SizedBox(height: 8),
+                      if (_files.isEmpty)
+                        const _DPInfoCard(
+                          icon: Icons.folder_open_outlined,
+                          title: 'No local files',
+                          description: 'Files created or selected by SH will appear here.',
+                        )
+                      else
+                        ..._files.map((file) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _DPFileItem(
+                            file: file,
+                            icon: _iconFor(file),
+                            size: _size,
+                            onDelete: () async {
+                              await file.delete();
+                              await _refresh();
+                            },
+                          ),
+                        )),
+                      const SizedBox(height: 12),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: _clearing || _files.isEmpty ? null : _clearLocalFiles,
+                          child: Container(
+                            padding: const EdgeInsets.all(17),
+                            decoration: BoxDecoration(
+                              color: shSurface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: shBorder),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 42, height: 42,
+                                  decoration: BoxDecoration(color: shSurface2, borderRadius: BorderRadius.circular(13)),
+                                  child: _clearing
+                                      ? const Padding(padding: EdgeInsets.all(11), child: CircularProgressIndicator(strokeWidth: 2))
+                                      : const Icon(Icons.cleaning_services_outlined, size: 20, color: Colors.redAccent),
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Clear Local Files', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.redAccent)),
+                                      SizedBox(height: 3),
+                                      Text('Removes files from SH local storage only', style: TextStyle(fontSize: 11, color: shMuted)),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded, size: 22, color: shMuted),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('LOCAL STORAGE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: shMuted)),
-                    const SizedBox(height: 8),
-                    Text(_size(_total), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
-                    Text('${_uploaded + _generated} attachments on this device', style: const TextStyle(fontSize: 12, color: shMuted)),
-                  ]),
                 ),
-                const SizedBox(height: 18), const _DPSectionLabel('BY TYPE'), const SizedBox(height: 8),
-                _DPFileStat(icon: Icons.image_outlined, label: 'Images', count: _images),
-                _DPFileStat(icon: Icons.videocam_outlined, label: 'Videos', count: _videos),
-                _DPFileStat(icon: Icons.graphic_eq_rounded, label: 'Audio', count: _audio),
-                _DPFileStat(icon: Icons.insert_drive_file_outlined, label: 'Files', count: _files),
-                const SizedBox(height: 18), const _DPSectionLabel('SOURCE'), const SizedBox(height: 8),
-                _DPFileStat(icon: Icons.file_upload_outlined, label: 'Uploaded', count: _uploaded),
-                _DPFileStat(icon: Icons.auto_awesome_outlined, label: 'Generated by SH', count: _generated),
-                const SizedBox(height: 18),
-                Material(color: Colors.transparent, child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: _clearing ? null : _clearLocalFiles,
-                  child: Container(
-                    padding: const EdgeInsets.all(17),
-                    decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(20), border: Border.all(color: shBorder)),
-                    child: Row(children: [
-                      Container(width: 42, height: 42, decoration: BoxDecoration(color: shSurface2, borderRadius: BorderRadius.circular(13)),
-                        child: _clearing ? const Padding(padding: EdgeInsets.all(11), child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(Icons.cleaning_services_outlined, size: 20, color: Colors.redAccent)),
-                      const SizedBox(width: 12),
-                      const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Clear Local Files', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.redAccent)),
-                        SizedBox(height: 3), Text('Removes attachment copies from this device only', style: TextStyle(fontSize: 11, color: shMuted)),
-                      ])),
-                      const Icon(Icons.chevron_right_rounded, size: 22, color: shMuted),
-                    ]),
-                  ),
-                )),
+        ),
+      ],
+    ),
+  );
+}
+
+class _DPFileItem extends StatelessWidget {
+  const _DPFileItem({required this.file, required this.icon, required this.size, required this.onDelete});
+
+  final File file;
+  final IconData icon;
+  final String Function(int) size;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final stat = file.statSync();
+    final name = file.path.split(Platform.pathSeparator).last;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+      decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(18), border: Border.all(color: shBorder)),
+      child: Row(
+        children: [
+          Container(
+            width: 42, height: 42,
+            decoration: BoxDecoration(color: shSurface2, borderRadius: BorderRadius.circular(13)),
+            child: Icon(icon, size: 20, color: shMuted),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 3),
+                Text(size(stat.size), style: const TextStyle(fontSize: 11, color: shMuted)),
               ],
             ),
-          )),
-    ]),
-  );
-
+          ),
+          IconButton(
+            tooltip: 'Delete',
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline_rounded, size: 19),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DPFileStat extends StatelessWidget { const _DPFileStat({required this.icon,required this.label,required this.count}); final IconData icon; final String label; final int count; @override Widget build(BuildContext context)=>Container(margin:const EdgeInsets.only(bottom:7),padding:const EdgeInsets.symmetric(horizontal:14,vertical:12),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(16),border:Border.all(color:shBorder)),child:Row(children:[Icon(icon,size:19,color:shMuted),const SizedBox(width:11),Expanded(child:Text(label,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w600))),Text('$count',style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700,color:shMuted))])); }
