@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../core/theme/sh_theme.dart';
+import '../../core/storage/storage_service.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 
@@ -91,7 +93,15 @@ class ConversationViewState extends State<ConversationView> {
  final ImagePicker _picker = ImagePicker();
  final TextEditingController _searchController=TextEditingController();
  void _send(){final t=_composerController.text.trim();if(t.isEmpty)return;setState((){_messages.add(ConversationMessage(t,false,'Now'));_composerController.clear();});}
- Future<void> _pick(ImageSource source) async {Navigator.pop(context);final f=await _picker.pickImage(source:source,imageQuality:88);if(f==null)return;final b=await f.readAsBytes();setState(()=>_messages.add(ConversationMessage('',false,'Now',image:b)));}
+ Future<void> _pick(ImageSource source) async {
+   Navigator.pop(context);
+   final f=await _picker.pickImage(source:source,imageQuality:88);
+   if(f==null)return;
+   final b=await f.readAsBytes();
+   final stored=await StorageService.saveConversationImage(b,extension:f.path.split('.').last);
+   if(!mounted)return;
+   setState(()=>_messages.add(ConversationMessage('',false,'Now',imagePath:stored.path)));
+ }
  void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_outlined,label:'File',onTap:(){Navigator.pop(context);ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('File picker integration pending'),behavior:SnackBarBehavior.floating));})])));}
  void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[ActionTile(icon:Icons.copy_outlined,label:'Copy',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.clear_all,label:'Clear',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.delete_outline,label:'Delete',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.share_outlined,label:'Share',onTap:()=>Navigator.pop(context))]))));
  void _copyText(String text){ if(text.trim().isEmpty)return; Clipboard.setData(ClipboardData(text:text)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Copied'),behavior:SnackBarBehavior.floating)); }
@@ -151,7 +161,7 @@ class ConversationViewState extends State<ConversationView> {
                     text: _messages[i].text,
                     time: _messages[i].time,
                     assistant: _messages[i].assistant,
-                    image: _messages[i].image,
+                    imagePath: _messages[i].imagePath,
                     onAvatarTap: () => _messageActions(
                       i,
                       assistant: _messages[i].assistant,
@@ -311,8 +321,8 @@ class ConversationViewState extends State<ConversationView> {
 
 class SelectableMessage extends StatelessWidget { const SelectableMessage({required this.index,required this.assistant,required this.selected,required this.onLongPress,required this.onTap,required this.child}); final int index; final bool assistant,selected; final VoidCallback onLongPress,onTap; final Widget child; @override Widget build(BuildContext context)=>GestureDetector(onLongPress:onLongPress,onTap:onTap,child:AnimatedContainer(duration:const Duration(milliseconds:160),decoration:BoxDecoration(borderRadius:BorderRadius.circular(18),color:selected?shPurple.withValues(alpha: .12):Colors.transparent),child:Stack(children:[child,if(selected)const Positioned(right:4,top:4,child:Icon(Icons.check_circle,size:17))]))); }
 class ConversationMessage {
- ConversationMessage(this.text,this.assistant,this.time,{this.image});
- String text; final bool assistant; final String time; final Uint8List? image;
+ ConversationMessage(this.text,this.assistant,this.time,{this.imagePath});
+ String text; final bool assistant; final String time; final String? imagePath;
 }
 class ActionTile extends StatelessWidget {
   const ActionTile({super.key,required this.icon,required this.label,required this.onTap});
@@ -501,14 +511,14 @@ class Message extends StatelessWidget {
     required this.time,
     required this.assistant,
     required this.onAvatarTap,
-    this.image,
+    this.imagePath,
   });
 
   final String text;
   final String time;
   final bool assistant;
   final VoidCallback onAvatarTap;
-  final Uint8List? image;
+  final String? imagePath;
 
 
   @override
@@ -549,17 +559,17 @@ class Message extends StatelessWidget {
               crossAxisAlignment:
                   assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end,
               children: [
-                if (image != null)
+                if (imagePath != null)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.memory(
-                      image!,
+                    child: Image.file(
+                      File(imagePath!),
                       width: 245,
                       height: 175,
                       fit: BoxFit.cover,
                     ),
                   ),
-                if (image != null && text.isNotEmpty)
+                if (imagePath != null && text.isNotEmpty)
                   const SizedBox(height: 7),
                 if (text.isNotEmpty)
                   Align(
