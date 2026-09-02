@@ -266,21 +266,6 @@ class _SideMenuState extends State<SideMenu> {
               onTap: () => _openPage(3),
             ),
             MenuTile(
-              icon: Icons.settings_outlined,
-              label: 'Settings',
-              onTap: () {
-                _closeDrawer();
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ProfileSectionView(
-                      title: 'Settings',
-                      subtitle: 'Application settings',
-                    ),
-                  ),
-                );
-              },
-            ),
-            MenuTile(
               icon: Icons.help_outline,
               label: 'Help & Support',
               onTap: () {
