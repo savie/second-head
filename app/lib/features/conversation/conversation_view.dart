@@ -196,7 +196,33 @@ class ConversationViewState extends State<ConversationView> {
               children: [
                 Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
                 const SizedBox(width: 10),
-                Expanded(child: FilledButton(onPressed: () { final name = controller.text.trim(); if (name.isNotEmpty) conversationTitle.value = name; Navigator.pop(sheet); }, child: const Text('Save'))),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {
+                      final name = controller.text.trim();
+                      if (name.isNotEmpty) {
+                        conversationTitle.value = name;
+
+                        // Keep the conversation page and Recent list bound
+                        // to the same in-memory conversation record.
+                        final list = [...recentConversations.value];
+                        final index = list.indexWhere(
+                          (item) => item.title == title,
+                        );
+                        if (index >= 0) {
+                          final item = list[index];
+                          list[index] = RecentConversationEntry(
+                            name,
+                            item.preview,
+                          );
+                          recentConversations.value = list;
+                        }
+                      }
+                      Navigator.pop(sheet);
+                    },
+                    child: const Text('Save'),
+                  ),
+                ),
               ],
             ),
           ],
