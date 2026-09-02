@@ -483,9 +483,7 @@ class Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: () => _showActions(context),
-      child: Align(
+    return Align(
         alignment: assistant ? Alignment.centerLeft : Alignment.centerRight,
         child: Row(
           mainAxisSize: MainAxisSize.min,
