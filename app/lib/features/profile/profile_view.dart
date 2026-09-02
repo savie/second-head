@@ -1050,7 +1050,7 @@ class _PendingAuthCard extends StatelessWidget {
 
   @override Widget build(BuildContext context) => Container(padding:const EdgeInsets.all(16),decoration:BoxDecoration(gradient:LinearGradient(colors:[shSurface2,shSurface]),borderRadius:BorderRadius.circular(22),border:Border.all(color:shBorder)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
 
-    Row(children:[Container(padding:const EdgeInsets.symmetric(horizontal:9,vertical:5),decoration:BoxDecoration(color:shPurple.withOpacity(.14),borderRadius:BorderRadius.circular(9)),child:Text(request.type,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w700))),const Spacer(),Text(request.incoming?'Needs your approval':'Waiting for approval',style:TextStyle(fontSize:10,color:request.incoming?shCyan:shMuted,fontWeight:FontWeight.w600))]),
+    Row(children:[Container(padding:const EdgeInsets.symmetric(horizontal:9,vertical:5),decoration:BoxDecoration(color:shPurple.withValues(alpha: .14),borderRadius:BorderRadius.circular(9)),child:Text(request.type,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w700))),const Spacer(),Text(request.incoming?'Needs your approval':'Waiting for approval',style:TextStyle(fontSize:10,color:request.incoming?shCyan:shMuted,fontWeight:FontWeight.w600))]),
 
     const SizedBox(height:14),Row(children:[_PartyPill(label:request.from),const Padding(padding:EdgeInsets.symmetric(horizontal:8),child:Icon(Icons.arrow_forward_rounded,size:16,color:shMuted)),_PartyPill(label:request.to)]),
 
