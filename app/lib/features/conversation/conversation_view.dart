@@ -12,6 +12,7 @@ import '../../core/theme/sh_theme.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
+import '../journey/semantic_hook.dart';
 
 final ValueNotifier<String> conversationTitle =
     ValueNotifier<String>('Today Priorities');
@@ -133,6 +134,7 @@ void _send(){
     _conversationStatus = 'SH is responding…';
   });
   _persistConversation();
+  _processFrontendSemantic(t);
   WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
   Future<void>.delayed(const Duration(milliseconds: 650), () {
     if(!mounted)return;
@@ -148,6 +150,17 @@ void _send(){
     _persistConversation();
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
   });
+}
+
+Future<void> _processFrontendSemantic(String text) async {
+  final candidates = await shFrontendSemanticSimulator.process(
+    sourceId: conversationTitle.value,
+    content: text,
+  );
+  if (!mounted || candidates.isEmpty) return;
+  for (final candidate in candidates) {
+    shAddSemanticRecord(candidate);
+  }
 }
 
 void _scrollToLatest(){
