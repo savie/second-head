@@ -25,7 +25,7 @@ ThemeData buildShTheme({bool light = false}) {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0x990B1622),
+      fillColor: light ? const Color(0xFFF7F9FC) : const Color(0x990B1622),
       hintStyle: const TextStyle(
         color: shMuted,
         fontSize: 16,
@@ -37,7 +37,10 @@ ThemeData buildShTheme({bool light = false}) {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: shBorder, width: 1.2),
+        borderSide: BorderSide(
+          color: light ? const Color(0xFFD2D9E2) : shBorder,
+          width: 1.2,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -45,19 +48,24 @@ ThemeData buildShTheme({bool light = false}) {
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: shSurface,
+      backgroundColor: light ? const Color(0xFFFFFFFF) : shSurface,
       indicatorColor: Colors.transparent,
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
           return const IconThemeData(color: shPurple, size: 22);
         }
-        return const IconThemeData(color: Colors.white70, size: 22);
+        return IconThemeData(
+          color: light ? const Color(0xFF46515E) : Colors.white70,
+          size: 22,
+        );
       }),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         return TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: states.contains(WidgetState.selected) ? shPurple : Colors.white70,
+          color: states.contains(WidgetState.selected)
+              ? shPurple
+              : (light ? const Color(0xFF46515E) : Colors.white70),
         );
       }),
     ),
