@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,18 +26,45 @@ class ConversationViewState extends State<ConversationView> {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   bool _isOnline = true;
+  Timer? _internetCheckTimer;
   @override
   void initState() {
     super.initState();
     conversationRevision.addListener(_resetConversation);
     _refreshConnectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((_) => _refreshConnectivity());
+    _internetCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) => _refreshConnectivity());
   }
 
   Future<void> _refreshConnectivity() async {
     final results = await _connectivity.checkConnectivity();
-    final online = results.any((result) => result != ConnectivityResult.none);
-    if (mounted && online != _isOnline) setState(() => _isOnline = online);
+    if (results.every((result) => result == ConnectivityResult.none)) {
+      if (mounted && _isOnline) setState(() => _isOnline = false);
+      return;
+    }
+
+    bool online = false;
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 3)
+      ..idleTimeout = const Duration(seconds: 3);
+
+    try {
+      final request = await client
+          .getUrl(Uri.parse('https://www.gstatic.com/generate_204'))
+          .timeout(const Duration(seconds: 3));
+      request.headers.add(HttpHeaders.cacheControlHeader, 'no-cache');
+      final response = await request.close().timeout(const Duration(seconds: 3));
+      online = response.statusCode >= 200 && response.statusCode < 400;
+      await response.drain<void>();
+    } catch (_) {
+      online = false;
+    } finally {
+      client.close(force: true);
+    }
+
+    if (mounted && online != _isOnline) {
+      setState(() => _isOnline = online);
+    }
   }
 
   void _resetConversation() {
@@ -85,6 +115,7 @@ class ConversationViewState extends State<ConversationView> {
     _searchController.dispose();
     _messageScrollController.dispose();
     _connectivitySubscription?.cancel();
+    _internetCheckTimer?.cancel();
     super.dispose();
   }
 
