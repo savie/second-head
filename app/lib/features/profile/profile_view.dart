@@ -461,7 +461,6 @@ class AccountView extends StatefulWidget {
 }
 
 class _AccountViewState extends State<AccountView> {
-
   Future<void> _editValue({
     required String title,
     required String initial,
@@ -528,16 +527,12 @@ class _AccountViewState extends State<AccountView> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: profileName,
-      builder: (context, name, _) => ValueListenableBuilder<String>(
-        valueListenable: profileEmail,
-        builder: (context, email, _) => Scaffold(
-          backgroundColor: shBackground,
-          body: Column(
-            children: [
-              ShTopBar(
-                title: 'Account',
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: Column(
+        children: [
+          ShTopBar(
+            title: 'Account',
             leading: IconButton(
               tooltip: 'Back',
               onPressed: () => Navigator.of(context).pop(),
@@ -551,8 +546,9 @@ class _AccountViewState extends State<AccountView> {
                 Center(
                   child: GestureDetector(
                     onTap: () {
-                      final state = context.findAncestorStateOfType<ProfileViewState>();
-                      state?._showPhotoOptions();
+                      // Account is a pushed route, so ProfileViewState is not an
+                      // ancestor here. Keep this action safe until photo handling
+                      // is shared by the account screen.
                     },
                     child: const ShProfileMark(size: 112),
                   ),
@@ -565,53 +561,66 @@ class _AccountViewState extends State<AccountView> {
                   ),
                 ),
                 const SizedBox(height: 22),
-                _AccountSection(
-                  title: 'Personal',
-                  rows: [
-                    _AccountRow(
-                      icon: Icons.person_outline_rounded,
-                      label: 'Name',
-                      value: profileName.value,
-                      editable: true,
-                      onTap: () => _editValue(
-                        title: 'Name',
-                        initial: profileName.value,
-                        onSave: (value) => setState(() => profileName.value = value),
-                      ),
+                ValueListenableBuilder<String>(
+                  valueListenable: profileName,
+                  builder: (context, name, _) => ValueListenableBuilder<String>(
+                    valueListenable: profileEmail,
+                    builder: (context, email, _) => _AccountSection(
+                      title: 'Personal',
+                      rows: [
+                        _AccountRow(
+                          icon: Icons.person_outline_rounded,
+                          label: 'Name',
+                          value: name,
+                          editable: true,
+                          onTap: () => _editValue(
+                            title: 'Name',
+                            initial: name,
+                            onSave: (value) => profileName.value = value,
+                          ),
+                        ),
+                        _AccountRow(
+                          icon: Icons.mail_outline_rounded,
+                          label: 'Email',
+                          value: email,
+                          editable: true,
+                          onTap: () => _editEmail(),
+                        ),
+                      ],
                     ),
-                    _AccountRow(
-                      icon: Icons.mail_outline_rounded,
-                      label: 'Email',
-                      value: profileEmail.value,
-                      editable: true,
-                      onTap: _editEmail,
-                    ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 14),
                 _AccountSection(
                   title: 'Identifiers',
                   rows: const [
-                    _AccountRow(icon: Icons.badge_outlined,
-                      label: 'Account ID', value: 'xxxxx'),
-                    _AccountRow(icon: Icons.fingerprint_rounded,
-                      label: 'SH ID', value: 'xxxxx'),
+                    _AccountRow(
+                      icon: Icons.badge_outlined,
+                      label: 'Account ID',
+                      value: 'xxxxx',
+                    ),
+                    _AccountRow(
+                      icon: Icons.fingerprint_rounded,
+                      label: 'SH ID',
+                      value: 'xxxxx',
+                    ),
                   ],
                 ),
                 const SizedBox(height: 14),
                 _AccountSection(
                   title: 'Account',
                   rows: const [
-                    _AccountRow(icon: Icons.calendar_today_outlined,
-                      label: 'Account created', value: 'mm-dd-yyyy'),
+                    _AccountRow(
+                      icon: Icons.calendar_today_outlined,
+                      label: 'Account created',
+                      value: 'mm-dd-yyyy',
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -1502,7 +1511,7 @@ class _AppearanceViewState extends State<AppearanceView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: shBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           ShTopBar(
@@ -1590,14 +1599,18 @@ class _ThemeCard extends StatelessWidget {
           height: 128,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: selected ? shSurface2 : shSurface,
+            color: selected
+                ? Theme.of(context).colorScheme.surfaceContainerHighest
+                : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: selected ? shPurple : shBorder, width: selected ? 1.7 : 1),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 30, color: selected ? Colors.white : shMuted),
+              Icon(icon, size: 30, color: selected
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(height: 12),
               Text(label, style: TextStyle(fontSize: 13, fontWeight: selected ? FontWeight.w700 : FontWeight.w500)),
               if (selected) ...[
@@ -1629,7 +1642,9 @@ class _LanguageCard extends StatelessWidget {
         height: 64,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         decoration: BoxDecoration(
-          color: selected ? shSurface2 : shSurface,
+          color: selected
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: selected ? shPurple : shBorder, width: selected ? 1.5 : 1),
         ),
