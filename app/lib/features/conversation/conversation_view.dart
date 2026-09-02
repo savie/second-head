@@ -29,6 +29,9 @@ class ConversationViewState extends State<ConversationView> {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   bool _isOnline = true;
+  bool _isLoadingConversation = true;
+  bool _staticReplyPending = false;
+  String _conversationStatus = 'Ready';
   Timer? _internetCheckTimer;
   @override
   void initState() {
@@ -397,8 +400,26 @@ void _scrollToLatest(){
 
 class SelectableMessage extends StatelessWidget { const SelectableMessage({required this.index,required this.assistant,required this.selected,required this.onLongPress,required this.onTap,required this.child}); final int index; final bool assistant,selected; final VoidCallback onLongPress,onTap; final Widget child; @override Widget build(BuildContext context)=>GestureDetector(onLongPress:onLongPress,onTap:onTap,child:AnimatedContainer(duration:const Duration(milliseconds:160),decoration:BoxDecoration(borderRadius:BorderRadius.circular(18),color:selected?shPurple.withValues(alpha: .12):Colors.transparent),child:Stack(children:[child,if(selected)const Positioned(right:4,top:4,child:Icon(Icons.check_circle,size:17))]))); }
 class ConversationMessage {
- ConversationMessage(this.text,this.assistant,this.time,{this.attachmentPath});
- String text; final bool assistant; final String time; final String? attachmentPath;
+  ConversationMessage(this.text, this.assistant, this.time, {this.attachmentPath});
+  String text;
+  final bool assistant;
+  final String time;
+  final String? attachmentPath;
+
+  Map<String, dynamic> toJson() => {
+    'text': text,
+    'assistant': assistant,
+    'time': time,
+    'attachmentPath': attachmentPath,
+  };
+
+  factory ConversationMessage.fromJson(Map<String, dynamic> json) =>
+      ConversationMessage(
+        json['text'] is String ? json['text'] as String : '',
+        json['assistant'] == true,
+        json['time'] is String ? json['time'] as String : 'Now',
+        attachmentPath: json['attachmentPath'] is String ? json['attachmentPath'] as String : null,
+      );
 }
 class ActionTile extends StatelessWidget {
   const ActionTile({super.key,required this.icon,required this.label,required this.onTap});
