@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../conversation/conversation_view.dart';
-import '../profile/profile_view.dart';
 import '../../core/theme/sh_theme.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../auth/auth_screens.dart';
