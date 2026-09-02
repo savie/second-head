@@ -29,11 +29,6 @@ class ProfileViewState extends State<ProfileView> {
     profilePhoto.value = bytes;
   }
 
-  Future<void> _removeProfilePhoto() async {
-    await StorageService.removeProfilePhoto();
-    if (mounted) setState(() => profilePhoto.value = null);
-  }
-
   void _showPhotoOptions() {
     showModalBottomSheet<void>(
       context: context,
