@@ -2164,7 +2164,39 @@ class _DPAttachmentList extends StatelessWidget {
   }
 }
 
-class _DPFileStat extends StatelessWidget { const _DPFileStat({required this.icon,required this.label,required this.count}); final IconData icon; final String label; final int count; @override Widget build(BuildContext context)=>Container(margin:const EdgeInsets.only(bottom:7),padding:const EdgeInsets.symmetric(horizontal:14,vertical:12),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(16),border:Border.all(color:shBorder)),child:Row(children:[Icon(icon,size:19,color:shMuted),const SizedBox(width:11),Expanded(child:Text(label,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w600))),Text('$count',style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700,color:shMuted))])); }
+class _DPFileStat extends StatelessWidget {
+  const _DPFileStat({required this.icon, required this.label, required this.count, required this.onTap});
+  final IconData icon;
+  final String label;
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: shSurface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: shBorder),
+        ),
+        child: Row(children: [
+          Icon(icon, size: 19, color: shMuted),
+          const SizedBox(width: 11),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
+          Text(count.toString(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: shMuted)),
+          const SizedBox(width: 4),
+          const Icon(Icons.chevron_right_rounded, size: 20, color: shMuted),
+        ]),
+      ),
+    ),
+  );
+}
 
 class _DPSectionLabel extends StatelessWidget {
   const _DPSectionLabel(this.text);
