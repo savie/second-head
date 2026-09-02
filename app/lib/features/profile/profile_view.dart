@@ -1437,7 +1437,7 @@ class _ExportDataViewState extends State<_ExportDataView> {
       final stamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
       final dir = Directory('${exportDir.path}/SH_export_$stamp');
       await dir.create(recursive: true);
-      final files = await StorageService.listFiles();
+      final files = await StorageService.listFiles(includeExports: false);
       final manifest = <String, dynamic>{
         'format': 'second_head_local_export_v1',
         'created_at': DateTime.now().toIso8601String(),
@@ -1536,7 +1536,7 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
     if (confirmed != true) return;
     setState(() => _busy = true);
     try {
-      for (final file in await StorageService.listFiles()) {
+      for (final file in await StorageService.listFiles(includeExports: false)) {
         await file.delete();
       }
       if (!mounted) return;
@@ -1859,7 +1859,7 @@ class _DataFilesViewState extends State<_DataFilesView> {
   Future<void> _refresh() async {
     if (mounted) setState(() => _loading = true);
     try {
-      final files = await StorageService.listFiles();
+      final files = await StorageService.listFiles(includeExports: false);
       int total = 0, images = 0, videos = 0, audio = 0, documents = 0;
       for (final file in files) {
         total += await file.length();
