@@ -3,8 +3,19 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../theme/sh_theme.dart';
+import '../storage/storage_service.dart';
 
 final ValueNotifier<Uint8List?> profilePhoto = ValueNotifier<Uint8List?>(null);
+
+final Future<void> profilePhotoLoad = _loadProfilePhoto();
+
+Future<void> _loadProfilePhoto() async {
+  try {
+    profilePhoto.value = await StorageService.readProfilePhoto();
+  } catch (_) {
+    // Local storage is optional; keep the default SH mark if unavailable.
+  }
+}
 
 // Frontend profile identity state. Backend persistence will be wired later.
 final ValueNotifier<String> profileName = ValueNotifier<String>('Savie');
