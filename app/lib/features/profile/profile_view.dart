@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
@@ -28,6 +27,11 @@ class ProfileViewState extends State<ProfileView> {
     final bytes = await file.readAsBytes();
     await StorageService.saveProfilePhoto(bytes);
     profilePhoto.value = bytes;
+  }
+
+  Future<void> _removeProfilePhoto() async {
+    await StorageService.removeProfilePhoto();
+    if (mounted) setState(() => profilePhoto.value = null);
   }
 
   void _showPhotoOptions() {
