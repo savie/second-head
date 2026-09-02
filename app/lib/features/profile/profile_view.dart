@@ -274,11 +274,14 @@ class _ProfileHero extends StatelessWidget {
             left: 16,
             right: 16,
             bottom: 10,
-
-            child: Column(
-              children: [
+            child: ValueListenableBuilder<String>(
+              valueListenable: profileName,
+              builder: (context, name, _) => ValueListenableBuilder<String>(
+                valueListenable: profileEmail,
+                builder: (context, email, _) => Column(
+                  children: [
                 Text(
-                  'Savie',
+                  name,
                   style: TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w700,
@@ -287,14 +290,16 @@ class _ProfileHero extends StatelessWidget {
                 ),
                 SizedBox(height: 5),
                 Text(
-                  'savie@secondhead.app',
+                  email,
                   style: TextStyle(
                     fontSize: 12,
                     color: shMuted,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -466,8 +471,6 @@ class AccountView extends StatefulWidget {
 }
 
 class _AccountViewState extends State<AccountView> {
-  String _name = 'Savie';
-  String _email = 'savie@secondhead.app';
 
   Future<void> _editValue({
     required String title,
@@ -529,18 +532,22 @@ class _AccountViewState extends State<AccountView> {
 
   Future<void> _editEmail() => _editValue(
         title: 'Email',
-        initial: _email,
-        onSave: (value) => setState(() => _email = value),
+        initial: profileEmail.value,
+        onSave: (value) => profileEmail.value = value,
       );
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: shBackground,
-      body: Column(
-        children: [
-          ShTopBar(
-            title: 'Account',
+    return ValueListenableBuilder<String>(
+      valueListenable: profileName,
+      builder: (context, name, _) => ValueListenableBuilder<String>(
+        valueListenable: profileEmail,
+        builder: (context, email, _) => Scaffold(
+          backgroundColor: shBackground,
+          body: Column(
+            children: [
+              ShTopBar(
+                title: 'Account',
             leading: IconButton(
               tooltip: 'Back',
               onPressed: () => Navigator.of(context).pop(),
@@ -607,7 +614,9 @@ class _AccountViewState extends State<AccountView> {
               ],
             ),
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
