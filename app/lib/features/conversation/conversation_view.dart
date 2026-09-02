@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../core/theme/sh_theme.dart';
 import '../../core/state/sh_profile_state.dart';
@@ -19,10 +20,21 @@ class ConversationView extends StatefulWidget {
 }
 
 class ConversationViewState extends State<ConversationView> {
+  final Connectivity _connectivity = Connectivity();
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  bool _isOnline = true;
   @override
   void initState() {
     super.initState();
     conversationRevision.addListener(_resetConversation);
+    _refreshConnectivity();
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((_) => _refreshConnectivity());
+  }
+
+  Future<void> _refreshConnectivity() async {
+    final results = await _connectivity.checkConnectivity();
+    final online = results.any((result) => result != ConnectivityResult.none);
+    if (mounted && online != _isOnline) setState(() => _isOnline = online);
   }
 
   void _resetConversation() {
@@ -72,6 +84,7 @@ class ConversationViewState extends State<ConversationView> {
     _composerController.dispose();
     _searchController.dispose();
     _messageScrollController.dispose();
+    _connectivitySubscription?.cancel();
     super.dispose();
   }
 
@@ -107,6 +120,7 @@ class ConversationViewState extends State<ConversationView> {
               onTitleTap: () => _renameConversation(context, title),
               onSearch: () => _showSearch(context),
               onMenu: _conversationMenu,
+              isOnline: _isOnline,
             ),
           ),
         Expanded(
@@ -331,12 +345,14 @@ class ConversationHeader extends StatelessWidget {
     required this.onTitleTap,
     required this.onSearch,
     required this.onMenu,
+    required this.isOnline,
   });
 
   final String title;
   final VoidCallback onTitleTap;
   final VoidCallback onSearch;
   final VoidCallback onMenu;
+  final bool isOnline;
 
   @override
   Widget build(BuildContext context) {
@@ -435,11 +451,11 @@ class _AssistantHeaderIdentity extends StatelessWidget {
               SizedBox(height: 2),
               Row(
                 children: [
-                  Icon(Icons.circle, size: 6, color: Colors.green),
+                  Icon(Icons.circle, size: 6, color: isOnline ? Colors.green : Colors.red),
                   SizedBox(width: 4),
                   Flexible(
                     child: Text(
-                      'Online',
+                      isOnline ? 'Online' : 'Offline',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 9, color: shMuted),
