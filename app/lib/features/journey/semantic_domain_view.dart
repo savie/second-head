@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
+import 'semantic_hook.dart';
 
 enum ShSemanticDomain { memory, knowledge, experience }
 
@@ -36,6 +37,7 @@ class _SemanticDomainViewState extends State<SemanticDomainView> {
       content: _seedContent(widget.domain),
       date: 'Local',
       isPrivate: true,
+      semanticSourceId: null,
     ),
   ];
 
@@ -53,6 +55,38 @@ class _SemanticDomainViewState extends State<SemanticDomainView> {
       case ShSemanticDomain.knowledge: return 'Reference material available to Second Head.';
       case ShSemanticDomain.experience: return 'An experience record captured for later use.';
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _syncSemanticRecords();
+    shSemanticRecords.addListener(_syncSemanticRecords);
+  }
+
+  @override
+  void dispose() {
+    shSemanticRecords.removeListener(_syncSemanticRecords);
+    super.dispose();
+  }
+
+  void _syncSemanticRecords() {
+    final records = shSemanticRecords.value
+        .where((record) => record.domain == widget.domain)
+        .toList();
+    for (final record in records) {
+      final exists = items.any((item) => item.semanticSourceId == record.sourceId + '|' + record.content);
+      if (!exists) {
+        items.insert(0, SemanticDomainItem(
+          title: record.content,
+          content: 'Created from explicit Conversation command.',
+          date: 'Just now',
+          isPrivate: true,
+          semanticSourceId: record.sourceId + '|' + record.content,
+        ));
+      }
+    }
+    if (mounted) setState(() {});
   }
 
   @override
@@ -200,11 +234,12 @@ class _SemanticDomainViewState extends State<SemanticDomainView> {
 }
 
 class SemanticDomainItem {
-  SemanticDomainItem({required this.title, required this.content, required this.date, required this.isPrivate});
+  SemanticDomainItem({required this.title, required this.content, required this.date, required this.isPrivate, this.semanticSourceId});
   String title;
   String content;
   String date;
   bool isPrivate;
+  final String? semanticSourceId;
 }
 
 class SemanticDomainDraft {
