@@ -1120,18 +1120,99 @@ class _DataFilesViewState extends State<_DataFilesView> {
 
   Future<Directory> _root() async { final base=await getApplicationSupportDirectory(); final dir=Directory(base.path+'/second_head/attachments'); await Directory(dir.path+'/uploaded').create(recursive:true); await Directory(dir.path+'/generated').create(recursive:true); return dir; }
 
-  Future<void> _refresh() async { setState(()=>_loading=true); final root=await _root(); final files=<File>[]; await for(final e in root.list(recursive:true,followLinks:false)){if(e is File)files.add(e);} int image=0,video=0,audio=0,other=0,bytes=0,up=0,gen=0; for(final file in files){final n=file.path.toLowerCase();final s=await file.stat();bytes+=s.size;if(n.contains('/uploaded/'))up++;if(n.contains('/generated/'))gen++;if(RegExp(r'\.(jpg|jpeg|png|gif|webp|heic)$').hasMatch(n)){image++;}else if(RegExp(r'\.(mp4|mov|m4v|webm|avi)$').hasMatch(n)){video++;}else if(RegExp(r'\.(mp3|m4a|wav|aac|ogg|opus)$').hasMatch(n)){audio++;}else{other++;}} if(!mounted)return;setState(()=>{_total=bytes;_images=image;_videos=video;_audio=audio;_files=other;_uploaded=up;_generated=gen;_loading=false;}); }
+  Future<void> _refresh() async {
+    setState(() => _loading = true);
+    final root = await _root();
+    final files = <File>[];
+    await for (final entity in root.list(recursive: true, followLinks: false)) {
+      if (entity is File) files.add(entity);
+    }
+    int image = 0, video = 0, audio = 0, other = 0;
+    int bytes = 0, uploaded = 0, generated = 0;
+    for (final file in files) {
+      final name = file.path.toLowerCase();
+      final stat = await file.stat();
+      bytes += stat.size;
+      if (name.contains('/uploaded/')) uploaded++;
+      if (name.contains('/generated/')) generated++;
+      if (RegExp(r'\.(jpg|jpeg|png|gif|webp|heic)$').hasMatch(name)) image++;
+      else if (RegExp(r'\.(mp4|mov|m4v|webm|avi)$').hasMatch(name)) video++;
+      else if (RegExp(r'\.(mp3|m4a|wav|aac|ogg|opus)$').hasMatch(name)) audio++;
+      else other++;
+    }
+    if (!mounted) return;
+    setState(() {
+      _total = bytes; _images = image; _videos = video; _audio = audio; _files = other;
+      _uploaded = uploaded; _generated = generated; _loading = false;
+    });
+  }
 
   Future<void> _clearLocalFiles() async { final root=await _root();setState(()=>_clearing=true);await for(final e in root.list(recursive:true,followLinks:false)){if(e is File)await e.delete();}if(!mounted)return;setState(()=>_clearing=false);await _refresh(); }
 
   String _size(int b){if(b<1024)return '$b B';if(b<1024*1024)return '${(b/1024).toStringAsFixed(1)} KB';if(b<1024*1024*1024)return '${(b/(1024*1024)).toStringAsFixed(1)} MB';return '${(b/(1024*1024*1024)).toStringAsFixed(2)} GB';}
 
-  @override Widget build(BuildContext context)=>Scaffold(backgroundColor:shBackground,body:Column(children:[ShTopBar(title:'Data & Files',leading:IconButton(tooltip:'Back',onPressed:()=>Navigator.of(context).pop(),icon:const Icon(Icons.arrow_back_rounded))),Expanded(child:_loading?const Center(child:CircularProgressIndicator()):RefreshIndicator(onRefresh:_refresh,child:ListView(padding:const EdgeInsets.fromLTRB(14,14,14,32),children:[
-
-    Container(padding:const EdgeInsets.all(20),decoration:BoxDecoration(gradient:const LinearGradient(colors:[shSurface2,shSurface]),borderRadius:BorderRadius.circular(24),border:Border.all(color:shBorder)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('LOCAL STORAGE',style:TextStyle(fontSize:11,fontWeight:FontWeight.w800,letterSpacing:1.4,color:shMuted)),const SizedBox(height:8),Text(_size(_total),style:const TextStyle(fontSize:30,fontWeight:FontWeight.w800)),const SizedBox(height:5),Text('${_uploaded+_generated} attachments on this device',style:const TextStyle(fontSize:12,color:shMuted))])),
-
-    const SizedBox(height:18),const _DPSectionLabel('BY TYPE'),const SizedBox(height:8),_DPFileStat(icon:Icons.image_outlined,label:'Images',count:_images),_DPFileStat(icon:Icons.videocam_outlined,label:'Videos',count:_videos),_DPFileStat(icon:Icons.graphic_eq_rounded,label:'Audio',count:_audio),_DPFileStat(icon:Icons.insert_drive_file_outlined,label:'Files',count:_files),
-
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: shBackground,
+    body: Column(children: [
+      ShTopBar(title: 'Data & Files', leading: IconButton(
+        tooltip: 'Back', onPressed: () => Navigator.of(context).pop(),
+        icon: const Icon(Icons.arrow_back_rounded),
+      )),
+      Expanded(child: _loading
+        ? const Center(child: CircularProgressIndicator())
+        : RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 32),
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [shSurface2, shSurface]),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text('LOCAL STORAGE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.4, color: shMuted)),
+                    const SizedBox(height: 8),
+                    Text(_size(_total), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+                    Text('${_uploaded + _generated} attachments on this device', style: const TextStyle(fontSize: 12, color: shMuted)),
+                  ]),
+                ),
+                const SizedBox(height: 18), const _DPSectionLabel('BY TYPE'), const SizedBox(height: 8),
+                _DPFileStat(icon: Icons.image_outlined, label: 'Images', count: _images),
+                _DPFileStat(icon: Icons.videocam_outlined, label: 'Videos', count: _videos),
+                _DPFileStat(icon: Icons.graphic_eq_rounded, label: 'Audio', count: _audio),
+                _DPFileStat(icon: Icons.insert_drive_file_outlined, label: 'Files', count: _files),
+                const SizedBox(height: 18), const _DPSectionLabel('SOURCE'), const SizedBox(height: 8),
+                _DPFileStat(icon: Icons.file_upload_outlined, label: 'Uploaded', count: _uploaded),
+                _DPFileStat(icon: Icons.auto_awesome_outlined, label: 'Generated by SH', count: _generated),
+                const SizedBox(height: 18),
+                Material(color: Colors.transparent, child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: _clearing ? null : _clearLocalFiles,
+                  child: Container(
+                    padding: const EdgeInsets.all(17),
+                    decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(20), border: Border.all(color: shBorder)),
+                    child: Row(children: [
+                      Container(width: 42, height: 42, decoration: BoxDecoration(color: shSurface2, borderRadius: BorderRadius.circular(13)),
+                        child: _clearing ? const Padding(padding: EdgeInsets.all(11), child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.cleaning_services_outlined, size: 20, color: Colors.redAccent)),
+                      const SizedBox(width: 12),
+                      const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text('Clear Local Files', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.redAccent)),
+                        SizedBox(height: 3), Text('Removes attachment copies from this device only', style: TextStyle(fontSize: 11, color: shMuted)),
+                      ])),
+                      const Icon(Icons.chevron_right_rounded, size: 22, color: shMuted),
+                    ]),
+                  ),
+                )),
+              ],
+            ),
+          )),
+    ]),
+  );
     const SizedBox(height:18),const _DPSectionLabel('SOURCE'),const SizedBox(height:8),_DPFileStat(icon:Icons.file_upload_outlined,label:'Uploaded',count:_uploaded),_DPFileStat(icon:Icons.auto_awesome_outlined,label:'Generated by SH',count:_generated),
 
     const SizedBox(height:18),Material(color:Colors.transparent,child:InkWell(borderRadius:BorderRadius.circular(20),onTap:_clearing?null:_clearLocalFiles,child:Container(padding:const EdgeInsets.all(17),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(20),border:Border.all(color:shBorder)),child:Row(children:[Container(width:42,height:42,decoration:BoxDecoration(color:shSurface2,borderRadius:BorderRadius.circular(13)),child:_clearing?const Padding(padding:EdgeInsets.all(11),child:CircularProgressIndicator(strokeWidth:2)):const Icon(Icons.cleaning_services_outlined,size:20,color:Colors.redAccent)),const SizedBox(width:12),const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('Clear Local Files',style:TextStyle(fontSize:14,fontWeight:FontWeight.w700,color:Colors.redAccent)),SizedBox(height:3),Text('Removes attachment copies from this device only',style:TextStyle(fontSize:11,color:shMuted))])),const Icon(Icons.chevron_right_rounded,size:22,color:shMuted)])))),
