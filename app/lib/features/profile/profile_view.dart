@@ -1289,6 +1289,20 @@ class _AppearanceViewState extends State<AppearanceView> {
   String get _language => shAppearance.languageCode == 'id' ? 'Indonesia' : 'English';
 
   @override
+  void initState() {
+    super.initState();
+    shAppearance.addListener(_appearanceChanged);
+  }
+
+  @override
+  void dispose() {
+    shAppearance.removeListener(_appearanceChanged);
+    super.dispose();
+  }
+
+  void _appearanceChanged() => setState(() {});
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: shBackground,
