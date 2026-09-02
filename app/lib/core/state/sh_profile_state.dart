@@ -6,6 +6,10 @@ import '../theme/sh_theme.dart';
 
 final ValueNotifier<Uint8List?> profilePhoto = ValueNotifier<Uint8List?>(null);
 
+// Frontend profile identity state. Backend persistence will be wired later.
+final ValueNotifier<String> profileName = ValueNotifier<String>('Savie');
+final ValueNotifier<String> profileEmail = ValueNotifier<String>('savie@secondhead.app');
+
 class ShProfileMark extends StatelessWidget {
   const ShProfileMark({super.key, this.size = 52});
 
