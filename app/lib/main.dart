@@ -6,7 +6,6 @@ import 'features/home/home_screen.dart';
 
 void main() => runApp(const SecondHeadApp());
 
-final shAppearance = ShAppearanceController();
 
 class SecondHeadApp extends StatefulWidget {
   const SecondHeadApp({super.key});
