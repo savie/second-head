@@ -484,76 +484,79 @@ class Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-        alignment: assistant ? Alignment.centerLeft : Alignment.centerRight,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (assistant)
-              Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onAvatarTap,
-                  child: ChatAvatar(assistant: true),
-                ),
+      alignment: assistant ? Alignment.centerLeft : Alignment.centerRight,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (assistant)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onAvatarTap,
+                child: ChatAvatar(assistant: true),
               ),
-            Container(
-          constraints: const BoxConstraints(maxWidth: 300),
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            gradient: assistant
-                ? null
-                : const LinearGradient(colors: [shPurple, shElectric]),
-            color: assistant ? shSurface2 : null,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(18),
-              topRight: const Radius.circular(18),
-              bottomLeft: Radius.circular(assistant ? 5 : 18),
-              bottomRight: Radius.circular(assistant ? 18 : 5),
             ),
-            border: assistant ? Border.all(color: shBorder) : null,
-          ),
-          child: Column(
-            crossAxisAlignment:
-                assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-            children: [
-              if (image != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.memory(
-                    image!,
-                    width: 245,
-                    height: 175,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              if (image != null && text.isNotEmpty) const SizedBox(height: 7),
-              if (text.isNotEmpty)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    text,
-                    style: const TextStyle(fontSize: 14, height: 1.45),
-                  ),
-                ),
-              const SizedBox(height: 4),
-              Text(time, style: const TextStyle(fontSize: 9, color: shMuted)),
-            ],
-          ),
-        ),
-            if (!assistant)
-              Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onAvatarTap,
-                  child: ChatAvatar(assistant: false),
-                ),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 300),
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: assistant
+                  ? null
+                  : const LinearGradient(colors: [shPurple, shElectric]),
+              color: assistant ? shSurface2 : null,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(18),
+                topRight: const Radius.circular(18),
+                bottomLeft: Radius.circular(assistant ? 5 : 18),
+                bottomRight: Radius.circular(assistant ? 18 : 5),
               ),
-          ],
-        ),
+              border: assistant ? Border.all(color: shBorder) : null,
+            ),
+            child: Column(
+              crossAxisAlignment:
+                  assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+              children: [
+                if (image != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.memory(
+                      image!,
+                      width: 245,
+                      height: 175,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                if (image != null && text.isNotEmpty)
+                  const SizedBox(height: 7),
+                if (text.isNotEmpty)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      text,
+                      style: const TextStyle(fontSize: 14, height: 1.45),
+                    ),
+                  ),
+                const SizedBox(height: 4),
+                Text(
+                  time,
+                  style: const TextStyle(fontSize: 9, color: shMuted),
+                ),
+              ],
+            ),
+          ),
+          if (!assistant)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onAvatarTap,
+                child: ChatAvatar(assistant: false),
+              ),
+            ),
+        ],
       ),
     );
   }
