@@ -80,3 +80,5 @@ class ShAppearanceController extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+final shAppearance = ShAppearanceController();
