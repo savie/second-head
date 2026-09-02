@@ -97,7 +97,6 @@ class ConversationViewState extends State<ConversationView> {
  final ScrollController _messageScrollController = ScrollController();
  final ImagePicker _picker = ImagePicker();
  final TextEditingController _searchController=TextEditingController();
- bool _staticReplyPending = false;
 
 Future<void> _persistConversation() async {
   await StorageService.saveConversationState(
