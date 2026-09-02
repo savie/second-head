@@ -403,9 +403,9 @@ class ConversationHeader extends StatelessWidget {
                 icon: const Icon(Icons.menu, size: 30),
               ),
               const SizedBox(width: 2),
-              const SizedBox(
+              SizedBox(
                 width: 112,
-                child: _AssistantHeaderIdentity(),
+                child: _AssistantHeaderIdentity(isOnline: isOnline),
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -445,7 +445,9 @@ class ConversationHeader extends StatelessWidget {
 }
 
 class _AssistantHeaderIdentity extends StatelessWidget {
-  const _AssistantHeaderIdentity();
+  const _AssistantHeaderIdentity({required this.isOnline});
+
+  final bool isOnline;
 
   @override
   Widget build(BuildContext context) {
