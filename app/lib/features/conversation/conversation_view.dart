@@ -183,18 +183,49 @@ class ConversationViewState extends State<ConversationView> {
       isScrollControlled: true,
       backgroundColor: shSurface,
       showDragHandle: true,
-      builder: (sheet) => Padding(
-        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
+      builder: (sheet) => SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          18,
+          8,
+          18,
+          MediaQuery.of(sheet).viewInsets.bottom + 18,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const Text(
+              'Rename conversation',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: controller, autofocus: true),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) {
+                final name = controller.text.trim();
+                if (name.isNotEmpty) {
+                  conversationTitle.value = name;
+                  final list = [...recentConversations.value];
+                  final index = list.indexWhere((item) => item.title == title);
+                  if (index >= 0) {
+                    final item = list[index];
+                    list[index] = RecentConversationEntry(name, item.preview);
+                    recentConversations.value = list;
+                  }
+                  Navigator.pop(sheet);
+                }
+              },
+            ),
             const SizedBox(height: 14),
             Row(
               children: [
-                Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(sheet),
+                    child: const Text('Cancel'),
+                  ),
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: FilledButton(
