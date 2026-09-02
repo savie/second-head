@@ -386,22 +386,13 @@ class _SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: shSurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: shBorder, width: 1.2),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            items[i],
-            if (i != items.length - 1)
-              const Divider(height: 1, color: shBorder),
-          ],
+    return Column(
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          items[i],
+          if (i != items.length - 1) const SizedBox(height: 10),
         ],
-      ),
+      ],
     );
   }
 }
@@ -416,44 +407,44 @@ class _SettingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 68,
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
+        borderRadius: BorderRadius.circular(22),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 76),
+          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [shSurface2, shSurface]),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: shBorder),
+          ),
           child: Row(
             children: [
-              Icon(icon, size: 25, color: Colors.white70),
-              const SizedBox(width: 18),
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: shSurface2,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: shBorder),
+                ),
+                child: Icon(icon, size: 22, color: Colors.white),
+              ),
+              const SizedBox(width: 13),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        color: shMuted,
-                      ),
-                    ),
+                    Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(subtitle, style: const TextStyle(fontSize: 11.5, color: shMuted)),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                size: 26,
-                color: shMuted,
-              ),
+              const Icon(Icons.chevron_right_rounded, size: 22, color: shMuted),
             ],
           ),
         ),
@@ -461,7 +452,6 @@ class _SettingItem extends StatelessWidget {
     );
   }
 }
-
 
 class AccountView extends StatefulWidget {
   const AccountView({super.key});
@@ -579,6 +569,7 @@ class _AccountViewState extends State<AccountView> {
                   title: 'Personal',
                   rows: [
                     _AccountRow(
+                      icon: Icons.person_outline_rounded,
                       label: 'Name',
                       value: profileName.value,
                       editable: true,
@@ -589,6 +580,7 @@ class _AccountViewState extends State<AccountView> {
                       ),
                     ),
                     _AccountRow(
+                      icon: Icons.mail_outline_rounded,
                       label: 'Email',
                       value: profileEmail.value,
                       editable: true,
@@ -600,15 +592,18 @@ class _AccountViewState extends State<AccountView> {
                 _AccountSection(
                   title: 'Identifiers',
                   rows: const [
-                    _AccountRow(label: 'Account ID', value: 'xxxxx'),
-                    _AccountRow(label: 'SH ID', value: 'xxxxx'),
+                    _AccountRow(icon: Icons.badge_outlined,
+                      label: 'Account ID', value: 'xxxxx'),
+                    _AccountRow(icon: Icons.fingerprint_rounded,
+                      label: 'SH ID', value: 'xxxxx'),
                   ],
                 ),
                 const SizedBox(height: 14),
                 _AccountSection(
                   title: 'Account',
                   rows: const [
-                    _AccountRow(label: 'Account created', value: 'mm-dd-yyyy'),
+                    _AccountRow(icon: Icons.calendar_today_outlined,
+                      label: 'Account created', value: 'mm-dd-yyyy'),
                   ],
                 ),
               ],
@@ -640,21 +635,13 @@ class _AccountSection extends StatelessWidget {
             style: const TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600),
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: shSurface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: shBorder),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              for (var i = 0; i < rows.length; i++) ...[
-                rows[i],
-                if (i < rows.length - 1) const Divider(height: 1, color: shBorder),
-              ],
+        Column(
+          children: [
+            for (var i = 0; i < rows.length; i++) ...[
+              rows[i],
+              if (i != rows.length - 1) const SizedBox(height: 10),
             ],
-          ),
+          ],
         ),
       ],
     );
@@ -663,12 +650,14 @@ class _AccountSection extends StatelessWidget {
 
 class _AccountRow extends StatelessWidget {
   const _AccountRow({
+    required this.icon,
     required this.label,
     required this.value,
     this.editable = false,
     this.onTap,
   });
 
+  final IconData icon;
   final String label;
   final String value;
   final bool editable;
@@ -676,28 +665,51 @@ class _AccountRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: editable ? onTap : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(label, style: const TextStyle(fontSize: 14, color: shMuted)),
-            ),
-            Flexible(
-              child: Text(
-                value,
-                textAlign: TextAlign.right,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: editable ? onTap : null,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 70),
+          padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: shSurface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: shBorder),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: shSurface2,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: shBorder),
+                ),
+                child: Icon(icon, size: 21, color: Colors.white),
               ),
-            ),
-            if (editable) ...[
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded, size: 20, color: shMuted),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 3),
+                    Text(
+                      value,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12, color: shMuted),
+                    ),
+                  ],
+                ),
+              ),
+              if (editable)
+                const Icon(Icons.chevron_right_rounded, size: 21, color: shMuted),
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -801,17 +813,17 @@ class _NotificationsViewState extends State<NotificationsView> {
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 30),
         children: [
           _NotificationSection(title: 'General', children: [
-            _NotificationRow(icon: Icons.chat_bubble_outline, label: 'Message notifications', value: message, onChanged: (v) => setState(() => message = v)),
-            _NotificationRow(icon: Icons.notifications_none_rounded, label: 'Activity notifications', value: activity, onChanged: (v) => setState(() => activity = v)),
+            _NotificationRow(icon: Icons.chat_bubble_outline, label: 'Message notifications', description: 'Alerts when new messages arrive', value: message, onChanged: (v) => setState(() => message = v)),
+            _NotificationRow(icon: Icons.notifications_none_rounded, label: 'Activity notifications', description: 'Updates about activity in SH', value: activity, onChanged: (v) => setState(() => activity = v)),
           ]),
           const SizedBox(height: 16),
           _NotificationSection(title: 'Updates', children: [
-            _NotificationRow(icon: Icons.auto_awesome_outlined, label: 'Second Head updates', value: updates, onChanged: (v) => setState(() => updates = v)),
+            _NotificationRow(icon: Icons.auto_awesome_outlined, label: 'Second Head updates', description: 'Product and system updates', value: updates, onChanged: (v) => setState(() => updates = v)),
           ]),
           const SizedBox(height: 16),
           _NotificationSection(title: 'Notification behavior', children: [
-            _NotificationRow(icon: Icons.volume_up_outlined, label: 'Sound', value: sound, onChanged: (v) => setState(() => sound = v)),
-            _NotificationRow(icon: Icons.vibration_rounded, label: 'Vibration', value: vibration, onChanged: (v) => setState(() => vibration = v)),
+            _NotificationRow(icon: Icons.volume_up_outlined, label: 'Sound', description: 'Play notification sounds', value: sound, onChanged: (v) => setState(() => sound = v)),
+            _NotificationRow(icon: Icons.vibration_rounded, label: 'Vibration', description: 'Vibrate for notifications', value: vibration, onChanged: (v) => setState(() => vibration = v)),
           ]),
         ],
       )),
@@ -821,45 +833,88 @@ class _NotificationsViewState extends State<NotificationsView> {
 
 class _NotificationSection extends StatelessWidget {
   const _NotificationSection({required this.title, required this.children});
+
   final String title;
   final List<Widget> children;
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
         padding: const EdgeInsets.only(left: 4, bottom: 8),
-        child: Text(title, style: const TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600)),
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600),
+        ),
       ),
-      Container(
-        decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(20), border: Border.all(color: shBorder)),
-        clipBehavior: Clip.antiAlias,
-        child: Column(children: [
+      Column(
+        children: [
           for (var i = 0; i < children.length; i++) ...[
             children[i],
-            if (i < children.length - 1) const Divider(height: 1, color: shBorder),
+            if (i != children.length - 1) const SizedBox(height: 10),
           ],
-        ]),
+        ],
       ),
     ],
   );
 }
 
 class _NotificationRow extends StatelessWidget {
-  const _NotificationRow({required this.icon, required this.label, required this.value, required this.onChanged});
+  const _NotificationRow({
+    required this.icon,
+    required this.label,
+    required this.description,
+    required this.value,
+    required this.onChanged,
+  });
+
   final IconData icon;
   final String label;
+  final String description;
   final bool value;
   final ValueChanged<bool> onChanged;
+
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-    child: Row(children: [
-      Icon(icon, size: 21, color: value ? Colors.white : shMuted),
-      const SizedBox(width: 13),
-      Expanded(child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
-      Switch.adaptive(value: value, onChanged: onChanged),
-    ]),
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: Container(
+      constraints: const BoxConstraints(minHeight: 76),
+      padding: const EdgeInsets.fromLTRB(16, 13, 12, 13),
+      decoration: BoxDecoration(
+        color: shSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: shBorder),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: shSurface2,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: shBorder),
+            ),
+            child: Icon(icon, size: 21, color: value ? Colors.white : shMuted),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 3),
+                Text(description, style: const TextStyle(fontSize: 11.5, color: shMuted)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
+    ),
   );
 }
 
@@ -888,39 +943,21 @@ class SecurityView extends StatelessWidget {
                   padding: EdgeInsets.only(left: 4, bottom: 8),
                   child: Text(
                     'Authentication',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: shMuted,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600),
                   ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: shSurface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: shBorder),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      const _SecurityRow(
-                        icon: Icons.mail_outline_rounded,
-                        label: 'Sign-in method',
-                        value: 'Email',
-                      ),
-                      const Divider(height: 1, color: shBorder),
-                      _SecurityRow(
-                        icon: Icons.lock_outline_rounded,
-                        label: 'Password',
-                        value: 'Not configured yet',
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const PasswordView(),
-                          ),
-                        ),
-                      ),
-                    ],
+                _SecurityRow(
+                  icon: Icons.mail_outline_rounded,
+                  label: 'Sign-in method',
+                  value: 'Email',
+                ),
+                const SizedBox(height: 10),
+                _SecurityRow(
+                  icon: Icons.lock_outline_rounded,
+                  label: 'Password',
+                  value: 'Not configured yet',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const PasswordView()),
                   ),
                 ),
               ],
@@ -930,6 +967,66 @@ class SecurityView extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SecurityRow extends StatelessWidget {
+  const _SecurityRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 70),
+        padding: const EdgeInsets.fromLTRB(16, 12, 14, 12),
+        decoration: BoxDecoration(
+          color: shSurface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: shBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: shSurface2,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: shBorder),
+              ),
+              child: Icon(icon, size: 21, color: onTap == null ? shMuted : Colors.white),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 3),
+                  Text(value, style: const TextStyle(fontSize: 11.5, color: shMuted)),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              const Icon(Icons.chevron_right_rounded, size: 21, color: shMuted),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class PasswordView extends StatefulWidget {
