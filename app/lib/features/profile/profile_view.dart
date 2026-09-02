@@ -769,8 +769,8 @@ class AppearanceView extends StatefulWidget {
 }
 
 class _AppearanceViewState extends State<AppearanceView> {
-  ThemeMode _themeMode = ThemeMode.dark;
-  String _language = 'English';
+  ThemeMode get _themeMode => shAppearance.themeMode;
+  String get _language => shAppearance.languageCode == 'id' ? 'Indonesia' : 'English';
 
   @override
   Widget build(BuildContext context) {
@@ -800,21 +800,21 @@ class _AppearanceViewState extends State<AppearanceView> {
                       icon: Icons.dark_mode_outlined,
                       label: 'Dark',
                       selected: _themeMode == ThemeMode.dark,
-                      onTap: () => setState(() => _themeMode = ThemeMode.dark),
+                      onTap: () => shAppearance.setThemeMode(ThemeMode.dark),
                     ),
                     const SizedBox(width: 8),
                     _ThemeCard(
                       icon: Icons.light_mode_outlined,
                       label: 'Light',
                       selected: _themeMode == ThemeMode.light,
-                      onTap: () => setState(() => _themeMode = ThemeMode.light),
+                      onTap: () => shAppearance.setThemeMode(ThemeMode.light),
                     ),
                     const SizedBox(width: 8),
                     _ThemeCard(
                       icon: Icons.brightness_auto_outlined,
                       label: 'System',
                       selected: _themeMode == ThemeMode.system,
-                      onTap: () => setState(() => _themeMode = ThemeMode.system),
+                      onTap: () => shAppearance.setThemeMode(ThemeMode.system),
                     ),
                   ],
                 ),
@@ -827,14 +827,14 @@ class _AppearanceViewState extends State<AppearanceView> {
                   code: 'EN',
                   label: 'English',
                   selected: _language == 'English',
-                  onTap: () => setState(() => _language = 'English'),
+                  onTap: () => shAppearance.setLanguage('en'),
                 ),
                 const SizedBox(height: 8),
                 _LanguageCard(
                   code: 'ID',
                   label: 'Indonesia',
                   selected: _language == 'Indonesia',
-                  onTap: () => setState(() => _language = 'Indonesia'),
+                  onTap: () => shAppearance.setLanguage('id'),
                 ),
               ],
             ),
