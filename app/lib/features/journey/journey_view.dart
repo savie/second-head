@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
 import 'semantic_domain_view.dart';
+import 'semantic_hook.dart';
 
 class JourneyView extends StatefulWidget {
   const JourneyView({super.key});
@@ -13,6 +14,36 @@ class JourneyView extends StatefulWidget {
 
 class JourneyViewState extends State<JourneyView> {
   String filter = 'All';
+
+  void _syncSemanticRecords() {
+    final existingSources = items.map((item) => item.semanticSourceId).whereType<String>().toSet();
+    final additions = <JourneyItem>[];
+    for (final record in shSemanticRecords.value) {
+      if (existingSources.contains(record.sourceId + '|' + record.content)) continue;
+      additions.add(JourneyItem(
+        record.content,
+        'Created from explicit Conversation command',
+        'Just now',
+        record.domain.label,
+        record.content,
+        true,
+        semanticSourceId: record.sourceId + '|' + record.content,
+      ));
+    }
+    if (additions.isNotEmpty) setState(() => items.insertAll(0, additions));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    shSemanticRecords.addListener(_syncSemanticRecords);
+  }
+
+  @override
+  void dispose() {
+    shSemanticRecords.removeListener(_syncSemanticRecords);
+    super.dispose();
+  }
 
   final List<JourneyItem> items = [
     JourneyItem(
