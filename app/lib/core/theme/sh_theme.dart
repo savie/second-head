@@ -9,15 +9,15 @@ const shCyan = Color(0xFF22D3EE);
 const shMuted = Color(0xFF9AA8B6);
 const shBorder = Color(0xFF273746);
 
-ThemeData buildShTheme() {
+ThemeData buildShTheme({bool light = false}) {
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: light ? Brightness.light : Brightness.dark,
     scaffoldBackgroundColor: shBackground,
     fontFamily: 'Poppins',
     colorScheme: ColorScheme.fromSeed(
       seedColor: shPurple,
-      brightness: Brightness.dark,
+      brightness: light ? Brightness.light : Brightness.dark,
     ).copyWith(
       primary: shPurple,
       secondary: shCyan,
@@ -62,4 +62,21 @@ ThemeData buildShTheme() {
       }),
     ),
   );
+}
+
+class ShAppearanceController extends ChangeNotifier {
+  ThemeMode themeMode = ThemeMode.dark;
+  String languageCode = 'en';
+
+  void setThemeMode(ThemeMode value) {
+    if (themeMode == value) return;
+    themeMode = value;
+    notifyListeners();
+  }
+
+  void setLanguage(String value) {
+    if (languageCode == value) return;
+    languageCode = value;
+    notifyListeners();
+  }
 }
