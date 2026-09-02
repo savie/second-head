@@ -107,29 +107,6 @@ class _SideMenuState extends State<SideMenu> {
     );
   }
 
-  void _showInfo(BuildContext context, String title, String body) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            Text(body, style: const TextStyle(color: shMuted, height: 1.5)),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _showAbout(BuildContext context) async {
     final info = await PackageInfo.fromPlatform();
     if (!context.mounted) return;
