@@ -1345,37 +1345,389 @@ class _IntegrationEmpty extends StatelessWidget { const _IntegrationEmpty({requi
 
 
 class DataPrivacyView extends StatelessWidget {
-
   const DataPrivacyView({super.key});
 
-  @override Widget build(BuildContext context) => Scaffold(backgroundColor:shBackground,body:Column(children:[
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: shBackground,
+    body: Column(
+      children: [
+        ShTopBar(
+          title: 'Data & Privacy',
+          leading: IconButton(
+            tooltip: 'Back',
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 32),
+            children: [
+              const _DPSectionLabel('YOUR DATA'),
+              const SizedBox(height: 8),
+              _DPCard(
+                icon: Icons.folder_copy_outlined,
+                title: 'Data & Files',
+                subtitle: 'Manage local images, files, audio and video',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const _DataFilesView()),
+                ),
+              ),
+              const SizedBox(height: 10),
+              _DPCard(
+                icon: Icons.file_download_outlined,
+                title: 'Export Data',
+                subtitle: 'Get a copy of your SH data',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const _ExportDataView()),
+                ),
+              ),
+              const SizedBox(height: 10),
+              _DPCard(
+                icon: Icons.delete_outline_rounded,
+                title: 'Delete Data',
+                subtitle: 'Remove selected SH data',
+                destructive: true,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const _DeleteDataView()),
+                ),
+              ),
+              const SizedBox(height: 22),
+              const _DPSectionLabel('PRIVACY'),
+              const SizedBox(height: 8),
+              _DPCard(
+                icon: Icons.privacy_tip_outlined,
+                title: 'Privacy Information',
+                subtitle: 'How your data is handled',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const _PrivacyInformationView()),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
-    ShTopBar(title:'Data & Privacy',leading:IconButton(tooltip:'Back',onPressed:()=>Navigator.of(context).pop(),icon:const Icon(Icons.arrow_back_rounded))),
+class _ExportDataView extends StatelessWidget {
+  const _ExportDataView();
 
-    Expanded(child:ListView(padding:const EdgeInsets.fromLTRB(14,14,14,32),children:[
+  @override
+  Widget build(BuildContext context) => _DPSubPage(
+    title: 'Export Data',
+    children: [
+      const _DPSectionLabel('EXPORT'),
+      const SizedBox(height: 8),
+      const _DPInfoCard(
+        icon: Icons.file_download_outlined,
+        title: 'Export your SH data',
+        description: 'Create a copy of the SH data available to your account. The export workflow will be connected to the data layer later.',
+      ),
+      const SizedBox(height: 14),
+      const _DPSectionLabel('INCLUDES'),
+      const SizedBox(height: 8),
+      const _DPOptionCard(
+        icon: Icons.account_circle_outlined,
+        title: 'Account & profile',
+        subtitle: 'Account information and profile data',
+      ),
+      const SizedBox(height: 10),
+      const _DPOptionCard(
+        icon: Icons.auto_awesome_outlined,
+        title: 'SH data',
+        subtitle: 'Journeys and other stored SH data',
+      ),
+      const SizedBox(height: 10),
+      const _DPOptionCard(
+        icon: Icons.history_rounded,
+        title: 'Activity & settings',
+        subtitle: 'Relevant settings and activity data',
+      ),
+      const SizedBox(height: 20),
+      _DPActionCard(
+        icon: Icons.file_download_outlined,
+        title: 'Export Data',
+        subtitle: 'Export is not connected yet.',
+        onTap: () => _showDPNotice(context, 'Export Data'),
+      ),
+    ],
+  );
+}
 
-      const _DPSectionLabel('YOUR DATA'),const SizedBox(height:8),
+class _DeleteDataView extends StatelessWidget {
+  const _DeleteDataView();
 
-      _DPCard(icon:Icons.folder_copy_outlined,title:'Data & Files',subtitle:'Manage local images, files, audio and video',onTap:()=>Navigator.of(context).push(MaterialPageRoute(builder:(_)=>const _DataFilesView()))),
+  @override
+  Widget build(BuildContext context) => _DPSubPage(
+    title: 'Delete Data',
+    children: [
+      const _DPSectionLabel('REMOVE DATA'),
+      const SizedBox(height: 8),
+      const _DPInfoCard(
+        icon: Icons.delete_outline_rounded,
+        title: 'Delete selected SH data',
+        description: 'Choose what you want to remove. This is data deletion only; SH does not use this action to delete the account.',
+        destructive: true,
+      ),
+      const SizedBox(height: 14),
+      const _DPSectionLabel('DATA'),
+      const SizedBox(height: 8),
+      const _DPOptionCard(
+        icon: Icons.chat_bubble_outline_rounded,
+        title: 'Conversation data',
+        subtitle: 'Stored conversation and related SH data',
+      ),
+      const SizedBox(height: 10),
+      const _DPOptionCard(
+        icon: Icons.folder_copy_outlined,
+        title: 'Local files',
+        subtitle: 'Attachment copies stored on this device',
+      ),
+      const SizedBox(height: 10),
+      const _DPOptionCard(
+        icon: Icons.auto_awesome_outlined,
+        title: 'Generated data',
+        subtitle: 'Generated SH content and related data',
+      ),
+      const SizedBox(height: 20),
+      _DPActionCard(
+        icon: Icons.delete_outline_rounded,
+        title: 'Delete Selected Data',
+        subtitle: 'Deletion workflow is not connected yet.',
+        destructive: true,
+        onTap: () => _showDPNotice(context, 'Delete Data'),
+      ),
+    ],
+  );
+}
 
-      const SizedBox(height:10),
+class _PrivacyInformationView extends StatelessWidget {
+  const _PrivacyInformationView();
 
-      _DPCard(icon:Icons.file_download_outlined,title:'Export Data',subtitle:'Get a copy of your SH data',onTap:()=>_showDPPlaceholder(context,'Export Data')),
+  @override
+  Widget build(BuildContext context) => _DPSubPage(
+    title: 'Privacy Information',
+    children: [
+      const _DPSectionLabel('PRIVACY'),
+      const SizedBox(height: 8),
+      const _DPInfoCard(
+        icon: Icons.privacy_tip_outlined,
+        title: 'How your data is handled',
+        description: 'This page provides a clear overview of how SH data is handled. Detailed policy controls belong to the relevant SH workflows rather than being duplicated here.',
+      ),
+      const SizedBox(height: 14),
+      const _DPSectionLabel('DATA TYPES'),
+      const SizedBox(height: 8),
+      const _DPOptionCard(
+        icon: Icons.storage_outlined,
+        title: 'Stored SH data',
+        subtitle: 'Data that belongs to your SH account and stored workflows',
+      ),
+      const SizedBox(height: 10),
+      const _DPOptionCard(
+        icon: Icons.phone_android_outlined,
+        title: 'Local files',
+        subtitle: 'Images, files, audio and video kept on this device',
+      ),
+      const SizedBox(height: 10),
+      const _DPOptionCard(
+        icon: Icons.tune_rounded,
+        title: 'Privacy controls',
+        subtitle: 'Policy and permission controls remain in their relevant SH workflows',
+      ),
+    ],
+  );
+}
 
-      const SizedBox(height:10),
+class _DPSubPage extends StatelessWidget {
+  const _DPSubPage({required this.title, required this.children});
 
-      _DPCard(icon:Icons.delete_outline_rounded,title:'Delete Data',subtitle:'Remove selected SH data',destructive:true,onTap:()=>_showDPPlaceholder(context,'Delete Data')),
+  final String title;
+  final List<Widget> children;
 
-      const SizedBox(height:22),const _DPSectionLabel('PRIVACY'),const SizedBox(height:8),
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: shBackground,
+    body: Column(
+      children: [
+        ShTopBar(
+          title: title,
+          leading: IconButton(
+            tooltip: 'Back',
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 32),
+            children: children,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
-      _DPCard(icon:Icons.privacy_tip_outlined,title:'Privacy Information',subtitle:'How your data is handled',onTap:()=>_showDPPlaceholder(context,'Privacy Information')),
+class _DPInfoCard extends StatelessWidget {
+  const _DPInfoCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    this.destructive = false,
+  });
 
-    ])),
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool destructive;
 
-  ]));
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(17),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(colors: [shSurface2, shSurface]),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: shBorder),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: shSurface2,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: shBorder),
+          ),
+          child: Icon(icon, size: 22, color: destructive ? Colors.redAccent : shCyan),
+        ),
+        const SizedBox(width: 13),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: destructive ? Colors.redAccent : Colors.white)),
+              const SizedBox(height: 5),
+              Text(description, style: const TextStyle(fontSize: 11.5, color: shMuted, height: 1.45)),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
-  void _showDPPlaceholder(BuildContext context,String title){showModalBottomSheet(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(26))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(20,8,20,28),child:Column(mainAxisSize:MainAxisSize.min,crossAxisAlignment:CrossAxisAlignment.start,children:[Text(title,style:const TextStyle(fontSize:20,fontWeight:FontWeight.w700)),const SizedBox(height:8),const Text('This area is ready for its full SH workflow.',style:TextStyle(fontSize:13,color:shMuted))]))));}
+class _DPOptionCard extends StatelessWidget {
+  const _DPOptionCard({required this.icon, required this.title, required this.subtitle});
 
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(15, 14, 14, 14),
+    decoration: BoxDecoration(
+      color: shSurface,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: shBorder),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: shSurface2,
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: shBorder),
+          ),
+          child: Icon(icon, size: 20, color: shMuted),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 3),
+              Text(subtitle, style: const TextStyle(fontSize: 11.5, color: shMuted)),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _DPActionCard extends StatelessWidget {
+  const _DPActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.destructive = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(15, 14, 14, 14),
+        decoration: BoxDecoration(
+          color: shSurface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: destructive ? Colors.redAccent.withValues(alpha: .45) : shBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: shSurface2,
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: shBorder),
+              ),
+              child: Icon(icon, size: 20, color: destructive ? Colors.redAccent : shCyan),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: destructive ? Colors.redAccent : Colors.white)),
+                  const SizedBox(height: 3),
+                  Text(subtitle, style: const TextStyle(fontSize: 11.5, color: shMuted)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, size: 22, color: shMuted),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+void _showDPNotice(BuildContext context, String title) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('$title is not connected yet.')),
+  );
 }
 
 class _DataFilesView extends StatefulWidget { const _DataFilesView(); @override State<_DataFilesView> createState()=>_DataFilesViewState(); }
