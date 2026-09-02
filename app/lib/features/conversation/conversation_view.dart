@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../core/theme/sh_theme.dart';
@@ -92,6 +93,17 @@ class ConversationViewState extends State<ConversationView> {
  final ImagePicker _picker = ImagePicker();
  final TextEditingController _searchController=TextEditingController();
  void _send(){final t=_composerController.text.trim();if(t.isEmpty)return;setState((){_messages.add(ConversationMessage(t,false,'Now'));_composerController.clear();});}
+ Future<void> _pickFile() async {
+   Navigator.pop(context);
+   final result = await FilePicker.platform.pickFiles(withData: true);
+   if (result == null || result.files.isEmpty) return;
+   final picked = result.files.single;
+   final bytes = picked.bytes;
+   if (bytes == null) return;
+   final stored = await StorageService.saveConversationImage(bytes, extension: picked.extension ?? 'bin');
+   if (!mounted) return;
+   setState(() => _messages.add(ConversationMessage('', false, 'Now', imagePath: stored.path)));
+ }
  Future<void> _pick(ImageSource source) async {
    Navigator.pop(context);
    final f=await _picker.pickImage(source:source,imageQuality:88);
@@ -101,7 +113,7 @@ class ConversationViewState extends State<ConversationView> {
    if(!mounted)return;
    setState(()=>_messages.add(ConversationMessage('',false,'Now',imagePath:stored.path)));
  }
- void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_outlined,label:'File',onTap:(){Navigator.pop(context);ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('File picker integration pending'),behavior:SnackBarBehavior.floating));})])));}
+ void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_outlined,label:'File',onTap:_pickFile)])));}
  void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[ActionTile(icon:Icons.copy_outlined,label:'Copy',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.clear_all,label:'Clear',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.delete_outline,label:'Delete',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.share_outlined,label:'Share',onTap:()=>Navigator.pop(context))]))));
  void _copyText(String text){ if(text.trim().isEmpty)return; Clipboard.setData(ClipboardData(text:text)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Copied'),behavior:SnackBarBehavior.floating)); }
  void _messageActions(int index,{required bool assistant}){final actions=assistant?const ['Copy','Regenerate','Delete']:const ['Copy','Edit','Delete'];showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[for(final a in actions)ActionTile(icon:a=='Copy'?Icons.copy_outlined:a=='Edit'?Icons.edit_outlined:a=='Regenerate'?Icons.refresh_outlined:Icons.delete_outline,label:a,onTap:()=>_runMessageAction(context,index,a))]))));}
