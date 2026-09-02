@@ -580,17 +580,17 @@ class _AccountViewState extends State<AccountView> {
                   rows: [
                     _AccountRow(
                       label: 'Name',
-                      value: _name,
+                      value: profileName.value,
                       editable: true,
                       onTap: () => _editValue(
                         title: 'Name',
-                        initial: _name,
-                        onSave: (value) => setState(() => _name = value),
+                        initial: profileName.value,
+                        onSave: (value) => setState(() => profileName.value = value),
                       ),
                     ),
                     _AccountRow(
                       label: 'Email',
-                      value: _email,
+                      value: profileEmail.value,
                       editable: true,
                       onTap: _editEmail,
                     ),
