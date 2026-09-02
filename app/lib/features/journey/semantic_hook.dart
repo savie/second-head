@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum ShSemanticDomain { memory, knowledge, experience }
+import 'semantic_domain_view.dart';
 
 class ShSemanticCandidate {
   const ShSemanticCandidate({required this.domain, required this.sourceId, required this.content});
