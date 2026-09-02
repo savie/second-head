@@ -707,6 +707,7 @@ class ProfileSectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (title == 'Appearance') return const AppearanceView();
     if (title == 'Notifications') return const NotificationsView();
+    if (title == 'Security') return const SecurityView();
 
     return Scaffold(
       backgroundColor: shBackground,
@@ -847,6 +848,133 @@ class _NotificationRow extends StatelessWidget {
       Switch.adaptive(value: value, onChanged: onChanged),
     ]),
   );
+}
+
+class SecurityView extends StatelessWidget {
+  const SecurityView({super.key});
+
+  void _showNotConfigured(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const Padding(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Password', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+            SizedBox(height: 10),
+            Text(
+              'Not configured yet',
+              style: TextStyle(fontSize: 13, color: shMuted, height: 1.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: Column(
+        children: [
+          ShTopBar(
+            title: 'Security',
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 30),
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text(
+                    'Authentication',
+                    style: TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: shBorder),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      _SecurityRow(
+                        icon: Icons.mail_outline_rounded,
+                        label: 'Sign-in method',
+                        value: 'Email',
+                      ),
+                      const Divider(height: 1, color: shBorder),
+                      _SecurityRow(
+                        icon: Icons.lock_outline_rounded,
+                        label: 'Password',
+                        value: 'Not configured yet',
+                        onTap: () => _showNotConfigured(context),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SecurityRow extends StatelessWidget {
+  const _SecurityRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 16),
+          child: Row(
+            children: [
+              Icon(icon, size: 21, color: onTap == null ? shMuted : Colors.white),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 3),
+                    Text(value, style: const TextStyle(fontSize: 12, color: shMuted)),
+                  ],
+                ),
+              ),
+              if (onTap != null)
+                const Icon(Icons.chevron_right_rounded, size: 20, color: shMuted),
+            ],
+          ),
+        ),
+      );
 }
 
 class AppearanceView extends StatefulWidget {
