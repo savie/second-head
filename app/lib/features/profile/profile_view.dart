@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/sh_theme.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
+import '../../core/storage/storage_service.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -24,7 +25,9 @@ class ProfileViewState extends State<ProfileView> {
       maxWidth: 900,
     );
     if (file == null) return;
-    profilePhoto.value = await file.readAsBytes();
+    final bytes = await file.readAsBytes();
+    await StorageService.saveProfilePhoto(bytes);
+    profilePhoto.value = bytes;
   }
 
   void _showPhotoOptions() {
@@ -64,6 +67,7 @@ class ProfileViewState extends State<ProfileView> {
                     ? null
                     : () {
                         Navigator.pop(context);
+                        await StorageService.removeProfilePhoto();
                         profilePhoto.value = null;
                       },
               ),
