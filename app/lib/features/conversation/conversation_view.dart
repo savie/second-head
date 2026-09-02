@@ -165,7 +165,8 @@ void _scrollToLatest(){
    if (bytes == null) return;
    final stored = await StorageService.saveConversationFile(bytes, filename: picked.name);
    if (!mounted) return;
-   setState(() => _messages.add(ConversationMessage('', false, 'Now', attachmentPath: stored.path)));\n   await _persistConversation();
+   setState(() => _messages.add(ConversationMessage('', false, 'Now', attachmentPath: stored.path)));
+   await _persistConversation();
  }
  Future<void> _pick(ImageSource source) async {
    Navigator.pop(context);
@@ -174,7 +175,8 @@ void _scrollToLatest(){
    final b=await f.readAsBytes();
    final stored=await StorageService.saveConversationImage(b,extension:f.path.split('.').last);
    if(!mounted)return;
-   setState(()=>_messages.add(ConversationMessage('',false,'Now',attachmentPath:stored.path)));\n   await _persistConversation();
+   setState(()=>_messages.add(ConversationMessage('',false,'Now',attachmentPath:stored.path)));
+   await _persistConversation();
  }
  void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_outlined,label:'File',onTap:_pickFile)])));}
  void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[ActionTile(icon:Icons.copy_outlined,label:'Copy',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.clear_all,label:'Clear',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.delete_outline,label:'Delete',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.share_outlined,label:'Share',onTap:()=>Navigator.pop(context))]))));
@@ -182,15 +184,15 @@ void _scrollToLatest(){
  void _messageActions(int index,{required bool assistant}){final actions=assistant?const ['Copy','Regenerate','Delete']:const ['Copy','Edit','Delete'];showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[for(final a in actions)ActionTile(icon:a=='Copy'?Icons.copy_outlined:a=='Edit'?Icons.edit_outlined:a=='Regenerate'?Icons.refresh_outlined:Icons.delete_outline,label:a,onTap:()=>_runMessageAction(context,index,a))]))));}
  void _enterSelection(int index)=>setState(()=>selected.add(index));
  void _toggleSelection(int index)=>setState((){if(selected.contains(index)){selected.remove(index);}else{selected.add(index);}});
- void _deleteSelected(){setState((){final ids=selected.toList()..sort((a,b)=>b.compareTo(a));for(final i in ids){if(i<_messages.length)_messages.removeAt(i);}selected.clear();});}
+ void _deleteSelected(){setState((){final ids=selected.toList()..sort((a,b)=>b.compareTo(a));for(final i in ids){if(i<_messages.length)_messages.removeAt(i);}selected.clear();});_persistConversation();}
  void _runMessageAction(BuildContext context,int index,String action){
    Navigator.pop(context);
    if(index>=_messages.length)return;
    final m=_messages[index];
    if(action=='Copy'){_copyText(m.text);}
-   else if(action=='Delete'){setState(()=>_messages.removeAt(index));}
-   else if(action=='Regenerate'){setState(()=>m.text='Regenerated response — ready to continue.');}
-   else if(action=='Edit'){final ctl=TextEditingController(text:m.text);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,builder:(sheet)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sheet).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('Edit message',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:ctl,maxLines:5),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sheet),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:(){if(ctl.text.trim().isNotEmpty)setState(()=>m.text=ctl.text.trim());Navigator.pop(sheet);},child:const Text('Save')))])])));}
+   else if(action=='Delete'){setState(()=>_messages.removeAt(index));_persistConversation();}
+   else if(action=='Regenerate'){setState(()=>m.text='Regenerated response — ready to continue.');_persistConversation();}
+   else if(action=='Edit'){final ctl=TextEditingController(text:m.text);showModalBottomSheet<void>(context:context,isScrollControlled:true,backgroundColor:shSurface,showDragHandle:true,builder:(sheet)=>Padding(padding:EdgeInsets.fromLTRB(18,8,18,MediaQuery.of(sheet).viewInsets.bottom+18),child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('Edit message',style:TextStyle(fontSize:16,fontWeight:FontWeight.w700)),const SizedBox(height:12),TextField(controller:ctl,maxLines:5),const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(sheet),child:const Text('Cancel'))),const SizedBox(width:10),Expanded(child:FilledButton(onPressed:(){if(ctl.text.trim().isNotEmpty){setState(()=>m.text=ctl.text.trim());_persistConversation();}Navigator.pop(sheet);},child:const Text('Save')))])])));}
  }
   @override
   void dispose() {
