@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
+import 'semantic_domain_view.dart';
 
 class JourneyView extends StatefulWidget {
   const JourneyView({super.key});
@@ -62,6 +63,13 @@ class JourneyViewState extends State<JourneyView> {
             ShTopBar(
               title: 'Journey',
               onSearch: () => _search(context),
+              actions: [
+                IconButton(
+                  tooltip: 'Domains',
+                  onPressed: () => _openDomain(context),
+                  icon: const Icon(Icons.hub_outlined, size: 26),
+                ),
+              ],
             ),
             JourneyFilters(
               value: filter,
@@ -98,6 +106,39 @@ class JourneyViewState extends State<JourneyView> {
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _openDomain(BuildContext context) async {
+    final domain = await showModalBottomSheet<ShSemanticDomain>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (sheet) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Explore domains', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 10),
+              for (final domain in ShSemanticDomain.values)
+                ListTile(
+                  leading: Icon(domain.icon, color: shPurple),
+                  title: Text(domain.label),
+                  trailing: const Icon(Icons.chevron_right_outlined),
+                  onTap: () => Navigator.pop(sheet, domain),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!mounted || domain == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SemanticDomainView(domain: domain),
+      ),
     );
   }
 
