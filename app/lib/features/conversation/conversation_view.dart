@@ -316,108 +316,116 @@ class ConversationHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final topInset = MediaQuery.paddingOf(context).top;
+
     return SizedBox(
-      height: topInset + 86,
+      height: topInset + 64,
       child: Padding(
         padding: EdgeInsets.only(top: topInset),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 54,
-              child: Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Menu',
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                    icon: const Icon(Icons.menu, size: 30),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: onTitleTap,
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.w600,
-                        ),
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            children: [
+              IconButton(
+                tooltip: 'Menu',
+                onPressed: () => Scaffold.of(context).openDrawer(),
+                icon: const Icon(Icons.menu, size: 30),
+              ),
+              const SizedBox(width: 2),
+              const SizedBox(
+                width: 88,
+                child: _AssistantHeaderIdentity(),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onTitleTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'Search',
-                    onPressed: onSearch,
-                    icon: const Icon(Icons.search_outlined, size: 29),
-                  ),
-                  IconButton(
-                    tooltip: 'More',
-                    onPressed: onMenu,
-                    icon: const Icon(Icons.more_vert, size: 27),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Search',
+                onPressed: onSearch,
+                icon: const Icon(Icons.search_outlined, size: 29),
+              ),
+              IconButton(
+                tooltip: 'More',
+                onPressed: onMenu,
+                icon: const Icon(Icons.more_vert, size: 27),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AssistantHeaderIdentity extends StatelessWidget {
+  const _AssistantHeaderIdentity();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          padding: const EdgeInsets.all(2),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(colors: [shPurple, shElectric]),
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/brand/unity.png',
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+            ),
+          ),
+        ),
+        const SizedBox(width: 7),
+        const Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'SH Prime',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 2),
+              Row(
+                children: [
+                  Icon(Icons.circle, size: 6, color: Colors.green),
+                  SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Online',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 9, color: shMuted),
+                    ),
                   ),
                 ],
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 7),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: shSurface,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: shBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(colors: [shPurple, shElectric]),
-                        ),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/brand/unity@2x.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      const Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'SH Prime',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                            ),
-                            SizedBox(height: 1),
-                            Row(
-                              children: [
-                                Icon(Icons.circle, size: 6, color: Colors.green),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Online',
-                                  style: TextStyle(fontSize: 10, color: shMuted),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.keyboard_arrow_down, size: 19, color: shMuted),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -572,7 +580,7 @@ class ChatAvatar extends StatelessWidget {
           shape: BoxShape.circle,
           gradient: const LinearGradient(colors: [shPurple, shElectric]),
         ),
-        child: ClipOval(child: Image.asset('assets/brand/unity@2x.png', fit: BoxFit.contain)),
+        child: ClipOval(child: Image.asset('assets/brand/unity.png', fit: BoxFit.contain, filterQuality: FilterQuality.high)),
       );
     }
     return ValueListenableBuilder<Uint8List?>(
@@ -581,7 +589,9 @@ class ChatAvatar extends StatelessWidget {
         radius: 11,
         backgroundColor: shSurface2,
         backgroundImage: photo != null ? MemoryImage(photo) : null,
-        child: photo == null ? const Icon(Icons.person_outline, size: 13, color: shMuted) : null,
+        child: photo == null
+            ? const Icon(Icons.person_outline, size: 13, color: shMuted)
+            : null,
       ),
     );
   }
