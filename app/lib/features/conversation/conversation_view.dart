@@ -227,7 +227,15 @@ void _scrollToLatest(){
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
             controller: _messageScrollController,
             children: [
-              const DateLabel('Today'),
+              if (_isLoadingConversation)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: LinearProgressIndicator(minHeight: 2),
+                ),
+              if (!_isLoadingConversation)
+                DateLabel(_conversationStatus),
+              if (_isLoadingConversation)
+                const DateLabel('Today'),
               for (var i = 0; i < _messages.length; i++)
                 SelectableMessage(
                   index: i,
