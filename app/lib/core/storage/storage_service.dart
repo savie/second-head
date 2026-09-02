@@ -50,13 +50,26 @@ class StorageService {
     if (await file.exists()) await file.delete();
   }
 
-  static Future<File> saveConversationImage(Uint8List bytes, {String extension = 'jpg'}) async {
-    final dir = await directory('images');
+  static Future<File> saveConversationFile(Uint8List bytes, {required String filename}) async {
+    final extension = filename.contains('.') ? filename.split('.').last.toLowerCase() : 'bin';
+    final category = _categoryForExtension(extension);
+    final dir = await directory(category);
     final timestamp = DateTime.now().microsecondsSinceEpoch;
-    final safeExtension = extension.toLowerCase().replaceFirst(RegExp(r'^\\.'), '');
-    final file = File('${dir.path}/conversation_$timestamp.$safeExtension');
+    final safeName = filename.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    final file = File('${dir.path}/conversation_${timestamp}_${safeName}');
     await file.writeAsBytes(bytes, flush: true);
     return file;
+  }
+
+  static Future<File> saveConversationImage(Uint8List bytes, {String extension = 'jpg'}) async {
+    return saveConversationFile(bytes, filename: 'conversation_image.$extension');
+  }
+
+  static String _categoryForExtension(String extension) {
+    if (RegExp(r'^(jpg|jpeg|png|gif|webp|heic|heif|bmp)$').hasMatch(extension)) return 'images';
+    if (RegExp(r'^(mp4|mov|m4v|webm|avi|mkv|3gp)$').hasMatch(extension)) return 'video';
+    if (RegExp(r'^(mp3|m4a|wav|aac|ogg|opus|flac)$').hasMatch(extension)) return 'audio';
+    return 'documents';
   }
 
   static Future<List<File>> listFiles({bool includeExports = true}) async {
