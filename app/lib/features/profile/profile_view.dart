@@ -708,6 +708,7 @@ class ProfileSectionView extends StatelessWidget {
     if (title == 'Appearance') return const AppearanceView();
     if (title == 'Notifications') return const NotificationsView();
     if (title == 'Security') return const SecurityView();
+    if (title == 'Integrations') return const IntegrationsView();
 
     return Scaffold(
       backgroundColor: shBackground,
@@ -976,6 +977,100 @@ class _SecurityRow extends StatelessWidget {
         ),
       );
 }
+
+class IntegrationsView extends StatefulWidget {
+
+  const IntegrationsView({super.key});
+
+  @override State<IntegrationsView> createState() => _IntegrationsViewState();
+
+}
+
+class _IntegrationsViewState extends State<IntegrationsView> {
+
+  final List<_AuthRequest> pending = [
+
+    _AuthRequest('Inheritance', 'SH-A', 'SH-B', true),
+
+    _AuthRequest('Succession', 'SH-C', 'SH-D', false),
+
+    _AuthRequest('Legacy', 'SH-E', 'SH-F', true),
+
+  ];
+
+  final List<_AuthRequest> authorized = [_AuthRequest('Inheritance', 'SH-X', 'SH-Y', true)];
+
+  void _accept(_AuthRequest r) => setState(() { pending.remove(r); authorized.add(r); });
+
+  void _reject(_AuthRequest r) => setState(() => pending.remove(r));
+
+  @override Widget build(BuildContext context) => Scaffold(backgroundColor: shBackground, body: Column(children: [
+
+    ShTopBar(title: 'Integrations', leading: IconButton(tooltip: 'Back', onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded))),
+
+    Expanded(child: ListView(padding: const EdgeInsets.fromLTRB(14,12,14,30), children: [
+
+      _IntegrationHeader(title: 'Pending', subtitle: pending.isEmpty ? 'Nothing needs your attention' : pending.length.toString() + ' authorization requests', icon: Icons.pending_actions_rounded),
+
+      const SizedBox(height:10),
+
+      if (pending.isEmpty) _IntegrationEmpty(icon: Icons.check_circle_outline_rounded, text: 'All caught up')
+
+      else ...pending.map((r) => Padding(padding: const EdgeInsets.only(bottom:10), child: _PendingAuthCard(request:r, onAccept:() => _accept(r), onReject:() => _reject(r)))),
+
+      const SizedBox(height:14),
+
+      _IntegrationHeader(title:'Authorized', subtitle:authorized.length.toString() + ' active', icon:Icons.verified_user_outlined),
+
+      const SizedBox(height:10),
+
+      if (authorized.isEmpty) _IntegrationEmpty(icon:Icons.link_off_rounded, text:'No active authorizations')
+
+      else ...authorized.map((r) => Padding(padding: const EdgeInsets.only(bottom:10), child:_AuthorizedCard(request:r, onRevoke:() => setState(() => authorized.remove(r))))),
+
+    ])),
+
+  ]));
+
+}
+
+class _AuthRequest { _AuthRequest(this.type,this.from,this.to,this.incoming); final String type,from,to; final bool incoming; }
+
+class _IntegrationHeader extends StatelessWidget {
+
+  const _IntegrationHeader({required this.title,required this.subtitle,required this.icon}); final String title,subtitle; final IconData icon;
+
+  @override Widget build(BuildContext context) => Row(children:[Container(width:38,height:38,decoration:BoxDecoration(color:shSurface2,borderRadius:BorderRadius.circular(12),border:Border.all(color:shBorder)),child:Icon(icon,size:20,color:Colors.white)),const SizedBox(width:11),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w700)),const SizedBox(height:2),Text(subtitle,style:const TextStyle(fontSize:11,color:shMuted))]))]);
+
+}
+
+class _PendingAuthCard extends StatelessWidget {
+
+  const _PendingAuthCard({required this.request,required this.onAccept,required this.onReject}); final _AuthRequest request; final VoidCallback onAccept,onReject;
+
+  @override Widget build(BuildContext context) => Container(padding:const EdgeInsets.all(16),decoration:BoxDecoration(gradient:LinearGradient(colors:[shSurface2,shSurface]),borderRadius:BorderRadius.circular(22),border:Border.all(color:shBorder)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+
+    Row(children:[Container(padding:const EdgeInsets.symmetric(horizontal:9,vertical:5),decoration:BoxDecoration(color:shPurple.withOpacity(.14),borderRadius:BorderRadius.circular(9)),child:Text(request.type,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w700))),const Spacer(),Text(request.incoming?'Needs your approval':'Waiting for approval',style:TextStyle(fontSize:10,color:request.incoming?shCyan:shMuted,fontWeight:FontWeight.w600))]),
+
+    const SizedBox(height:14),Row(children:[_PartyPill(label:request.from),const Padding(padding:EdgeInsets.symmetric(horizontal:8),child:Icon(Icons.arrow_forward_rounded,size:16,color:shMuted)),_PartyPill(label:request.to)]),
+
+    if(request.incoming)...[const SizedBox(height:15),Row(children:[Expanded(child:_AuthAction(label:'Reject',icon:Icons.close_rounded,onTap:onReject)),const SizedBox(width:8),Expanded(child:_AuthAction(label:'Accept',icon:Icons.check_rounded,onTap:onAccept,primary:true))])]
+
+  ]));
+
+}
+
+class _AuthorizedCard extends StatelessWidget { const _AuthorizedCard({required this.request,required this.onRevoke}); final _AuthRequest request; final VoidCallback onRevoke;
+
+  @override Widget build(BuildContext context)=>Container(padding:const EdgeInsets.all(15),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(20),border:Border.all(color:shBorder)),child:Row(children:[Container(width:42,height:42,decoration:BoxDecoration(color:shSurface2,borderRadius:BorderRadius.circular(13)),child:const Icon(Icons.verified_rounded,size:21,color:shCyan)),const SizedBox(width:12),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(request.type,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w700)),const SizedBox(height:3),Text(request.from+' → '+request.to,style:const TextStyle(fontSize:12,color:shMuted))])),IconButton(tooltip:'Revoke',onPressed:onRevoke,icon:const Icon(Icons.link_off_rounded,size:20))]));
+
+}
+
+class _PartyPill extends StatelessWidget { const _PartyPill({required this.label}); final String label; @override Widget build(BuildContext context)=>Expanded(child:Container(padding:const EdgeInsets.symmetric(horizontal:11,vertical:10),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(13),border:Border.all(color:shBorder)),child:Row(children:[const Icon(Icons.person_outline_rounded,size:16,color:shMuted),const SizedBox(width:7),Expanded(child:Text(label,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12,fontWeight:FontWeight.w600)))]))); }
+
+class _AuthAction extends StatelessWidget { const _AuthAction({required this.label,required this.icon,required this.onTap,this.primary=false}); final String label; final IconData icon; final VoidCallback onTap; final bool primary; @override Widget build(BuildContext context)=>InkWell(borderRadius:BorderRadius.circular(13),onTap:onTap,child:Container(height:44,decoration:BoxDecoration(color:primary?shSurface2:shSurface,borderRadius:BorderRadius.circular(13),border:Border.all(color:primary?shPurple:shBorder)),child:Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(icon,size:17),const SizedBox(width:7),Text(label,style:const TextStyle(fontSize:12,fontWeight:FontWeight.w700))]))); }
+
+class _IntegrationEmpty extends StatelessWidget { const _IntegrationEmpty({required this.icon,required this.text}); final IconData icon; final String text; @override Widget build(BuildContext context)=>Container(padding:const EdgeInsets.symmetric(vertical:28),decoration:BoxDecoration(color:shSurface,borderRadius:BorderRadius.circular(20),border:Border.all(color:shBorder)),child:Column(children:[Icon(icon,size:28,color:shMuted),const SizedBox(height:9),Text(text,style:const TextStyle(fontSize:12,color:shMuted))])); }
 
 class AppearanceView extends StatefulWidget {
   const AppearanceView({super.key});
