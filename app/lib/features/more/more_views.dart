@@ -223,15 +223,19 @@ class _SideMenuState extends State<SideMenu> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Savie',
+                        ValueListenableBuilder<String>(
+                          valueListenable: profileName,
+                          builder: (context, name, _) => Text(
+                            name,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Text(
-                          'savie@secondhead.app',
+                        ValueListenableBuilder<String>(
+                          valueListenable: profileEmail,
+                          builder: (context, email, _) => Text(
+                            email,
                           style: TextStyle(fontSize: 9, color: shMuted),
                         ),
                       ],
