@@ -51,7 +51,7 @@ class ConversationViewState extends State<ConversationView> {
  void _send(){final t=_composerController.text.trim();if(t.isEmpty)return;setState((){_messages.add(ConversationMessage(t,false,'Now'));_composerController.clear();});}
  Future<void> _pick(ImageSource source) async {Navigator.pop(context);final f=await _picker.pickImage(source:source,imageQuality:88);if(f==null)return;final b=await f.readAsBytes();setState(()=>_messages.add(ConversationMessage('',false,'Now',image:b)));}
  void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_outlined,label:'File',onTap:(){Navigator.pop(context);ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('File picker integration pending'),behavior:SnackBarBehavior.floating));})])));}
- void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ActionTile(Icons.copy_outlined,'Copy',()=>Navigator.pop(context)),ActionTile(Icons.clear_all,'Clear',()=>Navigator.pop(context)),ActionTile(Icons.delete_outline,'Delete',()=>Navigator.pop(context)),ActionTile(Icons.share_outlined,'Share',()=>Navigator.pop(context)),const SizedBox(height:8)])));
+ void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[ActionTile(icon:Icons.copy_outlined,label:'Copy',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.clear_all,label:'Clear',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.delete_outline,label:'Delete',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.share_outlined,label:'Share',onTap:()=>Navigator.pop(context))]))));
  void _copyText(String text){ if(text.trim().isEmpty)return; Clipboard.setData(ClipboardData(text:text)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Copied'),behavior:SnackBarBehavior.floating)); }
  void _messageActions(int index,{required bool assistant}){final actions=assistant?const ['Copy','Regenerate','Delete']:const ['Copy','Edit','Delete'];showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[for(final a in actions)ActionTile(a=='Copy'?Icons.copy_outlined:a=='Edit'?Icons.edit_outlined:a=='Regenerate'?Icons.refresh_outlined:Icons.delete_outline,a,()=>_runMessageAction(context,index,a)),const SizedBox(height:8)])));}
  void _enterSelection(int index)=>setState(()=>selected.add(index));
@@ -211,7 +211,37 @@ class ConversationMessage {
  ConversationMessage(this.text,this.assistant,this.time,{this.image});
  String text; final bool assistant; final String time; final Uint8List? image;
 }
-class ActionTile extends StatelessWidget { const ActionTile(this.icon,this.label,this.onTap); final IconData icon; final String label; final VoidCallback onTap; @override Widget build(BuildContext context)=>ListTile(leading:Icon(icon,size:20),title:Text(label,style:const TextStyle(fontSize:11)),onTap:onTap); }
+class ActionTile extends StatelessWidget {
+  const ActionTile({super.key,required this.icon,required this.label,required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context)=>InkWell(
+    borderRadius:BorderRadius.circular(18),
+    onTap:onTap,
+    child:Padding(
+      padding:const EdgeInsets.symmetric(horizontal:10,vertical:8),
+      child:Column(
+        mainAxisSize:MainAxisSize.min,
+        children:[
+          Container(
+            width:52,
+            height:52,
+            decoration:const BoxDecoration(
+              shape:BoxShape.circle,
+              gradient:LinearGradient(colors:[shPurple,shElectric]),
+            ),
+            child:Icon(icon,size:25),
+          ),
+          const SizedBox(height:7),
+          Text(label,style:const TextStyle(fontSize:10)),
+        ],
+      ),
+    ),
+  );
+}
 class ConversationHeader extends StatelessWidget {
   const ConversationHeader({
     super.key,
