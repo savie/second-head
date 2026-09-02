@@ -75,7 +75,7 @@ class ProfileViewState extends State<ProfileView> {
   void _openSection(BuildContext context, String title, String subtitle) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => ProfileSectionView(title: title, subtitle: subtitle),
+        builder: (_) => title == 'Account' ? const AccountView() : ProfileSectionView(title: title, subtitle: subtitle),
       ),
     );
   }
@@ -455,6 +455,243 @@ class _SettingItem extends StatelessWidget {
   }
 }
 
+
+class AccountView extends StatefulWidget {
+  const AccountView({super.key});
+
+  @override
+  State<AccountView> createState() => _AccountViewState();
+}
+
+class _AccountViewState extends State<AccountView> {
+  String _name = 'Savie';
+  String _email = 'savie@secondhead.app';
+
+  Future<void> _editValue({
+    required String title,
+    required String initial,
+    required ValueChanged<String> onSave,
+  }) async {
+    final controller = TextEditingController(text: initial);
+    final value = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: shSurface,
+      isScrollControlled: true,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          18,
+          8,
+          18,
+          MediaQuery.of(sheetContext).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => Navigator.pop(sheetContext, controller.text.trim()),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: shBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: shBorder),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(sheetContext, controller.text.trim()),
+                child: const Text('Save'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
+    if (!mounted || value == null || value.isEmpty) return;
+    onSave(value);
+  }
+
+  Future<void> _editEmail() => _editValue(
+        title: 'Email',
+        initial: _email,
+        onSave: (value) => setState(() => _email = value),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: Column(
+        children: [
+          ShTopBar(
+            title: 'Account',
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 28),
+              children: [
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      final state = context.findAncestorStateOfType<ProfileViewState>();
+                      state?._showPhotoOptions();
+                    },
+                    child: const ShProfileMark(size: 112),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Center(
+                  child: Text(
+                    'Tap photo to change',
+                    style: TextStyle(fontSize: 11, color: shMuted),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                _AccountSection(
+                  title: 'Personal',
+                  rows: [
+                    _AccountRow(
+                      label: 'Name',
+                      value: _name,
+                      editable: true,
+                      onTap: () => _editValue(
+                        title: 'Name',
+                        initial: _name,
+                        onSave: (value) => setState(() => _name = value),
+                      ),
+                    ),
+                    _AccountRow(
+                      label: 'Email',
+                      value: _email,
+                      editable: true,
+                      onTap: _editEmail,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                _AccountSection(
+                  title: 'Identifiers',
+                  rows: const [
+                    _AccountRow(label: 'Account ID', value: 'xxxxx'),
+                    _AccountRow(label: 'SH ID', value: 'xxxxx'),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                _AccountSection(
+                  title: 'Account',
+                  rows: const [
+                    _AccountRow(label: 'Account created', value: 'mm-dd-yyyy'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountSection extends StatelessWidget {
+  const _AccountSection({required this.title, required this.rows});
+
+  final String title;
+  final List<_AccountRow> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: shSurface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: shBorder),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              for (var i = 0; i < rows.length; i++) ...[
+                rows[i],
+                if (i < rows.length - 1) const Divider(height: 1, color: shBorder),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AccountRow extends StatelessWidget {
+  const _AccountRow({
+    required this.label,
+    required this.value,
+    this.editable = false,
+    this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final bool editable;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: editable ? onTap : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(label, style: const TextStyle(fontSize: 14, color: shMuted)),
+            ),
+            Flexible(
+              child: Text(
+                value,
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            ),
+            if (editable) ...[
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right_rounded, size: 20, color: shMuted),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class ProfileSectionView extends StatelessWidget {
   const ProfileSectionView({
