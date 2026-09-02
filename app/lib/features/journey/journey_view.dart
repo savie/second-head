@@ -37,6 +37,7 @@ class JourneyViewState extends State<JourneyView> {
   void initState() {
     super.initState();
     shSemanticRecords.addListener(_syncSemanticRecords);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncSemanticRecords());
   }
 
   @override
