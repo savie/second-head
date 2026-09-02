@@ -506,7 +506,14 @@ class HelpSupportView extends StatelessWidget {
       backgroundColor: shBackground,
       body: Column(
         children: [
-          const ShTopBar(title: 'Help & Support'),
+          ShTopBar(
+            title: 'Help & Support',
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
