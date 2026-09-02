@@ -34,6 +34,7 @@ class ConversationViewState extends State<ConversationView> {
   void initState() {
     super.initState();
     conversationRevision.addListener(_resetConversation);
+    _loadLocalConversation();
     _refreshConnectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((_) => _refreshConnectivity());
     _internetCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) => _refreshConnectivity());
@@ -95,6 +96,31 @@ class ConversationViewState extends State<ConversationView> {
  final TextEditingController _searchController=TextEditingController();
  bool _staticReplyPending = false;
 
+Future<void> _persistConversation() async {
+  await StorageService.saveConversationState(
+    title: conversationTitle.value,
+    messages: [for (final m in _messages) m.toJson()],
+  );
+}
+
+Future<void> _loadLocalConversation() async {
+  final state = await StorageService.readConversationState();
+  if (!mounted) return;
+  if (state != null) {
+    final title = state['title'];
+    final raw = state['messages'];
+    if (title is String && title.trim().isNotEmpty) conversationTitle.value = title;
+    if (raw is List) {
+      final restored = raw.whereType<Map>().map((m) => ConversationMessage.fromJson(Map<String, dynamic>.from(m))).toList();
+      if (restored.isNotEmpty) _messages
+        ..clear()
+        ..addAll(restored);
+    }
+  }
+  setState(() => _isLoadingConversation = false);
+  WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
+}
+
 void _send(){
   final t=_composerController.text.trim();
   if(t.isEmpty || _staticReplyPending)return;
@@ -102,7 +128,9 @@ void _send(){
     _messages.add(ConversationMessage(t,false,'Now'));
     _composerController.clear();
     _staticReplyPending = true;
+    _conversationStatus = 'SH is responding…';
   });
+  _persistConversation();
   WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
   Future<void>.delayed(const Duration(milliseconds: 650), () {
     if(!mounted)return;
@@ -113,7 +141,9 @@ void _send(){
         'Now',
       ));
       _staticReplyPending = false;
+      _conversationStatus = 'Ready';
     });
+    _persistConversation();
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
   });
 }
@@ -135,7 +165,7 @@ void _scrollToLatest(){
    if (bytes == null) return;
    final stored = await StorageService.saveConversationFile(bytes, filename: picked.name);
    if (!mounted) return;
-   setState(() => _messages.add(ConversationMessage('', false, 'Now', attachmentPath: stored.path)));
+   setState(() => _messages.add(ConversationMessage('', false, 'Now', attachmentPath: stored.path)));\n   await _persistConversation();
  }
  Future<void> _pick(ImageSource source) async {
    Navigator.pop(context);
@@ -144,7 +174,7 @@ void _scrollToLatest(){
    final b=await f.readAsBytes();
    final stored=await StorageService.saveConversationImage(b,extension:f.path.split('.').last);
    if(!mounted)return;
-   setState(()=>_messages.add(ConversationMessage('',false,'Now',attachmentPath:stored.path)));
+   setState(()=>_messages.add(ConversationMessage('',false,'Now',attachmentPath:stored.path)));\n   await _persistConversation();
  }
  void _showAttachments(){showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,builder:(_)=>SafeArea(child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[AttachAction(icon:Icons.camera_alt_outlined,label:'Camera',onTap:()=>_pick(ImageSource.camera)),AttachAction(icon:Icons.photo_library_outlined,label:'Photos',onTap:()=>_pick(ImageSource.gallery)),AttachAction(icon:Icons.attach_file_outlined,label:'File',onTap:_pickFile)])));}
  void _conversationMenu()=>showModalBottomSheet<void>(context:context,backgroundColor:shSurface,showDragHandle:true,shape:const RoundedRectangleBorder(borderRadius:BorderRadius.vertical(top:Radius.circular(22))),builder:(_)=>SafeArea(child:Padding(padding:const EdgeInsets.fromLTRB(18,8,18,18),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[ActionTile(icon:Icons.copy_outlined,label:'Copy',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.clear_all,label:'Clear',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.delete_outline,label:'Delete',onTap:()=>Navigator.pop(context)),ActionTile(icon:Icons.share_outlined,label:'Share',onTap:()=>Navigator.pop(context))]))));
