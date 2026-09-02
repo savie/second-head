@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../conversation/conversation_view.dart';
+import '../profile/profile_view.dart';
 import '../../core/theme/sh_theme.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../auth/auth_screens.dart';
@@ -288,16 +289,29 @@ class _SideMenuState extends State<SideMenu> {
             MenuTile(
               icon: Icons.settings_outlined,
               label: 'Settings',
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                _closeDrawer();
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ProfileSectionView(
+                      title: 'Settings',
+                      subtitle: 'Application settings',
+                    ),
+                  ),
+                );
+              },
             ),
             MenuTile(
               icon: Icons.help_outline,
               label: 'Help & Support',
-              onTap: () => _showInfo(
-                context,
-                'Help & Support',
-                'Help, guidance, and support for SECOND HEAD.',
-              ),
+              onTap: () {
+                _closeDrawer();
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const HelpSupportView(),
+                  ),
+                );
+              },
             ),
             MenuTile(
               icon: Icons.info_outline,
@@ -477,6 +491,76 @@ class MenuTile extends StatelessWidget {
           ),
         ),
         onTap: onTap ?? () => Navigator.of(context).pop(),
+      ),
+    );
+  }
+}
+
+
+class HelpSupportView extends StatelessWidget {
+  const HelpSupportView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: Column(
+        children: [
+          const ShTopBar(title: 'Help & Support'),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Help & Support',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Help, guidance, and support for SECOND HEAD.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: shMuted,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: const Text(
+                    'Dummy page — support content and actions will be implemented later.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: shMuted,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
