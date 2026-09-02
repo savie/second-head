@@ -121,13 +121,15 @@ class _SideMenuState extends State<SideMenu> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'About',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            const Center(
+              child: Text(
+                'About',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+              ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 22),
             AboutRow('Version', info.version),
-            const Divider(height: 1, color: shBorder),
+            const SizedBox(height: 8),
             AboutRow('Build', '#' + info.buildNumber),
           ],
         ),
@@ -412,14 +414,24 @@ class AboutRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(label, style: const TextStyle(fontSize: 11)),
-            const Spacer(),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 12),
             Text(
               value,
-              style: const TextStyle(fontSize: 10, color: shMuted),
+              style: const TextStyle(
+                fontSize: 16,
+                color: shMuted,
+              ),
             ),
           ],
         ),
