@@ -357,7 +357,7 @@ class ConversationHeader extends StatelessWidget {
               ),
               const SizedBox(width: 2),
               const SizedBox(
-                width: 88,
+                width: 112,
                 child: _AssistantHeaderIdentity(),
               ),
               const SizedBox(width: 6),
@@ -427,7 +427,7 @@ class _AssistantHeaderIdentity extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'SH Prime',
+                'Second Head',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
