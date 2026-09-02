@@ -706,6 +706,7 @@ class ProfileSectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (title == 'Appearance') return const AppearanceView();
+    if (title == 'Notifications') return const NotificationsView();
 
     return Scaffold(
       backgroundColor: shBackground,
@@ -759,6 +760,93 @@ class ProfileSectionView extends StatelessWidget {
       ),
     );
   }
+}
+
+class NotificationsView extends StatefulWidget {
+  const NotificationsView({super.key});
+  @override
+  State<NotificationsView> createState() => _NotificationsViewState();
+}
+
+class _NotificationsViewState extends State<NotificationsView> {
+  bool message = true, activity = true, updates = true, sound = true, vibration = true;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: shBackground,
+    body: Column(children: [
+      ShTopBar(
+        title: 'Notifications',
+        leading: IconButton(
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+      ),
+      Expanded(child: ListView(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 30),
+        children: [
+          _NotificationSection(title: 'General', children: [
+            _NotificationRow(icon: Icons.chat_bubble_outline, label: 'Message notifications', value: message, onChanged: (v) => setState(() => message = v)),
+            _NotificationRow(icon: Icons.notifications_none_rounded, label: 'Activity notifications', value: activity, onChanged: (v) => setState(() => activity = v)),
+          ]),
+          const SizedBox(height: 16),
+          _NotificationSection(title: 'Updates', children: [
+            _NotificationRow(icon: Icons.auto_awesome_outlined, label: 'Second Head updates', value: updates, onChanged: (v) => setState(() => updates = v)),
+          ]),
+          const SizedBox(height: 16),
+          _NotificationSection(title: 'Notification behavior', children: [
+            _NotificationRow(icon: Icons.volume_up_outlined, label: 'Sound', value: sound, onChanged: (v) => setState(() => sound = v)),
+            _NotificationRow(icon: Icons.vibration_rounded, label: 'Vibration', value: vibration, onChanged: (v) => setState(() => vibration = v)),
+          ]),
+        ],
+      )),
+    ]),
+  );
+}
+
+class _NotificationSection extends StatelessWidget {
+  const _NotificationSection({required this.title, required this.children});
+  final String title;
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(left: 4, bottom: 8),
+        child: Text(title, style: const TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600)),
+      ),
+      Container(
+        decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(20), border: Border.all(color: shBorder)),
+        clipBehavior: Clip.antiAlias,
+        child: Column(children: [
+          for (var i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1) const Divider(height: 1, color: shBorder),
+          ],
+        ]),
+      ),
+    ],
+  );
+}
+
+class _NotificationRow extends StatelessWidget {
+  const _NotificationRow({required this.icon, required this.label, required this.value, required this.onChanged});
+  final IconData icon;
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+    child: Row(children: [
+      Icon(icon, size: 21, color: value ? Colors.white : shMuted),
+      const SizedBox(width: 13),
+      Expanded(child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
+      Switch.adaptive(value: value, onChanged: onChanged),
+    ]),
+  );
 }
 
 class AppearanceView extends StatefulWidget {
