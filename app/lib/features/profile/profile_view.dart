@@ -472,7 +472,14 @@ class ProfileSectionView extends StatelessWidget {
       backgroundColor: shBackground,
       body: Column(
         children: [
-          ShTopBar(title: title),
+          ShTopBar(
+            title: title,
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
