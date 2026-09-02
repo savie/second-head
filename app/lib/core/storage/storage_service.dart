@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 /// This is intentionally client-side only. It does not replace Supabase
 /// persistence for account/conversation data.
 class StorageService {
-  // App-private local root. Android resolves this under the app's external files area.\n  // The OS-owned parent may differ by platform; callers must never hard-code it.\n  static const _rootName = 'second_head';
+  // App-private local root. The OS-owned parent differs by platform.\n  // Callers must never hard-code the platform path.\n  static const _rootName = 'second_head';
   static const profilePhotoName = 'profile_photo.jpg';
 
   static Future<Directory> root() async {
@@ -54,7 +54,7 @@ class StorageService {
     final rootDir = await root();
     final files = <File>[];
     await for (final entity in rootDir.list(recursive: true, followLinks: false)) {
-      if (entity is File) {\n        if (!includeExports && entity.path.contains('${Platform.pathSeparator}exports${Platform.pathSeparator}')) continue;\n        files.add(entity);\n      }
+      if (entity is File) {\n        if (!includeExports && entity.path.contains('${Platform.pathSeparator}exports${Platform.pathSeparator}')) {\n          continue;\n        }\n        files.add(entity);\n      }
     }
     return files;
   }
