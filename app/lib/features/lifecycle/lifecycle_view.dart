@@ -41,42 +41,9 @@ class LifecycleViewState extends State<LifecycleView> {
   }
 
   void _showDetail(BuildContext context, LifecycleStage stage) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                _StageIcon(stage: stage, size: 46),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    stage.title,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              stage.subtitle,
-              style: const TextStyle(
-                color: shMuted,
-                fontSize: 15,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => LifecycleDetailView(stage: stage),
       ),
     );
   }
@@ -439,4 +406,87 @@ class _OrganicCardPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _OrganicCardPainter oldDelegate) =>
       oldDelegate.accent != accent;
+}
+
+
+class LifecycleDetailView extends StatelessWidget {
+  const LifecycleDetailView({super.key, required this.stage});
+
+  final LifecycleStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: Column(
+        children: [
+          ShTopBar(title: stage.title),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: stage.accent.withValues(alpha: .55)),
+                  ),
+                  child: Row(
+                    children: [
+                      _StageIcon(stage: stage, size: 54),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          stage.title,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: Text(
+                    stage.subtitle,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: shMuted,
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: const Text(
+                    'Dummy page — actions and detailed lifecycle criteria will be implemented later.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: shMuted,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
