@@ -72,9 +72,17 @@ class ProfileViewState extends State<ProfileView> {
     );
   }
 
+  void _openSection(BuildContext context, String title, String subtitle) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ProfileSectionView(title: title, subtitle: subtitle),
+      ),
+    );
+  }
+
   Future<void> _search(BuildContext context) async {
     const settings = [
-      _SettingItem(Icons.person_outline, 'Account', 'Manage your personal information'),
+      _SettingItem(Icons.person_outline, 'Account', 'Manage your personal information', onTap: null),
       _SettingItem(Icons.palette_outlined, 'Appearance', 'Choose theme and language'),
       _SettingItem(Icons.notifications_none, 'Notifications', 'Manage your notification preferences'),
       _SettingItem(Icons.lock_outline, 'Security', 'Password and security settings'),
@@ -134,31 +142,37 @@ class ProfileViewState extends State<ProfileView> {
                     Icons.person_outline,
                     'Account',
                     'Manage your personal information',
+                    onTap: () => _openSection(context, 'Account', 'Manage your personal information'),
                   ),
                   _SettingItem(
                     Icons.palette_outlined,
                     'Appearance',
                     'Choose theme and language',
+                    onTap: () => _openSection(context, 'Appearance', 'Choose theme and language'),
                   ),
                   _SettingItem(
                     Icons.notifications_none,
                     'Notifications',
                     'Manage your notification preferences',
+                    onTap: () => _openSection(context, 'Notifications', 'Manage your notification preferences'),
                   ),
                   _SettingItem(
                     Icons.lock_outline,
                     'Security',
                     'Password and security settings',
+                    onTap: () => _openSection(context, 'Security', 'Password and security settings'),
                   ),
                   _SettingItem(
                     Icons.hub_outlined,
                     'Integrations',
                     'Manage connected services',
+                    onTap: () => _openSection(context, 'Integrations', 'Manage connected services'),
                   ),
                   _SettingItem(
                     Icons.shield_outlined,
                     'Data & Privacy',
                     'Manage your data and privacy',
+                    onTap: () => _openSection(context, 'Data & Privacy', 'Manage your data and privacy'),
                   ),
                 ],
               ),
@@ -386,18 +400,19 @@ class _SettingsGroup extends StatelessWidget {
 }
 
 class _SettingItem extends StatelessWidget {
-  const _SettingItem(this.icon, this.title, this.subtitle);
+  const _SettingItem(this.icon, this.title, this.subtitle, {this.onTap});
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 68,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
           child: Row(
@@ -435,6 +450,83 @@ class _SettingItem extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+class ProfileSectionView extends StatelessWidget {
+  const ProfileSectionView({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: Column(
+        children: [
+          ShTopBar(title: title),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: shMuted,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: shSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: const Text(
+                    'Dummy page — detail and actions will be implemented in the dedicated Profile workstream.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: shMuted,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
