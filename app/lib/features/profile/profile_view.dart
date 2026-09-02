@@ -1841,12 +1841,6 @@ class _DPActionCard extends StatelessWidget {
   );
 }
 
-void _showDPNotice(BuildContext context, String title) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('$title is not connected yet.')),
-  );
-}
-
 class _DataFilesView extends StatefulWidget { const _DataFilesView(); @override State<_DataFilesView> createState()=>_DataFilesViewState(); }
 
 class _DataFilesViewState extends State<_DataFilesView> {
