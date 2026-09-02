@@ -136,7 +136,7 @@ class ProfileViewState extends State<ProfileView> {
                 ),
               ),
               const SizedBox(height: 18),
-              const _SettingsGroup(
+              _SettingsGroup(
                 items: [
                   _SettingItem(
                     Icons.person_outline,
