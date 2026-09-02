@@ -349,8 +349,9 @@ class JourneyItem {
     this.date,
     this.type,
     this.content,
-    this.isPrivate,
-  );
+    this.isPrivate, {
+    this.semanticSourceId,
+  });
 
   String title;
   String subtitle;
@@ -358,6 +359,7 @@ class JourneyItem {
   String type;
   String content;
   bool isPrivate;
+  final String? semanticSourceId;
 }
 
 class JourneyCard extends StatelessWidget {
