@@ -86,8 +86,10 @@ class StorageService {
       }
     }
 
+    // Only remove the legacy container after all known content has moved.
+    // Never recursively delete unknown legacy files.
     try {
-      await legacyRoot.delete(recursive: true);
+      await legacyRoot.delete();
     } catch (_) {}
   }
 
