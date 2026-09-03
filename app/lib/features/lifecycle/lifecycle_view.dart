@@ -536,7 +536,19 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Snapshot restore requested.')));
+    try {
+      await _snapshots.restoreSnapshot(snapshot);
+      await _integrations.refreshFromDisk();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Snapshot restored successfully.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Restore failed: $error')),
+      );
+    }
   }
 
   Future<void> _deleteRecoverySnapshot(RecoverySnapshot snapshot) async {
