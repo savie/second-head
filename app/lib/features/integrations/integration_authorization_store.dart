@@ -38,7 +38,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
 
   static final instance = IntegrationAuthorizationStore._();
 
-  final List<IntegrationAuthorization> _items = [];
+  final List<IntegrationAuthorization> _items = <IntegrationAuthorization>[];
   bool _loaded = false;
 
   Future<void> ensureLoaded() async {
@@ -95,15 +95,15 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     ]), flush: true);
   }
 
-  List<IntegrationAuthorization> get items => List.unmodifiable(_items);
+  List<IntegrationAuthorization> get items => List<IntegrationAuthorization>.unmodifiable(_items);
 
-  List<IntegrationAuthorization> get pending => List.unmodifiable(
+  List<IntegrationAuthorization> get pending => List<IntegrationAuthorization>.unmodifiable(
         _items.where(
           (item) => item.status == IntegrationAuthorizationStatus.pending,
         ),
       );
 
-  List<IntegrationAuthorization> get authorized => List.unmodifiable(
+  List<IntegrationAuthorization> get authorized => List<IntegrationAuthorization>.unmodifiable(
         _items.where(
           (item) => item.status == IntegrationAuthorizationStatus.approved,
         ),
