@@ -121,9 +121,47 @@ class StorageService {
     }
   }
 
-  static Future<File> recoverySnapshotsFile() async {
+  static Future<Directory> recoverySnapshotsDirectory() async {
+    return directory('exports');
+  }
+
+  static Future<List<File>> listRecoverySnapshotFiles() async {
+    final dir = await recoverySnapshotsDirectory();
+    final files = <File>[];
+    await for (final entity in dir.list(followLinks: false)) {
+      if (entity is File &&
+          RegExp(r'^recovery_snapshots_\\d{6}_\\d{6}\\.json
+
+  static Future<File> integrationAuthorizationsFile() async {
     final dir = await directory('temp');
-    return File('${dir.path}/recovery_snapshots.json');
+    return File('${dir.path}/integration_authorizations.json');
+  }
+
+  static Future<int> totalBytes() async {
+    var total = 0;
+    for (final file in await listFiles(includeExports: false)) {
+      total += await file.length();
+    }
+    return total;
+  }
+}
+)
+              .hasMatch(entity.uri.pathSegments.last)) {
+        files.add(entity);
+      }
+    }
+    files.sort((a, b) => b.path.compareTo(a.path));
+    return files;
+  }
+
+  static Future<File> recoverySnapshotFileFor(DateTime createdAt) async {
+    final dir = await recoverySnapshotsDirectory();
+    String two(int n) => n.toString().padLeft(2, '0');
+    final filename =
+        'recovery_snapshots_${two(createdAt.month)}${two(createdAt.day)}'
+        '${createdAt.year.toString().substring(2)}_'
+        '${two(createdAt.hour)}${two(createdAt.minute)}${two(createdAt.second)}.json';
+    return File('${dir.path}/$filename');
   }
 
   static Future<File> integrationAuthorizationsFile() async {

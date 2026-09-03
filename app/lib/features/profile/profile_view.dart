@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/theme/sh_theme.dart';
 import '../../core/state/sh_profile_state.dart';
@@ -2249,35 +2250,44 @@ class _ExportDataView extends StatefulWidget {
 }
 
 class _ExportDataViewState extends State<_ExportDataView> {
-  final _snapshots = RecoverySnapshotStore.instance;
   bool _loading = true;
+  List<RecoverySnapshot> _snapshots = [];
+  final Map<String, File> _filesById = {};
 
   @override
   void initState() {
     super.initState();
-    _snapshots.addListener(_onSnapshotsChanged);
     _load();
   }
 
-  Future<void> _load() async {
-    await _snapshots.refreshFromDisk();
-    if (mounted) setState(() => _loading = false);
-  }
-
-  void _onSnapshotsChanged() {
-    if (mounted) setState(() {});
-  }
-
   @override
-  void dispose() {
-    _snapshots.removeListener(_onSnapshotsChanged);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loading) _load();
+  }
+
+  Future<void> _load() async {
+    if (mounted) setState(() => _loading = true);
+    final files = await StorageService.listRecoverySnapshotFiles();
+    final snapshots = <RecoverySnapshot>[];
+    _filesById.clear();
+    for (final file in files) {
+      try {
+        final decoded = jsonDecode(await file.readAsString());
+        if (decoded is Map<String, dynamic>) {
+          final snapshot = RecoverySnapshot.fromJson(decoded);
+          snapshots.add(snapshot);
+          _filesById[snapshot.id] = file;
+        }
+      } catch (_) {}
+    }
+    snapshots.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    if (mounted) setState(() { _snapshots = snapshots; _loading = false; });
   }
 
   String _date(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return '${value.year}-${two(value.month)}-${two(value.day)} '
-        '${two(value.hour)}:${two(value.minute)}';
+    return '${value.year}-${two(value.month)}-${two(value.day)} ${two(value.hour)}:${two(value.minute)}';
   }
 
   String _summary(RecoverySnapshot snapshot) {
@@ -2287,6 +2297,24 @@ class _ExportDataViewState extends State<_ExportDataView> {
     if (snapshot.experienceCount > 0) parts.add('${snapshot.experienceCount} Experience');
     if (snapshot.fileCount > 0) parts.add('${snapshot.fileCount} Files');
     return parts.isEmpty ? 'FULL SH snapshot' : parts.join(' · ');
+  }
+
+  Future<void> _shareSnapshot(BuildContext sheetContext, RecoverySnapshot snapshot) async {
+    final file = _filesById[snapshot.id];
+    if (file == null || !await file.exists()) {
+      if (mounted) {
+        Navigator.of(sheetContext).pop();
+        await _load();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Snapshot file is no longer available.')));
+      }
+      return;
+    }
+    Navigator.of(sheetContext).pop();
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'application/json')],
+      subject: 'SECOND HEAD Recovery Snapshot',
+      text: 'SECOND HEAD Recovery Snapshot: ${snapshot.id}',
+    );
   }
 
   void _openSnapshot(RecoverySnapshot snapshot, int index) {
@@ -2302,96 +2330,21 @@ class _ExportDataViewState extends State<_ExportDataView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: shSurface2,
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: shCyan.withValues(alpha: .35),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.inventory_2_outlined,
-                        color: shCyan,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Snapshot #${index + 1}',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            snapshot.id,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: shMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                Text('Snapshot #${index + 1}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 3),
+                Text(snapshot.id, style: const TextStyle(fontSize: 11, color: shMuted)),
                 const SizedBox(height: 18),
                 _DataExportRow(label: 'Type', value: snapshot.type),
                 _DataExportRow(label: 'Created', value: _date(snapshot.createdAt)),
-                const SizedBox(height: 12),
-                const Text(
-                  'SNAPSHOT CONTENT',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: shMuted,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: .7,
-                  ),
-                ),
-                const SizedBox(height: 9),
-                _DataExportScopeRow(label: 'Memory', count: snapshot.memoryCount),
-                _DataExportScopeRow(label: 'Knowledge', count: snapshot.knowledgeCount),
-                _DataExportScopeRow(label: 'Experience', count: snapshot.experienceCount),
-                _DataExportScopeRow(label: 'Files', count: snapshot.fileCount),
+                _DataExportRow(label: 'File', value: _filesById[snapshot.id]?.path.split(Platform.pathSeparator).last ?? 'Unavailable'),
                 const SizedBox(height: 18),
-                const Text(
-                  'EXPORT / SHARE TO',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: shMuted,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: .7,
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => _shareSnapshot(sheetContext, snapshot),
+                    icon: const Icon(Icons.share_outlined),
+                    label: const Text('Share Snapshot'),
                   ),
-                ),
-                const SizedBox(height: 9),
-                _DataExportDestination(
-                  icon: Icons.phone_android_outlined,
-                  title: 'Device Storage',
-                  subtitle: 'Keep a local copy of this snapshot',
-                  onTap: () => _selectDestination(sheetContext, 'Device Storage'),
-                ),
-                const SizedBox(height: 8),
-                _DataExportDestination(
-                  icon: Icons.share_outlined,
-                  title: 'Share',
-                  subtitle: 'Send this snapshot through the device share flow',
-                  onTap: () => _selectDestination(sheetContext, 'Share'),
-                ),
-                const SizedBox(height: 8),
-                _DataExportDestination(
-                  icon: Icons.cloud_outlined,
-                  title: 'External / Cloud',
-                  subtitle: 'Choose another configured destination',
-                  onTap: () => _selectDestination(sheetContext, 'External / Cloud'),
                 ),
               ],
             ),
@@ -2401,57 +2354,35 @@ class _ExportDataViewState extends State<_ExportDataView> {
     );
   }
 
-  void _selectDestination(BuildContext sheetContext, String destination) {
-    Navigator.of(sheetContext).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$destination selected for snapshot export.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return _DPSubPage(
-      title: 'Export Data',
-      children: [
-        const _DPSectionLabel('RECOVERED SNAPSHOTS'),
-        const SizedBox(height: 8),
-        const _DPInfoCard(
-          icon: Icons.inventory_2_outlined,
-          title: 'Recovered SH snapshots',
-          description:
-              'Snapshots created through Recovery are available here for export or sharing. Recovery itself only creates and restores snapshots.',
-        ),
-        const SizedBox(height: 14),
-        if (_loading)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 34),
-            child: Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          )
-        else if (_snapshots.items.isEmpty)
-          const _DPInfoCard(
-            icon: Icons.folder_open_outlined,
-            title: 'No recovered snapshots',
-            description: 'Create a snapshot in Recovery first.',
-          )
-        else
-          for (var i = 0; i < _snapshots.items.length; i++) ...[
-            _RecoveredSnapshotCard(
-              snapshot: _snapshots.items[i],
-              index: i + 1,
-              summary: _summary(_snapshots.items[i]),
-              date: _date(_snapshots.items[i].createdAt),
-              onTap: () => _openSnapshot(_snapshots.items[i], i),
-            ),
-            if (i != _snapshots.items.length - 1) const SizedBox(height: 10),
-          ],
-      ],
-    );
-  }
+  Widget build(BuildContext context) => _DPSubPage(
+    title: 'Export Data',
+    children: [
+      const _DPSectionLabel('RECOVERY SNAPSHOTS'),
+      const SizedBox(height: 8),
+      const _DPInfoCard(
+        icon: Icons.share_outlined,
+        title: 'Share existing snapshots',
+        description: 'Export reads Recovery snapshot files already stored locally. Sharing opens the device share sheet; no second export copy is created.',
+      ),
+      const SizedBox(height: 14),
+      if (_loading)
+        const Padding(padding: EdgeInsets.symmetric(vertical: 34), child: Center(child: CircularProgressIndicator(strokeWidth: 2)))
+      else if (_snapshots.isEmpty)
+        const _DPInfoCard(icon: Icons.folder_open_outlined, title: 'No recovery snapshots', description: 'Create a snapshot in Recovery first.')
+      else
+        for (var i = 0; i < _snapshots.length; i++) ...[
+          _RecoveredSnapshotCard(
+            snapshot: _snapshots[i],
+            index: i + 1,
+            summary: _summary(_snapshots[i]),
+            date: _date(_snapshots[i].createdAt),
+            onTap: () => _openSnapshot(_snapshots[i], i),
+          ),
+          if (i != _snapshots.length - 1) const SizedBox(height: 10),
+        ],
+    ],
+  );
 }
 
 class _RecoveredSnapshotCard extends StatelessWidget {
@@ -2683,7 +2614,7 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
     if (confirmed != true) return;
     setState(() => _busy = true);
     try {
-      for (final file in await StorageService.listFiles(includeExports: false)) {
+      for (final file in await StorageService.listFiles(includeExports: true)) {
         await file.delete();
       }
       await RecoverySnapshotStore.instance.refreshFromDisk();
@@ -3006,7 +2937,7 @@ class _DataFilesViewState extends State<_DataFilesView> {
   Future<void> _refresh() async {
     if (mounted) setState(() => _loading = true);
     try {
-      final files = await StorageService.listFiles(includeExports: false);
+      final files = await StorageService.listFiles(includeExports: true);
       int total = 0, images = 0, videos = 0, audio = 0, documents = 0;
       for (final file in files) {
         total += await file.length();

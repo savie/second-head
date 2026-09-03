@@ -55,73 +55,47 @@ class RecoverySnapshotStore extends ChangeNotifier {
 
   List<RecoverySnapshot> _items = [];
   bool _loaded = false;
-  bool _seedDemoWhenMissing = true;
 
   List<RecoverySnapshot> get items => List.unmodifiable(_items);
 
   Future<void> ensureLoaded() async {
     if (_loaded) return;
-    final file = await StorageService.recoverySnapshotsFile();
-    if (await file.exists()) {
+    final files = await StorageService.listRecoverySnapshotFiles();
+    final loaded = <RecoverySnapshot>[];
+    for (final file in files) {
       try {
         final decoded = jsonDecode(await file.readAsString());
-        if (decoded is List) {
-          _items = [
-            for (final item in decoded)
-              if (item is Map<String, dynamic>) RecoverySnapshot.fromJson(item),
-          ];
+        if (decoded is Map<String, dynamic>) {
+          loaded.add(RecoverySnapshot.fromJson(decoded));
         }
-      } catch (_) {
-        _items = const [];
-      }
+      } catch (_) {}
     }
-
-    if (_items.isEmpty && _seedDemoWhenMissing && !await file.exists()) {
-      _items = [
-        RecoverySnapshot(
-          id: 'SH-2026-09-03-001',
-          createdAt: DateTime(2026, 9, 3, 10, 30),
-          type: 'FULL',
-          memoryCount: 3,
-          knowledgeCount: 4,
-          experienceCount: 2,
-          fileCount: 5,
-          isDemo: true,
-        ),
-        RecoverySnapshot(
-          id: 'SH-2026-08-30-001',
-          createdAt: DateTime(2026, 8, 30, 16, 20),
-          type: 'FULL',
-          memoryCount: 2,
-          knowledgeCount: 3,
-          experienceCount: 1,
-          fileCount: 4,
-          isDemo: true,
-        ),
-      ];
-    }
-
+    loaded.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    _items = loaded;
     _loaded = true;
-    if (_items.any((item) => item.isDemo) && !await file.exists()) await _persist();
     notifyListeners();
   }
 
   Future<void> refreshFromDisk() async {
     _loaded = false;
-    _seedDemoWhenMissing = false;
     await ensureLoaded();
-    _seedDemoWhenMissing = true;
   }
 
   Future<void> deleteSnapshot(String id) async {
     await ensureLoaded();
-    _items.removeWhere((item) => item.id == id);
-    await _persist();
-    notifyListeners();
+    final files = await StorageService.listRecoverySnapshotFiles();
+    for (final file in files) {
+      try {
+        final decoded = jsonDecode(await file.readAsString());
+        if (decoded is Map<String, dynamic> && decoded['id'] == id) {
+          await file.delete();
+        }
+      } catch (_) {}
+    }
+    await refreshFromDisk();
   }
 
   Future<RecoverySnapshot> createSnapshot() async {
-    await ensureLoaded();
     final now = DateTime.now();
     final snapshot = RecoverySnapshot(
       id: 'SH-${now.year.toString().padLeft(4, '0')}-'
@@ -135,17 +109,10 @@ class RecoverySnapshotStore extends ChangeNotifier {
       experienceCount: 0,
       fileCount: 0,
     );
-    _items = [snapshot, ..._items.where((item) => !item.isDemo)];
-    await _persist();
-    notifyListeners();
+    final file = await StorageService.recoverySnapshotFileFor(now);
+    await file.writeAsString(jsonEncode(snapshot.toJson()), flush: true);
+    await refreshFromDisk();
     return snapshot;
   }
 
-  Future<void> _persist() async {
-    final file = await StorageService.recoverySnapshotsFile();
-    await file.writeAsString(
-      jsonEncode(_items.where((item) => !item.isDemo).map((item) => item.toJson()).toList()),
-      flush: true,
-    );
-  }
 }
