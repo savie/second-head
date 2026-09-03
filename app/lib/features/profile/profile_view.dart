@@ -2300,6 +2300,15 @@ class _ExportDataViewState extends State<_ExportDataView> {
     return parts.isEmpty ? 'FULL SH snapshot' : parts.join(' · ');
   }
 
+  Future<void> _deleteSnapshot(RecoverySnapshot snapshot) async {
+    await RecoverySnapshotStore.instance.deleteSnapshot(snapshot.id);
+    await _load();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Recovery snapshot deleted from local storage.')),
+    );
+  }
+
   Future<void> _shareSnapshot(BuildContext sheetContext, RecoverySnapshot snapshot) async {
     final file = _filesById[snapshot.id];
     if (file == null || !await file.exists()) {
@@ -2339,13 +2348,27 @@ class _ExportDataViewState extends State<_ExportDataView> {
                 _DataExportRow(label: 'Created', value: _date(snapshot.createdAt)),
                 _DataExportRow(label: 'File', value: _filesById[snapshot.id]?.path.split(Platform.pathSeparator).last ?? 'Unavailable'),
                 const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () => _shareSnapshot(sheetContext, snapshot),
-                    icon: const Icon(Icons.share_outlined),
-                    label: const Text('Share Snapshot'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop();
+                          _deleteSnapshot(snapshot);
+                        },
+                        icon: const Icon(Icons.delete_outline_rounded),
+                        label: const Text('Delete'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => _shareSnapshot(sheetContext, snapshot),
+                        icon: const Icon(Icons.share_outlined),
+                        label: const Text('Share Snapshot'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
