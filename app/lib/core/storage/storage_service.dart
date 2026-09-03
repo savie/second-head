@@ -74,7 +74,7 @@ class StorageService {
 
     final legacyTemp = Directory('${legacyRoot.path}/temp');
     if (await legacyTemp.exists()) {
-      final targetTemp = await internalDirectory('temp');
+      final targetTemp = await internalRoot();
       await for (final entity in legacyTemp.list(recursive: true, followLinks: false)) {
         if (entity is! File) continue;
         final relative = entity.path.substring(legacyTemp.path.length + 1);
@@ -193,7 +193,7 @@ class StorageService {
   }
 
   static Future<File> conversationStateFile() async {
-    final dir = await internalDirectory('temp');
+    final dir = await internalRoot();
     return File('${dir.path}/conversation_state.json');
   }
 
@@ -254,12 +254,12 @@ class StorageService {
   }
 
   static Future<File> journeyItemsFile() async {
-    final dir = await internalDirectory('temp');
+    final dir = await internalRoot();
     return File('${dir.path}/journey_items.json');
   }
 
   static Future<File> integrationAuthorizationsFile() async {
-    final dir = await internalDirectory('temp');
+    final dir = await internalRoot();
     return File('${dir.path}/integration_authorizations.json');
   }
 
@@ -302,7 +302,7 @@ class StorageService {
         await entity.delete(recursive: true);
       }
     }
-    await internalDirectory('temp');
+    await internalRoot();
   }
 
   static Future<int> totalBytes() async {
