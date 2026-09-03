@@ -827,19 +827,20 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                         ? const Text('No recovery history yet.', style: TextStyle(fontSize: 12, color: shMuted))
                         : Column(
                             children: [
-                              for (var i = 0; i < _islResults.length; i++)
+                              for (var i = 0; i < _recoveryHistory.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
                                     radius: 15,
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
-                                  title: Text('Snapshot Created', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  title: const Text('Snapshot Created', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                                   subtitle: Text(
                                     'Type: FULL · ' + _recoveryDate(_recoveryHistory[i].createdAt),
                                     style: const TextStyle(fontSize: 10, color: shMuted),
-                                  ),                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openAuthorizationDetail(_cloneResults[i], i + 1),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openRecoveryDetail(_recoveryHistory[i], i + 1),
                                 ),
                             ],
                           ),
@@ -889,11 +890,11 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Clone Result',
-                    child: _history.isEmpty
+                    child: _cloneResults.isEmpty
                         ? const Text('No clone results yet.', style: TextStyle(fontSize: 12, color: shMuted))
                         : Column(
                             children: [
-                              for (var i = 0; i < _history.length; i++)
+                              for (var i = 0; i < _cloneResults.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
@@ -901,17 +902,17 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
                                   title: Text(
-                                    _history[i].status,
+                                    _cloneResults[i].status.name,
                                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: Text(
-                                    'Target: ${_history[i].groups.first.targetAccountId}',
+                                    'Target: ${_cloneResults[i].targetAccountId}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),
                                   trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openAuthorizationDetail(_islResults[i], i + 1),
+                                  onTap: () => _openAuthorizationDetail(_cloneResults[i], i + 1),
                                 ),
                             ],
                           ),
@@ -984,11 +985,11 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Decision History',
-                    child: _history.isEmpty
+                    child: _islResults.isEmpty
                         ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted))
                         : Column(
                             children: [
-                              for (var i = 0; i < _history.length; i++)
+                              for (var i = 0; i < _islResults.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
@@ -996,17 +997,17 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
                                   title: Text(
-                                    _history[i].status,
+                                    _islResults[i].status.name,
                                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: Text(
-                                    '${_history[i].groups.length} target · ${_history[i].totalDataCount} data',
+                                    '${_islResults[i].scope.length} scope · ${_islResults[i].scope.values.fold<int>(0, (n, v) => n + v.length)} data',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),
                                   trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openDecision(_history[i], i + 1),
+                                  onTap: () => _openAuthorizationDetail(_islResults[i], i + 1),
                                 ),
                             ],
                           ),
