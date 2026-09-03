@@ -12,6 +12,7 @@ import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/storage/recovery_snapshot_store.dart';
 import '../integrations/integration_authorization_store.dart';
+import '../journey/journey_data.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -2549,9 +2550,9 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
     if (confirmed != true) return;
     setState(() => _busy = true);
     try {
-      for (final file in await StorageService.listFiles(includeExports: true)) {
-        await file.delete();
-      }
+      await StorageService.clearApplicationData();
+      await JourneyStore.refreshFromDisk();
+      await IntegrationAuthorizationStore.instance.refreshFromDisk();
       await RecoverySnapshotStore.instance.refreshFromDisk();
       if (!mounted) return;
       setState(() => _localFiles = false);
