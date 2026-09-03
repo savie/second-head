@@ -33,7 +33,6 @@ class IntegrationAuthorization {
   IntegrationAuthorizationStatus status;
 }
 
-/// Persisted frontend authorization state shared by Lifecycle, Integrations, and Profile.
 class IntegrationAuthorizationStore extends ChangeNotifier {
   IntegrationAuthorizationStore._();
 
@@ -44,6 +43,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
 
   Future<void> ensureLoaded() async {
     if (_loaded) return;
+
     final file = await StorageService.integrationAuthorizationsFile();
     if (await file.exists()) {
       try {
@@ -51,41 +51,52 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
         if (decoded is List) {
           _items
             ..clear()
-            ..addAll([
-              for (final raw in decoded)
-                if (raw is Map<String, dynamic>)
-                  IntegrationAuthorization(
-                    id: raw['id'] as String,
-                    type: raw['type'] as String,
-                    sourceShId: raw['source_sh_id'] as String? ?? 'Current SH',
-                    targetAccountId: raw['target_account_id'] as String,
-                    scope: {
-                      for (final entry in (raw['scope'] as Map<String, dynamic>? ?? {}).entries)
-                        entry.key: List<String>.from(entry.value as List? ?? const []),
-                    },
-                    createdAt: DateTime.parse(raw['created_at'] as String),
-                    status: IntegrationAuthorizationStatus.values.firstWhere(
-                      (value) => value.name == raw['status'],
-                      orElse: () => IntegrationAuthorizationStatus.pending,
-                    ),
-                    incoming: raw['incoming'] == true,
-                  ),
-            ]);
-      } on FormatException {
-        _items.clear();
+            ..addAll(decoded.whereType<Map<String, dynamic>>().map(_decode));
+        }
       } catch (_) {
         _items.clear();
       }
     }
+
     _loaded = true;
     notifyListeners();
   }
 
+  IntegrationAuthorization _decode(Map<String, dynamic> raw) {
+    final scope = <String, List<String>>{};
+    final rawScope = raw['scope'];
+
+    if (rawScope is Map<String, dynamic>) {
+      for (final entry in rawScope.entries) {
+        if (entry.value is List) {
+          scope[entry.key] = List<String>.from(entry.value as List);
+        }
+      }
+    }
+
+    final status = IntegrationAuthorizationStatus.values.firstWhere(
+      (value) => value.name == raw['status'],
+      orElse: () => IntegrationAuthorizationStatus.pending,
+    );
+
+    return IntegrationAuthorization(
+      id: raw['id']?.toString() ?? '',
+      type: raw['type']?.toString() ?? '',
+      sourceShId: raw['source_sh_id']?.toString() ?? 'Current SH',
+      targetAccountId: raw['target_account_id']?.toString() ?? '',
+      scope: scope,
+      createdAt: DateTime.tryParse(raw['created_at']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      status: status,
+      incoming: raw['incoming'] == true,
+    );
+  }
+
   Future<void> _persist() async {
     final file = await StorageService.integrationAuthorizationsFile();
-    await file.writeAsString(jsonEncode([
+    final payload = <Map<String, dynamic>>[
       for (final item in _items)
-        {
+        <String, dynamic>{
           'id': item.id,
           'type': item.type,
           'source_sh_id': item.sourceShId,
@@ -95,18 +106,23 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
           'status': item.status.name,
           'incoming': item.incoming,
         },
-    ]), flush: true);
+    ];
+
+    await file.writeAsString(jsonEncode(payload), flush: true);
   }
 
-  List<IntegrationAuthorization> get items => List<IntegrationAuthorization>.unmodifiable(_items);
+  List<IntegrationAuthorization> get items =>
+      List<IntegrationAuthorization>.unmodifiable(_items);
 
-  List<IntegrationAuthorization> get pending => List<IntegrationAuthorization>.unmodifiable(
+  List<IntegrationAuthorization> get pending =>
+      List<IntegrationAuthorization>.unmodifiable(
         _items.where(
           (item) => item.status == IntegrationAuthorizationStatus.pending,
         ),
       );
 
-  List<IntegrationAuthorization> get authorized => List<IntegrationAuthorization>.unmodifiable(
+  List<IntegrationAuthorization> get authorized =>
+      List<IntegrationAuthorization>.unmodifiable(
         _items.where(
           (item) => item.status == IntegrationAuthorizationStatus.approved,
         ),
@@ -117,7 +133,8 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     required String targetAccountId,
     required Map<String, List<String>> scope,
   }) {
-    final id = 'frontend-auth-${DateTime.now().microsecondsSinceEpoch}';
+    final id = 'frontend-auth-' + DateTime.now().microsecondsSinceEpoch.toString();
+
     _items.insert(
       0,
       IntegrationAuthorization(
@@ -125,15 +142,16 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
         type: type,
         sourceShId: 'Current SH',
         targetAccountId: targetAccountId,
-        scope: {
+        scope: <String, List<String>>{
           for (final entry in scope.entries)
-            entry.key: List.unmodifiable(entry.value),
+            entry.key: List<String>.unmodifiable(entry.value),
         },
         createdAt: DateTime.now(),
       ),
     );
-    _persist();
+
     notifyListeners();
+    _persist();
     return id;
   }
 
@@ -141,24 +159,24 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.approved;
-    _persist();
     notifyListeners();
+    _persist();
   }
 
   void reject(String id) {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.rejected;
-    _persist();
     notifyListeners();
+    _persist();
   }
 
   void revoke(String id) {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.revoked;
-    _persist();
     notifyListeners();
+    _persist();
   }
 
   IntegrationAuthorization? _find(String id) {
