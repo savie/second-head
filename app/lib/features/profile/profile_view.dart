@@ -2686,6 +2686,7 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
       for (final file in await StorageService.listFiles(includeExports: false)) {
         await file.delete();
       }
+      await RecoverySnapshotStore.instance.refreshFromDisk();
       if (!mounted) return;
       setState(() => _localFiles = false);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Local SH files deleted.')));
