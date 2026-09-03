@@ -245,6 +245,10 @@ class JourneyViewState extends State<JourneyView> {
             setState(() => items.removeAt(itemIndex));
             Navigator.of(context).pop();
           },
+          eligibleSharedItems: [
+            for (final candidate in items)
+              if (!candidate.isPrivate) candidate,
+          ],
         ),
       ),
     );
@@ -820,11 +824,13 @@ class JourneyDetail extends StatefulWidget {
     required this.item,
     required this.onChanged,
     required this.onDelete,
+    this.eligibleSharedItems = const [],
   });
 
   final JourneyItem item;
   final VoidCallback onChanged;
   final VoidCallback onDelete;
+  final List<JourneyItem> eligibleSharedItems;
 
   @override
   State<JourneyDetail> createState() => _JourneyDetailState();
@@ -835,6 +841,10 @@ class _JourneyDetailState extends State<JourneyDetail> {
 
   void _openLifecycle(BuildContext context) {
     final payload = JourneyLifecyclePayloadBuilder.fromJourneyItem(item);
+    final sharedPayloads = [
+      for (final candidate in widget.eligibleSharedItems)
+        JourneyLifecyclePayloadBuilder.fromJourneyItem(candidate),
+    ];
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => LifecycleDetailView(
@@ -842,6 +852,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
               ? LifecycleStage.clone
               : LifecycleStage.isl,
           incoming: payload,
+          incomingItems: sharedPayloads,
         ),
       ),
     );
