@@ -489,6 +489,15 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   void initState() {
     super.initState();
     IntegrationAuthorizationStore.instance.addListener(_onAuthorizationChanged);
+    _loadPersistentLifecycleState();
+  }
+
+  Future<void> _loadPersistentLifecycleState() async {
+    await Future.wait([
+      IntegrationAuthorizationStore.instance.ensureLoaded(),
+      RecoverySnapshotStore.instance.ensureLoaded(),
+    ]);
+    if (mounted) setState(() {});
   }
 
   void _onAuthorizationChanged() {
@@ -506,24 +515,17 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   Future<void> _createRecoverySnapshot() async {
     final snapshot = await RecoverySnapshotStore.instance.createSnapshot();
     if (!mounted) return;
-    setState(() {
-      _history.insert(0, _LifecycleDecision(
-        status: 'Snapshot Created',
-        createdAt: snapshot.createdAt,
-        groups: const [],
-        detail: 'FULL SH snapshot prepared. Restore is available from snapshot detail. Snapshot ID: ${snapshot.id}.',
-      ));
-    });
+    if (mounted) setState(() {});
   }
 
-  void _restoreRecovery(_LifecycleDecision decision) {
+  void _restoreRecovery(RecoverySnapshot snapshot) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Restore Snapshot?'),
         content: Text(
           'This will restore the selected FULL snapshot to your current SH.\n\n' +
-          'Created: ' + _recoveryDate(decision.createdAt),
+          'Created: ' + _recoveryDate(snapshot.createdAt),
         ),
         actions: [
           TextButton(
@@ -549,35 +551,57 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     );
   }
 
-  void _openRecoveryDetail(_LifecycleDecision decision, int index) {
+  void _openRecoveryDetail(RecoverySnapshot snapshot, int index) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Recovery Detail #' + index.toString(),
+                Text('Recovery Detail #$index',
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 16),
-                _LifecycleDataRow(label: 'Type', value: 'FULL'),
-                _LifecycleDataRow(label: 'Status', value: decision.status),
-                _LifecycleDataRow(label: 'Created', value: _recoveryDate(decision.createdAt)),
+                _LifecycleDataRow(label: 'Snapshot ID', value: snapshot.id),
+                _LifecycleDataRow(label: 'Type', value: snapshot.type),
+                _LifecycleDataRow(label: 'Created', value: _recoveryDate(snapshot.createdAt)),
+                _LifecycleDataRow(
+                  label: 'Content',
+                  value: '${snapshot.memoryCount} Memory · ${snapshot.knowledgeCount} Knowledge · ${snapshot.experienceCount} Experience · ${snapshot.fileCount} Files',
+                ),
                 const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _restoreRecovery(decision);
-                    },
-                    icon: const Icon(Icons.restore_rounded),
-                    label: const Text('Restore Snapshot'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop();
+                          _restoreRecovery(snapshot);
+                        },
+                        icon: const Icon(Icons.restore_rounded),
+                        label: const Text('Restore'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    IconButton.filledTonal(
+                      tooltip: 'Delete Snapshot',
+                      onPressed: () async {
+                        Navigator.of(sheetContext).pop();
+                        await RecoverySnapshotStore.instance.deleteSnapshot(snapshot.id);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Snapshot deleted.')),
+                          );
+                          setState(() {});
+                        }
+                      },
+                      icon: const Icon(Icons.delete_outline_rounded),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -633,6 +657,8 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     return scope;
   }
 
+  List<IntegrationAuthorization> get _cloneAuthorizations => IntegrationAuthorizationStore.instance.items.where((item) => item.type == 'Clone').toList();
+
   List<IntegrationAuthorization> get _islAuthorizations =>
       IntegrationAuthorizationStore.instance.items.where(
         (item) =>
@@ -659,12 +685,9 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     final normalizedTarget = target.trim();
     if (normalizedTarget.isEmpty) return <String>{};
     final keys = <String>{};
-    for (final decision in _history) {
-      for (final group in decision.groups) {
-        if (group.targetAccountId.trim() == normalizedTarget) {
-          keys.addAll(group.selectedKeys);
-        }
-      }
+    for (final item in IntegrationAuthorizationStore.instance.items) {
+      if (item.type != widget.stage.title || item.targetAccountId.trim() != normalizedTarget) continue;
+      for (final ids in item.scope.values) keys.addAll(ids);
     }
     return keys;
   }
@@ -747,31 +770,12 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       );
       return;
     }
-
-    // Clone has no user-selectable scope here. The backend-defined clone
-    // dataset stays opaque to the frontend; Integrations receives the target
-    // authorization record without inventing a data scope.
     IntegrationAuthorizationStore.instance.addRequest(
       type: 'Clone',
       targetAccountId: email,
       scope: const <String, List<String>>{},
     );
-
-    setState(() {
-      _history.insert(
-        0,
-        _LifecycleDecision(
-          status: 'Clone Created',
-          createdAt: DateTime.now(),
-          groups: [
-            _LifecycleRequestGroup(targetAccountId: email),
-          ],
-          detail:
-              'Clone target dikunci berdasarkan email. Authorization ditangani oleh Integrations.',
-        ),
-      );
-      _cloneEmailController.clear();
-    });
+    setState(() => _cloneEmailController.clear());
   }
 
   void _openAuthorizationDetail(
@@ -958,24 +962,24 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Recovery History',
-                    child: _history.isEmpty
+                    child: RecoverySnapshotStore.instance.items.isEmpty
                         ? const Text('No recovery history yet.', style: TextStyle(fontSize: 12, color: shMuted))
                         : Column(
                             children: [
-                              for (var i = 0; i < _history.length; i++)
+                              for (var i = 0; i < RecoverySnapshotStore.instance.items.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
                                     radius: 15,
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
-                                  title: Text(_history[i].status, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  title: const Text('Snapshot Created', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                                   subtitle: Text(
-                                    'Type: FULL · ' + _recoveryDate(_history[i].createdAt),
+                                    'Type: FULL · ' + _recoveryDate(RecoverySnapshotStore.instance.items[i].createdAt),
                                     style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),
                                   trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openRecoveryDetail(_history[i], i + 1),
+                                  onTap: () => _openRecoveryDetail(RecoverySnapshotStore.instance.items[i], i + 1),
                                 ),
                             ],
                           ),
@@ -1025,11 +1029,11 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Clone Result',
-                    child: _history.isEmpty
+                    child: _cloneAuthorizations.isEmpty
                         ? const Text('No clone results yet.', style: TextStyle(fontSize: 12, color: shMuted))
                         : Column(
                             children: [
-                              for (var i = 0; i < _history.length; i++)
+                              for (var i = 0; i < _cloneAuthorizations.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
@@ -1037,17 +1041,17 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
                                   title: Text(
-                                    _history[i].status,
+                                    _authorizationStatus(_cloneAuthorizations[i]),
                                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: Text(
-                                    'Target: ${_history[i].groups.first.targetAccountId}',
+                                    'Target: ${_cloneAuthorizations[i].targetAccountId}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),
                                   trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openDecision(_history[i], i + 1),
+                                  onTap: () => _openAuthorizationDetail(_cloneAuthorizations[i], i + 1),
                                 ),
                             ],
                           ),
