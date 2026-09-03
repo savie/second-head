@@ -442,18 +442,104 @@ class _OrganicCardPainter extends CustomPainter {
 }
 
 
-class LifecycleDetailView extends StatelessWidget {
-  const LifecycleDetailView({
-    super.key,
-    required this.stage,
-    this.incoming,
-  });
+class LifecycleDetailView extends StatefulWidget {
+  const LifecycleDetailView({super.key, required this.stage, this.incoming});
 
   final LifecycleStage stage;
   final JourneyLifecyclePayload? incoming;
 
   @override
+  State<LifecycleDetailView> createState() => _LifecycleDetailViewState();
+}
+
+class _LifecycleDetailViewState extends State<LifecycleDetailView> {
+  final _targetController = TextEditingController();
+  final List<_LifecycleDecision> _history = [];
+
+  bool get _isIsl =>
+      widget.stage.title == 'Inheritance' ||
+      widget.stage.title == 'Succession' ||
+      widget.stage.title == 'Legacy';
+
+  String get _actionLabel => switch (widget.stage.title) {
+        'Inheritance' => 'Request Inheritance',
+        'Succession' => 'Request Succession',
+        'Legacy' => 'Request Legacy',
+        _ => 'Request',
+      };
+
+  String get _actionDescription => switch (widget.stage.title) {
+        'Inheritance' => 'Request transfer of the selected shared Journey context.',
+        'Succession' => 'Request succession using the selected shared Journey context.',
+        'Legacy' => 'Request legacy handling for the selected shared Journey context.',
+        _ => '',
+      };
+
+  void _request() {
+    final target = _targetController.text.trim();
+    if (target.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Masukkan Target Account ID terlebih dahulu.')),
+      );
+      return;
+    }
+    setState(() {
+      _history.insert(
+        0,
+        _LifecycleDecision(
+          status: 'Waiting for Approval',
+          targetAccountId: target,
+          createdAt: DateTime.now(),
+          detail: 'Request dibuat dari shared Journey data. Authentication ditangani oleh Integrations.',
+        ),
+      );
+    });
+  }
+
+  void _openDecision(_LifecycleDecision decision, int index) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Decision #' + index.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 16),
+              _LifecycleDataRow(label: 'Status', value: decision.status),
+              _LifecycleDataRow(label: 'Target', value: decision.targetAccountId),
+              _LifecycleDataRow(label: 'Requested', value: _formatDate(decision.createdAt)),
+              const SizedBox(height: 12),
+              const Text('Detail', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              Text(decision.detail, style: const TextStyle(fontSize: 13, color: shMuted, height: 1.5)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime value) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return value.year.toString() + '-' + two(value.month) + '-' + two(value.day) +
+        ' ' + two(value.hour) + ':' + two(value.minute);
+  }
+
+  @override
+  void dispose() {
+    _targetController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final stage = widget.stage;
+    final incoming = widget.incoming;
     return Scaffold(
       backgroundColor: shBackground,
       body: Column(
@@ -470,109 +556,111 @@ class LifecycleDetailView extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
               children: [
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: shSurface,
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: stage.accent.withValues(alpha: .55)),
-                  ),
+                _LifecycleSectionCard(
+                  accent: stage.accent,
+                  title: stage.title,
                   child: Row(
                     children: [
                       _StageIcon(stage: stage, size: 54),
                       const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          stage.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+                      Expanded(child: Text(stage.subtitle, style: const TextStyle(fontSize: 13, color: shMuted, height: 1.5))),
                     ],
                   ),
                 ),
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: shSurface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: shBorder),
-                  ),
-                  child: Text(
-                    stage.subtitle,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: shMuted,
-                      height: 1.6,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
                 if (incoming != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: shSurface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: stage.accent.withValues(alpha: .55),
-                      ),
-                    ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Incoming from Journey',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Incoming Journey data',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                        _LifecycleDataRow(label: 'Title', value: incoming.title),
+                        _LifecycleDataRow(label: 'Type', value: incoming.type),
+                        _LifecycleDataRow(label: 'Policy', value: incoming.isPrivate ? 'Private' : 'Shared'),
+                        _LifecycleDataRow(label: 'Journey date', value: incoming.date),
+                        if (incoming.semanticSourceId != null)
+                          _LifecycleDataRow(label: 'Source', value: incoming.semanticSourceId!),
+                        const SizedBox(height: 8),
+                        Text(incoming.content, maxLines: 8, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
+                      ],
+                    ),
+                  ),
+                ],
+                if (_isIsl) ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Target',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Account ID', style: TextStyle(fontSize: 11, color: shMuted)),
+                        const SizedBox(height: 7),
+                        TextField(
+                          controller: _targetController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter target Account ID',
+                            prefixIcon: const Icon(Icons.person_outline_rounded),
+                            filled: true,
+                            fillColor: shBackground.withValues(alpha: .55),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                        _LifecycleDataRow(label: 'Title', value: incoming!.title),
-                        _LifecycleDataRow(label: 'Type', value: incoming!.type),
-                        _LifecycleDataRow(
-                          label: 'Policy',
-                          value: incoming!.isPrivate ? 'Private' : 'Shared',
-                        ),
-                        _LifecycleDataRow(label: 'Journey date', value: incoming!.date),
-                        if (incoming!.semanticSourceId != null)
-                          _LifecycleDataRow(label: 'Source', value: incoming!.semanticSourceId!),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Content',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          incoming!.content,
-                          style: const TextStyle(fontSize: 12, height: 1.5),
-                        ),
+                        const SizedBox(height: 8),
+                        const Text('Target SH is resolved from the Account ID.', style: TextStyle(fontSize: 11, color: shMuted)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 14),
-                ],
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: shSurface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: shBorder),
-                  ),
-                  child: Text(
-                    incoming == null
-                        ? 'Lifecycle detail shell.'
-                        : incoming!.isPrivate
-                            ? 'Private path: Clone / Recovery. No backend write is performed.'
-                            : 'Shared path: I / S / L. No backend write is performed.',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: shMuted,
-                      height: 1.5,
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Request',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_actionDescription, style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
+                        const SizedBox(height: 12),
+                        SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _request, icon: const Icon(Icons.send_rounded), label: Text(_actionLabel))),
+                        const SizedBox(height: 8),
+                        const Text('Authentication is handled by Integrations.', style: TextStyle(fontSize: 10, color: shMuted)),
+                      ],
                     ),
                   ),
-                ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Status',
+                    child: Text(_history.isEmpty ? 'Not requested' : _history.first.status, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _history.isEmpty ? shMuted : stage.accent)),
+                  ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Decision History',
+                    child: _history.isEmpty
+                        ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _history.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(radius: 15, child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11))),
+                                  title: Text(_history[i].status, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  subtitle: Text('Target ' + _history[i].targetAccountId, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: shMuted)),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openDecision(_history[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Lifecycle detail',
+                    child: const Text('This lifecycle detail is intentionally not implemented in this pass.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
+                  ),
+                ],
               ],
             ),
           ),
@@ -582,23 +670,50 @@ class LifecycleDetailView extends StatelessWidget {
   }
 }
 
+class _LifecycleDecision {
+  const _LifecycleDecision({required this.status, required this.targetAccountId, required this.createdAt, required this.detail});
+  final String status;
+  final String targetAccountId;
+  final DateTime createdAt;
+  final String detail;
+}
+
+class _LifecycleSectionCard extends StatelessWidget {
+  const _LifecycleSectionCard({required this.accent, required this.title, required this.child});
+  final Color accent;
+  final String title;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: shSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: shBorder),
+        boxShadow: [BoxShadow(color: accent.withValues(alpha: .06), blurRadius: 18, spreadRadius: 1)],
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        child,
+      ]),
+    );
+  }
+}
+
 class _LifecycleDataRow extends StatelessWidget {
   const _LifecycleDataRow({required this.label, required this.value});
-
   final String label;
   final String value;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 7),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 86, child: Text(label, style: const TextStyle(fontSize: 11, color: shMuted))),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500))),
-        ],
-      ),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SizedBox(width: 86, child: Text(label, style: const TextStyle(fontSize: 11, color: shMuted))),
+        Expanded(child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500))),
+      ]),
     );
   }
 }
