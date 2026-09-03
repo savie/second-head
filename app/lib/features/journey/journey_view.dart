@@ -826,6 +826,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                           onTap: () {
                             if (!item.isPrivate) {
                               setState(() => item.isPrivate = true);
+                              JourneyStore.persist();
                               widget.onChanged();
                             }
                           },
@@ -840,6 +841,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                           onTap: () {
                             if (item.isPrivate) {
                               setState(() => item.isPrivate = false);
+                              JourneyStore.persist();
                               widget.onChanged();
                             }
                           },
