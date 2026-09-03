@@ -2,6 +2,36 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
+import '../journey/journey_view.dart';
+
+class JourneyLifecyclePayload {
+  const JourneyLifecyclePayload({
+    required this.title,
+    required this.type,
+    required this.content,
+    required this.isPrivate,
+    required this.date,
+    this.semanticSourceId,
+  });
+
+  factory JourneyLifecyclePayload.fromJourneyItem(JourneyItem item) {
+    return JourneyLifecyclePayload(
+      title: item.title,
+      type: item.type,
+      content: item.content,
+      isPrivate: item.isPrivate,
+      date: item.date,
+      semanticSourceId: item.semanticSourceId,
+    );
+  }
+
+  final String title;
+  final String type;
+  final String content;
+  final bool isPrivate;
+  final String date;
+  final String? semanticSourceId;
+}
 
 class LifecycleView extends StatefulWidget {
   const LifecycleView({super.key});
@@ -244,6 +274,20 @@ class _MobileLifecycle extends StatelessWidget {
 class LifecycleStage {
   const LifecycleStage(this.title, this.subtitle, this.icon, this.accent);
 
+  static const clone = LifecycleStage(
+    'Clone',
+    'Private Journey data enters the Clone / Recovery lifecycle path.',
+    Icons.copy_all_outlined,
+    Color(0xFF9A45FF),
+  );
+
+  static const shared = LifecycleStage(
+    'I / S / L',
+    'Shared Journey data enters the I / S / L lifecycle path.',
+    Icons.account_tree_outlined,
+    Color(0xFF22D3EE),
+  );
+
   static const empty =
       LifecycleStage('', '', Icons.circle, Colors.transparent);
 
@@ -410,9 +454,14 @@ class _OrganicCardPainter extends CustomPainter {
 
 
 class LifecycleDetailView extends StatelessWidget {
-  const LifecycleDetailView({super.key, required this.stage});
+  const LifecycleDetailView({
+    super.key,
+    required this.stage,
+    this.incoming,
+  });
 
   final LifecycleStage stage;
+  final JourneyLifecyclePayload? incoming;
 
   @override
   Widget build(BuildContext context) {
@@ -473,6 +522,49 @@ class LifecycleDetailView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
+                if (incoming != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: shSurface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: stage.accent.withValues(alpha: .55)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Incoming Journey data',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 12),
+                        _LifecycleDataRow(label: 'Title', value: incoming!.title),
+                        _LifecycleDataRow(label: 'Type', value: incoming!.type),
+                        _LifecycleDataRow(
+                          label: 'Policy',
+                          value: incoming!.isPrivate ? 'Private' : 'Shared',
+                        ),
+                        _LifecycleDataRow(label: 'Journey date', value: incoming!.date),
+                        if (incoming!.semanticSourceId != null)
+                          _LifecycleDataRow(
+                            label: 'Source',
+                            value: incoming!.semanticSourceId!,
+                          ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Content',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          incoming!.content,
+                          style: const TextStyle(fontSize: 12, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -480,9 +572,13 @@ class LifecycleDetailView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: shBorder),
                   ),
-                  child: const Text(
-                    'Dummy page — actions and detailed lifecycle criteria will be implemented later.',
-                    style: TextStyle(
+                  child: Text(
+                    incoming == null
+                        ? 'Lifecycle detail shell. Incoming Journey data will appear here when a Journey entry is continued into Lifecycle.'
+                        : incoming!.isPrivate
+                            ? 'Private path: Clone → Recovery. No backend write is performed; this screen only carries the selected Journey data forward.'
+                            : 'Shared path: I / S / L. No backend write is performed; this screen only carries the selected Journey data forward.',
+                    style: const TextStyle(
                       fontSize: 12,
                       color: shMuted,
                       height: 1.5,
@@ -490,6 +586,38 @@ class LifecycleDetailView extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LifecycleDataRow extends StatelessWidget {
+  const _LifecycleDataRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 7),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 86,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: shMuted),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
           ),
         ],
