@@ -80,6 +80,33 @@ class JourneyViewState extends State<JourneyView> {
       'Reference material describing the runtime contract and future calling.',
       false,
     ),
+    JourneyItem(
+      'Shared Memory — User Preference Context',
+      'Shared memory eligible for I / S / L.',
+      'Today',
+      'Memory',
+      'Example shared memory context that has passed Journey policy and can enter the Lifecycle I / S / L path.',
+      false,
+      semanticSourceId: 'demo:journey:shared-memory',
+    ),
+    JourneyItem(
+      'Shared Knowledge — SH Runtime Context',
+      'Shared knowledge eligible for I / S / L.',
+      'Today',
+      'Knowledge',
+      'Example shared knowledge context that has passed Journey policy and can enter the Lifecycle I / S / L path.',
+      false,
+      semanticSourceId: 'demo:journey:shared-knowledge',
+    ),
+    JourneyItem(
+      'Shared Experience — Approval Context',
+      'Shared experience eligible for I / S / L.',
+      'Today',
+      'Experience',
+      'Example shared experience context that has passed Journey policy and can enter the Lifecycle I / S / L path.',
+      false,
+      semanticSourceId: 'demo:journey:shared-experience',
+    ),
   ];
 
   @override
