@@ -71,6 +71,8 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
                     incoming: raw['incoming'] == true,
                   ),
             ]);
+      } on FormatException {
+        _items.clear();
       } catch (_) {
         _items.clear();
       }
