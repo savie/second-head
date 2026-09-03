@@ -75,7 +75,7 @@ class RecoverySnapshotStore extends ChangeNotifier {
       }
     }
 
-    if (_items.isEmpty) {
+    if (_items.isEmpty && !await file.exists()) {
       _items = [
         RecoverySnapshot(
           id: 'SH-2026-09-03-001',
@@ -101,6 +101,19 @@ class RecoverySnapshotStore extends ChangeNotifier {
     }
 
     _loaded = true;
+    if (_items.any((item) => item.isDemo) && !await file.exists()) await _persist();
+    notifyListeners();
+  }
+
+  Future<void> refreshFromDisk() async {
+    _loaded = false;
+    await ensureLoaded();
+  }
+
+  Future<void> deleteSnapshot(String id) async {
+    await ensureLoaded();
+    _items.removeWhere((item) => item.id == id);
+    await _persist();
     notifyListeners();
   }
 
