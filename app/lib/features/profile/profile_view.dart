@@ -1266,6 +1266,165 @@ class IntegrationsView extends StatefulWidget {
 class _IntegrationsViewState extends State<IntegrationsView> {
   final store = IntegrationAuthorizationStore.instance;
 
+  String _authorizationStatusLabel(IntegrationAuthorization request) {
+    switch (request.status) {
+      case IntegrationAuthorizationStatus.pending:
+        return request.incoming
+            ? 'Needs your approval'
+            : 'Waiting for approval';
+      case IntegrationAuthorizationStatus.approved:
+        return 'Active authorization';
+      case IntegrationAuthorizationStatus.rejected:
+        return 'Rejected';
+      case IntegrationAuthorizationStatus.revoked:
+        return 'Revoked';
+    }
+  }
+
+  Color _authorizationStatusColor(IntegrationAuthorization request) {
+    switch (request.status) {
+      case IntegrationAuthorizationStatus.pending:
+        return request.incoming ? shCyan : shMuted;
+      case IntegrationAuthorizationStatus.approved:
+        return shCyan;
+      case IntegrationAuthorizationStatus.rejected:
+      case IntegrationAuthorizationStatus.revoked:
+        return shMuted;
+    }
+  }
+
+  String _formatAuthorizationDate(DateTime value) {
+    String two(int number) => number.toString().padLeft(2, '0');
+    return '${value.year}-${two(value.month)}-${two(value.day)} '
+        '${two(value.hour)}:${two(value.minute)}';
+  }
+
+  Future<void> _showAuthorizationDetail(
+    BuildContext context,
+    IntegrationAuthorization request,
+  ) async {
+    final scopeRows = <MapEntry<String, String>>[
+      MapEntry('Memory', 'memory_ids'),
+      MapEntry('Knowledge', 'knowledge_ids'),
+      MapEntry('Experience', 'experience_ids'),
+      MapEntry('Journey', 'journey_event_ids'),
+    ];
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: shSurface2,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: request.status ==
+                                  IntegrationAuthorizationStatus.approved
+                              ? shCyan.withValues(alpha: .45)
+                              : shPurple.withValues(alpha: .45),
+                        ),
+                      ),
+                      child: Icon(
+                        request.status ==
+                                IntegrationAuthorizationStatus.approved
+                            ? Icons.verified_rounded
+                            : Icons.security_outlined,
+                        color: request.status ==
+                                IntegrationAuthorizationStatus.approved
+                            ? shCyan
+                            : shPurple,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            request.type,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _authorizationStatusLabel(request),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: _authorizationStatusColor(request),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _IntegrationDetailRow(
+                  label: 'Source SH',
+                  value: request.sourceShId,
+                ),
+                _IntegrationDetailRow(
+                  label: 'Target',
+                  value: request.targetAccountId,
+                ),
+                _IntegrationDetailRow(
+                  label: 'Created',
+                  value: _formatAuthorizationDate(request.createdAt),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'AUTHORIZED DATA',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: shMuted,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: .7,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final row in scopeRows)
+                  _IntegrationScopeRow(
+                    label: row.key,
+                    count: request.scope[row.value]?.length ?? 0,
+                  ),
+                if (request.status == IntegrationAuthorizationStatus.approved) ...[
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop();
+                        store.revoke(request.id);
+                      },
+                      icon: const Icon(Icons.link_off_rounded, size: 18),
+                      label: const Text('Revoke Authorization'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: store,
@@ -1283,13 +1442,19 @@ class _IntegrationsViewState extends State<IntegrationsView> {
               ),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 30),
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 30),
                   children: [
+                    _IntegrationOverview(
+                      pendingCount: store.pending.length,
+                      authorizedCount: store.authorized.length,
+                    ),
+                    const SizedBox(height: 18),
                     _IntegrationHeader(
                       title: 'Pending',
                       subtitle: store.pending.isEmpty
-                          ? 'Nothing needs your attention'
-                          : '${store.pending.length} authorization requests',
+                          ? 'No authorization requests'
+                          : '${store.pending.length} authorization '
+                              '${store.pending.length == 1 ? 'request' : 'requests'}',
                       icon: Icons.pending_actions_rounded,
                     ),
                     const SizedBox(height: 10),
@@ -1304,15 +1469,18 @@ class _IntegrationsViewState extends State<IntegrationsView> {
                           padding: const EdgeInsets.only(bottom: 10),
                           child: _PendingAuthCard(
                             request: request,
+                            onTap: () => _showAuthorizationDetail(context, request),
                             onAccept: () => store.approve(request.id),
                             onReject: () => store.reject(request.id),
                           ),
                         ),
                       ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     _IntegrationHeader(
                       title: 'Authorized',
-                      subtitle: '${store.authorized.length} active',
+                      subtitle: store.authorized.isEmpty
+                          ? 'No active authorizations'
+                          : '${store.authorized.length} active',
                       icon: Icons.verified_user_outlined,
                     ),
                     const SizedBox(height: 10),
@@ -1327,6 +1495,7 @@ class _IntegrationsViewState extends State<IntegrationsView> {
                           padding: const EdgeInsets.only(bottom: 10),
                           child: _AuthorizedCard(
                             request: request,
+                            onTap: () => _showAuthorizationDetail(context, request),
                             onRevoke: () => store.revoke(request.id),
                           ),
                         ),
@@ -1336,6 +1505,90 @@ class _IntegrationsViewState extends State<IntegrationsView> {
               ),
             ],
           ),
+        ),
+      );
+}
+
+class _IntegrationOverview extends StatelessWidget {
+  const _IntegrationOverview({
+    required this.pendingCount,
+    required this.authorizedCount,
+  });
+
+  final int pendingCount;
+  final int authorizedCount;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              shSurface2.withValues(alpha: .92),
+              shSurface.withValues(alpha: .96),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: shBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: shBackground.withValues(alpha: .75),
+                shape: BoxShape.circle,
+                border: Border.all(color: shPurple.withValues(alpha: .38)),
+              ),
+              child: const Icon(
+                Icons.security_rounded,
+                color: shPurple,
+                size: 23,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Authorization Hub',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    pendingCount == 0
+                        ? 'No pending requests'
+                        : '$pendingCount pending · $authorizedCount active',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: shMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '$authorizedCount',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Text(
+                  'active',
+                  style: TextStyle(fontSize: 9, color: shMuted),
+                ),
+              ],
+            ),
+          ],
         ),
       );
 }
@@ -1371,7 +1624,10 @@ class _IntegrationHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1388,11 +1644,13 @@ class _IntegrationHeader extends StatelessWidget {
 class _PendingAuthCard extends StatelessWidget {
   const _PendingAuthCard({
     required this.request,
+    required this.onTap,
     required this.onAccept,
     required this.onReject,
   });
 
   final IntegrationAuthorization request;
+  final VoidCallback onTap;
   final VoidCallback onAccept;
   final VoidCallback onReject;
 
@@ -1400,233 +1658,433 @@ class _PendingAuthCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final needsApproval = request.incoming;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [shSurface2, shSurface]),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: shBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(
-                  color: shPurple.withValues(alpha: .14),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Text(
-                  request.type,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                needsApproval ? 'Needs your approval' : 'Waiting for approval',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: needsApproval ? shCyan : shMuted,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [shSurface2.withValues(alpha: .96), shSurface],
+            ),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: needsApproval
+                  ? shCyan.withValues(alpha: .28)
+                  : shBorder,
+            ),
           ),
-          const SizedBox(height: 14),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _PartyPill(label: request.sourceShId),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(Icons.arrow_forward_rounded, size: 16, color: shMuted),
+              Row(
+                children: [
+                  _IntegrationTypeBadge(
+                    type: request.type,
+                    pending: true,
+                  ),
+                  const Spacer(),
+                  _IntegrationStatusPill(
+                    label: needsApproval
+                        ? 'Needs your approval'
+                        : 'Waiting for approval',
+                    accent: needsApproval ? shCyan : shMuted,
+                  ),
+                ],
               ),
-              _PartyPill(label: request.targetAccountId),
-            ],
-          ),
-          if (needsApproval) ...[
-            const SizedBox(height: 15),
-            Row(
-              children: [
-                Expanded(
-                  child: _AuthAction(
-                    label: 'Reject',
-                    icon: Icons.close_rounded,
-                    onTap: onReject,
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _IntegrationParty(
+                      label: 'Source SH',
+                      value: request.sourceShId,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _AuthAction(
-                    label: 'Accept',
-                    icon: Icons.check_rounded,
-                    onTap: onAccept,
-                    primary: true,
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 18,
+                      color: shMuted,
+                    ),
                   ),
+                  Expanded(
+                    child: _IntegrationParty(
+                      label: 'Target',
+                      value: request.targetAccountId,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _IntegrationScopeSummary(
+                text: _scopeText(request),
+              ),
+              if (needsApproval) ...[
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AuthAction(
+                        label: 'Reject',
+                        icon: Icons.close_rounded,
+                        onTap: onReject,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _AuthAction(
+                        label: 'Accept',
+                        icon: Icons.check_rounded,
+                        onTap: onAccept,
+                        primary: true,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-        ],
+              const SizedBox(height: 6),
+              const Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'View details',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: shMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  String _scopeText(IntegrationAuthorization request) {
+    final parts = <String>[];
+    void add(String key, String label) {
+      final count = request.scope[key]?.length ?? 0;
+      if (count > 0) parts.add('$count $label');
+    }
+
+    add('memory_ids', 'Memory');
+    add('knowledge_ids', 'Knowledge');
+    add('experience_ids', 'Experience');
+    add('journey_event_ids', 'Journey');
+    return parts.isEmpty ? 'No data scope' : parts.join(' · ');
   }
 }
 
 class _AuthorizedCard extends StatelessWidget {
   const _AuthorizedCard({
     required this.request,
+    required this.onTap,
     required this.onRevoke,
   });
 
   final IntegrationAuthorization request;
+  final VoidCallback onTap;
   final VoidCallback onRevoke;
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: shSurface,
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
+        child: InkWell(
           borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(15, 14, 10, 14),
+            decoration: BoxDecoration(
+              color: shSurface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: shCyan.withValues(alpha: .22)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: shSurface2,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.verified_rounded,
+                    size: 21,
+                    color: shCyan,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              request.type,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const _IntegrationStatusPill(
+                            label: 'Active',
+                            accent: shCyan,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${request.sourceShId} → ${request.targetAccountId}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: shMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _scopeText(request),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: shMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Revoke',
+                  onPressed: onRevoke,
+                  icon: const Icon(Icons.link_off_rounded, size: 20),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  String _scopeText(IntegrationAuthorization request) {
+    final parts = <String>[];
+    void add(String key, String label) {
+      final count = request.scope[key]?.length ?? 0;
+      if (count > 0) parts.add('$count $label');
+    }
+
+    add('memory_ids', 'Memory');
+    add('knowledge_ids', 'Knowledge');
+    add('experience_ids', 'Experience');
+    add('journey_event_ids', 'Journey');
+    return parts.isEmpty ? 'No data scope' : parts.join(' · ');
+  }
+}
+
+class _IntegrationTypeBadge extends StatelessWidget {
+  const _IntegrationTypeBadge({
+    required this.type,
+    required this.pending,
+  });
+
+  final String type;
+  final bool pending;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          color: (pending ? shPurple : shCyan).withValues(alpha: .14),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Text(
+          type,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+}
+
+class _IntegrationStatusPill extends StatelessWidget {
+  const _IntegrationStatusPill({
+    required this.label,
+    required this.accent,
+  });
+
+  final String label;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: .10),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: accent.withValues(alpha: .25)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 9,
+            color: accent,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+}
+
+class _IntegrationParty extends StatelessWidget {
+  const _IntegrationParty({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.fromLTRB(11, 9, 11, 9),
+        decoration: BoxDecoration(
+          color: shBackground.withValues(alpha: .48),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: shBorder),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: shSurface2,
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: const Icon(
-                Icons.verified_rounded,
-                size: 21,
-                color: shCyan,
-              ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 9, color: shMuted),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    request.type,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            const SizedBox(height: 3),
+            Row(
+              children: [
+                const Icon(
+                  Icons.person_outline_rounded,
+                  size: 15,
+                  color: shMuted,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${request.sourceShId} → ${request.targetAccountId}',
-                    style: const TextStyle(fontSize: 12, color: shMuted),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              tooltip: 'Revoke',
-              onPressed: onRevoke,
-              icon: const Icon(Icons.link_off_rounded, size: 20),
+                ),
+              ],
             ),
           ],
         ),
       );
 }
 
-class _PartyPill extends StatelessWidget {
-  const _PartyPill({required this.label});
+class _IntegrationScopeSummary extends StatelessWidget {
+  const _IntegrationScopeSummary({required this.text});
 
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
-          decoration: BoxDecoration(
-            color: shSurface,
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: shBorder),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.person_outline_rounded, size: 16, color: shMuted),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-}
-
-class _AuthAction extends StatelessWidget {
-  const _AuthAction({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-    this.primary = false,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool primary;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-        borderRadius: BorderRadius.circular(13),
-        onTap: onTap,
-        child: Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: primary ? shSurface2 : shSurface,
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: primary ? shPurple : shBorder),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 17),
-              const SizedBox(width: 7),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-        ),
-      );
-}
-
-class _IntegrationEmpty extends StatelessWidget {
-  const _IntegrationEmpty({
-    required this.icon,
-    required this.text,
-  });
-
-  final IconData icon;
   final String text;
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 28),
-        decoration: BoxDecoration(
-          color: shSurface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: shBorder),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 28, color: shMuted),
-            const SizedBox(height: 9),
-            Text(
+  Widget build(BuildContext context) => Row(
+        children: [
+          const Icon(
+            Icons.data_object_rounded,
+            size: 16,
+            color: shMuted,
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
               text,
-              style: const TextStyle(fontSize: 12, color: shMuted),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10,
+                color: shMuted,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      );
+}
+
+class _IntegrationDetailRow extends StatelessWidget {
+  const _IntegrationDetailRow({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 84,
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 11, color: shMuted),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class _IntegrationScopeRow extends StatelessWidget {
+  const _IntegrationScopeRow({
+    required this.label,
+    required this.count,
+  });
+
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 7),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 11, color: shMuted),
+              ),
+            ),
+            Text(
+              '$count',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
