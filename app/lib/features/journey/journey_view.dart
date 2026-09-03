@@ -197,10 +197,6 @@ class JourneyViewState extends State<JourneyView> {
             JourneyStore.persist();
             Navigator.of(context).pop();
           },
-          eligibleSharedItems: [
-            for (final candidate in items)
-              if (!candidate.isPrivate) candidate,
-          ],
         ),
       ),
     );
