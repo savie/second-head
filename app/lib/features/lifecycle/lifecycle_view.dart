@@ -482,6 +482,96 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   final List<_LifecycleDecision> _history = [];
   final TextEditingController _cloneEmailController = TextEditingController();
 
+  bool get _isRecovery => widget.stage.title == 'Recovery';
+
+  String _recoveryDate(DateTime value) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return value.year.toString() + '-' + two(value.month) + '-' +
+        two(value.day) + ' ' + two(value.hour) + ':' + two(value.minute);
+  }
+
+  void _createRecoverySnapshot() {
+    setState(() {
+      _history.insert(0, _LifecycleDecision(
+        status: 'Snapshot Created',
+        createdAt: DateTime.now(),
+        groups: const [],
+        detail: 'FULL SH snapshot prepared. Restore is available from snapshot detail.',
+      ));
+    });
+  }
+
+  void _restoreRecovery(_LifecycleDecision decision) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore Snapshot?'),
+        content: Text(
+          'This will restore the selected FULL snapshot to your current SH.\n\n' +
+          'Created: ' + _recoveryDate(decision.createdAt),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                _history.insert(0, _LifecycleDecision(
+                  status: 'Restored',
+                  createdAt: DateTime.now(),
+                  groups: const [],
+                  detail: 'Outcome: RESTORED · Continuity: RECOVERED.',
+                ));
+              });
+            },
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openRecoveryDetail(_LifecycleDecision decision, int index) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Recovery Detail #' + index.toString(),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 16),
+                _LifecycleDataRow(label: 'Type', value: 'FULL'),
+                _LifecycleDataRow(label: 'Status', value: decision.status),
+                _LifecycleDataRow(label: 'Created', value: _recoveryDate(decision.createdAt)),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _restoreRecovery(decision);
+                    },
+                    icon: const Icon(Icons.restore_rounded),
+                    label: const Text('Restore Snapshot'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   bool get _isIsl =>
       widget.stage.title == 'Inheritance' ||
       widget.stage.title == 'Succession' ||
@@ -704,7 +794,57 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                     ],
                   ),
                 ),
-                if (_isClone) ...[
+                if (_isRecovery) ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Full SH Snapshot',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Recovery uses a FULL snapshot of the current SH. No target or per-item selection is required.',
+                          style: TextStyle(fontSize: 12, color: shMuted, height: 1.5),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _createRecoverySnapshot,
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            label: const Text('Create Snapshot'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Recovery History',
+                    child: _history.isEmpty
+                        ? const Text('No recovery history yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _history.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: Text(_history[i].status, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  subtitle: Text(
+                                    'Type: FULL · ' + _recoveryDate(_history[i].createdAt),
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openRecoveryDetail(_history[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
+                ] else if (_isClone) ...[
                   const SizedBox(height: 14),
                   _LifecycleSectionCard(
                     accent: stage.accent,
