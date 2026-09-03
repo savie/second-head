@@ -800,7 +800,14 @@ class _JourneyDetailState extends State<JourneyDetail> {
           stage: item.isPrivate
               ? LifecycleStage.clone
               : LifecycleStage.shared,
-          incoming: JourneyLifecyclePayload.fromJourneyItem(item),
+          incoming: JourneyLifecyclePayload(
+            title: item.title,
+            type: item.type,
+            content: item.content,
+            isPrivate: item.isPrivate,
+            date: item.date,
+            semanticSourceId: item.semanticSourceId,
+          ),
         ),
       ),
     );
@@ -998,24 +1005,3 @@ class PolicyOption extends StatelessWidget {
             children: [
               Icon(icon, size: 20, color: Colors.white),
               const SizedBox(width: 9),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              if (selected)
-                const Icon(
-                  Icons.check_rounded,
-                  size: 18,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
