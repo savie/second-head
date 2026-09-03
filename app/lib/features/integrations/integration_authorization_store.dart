@@ -192,6 +192,38 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     return true;
   }
 
+  Future<void> deleteRequest(String id) async {
+    final index = _items.indexWhere((item) => item.id == id);
+    if (index < 0) return;
+    _items.removeAt(index);
+    await _persist();
+    notifyListeners();
+  }
+
+  Future<void> removeRequestsReferencingKeys(Set<String> keys) async {
+    if (keys.isEmpty) return;
+    final normalized = keys.map((key) => key.trim()).where((key) => key.isNotEmpty).toSet();
+    if (normalized.isEmpty) return;
+
+    final before = _items.length;
+    _items.removeWhere((item) {
+      if (!{
+        'Inheritance',
+        'Succession',
+        'Legacy',
+      }.contains(item.type)) {
+        return false;
+      }
+      return item.scope.values.any(
+        (values) => values.any(normalized.contains),
+      );
+    });
+
+    if (_items.length == before) return;
+    await _persist();
+    notifyListeners();
+  }
+
   Future<void> approve(String id) async {
     final item = _find(id);
     if (item == null) return;
