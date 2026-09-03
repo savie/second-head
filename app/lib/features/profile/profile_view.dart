@@ -471,6 +471,14 @@ class AccountView extends StatefulWidget {
 }
 
 class _AccountViewState extends State<AccountView> {
+  final TextEditingController _editController = TextEditingController();
+
+  @override
+  void dispose() {
+    _editController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickPhoto(ImageSource source) async {
     final picker = ImagePicker();
     final file = await picker.pickImage(
@@ -528,12 +536,16 @@ class _AccountViewState extends State<AccountView> {
       ),
     );
   }
+
   Future<void> _editValue({
     required String title,
     required String initial,
     required ValueChanged<String> onSave,
   }) async {
-    final controller = TextEditingController(text: initial);
+    _editController.value = TextEditingValue(
+      text: initial,
+      selection: TextSelection.collapsed(offset: initial.length),
+    );
     final value = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: shSurface,
@@ -556,10 +568,10 @@ class _AccountViewState extends State<AccountView> {
             Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
             const SizedBox(height: 14),
             TextField(
-              controller: controller,
+              controller: _editController,
               autofocus: true,
               textInputAction: TextInputAction.done,
-              onSubmitted: (_) => Navigator.pop(sheetContext, controller.text.trim()),
+              onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()),
               decoration: InputDecoration(
                 filled: true,
                 fillColor: shBackground,
@@ -573,7 +585,7 @@ class _AccountViewState extends State<AccountView> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () => Navigator.pop(sheetContext, controller.text.trim()),
+                onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()),
                 child: const Text('Save'),
               ),
             ),
@@ -581,7 +593,6 @@ class _AccountViewState extends State<AccountView> {
         ),
       ),
     );
-    controller.dispose();
     if (!mounted || value == null || value.isEmpty) return;
     onSave(value);
   }
