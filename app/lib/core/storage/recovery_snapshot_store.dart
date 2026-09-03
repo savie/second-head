@@ -108,18 +108,6 @@ class RecoverySnapshotStore extends ChangeNotifier {
       file = await StorageService.recoverySnapshotFileFor(createdAt);
     }
 
-    final snapshot = RecoverySnapshot(
-      id: 'SH-${createdAt.year.toString().padLeft(4, '0')}-'
-          '${createdAt.month.toString().padLeft(2, '0')}-'
-          '${createdAt.day.toString().padLeft(2, '0')}-'
-          '${createdAt.microsecondsSinceEpoch.toString().substring(9)}',
-      createdAt: createdAt,
-      type: 'FULL',
-      memoryCount: 0,
-      knowledgeCount: 0,
-      experienceCount: 0,
-      fileCount: 0,
-    );
     final root = await StorageService.root();
     final persistentFiles = <Map<String, dynamic>>[];
     await for (final entity in root.list(recursive: true, followLinks: false)) {
@@ -132,6 +120,44 @@ class RecoverySnapshotStore extends ChangeNotifier {
         'bytes_base64': base64Encode(await entity.readAsBytes()),
       });
     }
+
+    var memoryCount = 0;
+    var knowledgeCount = 0;
+    var experienceCount = 0;
+    for (final entry in persistentFiles) {
+      if (entry['path'] != 'temp/journey_items.json') continue;
+      try {
+        final decoded = jsonDecode(
+          utf8.decode(base64Decode(entry['bytes_base64'] as String)),
+        );
+        if (decoded is List) {
+          for (final item in decoded) {
+            if (item is! Map<String, dynamic>) continue;
+            switch (item['type']) {
+              case 'Memory':
+                memoryCount++;
+              case 'Knowledge':
+                knowledgeCount++;
+              case 'Experience':
+                experienceCount++;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    final snapshot = RecoverySnapshot(
+      id: 'SH-${createdAt.year.toString().padLeft(4, '0')}-'
+          '${createdAt.month.toString().padLeft(2, '0')}-'
+          '${createdAt.day.toString().padLeft(2, '0')}-'
+          '${createdAt.microsecondsSinceEpoch.toString().substring(9)}',
+      createdAt: createdAt,
+      type: 'FULL',
+      memoryCount: memoryCount,
+      knowledgeCount: knowledgeCount,
+      experienceCount: experienceCount,
+      fileCount: persistentFiles.length,
+    );
     await file.writeAsString(
       jsonEncode({
         ...snapshot.toJson(),
