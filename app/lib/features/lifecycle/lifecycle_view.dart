@@ -4,6 +4,7 @@ import '../../core/theme/sh_theme.dart';
 import '../journey/journey_data.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../integrations/integration_authorization_store.dart';
+import '../integrations/integrations_view.dart';
 
 class JourneyLifecyclePayload {
   const JourneyLifecyclePayload({
@@ -803,6 +804,19 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
               onPressed: () => Navigator.of(context).pop(),
               icon: const Icon(Icons.arrow_back),
             ),
+            actions: [
+              IconButton(
+                tooltip: 'Integrations',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const IntegrationsView(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.hub_outlined, size: 24),
+              ),
+            ],
           ),
           Expanded(
             child: ListView(
