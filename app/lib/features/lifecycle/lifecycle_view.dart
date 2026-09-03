@@ -632,8 +632,6 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   label: 'Target',
                   value: decision.groups.first.targetAccountId,
                 ),
-                if (decision.cloneShId != null)
-                  _LifecycleDataRow(label: 'Clone SH', value: decision.cloneShId!),
                 _LifecycleDataRow(
                   label: 'Created',
                   value: _formatDate(decision.createdAt),
@@ -1006,14 +1004,12 @@ class _LifecycleDecision {
     required this.createdAt,
     required this.groups,
     required this.detail,
-    this.cloneShId,
   });
 
   final String status;
   final DateTime createdAt;
   final List<_LifecycleRequestGroup> groups;
   final String detail;
-  final String? cloneShId;
 
   int get totalDataCount =>
       groups.fold(0, (sum, group) => sum + group.selectedKeys.length);
