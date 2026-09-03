@@ -2260,7 +2260,7 @@ class _ExportDataViewState extends State<_ExportDataView> {
   }
 
   Future<void> _load() async {
-    await _snapshots.ensureLoaded();
+    await _snapshots.refreshFromDisk();
     if (mounted) setState(() => _loading = false);
   }
 
