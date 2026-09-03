@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../../core/theme/sh_theme.dart';
 import '../journey/journey_data.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
-import '../integrations/integration_authorization_store.dart';
-import '../integrations/integrations_view.dart';
-import '../../core/storage/recovery_snapshot_store.dart';
 
 class JourneyLifecyclePayload {
   const JourneyLifecyclePayload({
@@ -485,25 +482,6 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   final List<_LifecycleDecision> _history = [];
   final TextEditingController _cloneEmailController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    IntegrationAuthorizationStore.instance.addListener(_onAuthorizationChanged);
-    _loadPersistentLifecycleState();
-  }
-
-  Future<void> _loadPersistentLifecycleState() async {
-    await Future.wait([
-      IntegrationAuthorizationStore.instance.ensureLoaded(),
-      RecoverySnapshotStore.instance.ensureLoaded(),
-    ]);
-    if (mounted) setState(() {});
-  }
-
-  void _onAuthorizationChanged() {
-    if (mounted) setState(() {});
-  }
-
   bool get _isRecovery => widget.stage.title == 'Recovery';
 
   String _recoveryDate(DateTime value) {
@@ -512,20 +490,25 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
         two(value.day) + ' ' + two(value.hour) + ':' + two(value.minute);
   }
 
-  Future<void> _createRecoverySnapshot() async {
-    await RecoverySnapshotStore.instance.createSnapshot();
-    if (!mounted) return;
-    if (mounted) setState(() {});
+  void _createRecoverySnapshot() {
+    setState(() {
+      _history.insert(0, _LifecycleDecision(
+        status: 'Snapshot Created',
+        createdAt: DateTime.now(),
+        groups: const [],
+        detail: 'FULL SH snapshot prepared. Restore is available from snapshot detail.',
+      ));
+    });
   }
 
-  void _restoreRecovery(RecoverySnapshot snapshot) {
+  void _restoreRecovery(_LifecycleDecision decision) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Restore Snapshot?'),
         content: Text(
           'This will restore the selected FULL snapshot to your current SH.\n\n' +
-          'Created: ' + _recoveryDate(snapshot.createdAt),
+          'Created: ' + _recoveryDate(decision.createdAt),
         ),
         actions: [
           TextButton(
@@ -551,57 +534,35 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     );
   }
 
-  void _openRecoveryDetail(RecoverySnapshot snapshot, int index) {
+  void _openRecoveryDetail(_LifecycleDecision decision, int index) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
+      builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Recovery Detail #$index',
+                Text('Recovery Detail #' + index.toString(),
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 16),
-                _LifecycleDataRow(label: 'Snapshot ID', value: snapshot.id),
-                _LifecycleDataRow(label: 'Type', value: snapshot.type),
-                _LifecycleDataRow(label: 'Created', value: _recoveryDate(snapshot.createdAt)),
-                _LifecycleDataRow(
-                  label: 'Content',
-                  value: '${snapshot.memoryCount} Memory · ${snapshot.knowledgeCount} Knowledge · ${snapshot.experienceCount} Experience · ${snapshot.fileCount} Files',
-                ),
+                _LifecycleDataRow(label: 'Type', value: 'FULL'),
+                _LifecycleDataRow(label: 'Status', value: decision.status),
+                _LifecycleDataRow(label: 'Created', value: _recoveryDate(decision.createdAt)),
                 const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                          _restoreRecovery(snapshot);
-                        },
-                        icon: const Icon(Icons.restore_rounded),
-                        label: const Text('Restore'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    IconButton.filledTonal(
-                      tooltip: 'Delete Snapshot',
-                      onPressed: () async {
-                        Navigator.of(sheetContext).pop();
-                        await RecoverySnapshotStore.instance.deleteSnapshot(snapshot.id);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Snapshot deleted.')),
-                          );
-                          setState(() {});
-                        }
-                      },
-                      icon: const Icon(Icons.delete_outline_rounded),
-                    ),
-                  ],
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _restoreRecovery(decision);
+                    },
+                    icon: const Icon(Icons.restore_rounded),
+                    label: const Text('Restore Snapshot'),
+                  ),
                 ),
               ],
             ),
@@ -634,60 +595,16 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   String _itemKey(JourneyLifecyclePayload item) =>
       item.semanticSourceId ?? '${item.type}|${item.title}';
 
-  Map<String, List<String>> _scopeForGroup(_LifecycleRequestGroup group) {
-    final scope = <String, List<String>>{
-      'memory_ids': <String>[],
-      'knowledge_ids': <String>[],
-      'experience_ids': <String>[],
-      'journey_event_ids': <String>[],
-    };
-
-    for (final item in _availableItems) {
-      if (!group.selectedKeys.contains(_itemKey(item))) continue;
-      final id = item.semanticSourceId ?? _itemKey(item);
-      final key = switch (item.type.toLowerCase()) {
-        'memory' => 'memory_ids',
-        'knowledge' => 'knowledge_ids',
-        'experience' => 'experience_ids',
-        _ => 'journey_event_ids',
-      };
-      scope[key]!.add(id);
-    }
-
-    return scope;
-  }
-
-  List<IntegrationAuthorization> get _cloneAuthorizations => IntegrationAuthorizationStore.instance.items.where((item) => item.type == 'Clone').toList();
-
-  List<IntegrationAuthorization> get _islAuthorizations =>
-      IntegrationAuthorizationStore.instance.items.where(
-        (item) =>
-            item.type == widget.stage.title &&
-            (item.type == 'Inheritance' ||
-                item.type == 'Succession' ||
-                item.type == 'Legacy'),
-      ).toList();
-
-  String _authorizationStatus(IntegrationAuthorization item) {
-    switch (item.status) {
-      case IntegrationAuthorizationStatus.pending:
-        return 'Waiting for Approval';
-      case IntegrationAuthorizationStatus.approved:
-        return 'Approved';
-      case IntegrationAuthorizationStatus.rejected:
-        return 'Rejected';
-      case IntegrationAuthorizationStatus.revoked:
-        return 'Revoked';
-    }
-  }
-
   Set<String> _requestedKeysForTarget(String target) {
     final normalizedTarget = target.trim();
     if (normalizedTarget.isEmpty) return <String>{};
     final keys = <String>{};
-    for (final item in IntegrationAuthorizationStore.instance.items) {
-      if (item.type != widget.stage.title || item.targetAccountId.trim() != normalizedTarget) continue;
-      for (final ids in item.scope.values) keys.addAll(ids);
+    for (final decision in _history) {
+      for (final group in decision.groups) {
+        if (group.targetAccountId.trim() == normalizedTarget) {
+          keys.addAll(group.selectedKeys);
+        }
+      }
     }
     return keys;
   }
@@ -742,24 +659,18 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       groups.add(group);
     }
 
-    final immutableGroups = List<_LifecycleRequestGroup>.unmodifiable(groups);
-    final integrations = IntegrationAuthorizationStore.instance;
-    for (final group in immutableGroups) {
-      integrations.addRequest(
-        type: widget.stage.title,
-        targetAccountId: group.targetAccountId.trim(),
-        scope: _scopeForGroup(group),
+    setState(() {
+      _history.insert(
+        0,
+        _LifecycleDecision(
+          status: 'Waiting for Approval',
+          createdAt: DateTime.now(),
+          groups: List.unmodifiable(groups),
+          detail:
+              'Batch request dibuat dari shared Journey data. Authentication ditangani oleh Integrations.',
+        ),
       );
-    }
-
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    IntegrationAuthorizationStore.instance.removeListener(_onAuthorizationChanged);
-    _cloneEmailController.dispose();
-    super.dispose();
+    });
   }
 
   void _createClone() {
@@ -770,69 +681,314 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       );
       return;
     }
-    IntegrationAuthorizationStore.instance.addRequest(
-      type: 'Clone',
-      targetAccountId: email,
-      scope: const <String, List<String>>{},
-    );
-    setState(() => _cloneEmailController.clear());
+
+    setState(() {
+      _history.insert(
+        0,
+        _LifecycleDecision(
+          status: 'Clone Created',
+          createdAt: DateTime.now(),
+          groups: [
+            _LifecycleRequestGroup(targetAccountId: email),
+          ],
+          detail:
+              'Clone target dikunci berdasarkan email. Authorization ditangani oleh Integrations.',
+        ),
+      );
+      _cloneEmailController.clear();
+    });
   }
 
-  void _openAuthorizationDetail(
-    IntegrationAuthorization item,
-    int index,
-  ) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+
+
+  String _formatDate(DateTime value) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${value.year}-${two(value.month)}-${two(value.day)} '
+        '${two(value.hour)}:${two(value.minute)}';
+  }
+
+  @override
+  void dispose() {
+    _cloneEmailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stage = widget.stage;
+    final availableItems = _availableItems;
+
+    return Scaffold(
+      backgroundColor: shBackground,
+      body: Column(
+        children: [
+          ShTopBar(
+            title: stage.title,
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
               children: [
-                Text(
-                  item.type + ' #' + index.toString(),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 16),
-                _LifecycleDataRow(
-                  label: 'Status',
-                  value: _authorizationStatus(item),
-                ),
-                _LifecycleDataRow(label: 'Target', value: item.targetAccountId),
-                _LifecycleDataRow(label: 'Source', value: item.sourceShId),
-                _LifecycleDataRow(
-                  label: 'Created',
-                  value: _formatDate(item.createdAt),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Selected Journey Data',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 7),
-                for (final entry in item.scope.entries)
-                  if (entry.value.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 7),
-                      child: _LifecycleDataRow(
-                        label: entry.key.replaceAll('_ids', ''),
-                        value: entry.value.join(', '),
+                _LifecycleSectionCard(
+                  accent: stage.accent,
+                  title: stage.title,
+                  child: Row(
+                    children: [
+                      _StageIcon(stage: stage, size: 54),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          stage.subtitle,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: shMuted,
+                            height: 1.5,
+                          ),
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+                if (_isRecovery) ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Full SH Snapshot',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Recovery uses a FULL snapshot of the current SH. No target or per-item selection is required.',
+                          style: TextStyle(fontSize: 12, color: shMuted, height: 1.5),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _createRecoverySnapshot,
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            label: const Text('Create Snapshot'),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Recovery History',
+                    child: _history.isEmpty
+                        ? const Text('No recovery history yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _history.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: Text(_history[i].status, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  subtitle: Text(
+                                    'Type: FULL · ' + _recoveryDate(_history[i].createdAt),
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openRecoveryDetail(_history[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
+                ] else if (_isClone) ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Target',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Email', style: TextStyle(fontSize: 11, color: shMuted)),
+                        const SizedBox(height: 7),
+                        TextField(
+                          controller: _cloneEmailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            hintText: 'Enter target email',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            filled: true,
+                            fillColor: shBackground.withValues(alpha: .55),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _createClone,
+                            icon: const Icon(Icons.copy_all_outlined),
+                            label: const Text('Create Clone'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Target email is used for the clone authorization flow. Authorization is handled by Integrations.',
+                          style: TextStyle(fontSize: 10, color: shMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Clone Result',
+                    child: _history.isEmpty
+                        ? const Text('No clone results yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _history.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: Text(
+                                    _history[i].status,
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                  ),
+                                  subtitle: Text(
+                                    'Target: ${_history[i].groups.first.targetAccountId}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openDecision(_history[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
+                ] else if (_isIsl) ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Target & Incoming from Journey',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var i = 0; i < _groups.length; i++) ...[
+                          _RequestGroupEditor(
+                            group: _groups[i],
+                            groupIndex: i,
+                            availableItems: availableItems,
+                            onTargetChanged: (value) => _setTarget(i, value),
+                            onItemToggle: (item) => _toggleItem(i, item),
+                            isItemAlreadyRequested: (item) =>
+                                _wasAlreadyRequested(item, _groups[i].targetAccountId),
+                            showRemove: _groups.length > 1,
+                            onRemove: () => setState(() => _groups.removeAt(i)),
+                          ),
+                          if (i != _groups.length - 1)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              child: Divider(color: shBorder),
+                            ),
+                        ],
+                        const SizedBox(height: 4),
+                        OutlinedButton.icon(
+                          onPressed: _addGroup,
+                          icon: const Icon(Icons.add_rounded, size: 18),
+                          label: const Text('Add Target'),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          switch (stage.title) {
+                            'Inheritance' => 'Request transfer of selected shared Journey context.',
+                            'Succession' => 'Request succession using selected shared Journey context.',
+                            'Legacy' => 'Request legacy handling for selected shared Journey context.',
+                            _ => '',
+                          },
+                          style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _request,
+                            icon: const Icon(Icons.send_rounded),
+                            label: Text(switch (stage.title) {
+                              'Inheritance' => 'Request Inheritance',
+                              'Succession' => 'Request Succession',
+                              'Legacy' => 'Request Legacy',
+                              _ => 'Request',
+                            }),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Authentication is handled by Integrations.',
+                          style: TextStyle(fontSize: 10, color: shMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Decision History',
+                    child: _history.isEmpty
+                        ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _history.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: Text(
+                                    _history[i].status,
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                  ),
+                                  subtitle: Text(
+                                    '${_history[i].groups.length} target · ${_history[i].totalDataCount} data',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openDecision(_history[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Lifecycle detail',
+                    child: const Text(
+                      'This lifecycle detail is intentionally not implemented in this pass.',
+                      style: TextStyle(fontSize: 12, color: shMuted, height: 1.5),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
-
-
 }
 
 class _RequestGroupEditor extends StatelessWidget {
