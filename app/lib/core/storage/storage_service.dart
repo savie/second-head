@@ -121,6 +121,11 @@ class StorageService {
     }
   }
 
+  static Future<File> recoverySnapshotsFile() async {
+    final dir = await directory('temp');
+    return File('${dir.path}/recovery_snapshots.json');
+  }
+
   static Future<int> totalBytes() async {
     var total = 0;
     for (final file in await listFiles(includeExports: false)) {
