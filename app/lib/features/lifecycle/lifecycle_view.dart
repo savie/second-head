@@ -1139,23 +1139,6 @@ class _LifecycleRequestGroup {
       );
 }
 
-class _LifecycleDecision {
-  const _LifecycleDecision({
-    required this.status,
-    required this.createdAt,
-    required this.groups,
-    required this.detail,
-  });
-
-  final String status;
-  final DateTime createdAt;
-  final List<_LifecycleRequestGroup> groups;
-  final String detail;
-
-  int get totalDataCount =>
-      groups.fold(0, (sum, group) => sum + group.selectedKeys.length);
-}
-
 class _LifecycleSectionCard extends StatelessWidget {
   const _LifecycleSectionCard({
     required this.accent,
