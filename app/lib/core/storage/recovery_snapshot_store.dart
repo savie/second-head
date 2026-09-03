@@ -76,7 +76,7 @@ class RecoverySnapshotStore extends ChangeNotifier {
     }
 
     if (_items.isEmpty) {
-      _items = const [
+      _items = [
         RecoverySnapshot(
           id: 'SH-2026-09-03-001',
           createdAt: DateTime(2026, 9, 3, 10, 30),
