@@ -108,24 +108,13 @@ class RecoverySnapshotStore extends ChangeNotifier {
       file = await StorageService.recoverySnapshotFileFor(createdAt);
     }
 
-    final root = await StorageService.root();
-    final persistentFiles = <Map<String, dynamic>>[];
-    await for (final entity in root.list(recursive: true, followLinks: false)) {
-      if (entity is! File) continue;
-      if (entity.path.contains(
-        '${Platform.pathSeparator}exports${Platform.pathSeparator}',
-      )) continue;
-      persistentFiles.add({
-        'path': entity.path.substring(root.path.length + 1),
-        'bytes_base64': base64Encode(await entity.readAsBytes()),
-      });
-    }
+    final persistentFiles = await StorageService.listPersistentFilesForRecovery();
 
     var memoryCount = 0;
     var knowledgeCount = 0;
     var experienceCount = 0;
     for (final entry in persistentFiles) {
-      if (entry['path'] != 'temp/journey_items.json') continue;
+      if (entry['path'] != 'internal/temp/journey_items.json') continue;
       try {
         final decoded = jsonDecode(
           utf8.decode(base64Decode(entry['bytes_base64'] as String)),
@@ -161,11 +150,12 @@ class RecoverySnapshotStore extends ChangeNotifier {
     await file.writeAsString(
       jsonEncode({
         ...snapshot.toJson(),
-        'state_version': 1,
+        'state_version': 2,
         'persistent_files': persistentFiles,
       }),
       flush: true,
     );
+
     final recoveryFiles = await StorageService.listRecoverySnapshotFiles();
     for (final oldFile in recoveryFiles.skip(3)) {
       await oldFile.delete();
@@ -173,7 +163,6 @@ class RecoverySnapshotStore extends ChangeNotifier {
     await refreshFromDisk();
     return snapshot;
   }
-
 
   Future<void> restoreSnapshot(RecoverySnapshot snapshot) async {
     final files = await StorageService.listRecoverySnapshotFiles();
@@ -190,6 +179,7 @@ class RecoverySnapshotStore extends ChangeNotifier {
     if (snapshotFile == null) {
       throw StateError('Recovery snapshot file not found: ${snapshot.id}');
     }
+
     final decoded = jsonDecode(await snapshotFile.readAsString());
     if (decoded is! Map<String, dynamic>) {
       throw const FormatException('Invalid recovery snapshot payload.');
@@ -199,27 +189,69 @@ class RecoverySnapshotStore extends ChangeNotifier {
       throw const FormatException('Recovery snapshot has no full state payload.');
     }
 
-    final root = await StorageService.root();
-    final snapshotPaths = <String>{};
+    final externalRoot = await StorageService.root();
+    final internalRoot = await StorageService.internalRoot();
+    final snapshotExternalPaths = <String>{};
+    final snapshotInternalPaths = <String>{};
+
     for (final raw in entries) {
       if (raw is! Map<String, dynamic>) continue;
-      final relativePath = raw['path'];
+      final storedPath = raw['path'];
       final encoded = raw['bytes_base64'];
-      if (relativePath is! String || encoded is! String) continue;
-      snapshotPaths.add(relativePath);
-      final target = File('${root.path}/$relativePath');
+      if (storedPath is! String || encoded is! String) continue;
+
+      Directory base;
+      String relativePath;
+      Set<String> pathSet;
+      if (storedPath.startsWith('internal/')) {
+        base = internalRoot;
+        relativePath = storedPath.substring('internal/'.length);
+        pathSet = snapshotInternalPaths;
+      } else if (storedPath.startsWith('external/')) {
+        base = externalRoot;
+        relativePath = storedPath.substring('external/'.length);
+        pathSet = snapshotExternalPaths;
+      } else if (storedPath.startsWith('temp/')) {
+        // Compatibility with snapshots created before the storage-boundary
+        // migration: legacy temp data now belongs to internal app data.
+        base = internalRoot;
+        relativePath = storedPath;
+        pathSet = snapshotInternalPaths;
+      } else {
+        base = externalRoot;
+        relativePath = storedPath;
+        pathSet = snapshotExternalPaths;
+      }
+
+      if (relativePath.startsWith('exports/') ||
+          relativePath == 'exports') {
+        continue;
+      }
+
+      pathSet.add(relativePath);
+      final target = File('${base.path}/$relativePath');
       await target.parent.create(recursive: true);
       await target.writeAsBytes(base64Decode(encoded), flush: true);
     }
 
-    await for (final entity in root.list(recursive: true, followLinks: false)) {
-      if (entity is! File) continue;
-      if (entity.path.contains(
-        '${Platform.pathSeparator}exports${Platform.pathSeparator}',
-      )) continue;
-      final relativePath = entity.path.substring(root.path.length + 1);
-      if (!snapshotPaths.contains(relativePath)) await entity.delete();
+    Future<void> removeFilesNotInSnapshot(
+      Directory base,
+      Set<String> keep,
+    ) async {
+      if (!await base.exists()) return;
+      await for (final entity in base.list(recursive: true, followLinks: false)) {
+        if (entity is! File) continue;
+        final relativePath = entity.path.substring(base.path.length + 1);
+        if (relativePath.startsWith('exports/')) continue;
+        if (!keep.contains(relativePath)) {
+          await entity.delete();
+        }
+      }
     }
+
+    await removeFilesNotInSnapshot(externalRoot, snapshotExternalPaths);
+    await removeFilesNotInSnapshot(internalRoot, snapshotInternalPaths);
     await refreshFromDisk();
   }
+
 }
