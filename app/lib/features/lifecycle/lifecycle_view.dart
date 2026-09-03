@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/sh_theme.dart';
 import '../journey/journey_data.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
+import '../../core/storage/recovery_snapshot_store.dart';
+import '../integrations/integration_authorization_store.dart';
 
 class JourneyLifecyclePayload {
   const JourneyLifecyclePayload({
@@ -478,10 +480,33 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   final List<_LifecycleRequestGroup> _groups = [
     const _LifecycleRequestGroup(),
   ];
-  final List<_LifecycleDecision> _history = [];
   final TextEditingController _cloneEmailController = TextEditingController();
+  final _snapshots = RecoverySnapshotStore.instance;
+  final _integrations = IntegrationAuthorizationStore.instance;
+  bool _storesReady = false;
 
   bool get _isRecovery => widget.stage.title == 'Recovery';
+
+  @override
+  void initState() {
+    super.initState();
+    _snapshots.addListener(_storesChanged);
+    _integrations.addListener(_storesChanged);
+    _loadStores();
+  }
+
+  Future<void> _loadStores() async {
+    await Future.wait([_snapshots.ensureLoaded(), _integrations.ensureLoaded()]);
+    if (mounted) setState(() => _storesReady = true);
+  }
+
+  void _storesChanged() {
+    if (mounted) setState(() {});
+  }
+
+  List<RecoverySnapshot> get _recoveryHistory => _snapshots.items;
+  List<IntegrationAuthorization> get _cloneResults => _integrations.items.where((item) => item.type == 'Clone').toList(growable: false);
+  List<IntegrationAuthorization> get _islResults => _integrations.items.where((item) => item.type == widget.stage.title).toList(growable: false);
 
   String _recoveryDate(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
@@ -489,79 +514,76 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
         two(value.day) + ' ' + two(value.hour) + ':' + two(value.minute);
   }
 
-  void _createRecoverySnapshot() {
-    setState(() {
-      _history.insert(0, _LifecycleDecision(
-        status: 'Snapshot Created',
-        createdAt: DateTime.now(),
-        groups: const [],
-        detail: 'FULL SH snapshot prepared. Restore is available from snapshot detail.',
-      ));
-    });
+  Future<void> _createRecoverySnapshot() async {
+    await _snapshots.createSnapshot();
   }
 
-  void _restoreRecovery(_LifecycleDecision decision) {
-    showDialog<void>(
+  Future<void> _restoreRecovery(RecoverySnapshot snapshot) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Restore Snapshot?'),
-        content: Text(
-          'This will restore the selected FULL snapshot to your current SH.\n\n' +
-          'Created: ' + _recoveryDate(decision.createdAt),
-        ),
+        content: Text('This will restore the selected FULL snapshot to your current SH.\\n\\nCreated: ' + _recoveryDate(snapshot.createdAt)),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() {
-                _history.insert(0, _LifecycleDecision(
-                  status: 'Restored',
-                  createdAt: DateTime.now(),
-                  groups: const [],
-                  detail: 'Outcome: RESTORED · Continuity: RECOVERED.',
-                ));
-              });
-            },
-            child: const Text('Restore'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Restore')),
         ],
       ),
     );
+    if (confirmed != true || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Snapshot restore requested.')));
   }
 
-  void _openRecoveryDetail(_LifecycleDecision decision, int index) {
+  Future<void> _deleteRecoverySnapshot(RecoverySnapshot snapshot) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Snapshot?'),
+        content: Text('This permanently removes snapshot ${snapshot.id} from local Recovery history.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Delete')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _snapshots.deleteSnapshot(snapshot.id);
+  }
+
+  void _openRecoveryDetail(RecoverySnapshot snapshot, int index) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Recovery Detail #' + index.toString(),
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                Text('Recovery Detail #' + index.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 16),
-                _LifecycleDataRow(label: 'Type', value: 'FULL'),
-                _LifecycleDataRow(label: 'Status', value: decision.status),
-                _LifecycleDataRow(label: 'Created', value: _recoveryDate(decision.createdAt)),
+                _LifecycleDataRow(label: 'ID', value: snapshot.id),
+                _LifecycleDataRow(label: 'Type', value: snapshot.type),
+                _LifecycleDataRow(label: 'Created', value: _recoveryDate(snapshot.createdAt)),
+                _LifecycleDataRow(label: 'Memory', value: snapshot.memoryCount.toString()),
+                _LifecycleDataRow(label: 'Knowledge', value: snapshot.knowledgeCount.toString()),
+                _LifecycleDataRow(label: 'Experience', value: snapshot.experienceCount.toString()),
+                _LifecycleDataRow(label: 'Files', value: snapshot.fileCount.toString()),
                 const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _restoreRecovery(decision);
-                    },
-                    icon: const Icon(Icons.restore_rounded),
-                    label: const Text('Restore Snapshot'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(child: OutlinedButton.icon(
+                      onPressed: () { Navigator.of(sheetContext).pop(); _deleteRecoverySnapshot(snapshot); },
+                      icon: const Icon(Icons.delete_outline_rounded), label: const Text('Delete'),
+                    )),
+                    const SizedBox(width: 10),
+                    Expanded(child: FilledButton.icon(
+                      onPressed: () { Navigator.of(sheetContext).pop(); _restoreRecovery(snapshot); },
+                      icon: const Icon(Icons.restore_rounded), label: const Text('Restore'),
+                    )),
+                  ],
                 ),
               ],
             ),
@@ -594,22 +616,19 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   String _itemKey(JourneyLifecyclePayload item) =>
       item.semanticSourceId ?? '${item.type}|${item.title}';
 
-  Set<String> _requestedKeysForTarget(String target) {
-    final normalizedTarget = target.trim();
-    if (normalizedTarget.isEmpty) return <String>{};
+  Set<String> _requestedKeysForTarget(String target, {String? type}) {
+    final normalizedTarget = target.trim().toLowerCase();
     final keys = <String>{};
-    for (final decision in _history) {
-      for (final group in decision.groups) {
-        if (group.targetAccountId.trim() == normalizedTarget) {
-          keys.addAll(group.selectedKeys);
-        }
-      }
+    for (final item in _integrations.items) {
+      if (type != null && item.type != type) continue;
+      if (item.targetAccountId.trim().toLowerCase() != normalizedTarget) continue;
+      for (final values in item.scope.values) keys.addAll(values);
     }
     return keys;
   }
 
   bool _wasAlreadyRequested(JourneyLifecyclePayload item, String target) =>
-      _requestedKeysForTarget(target).contains(_itemKey(item));
+      _requestedKeysForTarget(target, type: widget.stage.title).contains(_itemKey(item));
 
   void _setTarget(int index, String value) {
     final group = _groups[index];
@@ -632,114 +651,86 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     setState(() => _groups.add(const _LifecycleRequestGroup()));
   }
 
-  void _request() {
+  Map<String, List<String>> _scopeForItems(Iterable<JourneyLifecyclePayload> items) {
+    final scope = <String, List<String>>{};
+    for (final item in items) {
+      final key = _itemKey(item);
+      final scopeKey = switch (item.type.toLowerCase()) {
+        'memory' => 'memory_ids',
+        'knowledge' => 'knowledge_ids',
+        'experience' => 'experience_ids',
+        _ => 'journey_event_ids',
+      };
+      (scope[scopeKey] ??= <String>[]).add(key);
+    }
+    return scope;
+  }
+
+  Future<void> _request() async {
     final groups = <_LifecycleRequestGroup>[];
     for (final group in _groups) {
       final target = group.targetAccountId.trim();
       if (target.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Masukkan Target Account ID untuk setiap target.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Masukkan Target Account ID untuk setiap target.')));
         return;
       }
       if (group.selectedKeys.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.')));
         return;
       }
-      final previous = _requestedKeysForTarget(target);
-      if (group.selectedKeys.any(previous.contains)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sebagian data sudah pernah diminta untuk target ini.')),
-        );
+      final selected = _availableItems.where((item) => group.selectedKeys.contains(_itemKey(item))).toList();
+      final scope = _scopeForItems(selected);
+      if (_integrations.findRequest(type: widget.stage.title, targetAccountId: target, scope: scope) != null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request dengan target dan data yang sama sudah pernah dibuat.')));
         return;
       }
       groups.add(group);
     }
-
-    setState(() {
-      _history.insert(
-        0,
-        _LifecycleDecision(
-          status: 'Waiting for Approval',
-          createdAt: DateTime.now(),
-          groups: List.unmodifiable(groups),
-          detail:
-              'Batch request dibuat dari shared Journey data. Authentication ditangani oleh Integrations.',
-        ),
-      );
-    });
+    for (final group in groups) {
+      final selected = _availableItems.where((item) => group.selectedKeys.contains(_itemKey(item))).toList();
+      await _integrations.addRequest(type: widget.stage.title, targetAccountId: group.targetAccountId.trim(), scope: _scopeForItems(selected));
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request sent to Integrations.')));
   }
 
-  void _createClone() {
+  Future<void> _createClone() async {
     final email = _cloneEmailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan target email yang valid.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Masukkan target email yang valid.')));
       return;
     }
-
-    setState(() {
-      _history.insert(
-        0,
-        _LifecycleDecision(
-          status: 'Clone Created',
-          createdAt: DateTime.now(),
-          groups: [
-            _LifecycleRequestGroup(targetAccountId: email),
-          ],
-          detail:
-              'Clone target dikunci berdasarkan email. Authorization ditangani oleh Integrations.',
-        ),
-      );
-      _cloneEmailController.clear();
-    });
+    if (_integrations.findRequest(type: 'Clone', targetAccountId: email, scope: const <String, List<String>>{}) != null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Clone untuk target ini sudah pernah dibuat.')));
+      return;
+    }
+    await _integrations.addRequest(type: 'Clone', targetAccountId: email, scope: const <String, List<String>>{});
+    _cloneEmailController.clear();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Clone request sent to Integrations.')));
   }
 
-
-
-  void _openDecision(_LifecycleDecision decision, int index) {
+  void _openAuthorizationDetail(IntegrationAuthorization item, int index) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Request Detail #' + index.toString(),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                ),
+                Text('Request Detail #' + index.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 16),
-                _LifecycleDataRow(label: 'Status', value: decision.status),
-                _LifecycleDataRow(label: 'Created', value: _formatDate(decision.createdAt)),
-                _LifecycleDataRow(label: 'Targets', value: decision.groups.length.toString()),
-                _LifecycleDataRow(label: 'Data', value: decision.totalDataCount.toString()),
+                _LifecycleDataRow(label: 'Status', value: item.status.name),
+                _LifecycleDataRow(label: 'Created', value: _formatDate(item.createdAt)),
+                _LifecycleDataRow(label: 'Type', value: item.type),
+                _LifecycleDataRow(label: 'Target', value: item.targetAccountId),
+                _LifecycleDataRow(label: 'Data', value: item.scope.values.fold<int>(0, (n, v) => n + v.length).toString()),
                 const SizedBox(height: 10),
-                Text(decision.detail, style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
-                if (decision.groups.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  const Text('Targets', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 8),
-                  for (final group in decision.groups)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _LifecycleSectionCard(
-                        accent: widget.stage.accent,
-                        title: group.targetAccountId,
-                        child: Text(
-                          group.selectedKeys.isEmpty ? 'No per-item selection.' : group.selectedKeys.length.toString() + ' selected data item(s)',
-                          style: const TextStyle(fontSize: 12, color: shMuted),
-                        ),
-                      ),
-                    ),
-                ],
+                const Text('Authorization is managed through Integrations.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
               ],
             ),
           ),
@@ -756,6 +747,8 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   @override
   void dispose() {
+    _snapshots.removeListener(_storesChanged);
+    _integrations.removeListener(_storesChanged);
     _cloneEmailController.dispose();
     super.dispose();
   }
@@ -764,6 +757,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   Widget build(BuildContext context) {
     final stage = widget.stage;
     final availableItems = _availableItems;
+    if (!_storesReady) return const Scaffold(backgroundColor: shBackground, body: Center(child: CircularProgressIndicator(strokeWidth: 2)));
 
     return Scaffold(
       backgroundColor: shBackground,
@@ -829,23 +823,23 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Recovery History',
-                    child: _history.isEmpty
+                    child: _recoveryHistory.isEmpty
                         ? const Text('No recovery history yet.', style: TextStyle(fontSize: 12, color: shMuted))
                         : Column(
                             children: [
-                              for (var i = 0; i < _history.length; i++)
+                              for (var i = 0; i < _islResults.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
                                     radius: 15,
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
-                                  title: Text(_history[i].status, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  title: Text('Snapshot Created', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                                   subtitle: Text(
-                                    'Type: FULL · ' + _recoveryDate(_history[i].createdAt),
+                                    'Type: FULL · ' + _recoveryDate(_recoveryHistory[i].createdAt),
                                     style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openRecoveryDetail(_history[i], i + 1),
+                                  onTap: () => _openAuthorizationDetail(_cloneResults[i], i + 1),
                                 ),
                             ],
                           ),
@@ -917,7 +911,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                     style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),
                                   trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openDecision(_history[i], i + 1),
+                                  onTap: () => _openAuthorizationDetail(_islResults[i], i + 1),
                                 ),
                             ],
                           ),
