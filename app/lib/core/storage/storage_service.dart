@@ -46,10 +46,12 @@ class StorageService {
 
   static Future<void> _migrateLegacyStorage(Directory externalRoot) async {
     if (_legacyMigrationDone) return;
-    _legacyMigrationDone = true;
 
     final legacyRoot = Directory('${externalRoot.path}/second_head');
-    if (!await legacyRoot.exists()) return;
+    if (!await legacyRoot.exists()) {
+      _legacyMigrationDone = true;
+      return;
+    }
 
     final externalCategories = ['images', 'audio', 'video', 'documents', 'exports'];
     for (final category in externalCategories) {
@@ -81,7 +83,10 @@ class StorageService {
         if (await target.exists()) {
           await entity.delete();
         } else {
-          await entity.rename(target.path);
+          // Legacy temp lived on external storage; copy into app-private
+          // storage because this may cross filesystem boundaries.
+          await target.writeAsBytes(await entity.readAsBytes(), flush: true);
+          await entity.delete();
         }
       }
     }
@@ -91,6 +96,7 @@ class StorageService {
     try {
       await legacyRoot.delete();
     } catch (_) {}
+    _legacyMigrationDone = true;
   }
 
   static Future<File> profilePhotoFile() async {
