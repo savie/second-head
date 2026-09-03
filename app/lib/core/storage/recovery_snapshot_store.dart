@@ -96,20 +96,28 @@ class RecoverySnapshotStore extends ChangeNotifier {
   }
 
   Future<RecoverySnapshot> createSnapshot() async {
-    final now = DateTime.now();
+    var createdAt = DateTime.now();
+    var file = await StorageService.recoverySnapshotFileFor(createdAt);
+
+    // The canonical filename has second precision. Never overwrite an
+    // existing physical snapshot when two creates happen in the same second.
+    while (await file.exists()) {
+      createdAt = createdAt.add(const Duration(seconds: 1));
+      file = await StorageService.recoverySnapshotFileFor(createdAt);
+    }
+
     final snapshot = RecoverySnapshot(
-      id: 'SH-${now.year.toString().padLeft(4, '0')}-'
-          '${now.month.toString().padLeft(2, '0')}-'
-          '${now.day.toString().padLeft(2, '0')}-'
-          '${now.microsecondsSinceEpoch.toString().substring(9)}',
-      createdAt: now,
+      id: 'SH-${createdAt.year.toString().padLeft(4, '0')}-'
+          '${createdAt.month.toString().padLeft(2, '0')}-'
+          '${createdAt.day.toString().padLeft(2, '0')}-'
+          '${createdAt.microsecondsSinceEpoch.toString().substring(9)}',
+      createdAt: createdAt,
       type: 'FULL',
       memoryCount: 0,
       knowledgeCount: 0,
       experienceCount: 0,
       fileCount: 0,
     );
-    final file = await StorageService.recoverySnapshotFileFor(now);
     await file.writeAsString(jsonEncode(snapshot.toJson()), flush: true);
     await refreshFromDisk();
     return snapshot;
