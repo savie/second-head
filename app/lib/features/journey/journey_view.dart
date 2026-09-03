@@ -774,6 +774,19 @@ class _JourneyEditorSheetState extends State<JourneyEditorSheet> {
   }
 }
 
+class JourneyLifecyclePayloadBuilder {
+  static JourneyLifecyclePayload fromJourneyItem(JourneyItem item) {
+    return JourneyLifecyclePayload(
+      title: item.title,
+      type: item.type,
+      content: item.content,
+      isPrivate: item.isPrivate,
+      date: item.date,
+      semanticSourceId: item.semanticSourceId,
+    );
+  }
+}
+
 class JourneyDetail extends StatefulWidget {
   const JourneyDetail({
     super.key,
@@ -794,20 +807,14 @@ class _JourneyDetailState extends State<JourneyDetail> {
   JourneyItem get item => widget.item;
 
   void _openLifecycle(BuildContext context) {
+    final payload = JourneyLifecyclePayloadBuilder.fromJourneyItem(item);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => LifecycleDetailView(
           stage: item.isPrivate
               ? LifecycleStage.clone
-              : LifecycleStage.shared,
-          incoming: JourneyLifecyclePayload(
-            title: item.title,
-            type: item.type,
-            content: item.content,
-            isPrivate: item.isPrivate,
-            date: item.date,
-            semanticSourceId: item.semanticSourceId,
-          ),
+              : LifecycleStage.isl,
+          incoming: payload,
         ),
       ),
     );
@@ -902,8 +909,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 14),
+                  ),                  const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
@@ -1005,3 +1011,24 @@ class PolicyOption extends StatelessWidget {
             children: [
               Icon(icon, size: 20, color: Colors.white),
               const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (selected)
+                const Icon(
+                  Icons.check_rounded,
+                  size: 18,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
