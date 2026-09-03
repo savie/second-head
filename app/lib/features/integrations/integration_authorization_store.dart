@@ -62,6 +62,11 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refreshFromDisk() async {
+    _loaded = false;
+    await ensureLoaded();
+  }
+
   IntegrationAuthorization _decode(Map<String, dynamic> raw) {
     final scope = <String, List<String>>{};
     final rawScope = raw['scope'];
