@@ -757,8 +757,6 @@ class JourneyDetail extends StatefulWidget {
 class _JourneyDetailState extends State<JourneyDetail> {
   JourneyItem get item => widget.item;
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -799,19 +797,55 @@ class _JourneyDetailState extends State<JourneyDetail> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                ],
-                  ),                  const SizedBox(height: 14),
-                  SizedBox(
+                  Container(
                     width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () => _openLifecycle(context),
-                      icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                      label: Text(
-                        item.isPrivate
-                            ? 'Continue to Clone / Recovery'
-                            : 'Continue to I / S / L',
-                      ),
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: shSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: shBorder),
                     ),
+                    child: Text(
+                      item.content,
+                      style: const TextStyle(fontSize: 12, height: 1.5),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Policy',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: PolicyOption(
+                          label: 'Private',
+                          icon: Icons.lock_outline,
+                          selected: item.isPrivate,
+                          onTap: () {
+                            if (!item.isPrivate) {
+                              setState(() => item.isPrivate = true);
+                              widget.onChanged();
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: PolicyOption(
+                          label: 'Public',
+                          icon: Icons.public,
+                          selected: !item.isPrivate,
+                          onTap: () {
+                            if (item.isPrivate) {
+                              setState(() => item.isPrivate = false);
+                              widget.onChanged();
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
