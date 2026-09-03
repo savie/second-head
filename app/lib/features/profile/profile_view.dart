@@ -1340,20 +1340,6 @@ class _IntegrationsViewState extends State<IntegrationsView> {
       );
 }
 
-class _AuthRequest {
-  _AuthRequest(
-    this.type,
-    this.from,
-    this.to,
-    this.incoming,
-  );
-
-  final String type;
-  final String from;
-  final String to;
-  final bool incoming;
-}
-
 class _IntegrationHeader extends StatelessWidget {
   const _IntegrationHeader({
     required this.title,
