@@ -347,8 +347,7 @@ class LifecycleCard extends StatelessWidget {
                     stage.subtitle,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(                      fontSize: 11,
-                      color: shMuted,
+                    style: const TextStyle(                      fontSize: 11,                      color: shMuted,
                       height: 1.4,
                     ),
                   ),
@@ -697,8 +696,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.')));
         return;
       }      final selected = _availableItems.where((item) => group.selectedKeys.contains(_itemKey(item))).toList();
-      final scope = _scopeForItems(selected);
-      if (_integrations.findRequest(type: widget.stage.title, targetAccountId: target, scope: scope) != null) {
+      final scope = _scopeForItems(selected);      if (_integrations.findRequest(type: widget.stage.title, targetAccountId: target, scope: scope) != null) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request dengan target dan data yang sama sudah pernah dibuat.')));
         return;
       }
@@ -1047,8 +1045,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                         : Column(
                             children: [
                               for (var i = 0; i < _islResults.length; i++)
-                                ListTile(                                  contentPadding: EdgeInsets.zero,
-                                  leading: CircleAvatar(
+                                ListTile(                                  contentPadding: EdgeInsets.zero,                                  leading: CircleAvatar(
                                     radius: 15,
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
@@ -1084,6 +1081,71 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+class _JourneyCloneSummary extends StatelessWidget {
+  const _JourneyCloneSummary({required this.items});
+
+  final List<JourneyLifecyclePayload> items;
+
+  int _count(String type) =>
+      items.where((item) => item.type.toLowerCase() == type.toLowerCase()).length;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: shBackground.withValues(alpha: .55),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: shBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Journey Clone Summary',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _CloneSummaryValue(label: 'Memory', value: _count('Memory'))),
+              Expanded(child: _CloneSummaryValue(label: 'Knowledge', value: _count('Knowledge'))),
+              Expanded(child: _CloneSummaryValue(label: 'Experience', value: _count('Experience'))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CloneSummaryValue extends StatelessWidget {
+  const _CloneSummaryValue({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value.toString(),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 10, color: shMuted),
+        ),
+      ],
     );
   }
 }
