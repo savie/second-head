@@ -3052,6 +3052,7 @@ class _DataFilesViewState extends State<_DataFilesView> {
     setState(() => _clearing = true);
     try {
       for (final file in await StorageService.listFiles()) { await file.delete(); }
+      await RecoverySnapshotStore.instance.refreshFromDisk();
     } finally {
       if (mounted) { setState(() => _clearing = false); await _refresh(); }
     }
@@ -3189,6 +3190,7 @@ class _DataFilesCategoryViewState extends State<_DataFilesCategoryView> {
 
   Future<void> _delete(File file) async {
     await file.delete();
+    await RecoverySnapshotStore.instance.refreshFromDisk();
     if (!mounted) return;
     setState(() => _files.remove(file));
     await widget.onChanged();
