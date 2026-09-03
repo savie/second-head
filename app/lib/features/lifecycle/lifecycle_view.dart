@@ -443,23 +443,44 @@ class _OrganicCardPainter extends CustomPainter {
 
 
 class LifecycleDetailView extends StatefulWidget {
-  const LifecycleDetailView({super.key, required this.stage, this.incoming});
+  const LifecycleDetailView({
+    super.key,
+    required this.stage,
+    this.incoming,
+    this.incomingItems = const [],
+  });
 
   final LifecycleStage stage;
   final JourneyLifecyclePayload? incoming;
+  final List<JourneyLifecyclePayload> incomingItems;
 
   @override
   State<LifecycleDetailView> createState() => _LifecycleDetailViewState();
 }
 
 class _LifecycleDetailViewState extends State<LifecycleDetailView> {
-  final _targetController = TextEditingController();
+  final List<_LifecycleRequestGroup> _groups = [
+    const _LifecycleRequestGroup(),
+  ];
   final List<_LifecycleDecision> _history = [];
 
   bool get _isIsl =>
       widget.stage.title == 'Inheritance' ||
       widget.stage.title == 'Succession' ||
       widget.stage.title == 'Legacy';
+
+  List<JourneyLifecyclePayload> get _availableItems {
+    final source = widget.incomingItems.isNotEmpty
+        ? widget.incomingItems
+        : (widget.incoming == null ? const [] : [widget.incoming!]);
+    final seen = <String>{};
+    return [
+      for (final item in source)
+        if (!item.isPrivate &&
+            seen.add(item.semanticSourceId ?? '${item.type}|${item.title}'))
+          item,
+    ];
+  }
 
   String get _actionLabel => switch (widget.stage.title) {
         'Inheritance' => 'Request Inheritance',
@@ -469,28 +490,62 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       };
 
   String get _actionDescription => switch (widget.stage.title) {
-        'Inheritance' => 'Request transfer of the selected shared Journey context.',
-        'Succession' => 'Request succession using the selected shared Journey context.',
-        'Legacy' => 'Request legacy handling for the selected shared Journey context.',
+        'Inheritance' => 'Request transfer of selected shared Journey context.',
+        'Succession' => 'Request succession using selected shared Journey context.',
+        'Legacy' => 'Request legacy handling for selected shared Journey context.',
         _ => '',
       };
 
+  void _addGroup() {
+    setState(() => _groups.add(const _LifecycleRequestGroup()));
+  }
+
+  void _toggleItem(int groupIndex, JourneyLifecyclePayload item) {
+    setState(() {
+      final group = _groups[groupIndex];
+      final key = _itemKey(item);
+      final selected = Set<String>.from(group.selectedKeys);
+      if (!selected.add(key)) selected.remove(key);
+      _groups[groupIndex] = group.copyWith(selectedKeys: selected);
+    });
+  }
+
+  String _itemKey(JourneyLifecyclePayload item) =>
+      item.semanticSourceId ?? '${item.type}|${item.title}';
+
+  void _setTarget(int index, String value) {
+    final group = _groups[index];
+    _groups[index] = group.copyWith(targetAccountId: value);
+  }
+
   void _request() {
-    final target = _targetController.text.trim();
-    if (target.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan Target Account ID terlebih dahulu.')),
-      );
-      return;
+    final groups = <_LifecycleRequestGroup>[];
+    for (final group in _groups) {
+      final target = group.targetAccountId.trim();
+      if (target.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Masukkan Target Account ID untuk setiap target.')),
+        );
+        return;
+      }
+      if (group.selectedKeys.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.')),
+        );
+        return;
+      }
+      groups.add(group);
     }
+
     setState(() {
       _history.insert(
         0,
         _LifecycleDecision(
           status: 'Waiting for Approval',
-          targetAccountId: target,
           createdAt: DateTime.now(),
-          detail: 'Request dibuat dari shared Journey data. Authentication ditangani oleh Integrations.',
+          groups: List.unmodifiable(groups),
+          detail:
+              'Batch request dibuat dari shared Journey data. Authentication ditangani oleh Integrations.',
         ),
       );
     });
@@ -504,20 +559,57 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Decision #' + index.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 16),
-              _LifecycleDataRow(label: 'Status', value: decision.status),
-              _LifecycleDataRow(label: 'Target', value: decision.targetAccountId),
-              _LifecycleDataRow(label: 'Requested', value: _formatDate(decision.createdAt)),
-              const SizedBox(height: 12),
-              const Text('Detail', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              Text(decision.detail, style: const TextStyle(fontSize: 13, color: shMuted, height: 1.5)),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Decision #$index',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 16),
+                _LifecycleDataRow(
+                  label: 'Status',
+                  value: decision.status,
+                ),
+                _LifecycleDataRow(
+                  label: 'Targets',
+                  value: decision.groups.length.toString(),
+                ),
+                _LifecycleDataRow(
+                  label: 'Data',
+                  value: decision.totalDataCount.toString(),
+                ),
+                _LifecycleDataRow(
+                  label: 'Requested',
+                  value: _formatDate(decision.createdAt),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Targets & data',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                for (var i = 0; i < decision.groups.length; i++) ...[
+                  _LifecycleRequestSummary(
+                    group: decision.groups[i],
+                    availableItems: _availableItems,
+                  ),
+                  if (i != decision.groups.length - 1) const SizedBox(height: 10),
+                ],
+                const SizedBox(height: 12),
+                const Text(
+                  'Detail',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  decision.detail,
+                  style: const TextStyle(fontSize: 13, color: shMuted, height: 1.5),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -526,20 +618,22 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   String _formatDate(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return value.year.toString() + '-' + two(value.month) + '-' + two(value.day) +
-        ' ' + two(value.hour) + ':' + two(value.minute);
-  }
-
-  @override
-  void dispose() {
-    _targetController.dispose();
-    super.dispose();
+    return value.year.toString() +
+        '-' +
+        two(value.month) +
+        '-' +
+        two(value.day) +
+        ' ' +
+        two(value.hour) +
+        ':' +
+        two(value.minute);
   }
 
   @override
   Widget build(BuildContext context) {
     final stage = widget.stage;
-    final incoming = widget.incoming;
+    final availableItems = _availableItems;
+
     return Scaffold(
       backgroundColor: shBackground,
       body: Column(
@@ -563,91 +657,116 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                     children: [
                       _StageIcon(stage: stage, size: 54),
                       const SizedBox(width: 14),
-                      Expanded(child: Text(stage.subtitle, style: const TextStyle(fontSize: 13, color: shMuted, height: 1.5))),
+                      Expanded(
+                        child: Text(
+                          stage.subtitle,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: shMuted,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                if (incoming != null) ...[
-                  const SizedBox(height: 14),
-                  _LifecycleSectionCard(
-                    accent: stage.accent,
-                    title: 'Incoming from Journey',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _LifecycleDataRow(label: 'Title', value: incoming.title),
-                        _LifecycleDataRow(label: 'Type', value: incoming.type),
-                        _LifecycleDataRow(label: 'Policy', value: incoming.isPrivate ? 'Private' : 'Shared'),
-                        _LifecycleDataRow(label: 'Journey date', value: incoming.date),
-                        if (incoming.semanticSourceId != null)
-                          _LifecycleDataRow(label: 'Source', value: incoming.semanticSourceId!),
-                        const SizedBox(height: 8),
-                        Text(incoming.content, maxLines: 8, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
-                      ],
-                    ),
-                  ),
-                ],
                 if (_isIsl) ...[
                   const SizedBox(height: 14),
                   _LifecycleSectionCard(
                     accent: stage.accent,
-                    title: 'Target',
+                    title: 'Target & Incoming from Journey',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Account ID', style: TextStyle(fontSize: 11, color: shMuted)),
-                        const SizedBox(height: 7),
-                        TextField(
-                          controller: _targetController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter target Account ID',
-                            prefixIcon: const Icon(Icons.person_outline_rounded),
-                            filled: true,
-                            fillColor: shBackground.withValues(alpha: .55),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                        for (var i = 0; i < _groups.length; i++) ...[
+                          _RequestGroupEditor(
+                            group: _groups[i],
+                            groupIndex: i,
+                            availableItems: availableItems,
+                            onTargetChanged: (value) => _setTarget(i, value),
+                            onItemToggle: (item) => _toggleItem(i, item),
+                            showRemove: _groups.length > 1,
+                            onRemove: () => setState(() => _groups.removeAt(i)),
+                          ),
+                          if (i != _groups.length - 1)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              child: Divider(color: shBorder),
+                            ),
+                        ],
+                        const SizedBox(height: 4),
+                        OutlinedButton.icon(
+                          onPressed: _addGroup,
+                          icon: const Icon(Icons.add_rounded, size: 18),
+                          label: const Text('Add Target'),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          _actionDescription,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: shMuted,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _request,
+                            icon: const Icon(Icons.send_rounded),
+                            label: Text(_actionLabel),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text('Target SH is resolved from the Account ID.', style: TextStyle(fontSize: 11, color: shMuted)),
+                        const Text(
+                          'Authentication is handled by Integrations.',
+                          style: TextStyle(fontSize: 10, color: shMuted),
+                        ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  _LifecycleSectionCard(
-                    accent: stage.accent,
-                    title: 'Request',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_actionDescription, style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
-                        const SizedBox(height: 12),
-                        SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _request, icon: const Icon(Icons.send_rounded), label: Text(_actionLabel))),
-                        const SizedBox(height: 8),
-                        const Text('Authentication is handled by Integrations.', style: TextStyle(fontSize: 10, color: shMuted)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _LifecycleSectionCard(
-                    accent: stage.accent,
-                    title: 'Status',
-                    child: Text(_history.isEmpty ? 'Not requested' : _history.first.status, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _history.isEmpty ? shMuted : stage.accent)),
                   ),
                   const SizedBox(height: 14),
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Decision History',
                     child: _history.isEmpty
-                        ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        ? const Text(
+                            'No decisions yet.',
+                            style: TextStyle(fontSize: 12, color: shMuted),
+                          )
                         : Column(
                             children: [
                               for (var i = 0; i < _history.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
-                                  leading: CircleAvatar(radius: 15, child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11))),
-                                  title: Text(_history[i].status, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                                  subtitle: Text('Target ' + _history[i].targetAccountId, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: shMuted)),
-                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text(
+                                      (i + 1).toString(),
+                                      style: const TextStyle(fontSize: 11),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    _history[i].status,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    '${_history[i].groups.length} target · ${_history[i].totalDataCount} data',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: shMuted,
+                                    ),
+                                  ),
+                                  trailing: const Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: 20,
+                                  ),
                                   onTap: () => _openDecision(_history[i], i + 1),
                                 ),
                             ],
@@ -658,7 +777,14 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Lifecycle detail',
-                    child: const Text('This lifecycle detail is intentionally not implemented in this pass.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
+                    child: const Text(
+                      'This lifecycle detail is intentionally not implemented in this pass.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: shMuted,
+                        height: 1.5,
+                      ),
+                    ),
                   ),
                 ],
               ],
@@ -670,19 +796,195 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   }
 }
 
-class _LifecycleDecision {
-  const _LifecycleDecision({required this.status, required this.targetAccountId, required this.createdAt, required this.detail});
-  final String status;
+class _RequestGroupEditor extends StatelessWidget {
+  const _RequestGroupEditor({
+    required this.group,
+    required this.groupIndex,
+    required this.availableItems,
+    required this.onTargetChanged,
+    required this.onItemToggle,
+    required this.showRemove,
+    required this.onRemove,
+  });
+
+  final _LifecycleRequestGroup group;
+  final int groupIndex;
+  final List<JourneyLifecyclePayload> availableItems;
+  final ValueChanged<String> onTargetChanged;
+  final ValueChanged<JourneyLifecyclePayload> onItemToggle;
+  final bool showRemove;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Target ${groupIndex + 1}',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+            ),
+            if (showRemove)
+              IconButton(
+                tooltip: 'Remove target',
+                onPressed: onRemove,
+                icon: const Icon(Icons.close_rounded, size: 18),
+                visualDensity: VisualDensity.compact,
+              ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        const Text('Account ID', style: TextStyle(fontSize: 11, color: shMuted)),
+        const SizedBox(height: 7),
+        TextFormField(
+          initialValue: group.targetAccountId,
+          onChanged: onTargetChanged,
+          decoration: InputDecoration(
+            hintText: 'Enter target Account ID',
+            prefixIcon: const Icon(Icons.person_outline_rounded),
+            filled: true,
+            fillColor: shBackground.withValues(alpha: .55),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'Incoming from Journey',
+          style: TextStyle(fontSize: 11, color: shMuted),
+        ),
+        const SizedBox(height: 7),
+        if (availableItems.isEmpty)
+          const Text(
+            'No shared Journey data available.',
+            style: TextStyle(fontSize: 12, color: shMuted),
+          )
+        else
+          for (final item in availableItems)
+            CheckboxListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              value: group.selectedKeys.contains(
+                item.semanticSourceId ?? '${item.type}|${item.title}',
+              ),
+              onChanged: (_) => onItemToggle(item),
+              title: Text(
+                item.title,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                '${item.type} · Shared',
+                style: const TextStyle(fontSize: 10, color: shMuted),
+              ),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+      ],
+    );
+  }
+}
+
+class _LifecycleRequestGroup {
+  const _LifecycleRequestGroup({
+    this.targetAccountId = '',
+    this.selectedKeys = const <String>{},
+  });
+
   final String targetAccountId;
+  final Set<String> selectedKeys;
+
+  _LifecycleRequestGroup copyWith({
+    String? targetAccountId,
+    Set<String>? selectedKeys,
+  }) {
+    return _LifecycleRequestGroup(
+      targetAccountId: targetAccountId ?? this.targetAccountId,
+      selectedKeys: selectedKeys ?? this.selectedKeys,
+    );
+  }
+}
+
+class _LifecycleDecision {
+  const _LifecycleDecision({
+    required this.status,
+    required this.createdAt,
+    required this.groups,
+    required this.detail,
+  });
+
+  final String status;
   final DateTime createdAt;
+  final List<_LifecycleRequestGroup> groups;
   final String detail;
+
+  int get totalDataCount =>
+      groups.fold(0, (sum, group) => sum + group.selectedKeys.length);
+}
+
+class _LifecycleRequestSummary extends StatelessWidget {
+  const _LifecycleRequestSummary({
+    required this.group,
+    required this.availableItems,
+  });
+
+  final _LifecycleRequestGroup group;
+  final List<JourneyLifecyclePayload> availableItems;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = availableItems.where(
+      (item) => group.selectedKeys.contains(
+        item.semanticSourceId ?? '${item.type}|${item.title}',
+      ),
+    );
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: shBackground.withValues(alpha: .45),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: shBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _LifecycleDataRow(label: 'Target', value: group.targetAccountId),
+          const SizedBox(height: 4),
+          const Text(
+            'Data',
+            style: TextStyle(fontSize: 11, color: shMuted),
+          ),
+          const SizedBox(height: 5),
+          for (final item in selected)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                '• ${item.title}',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class _LifecycleSectionCard extends StatelessWidget {
-  const _LifecycleSectionCard({required this.accent, required this.title, required this.child});
+  const _LifecycleSectionCard({
+    required this.accent,
+    required this.title,
+    required this.child,
+  });
+
   final Color accent;
   final String title;
   final Widget child;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -691,29 +993,57 @@ class _LifecycleSectionCard extends StatelessWidget {
         color: shSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: shBorder),
-        boxShadow: [BoxShadow(color: accent.withValues(alpha: .06), blurRadius: 18, spreadRadius: 1)],
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: .06),
+            blurRadius: 18,
+            spreadRadius: 1,
+          ),
+        ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 12),
-        child,
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
     );
   }
 }
 
 class _LifecycleDataRow extends StatelessWidget {
   const _LifecycleDataRow({required this.label, required this.value});
+
   final String label;
   final String value;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 7),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SizedBox(width: 86, child: Text(label, style: const TextStyle(fontSize: 11, color: shMuted))),
-        Expanded(child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500))),
-      ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 86,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: shMuted),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
