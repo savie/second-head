@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+
+import '../../core/storage/storage_service.dart';
 
 enum IntegrationAuthorizationStatus {
   pending,
@@ -35,6 +39,61 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
   static final instance = IntegrationAuthorizationStore._();
 
   final List<IntegrationAuthorization> _items = [];
+  bool _loaded = false;
+
+  Future<void> ensureLoaded() async {
+    if (_loaded) return;
+    final file = await StorageService.integrationAuthorizationsFile();
+    if (await file.exists()) {
+      try {
+        final decoded = jsonDecode(await file.readAsString());
+        if (decoded is List) {
+          _items
+            ..clear()
+            ..addAll([
+              for (final raw in decoded)
+                if (raw is Map<String, dynamic>)
+                  IntegrationAuthorization(
+                    id: raw['id'] as String,
+                    type: raw['type'] as String,
+                    sourceShId: raw['source_sh_id'] as String? ?? 'Current SH',
+                    targetAccountId: raw['target_account_id'] as String,
+                    scope: {
+                      for (final entry in (raw['scope'] as Map<String, dynamic>? ?? {}).entries)
+                        entry.key: List<String>.from(entry.value as List? ?? const []),
+                    },
+                    createdAt: DateTime.parse(raw['created_at'] as String),
+                    status: IntegrationAuthorizationStatus.values.firstWhere(
+                      (value) => value.name == raw['status'],
+                      orElse: () => IntegrationAuthorizationStatus.pending,
+                    ),
+                    incoming: raw['incoming'] == true,
+                  ),
+            ]);
+      } catch (_) {
+        _items.clear();
+      }
+    }
+    _loaded = true;
+    notifyListeners();
+  }
+
+  Future<void> _persist() async {
+    final file = await StorageService.integrationAuthorizationsFile();
+    await file.writeAsString(jsonEncode([
+      for (final item in _items)
+        {
+          'id': item.id,
+          'type': item.type,
+          'source_sh_id': item.sourceShId,
+          'target_account_id': item.targetAccountId,
+          'scope': item.scope,
+          'created_at': item.createdAt.toIso8601String(),
+          'status': item.status.name,
+          'incoming': item.incoming,
+        },
+    ]), flush: true);
+  }
 
   List<IntegrationAuthorization> get items => List.unmodifiable(_items);
 
@@ -70,6 +129,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
         createdAt: DateTime.now(),
       ),
     );
+    _persist();
     notifyListeners();
     return id;
   }
@@ -78,6 +138,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.approved;
+    _persist();
     notifyListeners();
   }
 
@@ -85,6 +146,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.rejected;
+    _persist();
     notifyListeners();
   }
 
@@ -92,6 +154,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.revoked;
+    _persist();
     notifyListeners();
   }
 
