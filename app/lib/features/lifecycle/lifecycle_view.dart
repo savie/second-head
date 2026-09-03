@@ -683,7 +683,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       groups.add(group);
     }
 
-    final immutableGroups = List.unmodifiable(groups);
+    final immutableGroups = List<_LifecycleRequestGroup>.unmodifiable(groups);
     final integrations = IntegrationAuthorizationStore.instance;
     for (final group in immutableGroups) {
       integrations.addRequest(
