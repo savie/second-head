@@ -2472,72 +2472,6 @@ class _RecoveredSnapshotCard extends StatelessWidget {
       );
 }
 
-class _DataExportDestination extends StatelessWidget {
-  const _DataExportDestination({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-            decoration: BoxDecoration(
-              color: shSurface2.withValues(alpha: .58),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: shBorder),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: shBackground.withValues(alpha: .55),
-                    borderRadius: BorderRadius.circular(13),
-                    border: Border.all(color: shBorder),
-                  ),
-                  child: Icon(icon, size: 20, color: shCyan),
-                ),
-                const SizedBox(width: 11),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(fontSize: 10.5, color: shMuted),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right_rounded, size: 20, color: shMuted),
-              ],
-            ),
-          ),
-        ),
-      );
-}
-
 class _DataExportRow extends StatelessWidget {
   const _DataExportRow({required this.label, required this.value});
 
@@ -2559,29 +2493,6 @@ class _DataExportRow extends StatelessWidget {
                 value,
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
-            ),
-          ],
-        ),
-      );
-}
-
-class _DataExportScopeRow extends StatelessWidget {
-  const _DataExportScopeRow({required this.label, required this.count});
-
-  final String label;
-  final int count;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 7),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(label, style: const TextStyle(fontSize: 11, color: shMuted)),
-            ),
-            Text(
-              count.toString(),
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
             ),
           ],
         ),
