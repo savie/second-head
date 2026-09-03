@@ -5,6 +5,7 @@ import '../journey/journey_data.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../integrations/integration_authorization_store.dart';
 import '../integrations/integrations_view.dart';
+import '../../core/storage/recovery_snapshot_store.dart';
 
 class JourneyLifecyclePayload {
   const JourneyLifecyclePayload({
@@ -502,13 +503,15 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
         two(value.day) + ' ' + two(value.hour) + ':' + two(value.minute);
   }
 
-  void _createRecoverySnapshot() {
+  Future<void> _createRecoverySnapshot() async {
+    final snapshot = await RecoverySnapshotStore.instance.createSnapshot();
+    if (!mounted) return;
     setState(() {
       _history.insert(0, _LifecycleDecision(
         status: 'Snapshot Created',
-        createdAt: DateTime.now(),
+        createdAt: snapshot.createdAt,
         groups: const [],
-        detail: 'FULL SH snapshot prepared. Restore is available from snapshot detail.',
+        detail: 'FULL SH snapshot prepared. Restore is available from snapshot detail. Snapshot ID: ${snapshot.id}.',
       ));
     });
   }
