@@ -745,6 +745,15 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       return;
     }
 
+    // Clone has no user-selectable scope here. The backend-defined clone
+    // dataset stays opaque to the frontend; Integrations receives the target
+    // authorization record without inventing a data scope.
+    IntegrationAuthorizationStore.instance.addRequest(
+      type: 'Clone',
+      targetAccountId: email,
+      scope: const <String, List<String>>{},
+    );
+
     setState(() {
       _history.insert(
         0,
