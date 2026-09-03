@@ -39,7 +39,10 @@ class JourneyViewState extends State<JourneyView> {
         semanticSourceId: record.sourceId + '|' + record.content,
       ));
     }
-    if (additions.isNotEmpty) setState(() => items.insertAll(0, additions));
+    if (additions.isNotEmpty) {
+      setState(() => items.insertAll(0, additions));
+      JourneyStore.persist();
+    }
   }
 
   @override
