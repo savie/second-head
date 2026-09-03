@@ -19,6 +19,11 @@ class JourneyViewState extends State<JourneyView> {
 
   List<JourneyItem> get items => shJourneyItems;
 
+  Future<void> _loadJourney() async {
+    await JourneyStore.refreshFromDisk();
+    if (mounted) setState(() {});
+  }
+
   void _syncSemanticRecords() {
     final existingSources = items.map((item) => item.semanticSourceId).whereType<String>().toSet();
     final additions = <JourneyItem>[];
@@ -41,6 +46,7 @@ class JourneyViewState extends State<JourneyView> {
   void initState() {
     super.initState();
     shSemanticRecords.addListener(_syncSemanticRecords);
+    _loadJourney();
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncSemanticRecords());
   }
 
@@ -186,6 +192,7 @@ class JourneyViewState extends State<JourneyView> {
           onDelete: () {
             if (itemIndex < 0 || itemIndex >= items.length) return;
             setState(() => items.removeAt(itemIndex));
+            JourneyStore.persist();
             Navigator.of(context).pop();
           },
           eligibleSharedItems: [
@@ -257,6 +264,7 @@ class JourneyViewState extends State<JourneyView> {
         ),
       ),
     );
+    await JourneyStore.persist();
   }
 
 
@@ -909,6 +917,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
       item.subtitle = draft.content;
       item.isPrivate = draft.isPrivate;
     });
+    await JourneyStore.persist();
     widget.onChanged();
   }
 
@@ -931,7 +940,10 @@ class _JourneyDetailState extends State<JourneyDetail> {
       ),
     );
 
-    if (confirmed == true && context.mounted) widget.onDelete();
+    if (confirmed == true && context.mounted) {
+      await JourneyStore.persist();
+      widget.onDelete();
+    }
   }
 }
 
