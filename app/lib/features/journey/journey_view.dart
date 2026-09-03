@@ -817,7 +817,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                     children: [
                       Expanded(
                         child: PolicyOption(
-                          label: 'Private',
+                          label: 'Owner Only',
                           icon: Icons.lock_outline,
                           selected: item.isPrivate,
                           onTap: () {
@@ -832,7 +832,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: PolicyOption(
-                          label: 'Public',
+                          label: 'Shared',
                           icon: Icons.public,
                           selected: !item.isPrivate,
                           onTap: () {
