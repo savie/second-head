@@ -281,9 +281,9 @@ class _AuthorizationDetail extends StatelessWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          IntegrationAuthorizationStore.instance.reject(item.id);
-                          Navigator.of(context).pop();
+                        onPressed: () async {
+                          await IntegrationAuthorizationStore.instance.reject(item.id);
+                          if (context.mounted) Navigator.of(context).pop();
                         },
                         icon: const Icon(Icons.close_rounded, size: 18),
                         label: const Text('Reject'),
@@ -292,9 +292,9 @@ class _AuthorizationDetail extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: FilledButton.icon(
-                        onPressed: () {
-                          IntegrationAuthorizationStore.instance.approve(item.id);
-                          Navigator.of(context).pop();
+                        onPressed: () async {
+                          await IntegrationAuthorizationStore.instance.approve(item.id);
+                          if (context.mounted) Navigator.of(context).pop();
                         },
                         icon: const Icon(Icons.check_rounded, size: 18),
                         label: const Text('Accept'),
@@ -308,9 +308,9 @@ class _AuthorizationDetail extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      IntegrationAuthorizationStore.instance.revoke(item.id);
-                      Navigator.of(context).pop();
+                    onPressed: () async {
+                      await IntegrationAuthorizationStore.instance.revoke(item.id);
+                      if (context.mounted) Navigator.of(context).pop();
                     },
                     icon: const Icon(Icons.link_off_rounded, size: 18),
                     label: const Text('Revoke Authorization'),
