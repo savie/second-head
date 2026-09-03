@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/sh_theme.dart';
 import '../journey/journey_data.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
+import '../integrations/integration_authorization_store.dart';
 
 class JourneyLifecyclePayload {
   const JourneyLifecyclePayload({
@@ -595,6 +596,29 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   String _itemKey(JourneyLifecyclePayload item) =>
       item.semanticSourceId ?? '${item.type}|${item.title}';
 
+  Map<String, List<String>> _scopeForGroup(_LifecycleRequestGroup group) {
+    final scope = <String, List<String>>{
+      'memory_ids': <String>[],
+      'knowledge_ids': <String>[],
+      'experience_ids': <String>[],
+      'journey_event_ids': <String>[],
+    };
+
+    for (final item in _availableItems) {
+      if (!group.selectedKeys.contains(_itemKey(item))) continue;
+      final id = item.semanticSourceId ?? _itemKey(item);
+      final key = switch (item.type.toLowerCase()) {
+        'memory' => 'memory_ids',
+        'knowledge' => 'knowledge_ids',
+        'experience' => 'experience_ids',
+        _ => 'journey_event_ids',
+      };
+      scope[key]!.add(id);
+    }
+
+    return scope;
+  }
+
   Set<String> _requestedKeysForTarget(String target) {
     final normalizedTarget = target.trim();
     if (normalizedTarget.isEmpty) return <String>{};
@@ -659,15 +683,25 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       groups.add(group);
     }
 
+    final immutableGroups = List.unmodifiable(groups);
+    final integrations = IntegrationAuthorizationStore.instance;
+    for (final group in immutableGroups) {
+      integrations.addRequest(
+        type: widget.stage.title,
+        targetAccountId: group.targetAccountId.trim(),
+        scope: _scopeForGroup(group),
+      );
+    }
+
     setState(() {
       _history.insert(
         0,
         _LifecycleDecision(
           status: 'Waiting for Approval',
           createdAt: DateTime.now(),
-          groups: List.unmodifiable(groups),
+          groups: immutableGroups,
           detail:
-              'Batch request dibuat dari shared Journey data. Authentication ditangani oleh Integrations.',
+              'Batch request dibuat dari shared Journey data. Authorization ditangani oleh Integrations.',
         ),
       );
     });
