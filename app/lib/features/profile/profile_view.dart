@@ -9,6 +9,7 @@ import '../../core/theme/sh_theme.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/storage/storage_service.dart';
+import '../../core/storage/recovery_snapshot_store.dart';
 import '../integrations/integration_authorization_store.dart';
 
 class ProfileView extends StatefulWidget {
@@ -2249,88 +2250,411 @@ class _ExportDataView extends StatefulWidget {
 }
 
 class _ExportDataViewState extends State<_ExportDataView> {
-  bool _busy = false;
-  String? _result;
+  final _snapshots = RecoverySnapshotStore.instance;
+  bool _loading = true;
 
-  Future<void> _export() async {
-    if (_busy) return;
-    setState(() { _busy = true; _result = null; });
-    try {
-      final root = await StorageService.root();
-      final exportDir = await StorageService.directory('exports');
-      final stamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
-      final dir = Directory('${exportDir.path}/SH_export_$stamp');
-      await dir.create(recursive: true);
-      final files = await StorageService.listFiles(includeExports: false);
-      final manifest = <String, dynamic>{
-        'format': 'second_head_local_export_v1',
-        'created_at': DateTime.now().toIso8601String(),
-        'scope': 'local_files',
-        'source_root': root.path,
-        'files': <Map<String, dynamic>>[],
-      };
-      for (final file in files) {
-        if (file.path.contains('${Platform.pathSeparator}exports${Platform.pathSeparator}')) continue;
-        final category = StorageService.categoryFor(file);
-        final categoryDir = Directory('${dir.path}/$category');
-        await categoryDir.create(recursive: true);
-        final name = file.path.split(Platform.pathSeparator).last;
-        final target = File('${categoryDir.path}/$name');
-        await file.copy(target.path);
-        (manifest['files'] as List<Map<String, dynamic>>).add({
-          'name': name,
-          'category': category,
-          'size': await file.length(),
-        });
-      }
-      await File('${dir.path}/manifest.json').writeAsString(
-        const JsonEncoder.withIndent('  ').convert(manifest),
-        flush: true,
-      );
-      if (!mounted) return;
-      setState(() => _result = 'Export created in SH local storage.');
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _result = 'Export could not be created.');
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+  @override
+  void initState() {
+    super.initState();
+    _snapshots.addListener(_onSnapshotsChanged);
+    _load();
+  }
+
+  Future<void> _load() async {
+    await _snapshots.ensureLoaded();
+    if (mounted) setState(() => _loading = false);
+  }
+
+  void _onSnapshotsChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
-  Widget build(BuildContext context) => _DPSubPage(
-    title: 'Export Data',
-    children: [
-      const _DPSectionLabel('LOCAL EXPORT'),
-      const SizedBox(height: 8),
-      const _DPInfoCard(
-        icon: Icons.file_download_outlined,
-        title: 'Export local SH data',
-        description: 'Creates a self-contained copy of files currently stored by SH on this device. Account, conversation and other server data are not included here.',
+  void dispose() {
+    _snapshots.removeListener(_onSnapshotsChanged);
+    super.dispose();
+  }
+
+  String _date(DateTime value) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${value.year}-${two(value.month)}-${two(value.day)} '
+        '${two(value.hour)}:${two(value.minute)}';
+  }
+
+  String _summary(RecoverySnapshot snapshot) {
+    final parts = <String>[];
+    if (snapshot.memoryCount > 0) parts.add('${snapshot.memoryCount} Memory');
+    if (snapshot.knowledgeCount > 0) parts.add('${snapshot.knowledgeCount} Knowledge');
+    if (snapshot.experienceCount > 0) parts.add('${snapshot.experienceCount} Experience');
+    if (snapshot.fileCount > 0) parts.add('${snapshot.fileCount} Files');
+    return parts.isEmpty ? 'FULL SH snapshot' : parts.join(' · ');
+  }
+
+  void _openSnapshot(RecoverySnapshot snapshot, int index) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: shSurface2,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: shCyan.withValues(alpha: .35),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.inventory_2_outlined,
+                        color: shCyan,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Snapshot #${index + 1}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            snapshot.id,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: shMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                _DataExportRow(label: 'Type', value: snapshot.type),
+                _DataExportRow(label: 'Created', value: _date(snapshot.createdAt)),
+                const SizedBox(height: 12),
+                const Text(
+                  'SNAPSHOT CONTENT',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: shMuted,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: .7,
+                  ),
+                ),
+                const SizedBox(height: 9),
+                _DataExportScopeRow(label: 'Memory', count: snapshot.memoryCount),
+                _DataExportScopeRow(label: 'Knowledge', count: snapshot.knowledgeCount),
+                _DataExportScopeRow(label: 'Experience', count: snapshot.experienceCount),
+                _DataExportScopeRow(label: 'Files', count: snapshot.fileCount),
+                const SizedBox(height: 18),
+                const Text(
+                  'EXPORT / SHARE TO',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: shMuted,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: .7,
+                  ),
+                ),
+                const SizedBox(height: 9),
+                _DataExportDestination(
+                  icon: Icons.phone_android_outlined,
+                  title: 'Device Storage',
+                  subtitle: 'Keep a local copy of this snapshot',
+                  onTap: () => _selectDestination(sheetContext, 'Device Storage'),
+                ),
+                const SizedBox(height: 8),
+                _DataExportDestination(
+                  icon: Icons.share_outlined,
+                  title: 'Share',
+                  subtitle: 'Send this snapshot through the device share flow',
+                  onTap: () => _selectDestination(sheetContext, 'Share'),
+                ),
+                const SizedBox(height: 8),
+                _DataExportDestination(
+                  icon: Icons.cloud_outlined,
+                  title: 'External / Cloud',
+                  subtitle: 'Choose another configured destination',
+                  onTap: () => _selectDestination(sheetContext, 'External / Cloud'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
-      const SizedBox(height: 14),
-      const _DPSectionLabel('INCLUDES'),
-      const SizedBox(height: 8),
-      const _DPOptionCard(
-        icon: Icons.folder_copy_outlined,
-        title: 'Local files',
-        subtitle: 'Images, audio, video and documents stored by SH',
+    );
+  }
+
+  void _selectDestination(BuildContext sheetContext, String destination) {
+    Navigator.of(sheetContext).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$destination selected for snapshot export.'),
+        behavior: SnackBarBehavior.floating,
       ),
-      const SizedBox(height: 10),
-      const _DPOptionCard(
-        icon: Icons.list_alt_outlined,
-        title: 'File manifest',
-        subtitle: 'Names, categories and sizes of exported files',
-      ),
-      const SizedBox(height: 20),
-      _DPActionCard(
-        icon: Icons.file_download_outlined,
-        title: _busy ? 'Creating Export…' : 'Create Export',
-        subtitle: _result ?? 'Save a local export snapshot',
-        onTap: _busy ? () {} : _export,
-      ),
-    ],
-  );
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _DPSubPage(
+      title: 'Export Data',
+      children: [
+        const _DPSectionLabel('RECOVERED SNAPSHOTS'),
+        const SizedBox(height: 8),
+        const _DPInfoCard(
+          icon: Icons.inventory_2_outlined,
+          title: 'Recovered SH snapshots',
+          description:
+              'Snapshots created through Recovery are available here for export or sharing. Recovery itself only creates and restores snapshots.',
+        ),
+        const SizedBox(height: 14),
+        if (_loading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 34),
+            child: Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          )
+        else if (_snapshots.items.isEmpty)
+          const _DPInfoCard(
+            icon: Icons.folder_open_outlined,
+            title: 'No recovered snapshots',
+            description: 'Create a snapshot in Recovery first.',
+          )
+        else
+          for (var i = 0; i < _snapshots.items.length; i++) ...[
+            _RecoveredSnapshotCard(
+              snapshot: _snapshots.items[i],
+              index: i + 1,
+              summary: _summary(_snapshots.items[i]),
+              date: _date(_snapshots.items[i].createdAt),
+              onTap: () => _openSnapshot(_snapshots.items[i], i),
+            ),
+            if (i != _snapshots.items.length - 1) const SizedBox(height: 10),
+          ],
+      ],
+    );
+  }
+}
+
+class _RecoveredSnapshotCard extends StatelessWidget {
+  const _RecoveredSnapshotCard({
+    required this.snapshot,
+    required this.index,
+    required this.summary,
+    required this.date,
+    required this.onTap,
+  });
+
+  final RecoverySnapshot snapshot;
+  final int index;
+  final String summary;
+  final String date;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(15, 14, 12, 14),
+            decoration: BoxDecoration(
+              color: shSurface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: shBorder),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: shSurface2,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: shCyan.withValues(alpha: .22)),
+                  ),
+                  child: const Icon(
+                    Icons.inventory_2_outlined,
+                    size: 21,
+                    color: shCyan,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '#$index  ${snapshot.type} Snapshot',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        snapshot.id,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 10, color: shMuted),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        summary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 10.5, color: shMuted),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        date,
+                        style: const TextStyle(fontSize: 9.5, color: shMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, size: 22, color: shMuted),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class _DataExportDestination extends StatelessWidget {
+  const _DataExportDestination({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+            decoration: BoxDecoration(
+              color: shSurface2.withValues(alpha: .58),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: shBorder),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: shBackground.withValues(alpha: .55),
+                    borderRadius: BorderRadius.circular(13),
+                    border: Border.all(color: shBorder),
+                  ),
+                  child: Icon(icon, size: 20, color: shCyan),
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(fontSize: 10.5, color: shMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, size: 20, color: shMuted),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class _DataExportRow extends StatelessWidget {
+  const _DataExportRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 7),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 72,
+              child: Text(label, style: const TextStyle(fontSize: 11, color: shMuted)),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class _DataExportScopeRow extends StatelessWidget {
+  const _DataExportScopeRow({required this.label, required this.count});
+
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 7),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(label, style: const TextStyle(fontSize: 11, color: shMuted)),
+            ),
+            Text(
+              count.toString(),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      );
 }
 
 class _DeleteDataView extends StatefulWidget {
