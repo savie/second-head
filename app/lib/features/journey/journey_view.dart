@@ -4,6 +4,7 @@ import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
 import 'semantic_domain_view.dart';
 import 'semantic_hook.dart';
+import '../lifecycle/lifecycle_view.dart';
 
 class JourneyView extends StatefulWidget {
   const JourneyView({super.key});
@@ -792,6 +793,19 @@ class JourneyDetail extends StatefulWidget {
 class _JourneyDetailState extends State<JourneyDetail> {
   JourneyItem get item => widget.item;
 
+  void _openLifecycle(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => LifecycleDetailView(
+          stage: item.isPrivate
+              ? LifecycleStage.clone
+              : LifecycleStage.shared,
+          incoming: JourneyLifecyclePayload.fromJourneyItem(item),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -881,6 +895,19 @@ class _JourneyDetailState extends State<JourneyDetail> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () => _openLifecycle(context),
+                      icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                      label: Text(
+                        item.isPrivate
+                            ? 'Continue to Clone / Recovery'
+                            : 'Continue to I / S / L',
+                      ),
+                    ),
                   ),
                 ],
               ),
