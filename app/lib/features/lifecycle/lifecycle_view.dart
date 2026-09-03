@@ -484,6 +484,16 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   final List<_LifecycleDecision> _history = [];
   final TextEditingController _cloneEmailController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    IntegrationAuthorizationStore.instance.addListener(_onAuthorizationChanged);
+  }
+
+  void _onAuthorizationChanged() {
+    if (mounted) setState(() {});
+  }
+
   bool get _isRecovery => widget.stage.title == 'Recovery';
 
   String _recoveryDate(DateTime value) {
@@ -620,6 +630,28 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     return scope;
   }
 
+  List<IntegrationAuthorization> get _islAuthorizations =>
+      IntegrationAuthorizationStore.instance.items.where(
+        (item) =>
+            item.type == widget.stage.title &&
+            (item.type == 'Inheritance' ||
+                item.type == 'Succession' ||
+                item.type == 'Legacy'),
+      ).toList();
+
+  String _authorizationStatus(IntegrationAuthorization item) {
+    switch (item.status) {
+      case IntegrationAuthorizationStatus.pending:
+        return 'Waiting for Approval';
+      case IntegrationAuthorizationStatus.approved:
+        return 'Approved';
+      case IntegrationAuthorizationStatus.rejected:
+        return 'Rejected';
+      case IntegrationAuthorizationStatus.revoked:
+        return 'Revoked';
+    }
+  }
+
   Set<String> _requestedKeysForTarget(String target) {
     final normalizedTarget = target.trim();
     if (normalizedTarget.isEmpty) return <String>{};
@@ -694,18 +726,14 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       );
     }
 
-    setState(() {
-      _history.insert(
-        0,
-        _LifecycleDecision(
-          status: 'Waiting for Approval',
-          createdAt: DateTime.now(),
-          groups: immutableGroups,
-          detail:
-              'Batch request dibuat dari shared Journey data. Authorization ditangani oleh Integrations.',
-        ),
-      );
-    });
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    IntegrationAuthorizationStore.instance.removeListener(_onAuthorizationChanged);
+    _cloneEmailController.dispose();
+    super.dispose();
   }
 
   void _createClone() {
@@ -732,6 +760,60 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       );
       _cloneEmailController.clear();
     });
+  }
+
+  void _openAuthorizationDetail(
+    IntegrationAuthorization item,
+    int index,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.type + ' #' + index.toString(),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 16),
+                _LifecycleDataRow(
+                  label: 'Status',
+                  value: _authorizationStatus(item),
+                ),
+                _LifecycleDataRow(label: 'Target', value: item.targetAccountId),
+                _LifecycleDataRow(label: 'Source', value: item.sourceShId),
+                _LifecycleDataRow(
+                  label: 'Created',
+                  value: _formatDate(item.createdAt),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Selected Journey Data',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 7),
+                for (final entry in item.scope.entries)
+                  if (entry.value.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 7),
+                      child: _LifecycleDataRow(
+                        label: entry.key.replaceAll('_ids', ''),
+                        value: entry.value.join(', '),
+                      ),
+                    ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _openDecision(_LifecycleDecision decision, int index) {
@@ -780,12 +862,6 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     String two(int n) => n.toString().padLeft(2, '0');
     return '${value.year}-${two(value.month)}-${two(value.day)} '
         '${two(value.hour)}:${two(value.minute)}';
-  }
-
-  @override
-  void dispose() {
-    _cloneEmailController.dispose();
-    super.dispose();
   }
 
   @override
@@ -1032,29 +1108,46 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                   _LifecycleSectionCard(
                     accent: stage.accent,
                     title: 'Decision History',
-                    child: _history.isEmpty
-                        ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                    child: _islAuthorizations.isEmpty
+                        ? const Text(
+                            'No decisions yet.',
+                            style: TextStyle(fontSize: 12, color: shMuted),
+                          )
                         : Column(
                             children: [
-                              for (var i = 0; i < _history.length; i++)
+                              for (var i = 0; i < _islAuthorizations.length; i++)
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
                                     radius: 15,
-                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                    child: Text((i + 1).toString()),
                                   ),
                                   title: Text(
-                                    _history[i].status,
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                    _authorizationStatus(_islAuthorizations[i]),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   subtitle: Text(
-                                    '${_history[i].groups.length} target · ${_history[i].totalDataCount} data',
+                                    _islAuthorizations[i].targetAccountId +
+                                        ' · ' +
+                                        _islAuthorizations[i].scope.values
+                                            .fold<int>(
+                                              0,
+                                              (sum, values) => sum + values.length,
+                                            )
+                                            .toString() +
+                                        ' data',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),
                                   trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                                  onTap: () => _openDecision(_history[i], i + 1),
+                                  onTap: () => _openAuthorizationDetail(
+                                    _islAuthorizations[i],
+                                    i + 1,
+                                  ),
                                 ),
                             ],
                           ),
