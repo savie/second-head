@@ -731,7 +731,7 @@ class _JourneyEditorSheetState extends State<JourneyEditorSheet> {
               children: [
                 Expanded(
                   child: PolicyOption(
-                    label: 'Private',
+                    label: 'Owner Only',
                     icon: Icons.lock_outline,
                     selected: _privatePolicy,
                     onTap: () => setState(() => _privatePolicy = true),
@@ -740,7 +740,7 @@ class _JourneyEditorSheetState extends State<JourneyEditorSheet> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: PolicyOption(
-                    label: 'Public',
+                    label: 'Shared',
                     icon: Icons.public,
                     selected: !_privatePolicy,
                     onTap: () => setState(() => _privatePolicy = false),
