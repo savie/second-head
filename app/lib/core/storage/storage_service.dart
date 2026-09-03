@@ -8,14 +8,19 @@ import 'package:path_provider/path_provider.dart';
 class StorageService {
   static const profilePhotoName = 'profile_photo.jpg';
 
+  static bool _legacyMigrationDone = false;
+
   static Future<Directory> root() async {
     final external = await getExternalStorageDirectory();
-    final base = external ?? await getApplicationSupportDirectory();
-    final dir = Directory('${base.path}/second_head');
+    if (external == null) {
+      throw StateError('SECOND HEAD external storage directory is unavailable.');
+    }
+    final dir = Directory(external.path);
     await dir.create(recursive: true);
-    for (final name in ['images', 'audio', 'video', 'documents', 'exports', 'temp']) {
+    for (final name in ['images', 'audio', 'video', 'documents', 'exports']) {
       await Directory('${dir.path}/$name').create(recursive: true);
     }
+    await _migrateLegacyStorage(dir);
     return dir;
   }
 
@@ -24,6 +29,66 @@ class StorageService {
     final dir = Directory('${rootDir.path}/$category');
     await dir.create(recursive: true);
     return dir;
+  }
+
+  static Future<Directory> internalRoot() async {
+    final dir = Directory('/data/data/com.secondhead.app/files');
+    await dir.create(recursive: true);
+    return dir;
+  }
+
+  static Future<Directory> internalDirectory(String category) async {
+    final rootDir = await internalRoot();
+    final dir = Directory('${rootDir.path}/$category');
+    await dir.create(recursive: true);
+    return dir;
+  }
+
+  static Future<void> _migrateLegacyStorage(Directory externalRoot) async {
+    if (_legacyMigrationDone) return;
+    _legacyMigrationDone = true;
+
+    final legacyRoot = Directory('${externalRoot.path}/second_head');
+    if (!await legacyRoot.exists()) return;
+
+    final externalCategories = ['images', 'audio', 'video', 'documents', 'exports'];
+    for (final category in externalCategories) {
+      final sourceDir = Directory('${legacyRoot.path}/$category');
+      if (!await sourceDir.exists()) continue;
+      final targetDir = Directory('${externalRoot.path}/$category');
+      await targetDir.create(recursive: true);
+      await for (final entity in sourceDir.list(recursive: true, followLinks: false)) {
+        if (entity is! File) continue;
+        final relative = entity.path.substring(sourceDir.path.length + 1);
+        final target = File('${targetDir.path}/$relative');
+        await target.parent.create(recursive: true);
+        if (await target.exists()) {
+          await entity.delete();
+        } else {
+          await entity.rename(target.path);
+        }
+      }
+    }
+
+    final legacyTemp = Directory('${legacyRoot.path}/temp');
+    if (await legacyTemp.exists()) {
+      final targetTemp = await internalDirectory('temp');
+      await for (final entity in legacyTemp.list(recursive: true, followLinks: false)) {
+        if (entity is! File) continue;
+        final relative = entity.path.substring(legacyTemp.path.length + 1);
+        final target = File('${targetTemp.path}/$relative');
+        await target.parent.create(recursive: true);
+        if (await target.exists()) {
+          await entity.delete();
+        } else {
+          await entity.rename(target.path);
+        }
+      }
+    }
+
+    try {
+      await legacyRoot.delete(recursive: true);
+    } catch (_) {}
   }
 
   static Future<File> profilePhotoFile() async {
@@ -120,7 +185,7 @@ class StorageService {
   }
 
   static Future<File> conversationStateFile() async {
-    final dir = await directory('temp');
+    final dir = await internalDirectory('temp');
     return File('${dir.path}/conversation_state.json');
   }
 
@@ -181,13 +246,55 @@ class StorageService {
   }
 
   static Future<File> journeyItemsFile() async {
-    final dir = await directory('temp');
+    final dir = await internalDirectory('temp');
     return File('${dir.path}/journey_items.json');
   }
 
   static Future<File> integrationAuthorizationsFile() async {
-    final dir = await directory('temp');
+    final dir = await internalDirectory('temp');
     return File('${dir.path}/integration_authorizations.json');
+  }
+
+  static Future<List<Map<String, dynamic>>> listPersistentFilesForRecovery() async {
+    final result = <Map<String, dynamic>>[];
+
+    Future<void> collect(Directory base, String prefix, {String? excludedPath}) async {
+      if (!await base.exists()) return;
+      await for (final entity in base.list(recursive: true, followLinks: false)) {
+        if (entity is! File) continue;
+        if (excludedPath != null &&
+            entity.path.contains(
+              '${Platform.pathSeparator}$excludedPath${Platform.pathSeparator}',
+            )) {
+          continue;
+        }
+        final relative = entity.path.substring(base.path.length + 1);
+        result.add({
+          'path': '$prefix/$relative',
+          'bytes_base64': base64Encode(await entity.readAsBytes()),
+        });
+      }
+    }
+
+    await collect(await internalRoot(), 'internal');
+    await collect(await root(), 'external', excludedPath: 'exports');
+    return result;
+  }
+
+  static Future<void> clearApplicationData() async {
+    final dir = await internalRoot();
+    if (await dir.exists()) {
+      await for (final entity in dir.list(followLinks: false)) {
+        await entity.delete(recursive: true);
+      }
+    }
+    final cache = await getTemporaryDirectory();
+    if (await cache.exists()) {
+      await for (final entity in cache.list(followLinks: false)) {
+        await entity.delete(recursive: true);
+      }
+    }
+    await internalDirectory('temp');
   }
 
   static Future<int> totalBytes() async {
