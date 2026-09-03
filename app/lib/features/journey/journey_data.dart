@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import '../../core/storage/storage_service.dart';
+
 class JourneyItem {
   JourneyItem(
     this.title,
@@ -16,66 +20,67 @@ class JourneyItem {
   String content;
   bool isPrivate;
   final String? semanticSourceId;
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'subtitle': subtitle,
+        'date': date,
+        'type': type,
+        'content': content,
+        'is_private': isPrivate,
+        'semantic_source_id': semanticSourceId,
+      };
+
+  factory JourneyItem.fromJson(Map<String, dynamic> json) => JourneyItem(
+        (json['title'] as String?) ?? '',
+        (json['subtitle'] as String?) ?? '',
+        (json['date'] as String?) ?? '',
+        (json['type'] as String?) ?? 'Memory',
+        (json['content'] as String?) ?? '',
+        json['is_private'] != false,
+        semanticSourceId: json['semantic_source_id'] as String?,
+      );
 }
 
-final List<JourneyItem> shJourneyItems = [
-    JourneyItem(
-      'Project SH Roadmap',
-      'Documented roadmap and key milestones',
-      '2 days ago',
-      'Knowledge',
-      'The documented roadmap and key milestones for Second Head.',
-      true,
-    ),
-    JourneyItem(
-      'Client Meeting Notes',
-      'Important notes from the meeting about feature priorities.',
-      'Yesterday',
-      'Experience',
-      'Important notes captured from the client meeting and its feature priorities.',
-      false,
-    ),
-    JourneyItem(
-      'Ideas – AI Personalization',
-      'Ideas about personalization based on user behavior.',
-      'May 29',
-      'Memory',
-      'Ideas and retained context about personalization based on user behavior.',
-      true,
-    ),
-    JourneyItem(
-      'Reference – Runtime Contract',
-      'Notes about runtime contract and future calling.',
-      'May 25',
-      'Knowledge',
-      'Reference material describing the runtime contract and future calling.',
-      false,
-    ),
-    JourneyItem(
-      'Shared Memory — User Preference Context',
-      'Shared memory eligible for I / S / L.',
-      'Today',
-      'Memory',
-      'Example shared memory context that has passed Journey policy and can enter the Lifecycle I / S / L path.',
-      false,
-      semanticSourceId: 'demo:journey:shared-memory',
-    ),
-    JourneyItem(
-      'Shared Knowledge — SH Runtime Context',
-      'Shared knowledge eligible for I / S / L.',
-      'Today',
-      'Knowledge',
-      'Example shared knowledge context that has passed Journey policy and can enter the Lifecycle I / S / L path.',
-      false,
-      semanticSourceId: 'demo:journey:shared-knowledge',
-    ),
-    JourneyItem(
-      'Shared Experience — Approval Context',
-      'Shared experience eligible for I / S / L.',
-      'Today',
-      'Experience',
-      'Example shared experience context that has passed Journey policy and can enter the Lifecycle I / S / L path.',
-      false,
-      semanticSourceId: 'demo:journey:shared-experience',
-    ),
-];
+List<JourneyItem> shJourneyItems = [];
+
+class JourneyStore {
+  static bool _loaded = false;
+
+  static Future<void> ensureLoaded() async {
+    if (_loaded) return;
+    await refreshFromDisk();
+  }
+
+  static Future<void> refreshFromDisk() async {
+    final file = await StorageService.journeyItemsFile();
+    if (!await file.exists()) {
+      shJourneyItems = [];
+      _loaded = true;
+      return;
+    }
+    try {
+      final decoded = jsonDecode(await file.readAsString());
+      if (decoded is List) {
+        shJourneyItems = [
+          for (final raw in decoded)
+            if (raw is Map<String, dynamic>) JourneyItem.fromJson(raw),
+        ];
+      } else {
+        shJourneyItems = [];
+      }
+    } catch (_) {
+      shJourneyItems = [];
+    }
+    _loaded = true;
+  }
+
+  static Future<void> persist() async {
+    final file = await StorageService.journeyItemsFile();
+    await file.writeAsString(
+      jsonEncode([for (final item in shJourneyItems) item.toJson()]),
+      flush: true,
+    );
+    _loaded = true;
+  }
+}
