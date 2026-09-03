@@ -192,28 +192,28 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
     return true;
   }
 
-  void approve(String id) {
+  Future<void> approve(String id) async {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.approved;
+    await _persist();
     notifyListeners();
-    _persist();
   }
 
-  void reject(String id) {
+  Future<void> reject(String id) async {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.rejected;
+    await _persist();
     notifyListeners();
-    _persist();
   }
 
-  void revoke(String id) {
+  Future<void> revoke(String id) async {
     final item = _find(id);
     if (item == null) return;
     item.status = IntegrationAuthorizationStatus.revoked;
+    await _persist();
     notifyListeners();
-    _persist();
   }
 
   IntegrationAuthorization? _find(String id) {
