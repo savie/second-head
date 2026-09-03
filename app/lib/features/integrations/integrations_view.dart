@@ -18,6 +18,7 @@ class _IntegrationsViewState extends State<IntegrationsView> {
   void initState() {
     super.initState();
     store.addListener(_refresh);
+    store.refreshFromDisk();
   }
 
   @override
