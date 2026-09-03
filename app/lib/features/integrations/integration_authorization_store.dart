@@ -23,7 +23,7 @@ class IntegrationAuthorization {
   final String type;
   final String sourceShId;
   final String targetAccountId;
-  final List<String> scope;
+  final Map<String, List<String>> scope;
   final DateTime createdAt;
   final bool incoming;
   IntegrationAuthorizationStatus status;
@@ -51,7 +51,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
   String addRequest({
     required String type,
     required String targetAccountId,
-    required List<String> scope,
+    required Map<String, List<String>> scope,
   }) {
     final id = 'frontend-auth-${DateTime.now().microsecondsSinceEpoch}';
     _items.insert(
@@ -61,7 +61,10 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
         type: type,
         sourceShId: 'Current SH',
         targetAccountId: targetAccountId,
-        scope: List.unmodifiable(scope),
+        scope: {
+          for (final entry in scope.entries)
+            entry.key: List.unmodifiable(entry.value),
+        },
         createdAt: DateTime.now(),
       ),
     );
