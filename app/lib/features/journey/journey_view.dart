@@ -5,7 +5,6 @@ import '../../core/theme/sh_theme.dart';
 import 'semantic_domain_view.dart';
 import 'semantic_hook.dart';
 import 'journey_data.dart';
-import '../lifecycle/lifecycle_view.dart';
 
 class JourneyView extends StatefulWidget {
   const JourneyView({super.key});
@@ -739,32 +738,17 @@ class _JourneyEditorSheetState extends State<JourneyEditorSheet> {
   }
 }
 
-class JourneyLifecyclePayloadBuilder {
-  static JourneyLifecyclePayload fromJourneyItem(JourneyItem item) {
-    return JourneyLifecyclePayload(
-      title: item.title,
-      type: item.type,
-      content: item.content,
-      isPrivate: item.isPrivate,
-      date: item.date,
-      semanticSourceId: item.semanticSourceId,
-    );
-  }
-}
-
 class JourneyDetail extends StatefulWidget {
   const JourneyDetail({
     super.key,
     required this.item,
     required this.onChanged,
     required this.onDelete,
-    this.eligibleSharedItems = const [],
   });
 
   final JourneyItem item;
   final VoidCallback onChanged;
   final VoidCallback onDelete;
-  final List<JourneyItem> eligibleSharedItems;
 
   @override
   State<JourneyDetail> createState() => _JourneyDetailState();
@@ -773,24 +757,7 @@ class JourneyDetail extends StatefulWidget {
 class _JourneyDetailState extends State<JourneyDetail> {
   JourneyItem get item => widget.item;
 
-  void _openLifecycle(BuildContext context) {
-    final payload = JourneyLifecyclePayloadBuilder.fromJourneyItem(item);
-    final sharedPayloads = [
-      for (final candidate in widget.eligibleSharedItems)
-        JourneyLifecyclePayloadBuilder.fromJourneyItem(candidate),
-    ];
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => LifecycleDetailView(
-          stage: item.isPrivate
-              ? LifecycleStage.clone
-              : LifecycleStage.isl,
-          incoming: payload,
-          incomingItems: sharedPayloads,
-        ),
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -832,55 +799,7 @@ class _JourneyDetailState extends State<JourneyDetail> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: shSurface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: shBorder),
-                    ),
-                    child: Text(
-                      item.content,
-                      style: const TextStyle(fontSize: 12, height: 1.5),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Policy',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PolicyOption(
-                          label: 'Private',
-                          icon: Icons.lock_outline,
-                          selected: item.isPrivate,
-                          onTap: () {
-                            if (!item.isPrivate) {
-                              setState(() => item.isPrivate = true);
-                              widget.onChanged();
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: PolicyOption(
-                          label: 'Public',
-                          icon: Icons.public,
-                          selected: !item.isPrivate,
-                          onTap: () {
-                            if (item.isPrivate) {
-                              setState(() => item.isPrivate = false);
-                              widget.onChanged();
-                            }
-                          },
-                        ),
-                      ),
-                    ],
+                ],
                   ),                  const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
