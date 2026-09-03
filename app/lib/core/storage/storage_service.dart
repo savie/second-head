@@ -180,6 +180,11 @@ class StorageService {
     return File('${dir.path}/$filename');
   }
 
+  static Future<File> journeyItemsFile() async {
+    final dir = await directory('temp');
+    return File('${dir.path}/journey_items.json');
+  }
+
   static Future<File> integrationAuthorizationsFile() async {
     final dir = await directory('temp');
     return File('${dir.path}/integration_authorizations.json');
