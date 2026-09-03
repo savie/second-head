@@ -94,7 +94,6 @@ class RecoverySnapshot {
     }
     await refreshFromDisk();
   }
-
 }
 
 class RecoverySnapshotStore extends ChangeNotifier {
