@@ -128,11 +128,13 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
         ),
       );
 
-  String addRequest({
+  Future<String> addRequest({
     required String type,
     required String targetAccountId,
     required Map<String, List<String>> scope,
-  }) {
+  }) async {
+    final existing = findRequest(type: type, targetAccountId: targetAccountId, scope: scope);
+    if (existing != null) return existing.id;
     final id = 'frontend-auth-' + DateTime.now().microsecondsSinceEpoch.toString();
 
     _items.insert(
@@ -150,9 +152,39 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
       ),
     );
 
+    await _persist();
     notifyListeners();
-    _persist();
     return id;
+  }
+
+  IntegrationAuthorization? findRequest({
+    required String type,
+    required String targetAccountId,
+    required Map<String, List<String>> scope,
+  }) {
+    final normalizedType = type.trim().toLowerCase();
+    final normalizedTarget = targetAccountId.trim().toLowerCase();
+    for (final item in _items) {
+      if (item.type.trim().toLowerCase() != normalizedType) continue;
+      if (item.targetAccountId.trim().toLowerCase() != normalizedTarget) continue;
+      if (_scopeEquals(item.scope, scope)) return item;
+    }
+    return null;
+  }
+
+  bool _scopeEquals(Map<String, List<String>> a, Map<String, List<String>> b) {
+    final keys = <String>{...a.keys, ...b.keys};
+    for (final key in keys) {
+      final left = <String>[...(a[key] ?? const <String>[])];
+      final right = <String>[...(b[key] ?? const <String>[])];
+      left.sort();
+      right.sort();
+      if (left.length != right.length) return false;
+      for (var i = 0; i < left.length; i++) {
+        if (left[i] != right[i]) return false;
+      }
+    }
+    return true;
   }
 
   void approve(String id) {
