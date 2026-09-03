@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
@@ -46,6 +47,54 @@ class RecoverySnapshot {
         fileCount: (json['file_count'] as num?)?.toInt() ?? 0,
         isDemo: json['is_demo'] == true,
       );
+  Future<void> restoreSnapshot(RecoverySnapshot snapshot) async {
+    final files = await StorageService.listRecoverySnapshotFiles();
+    File? snapshotFile;
+    for (final candidate in files) {
+      try {
+        final decoded = jsonDecode(await candidate.readAsString());
+        if (decoded is Map<String, dynamic> && decoded['id'] == snapshot.id) {
+          snapshotFile = candidate;
+          break;
+        }
+      } catch (_) {}
+    }
+    if (snapshotFile == null) {
+      throw StateError('Recovery snapshot file not found: ${snapshot.id}');
+    }
+    final decoded = jsonDecode(await snapshotFile.readAsString());
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Invalid recovery snapshot payload.');
+    }
+    final entries = decoded['persistent_files'];
+    if (entries is! List) {
+      throw const FormatException('Recovery snapshot has no full state payload.');
+    }
+
+    final root = await StorageService.root();
+    final snapshotPaths = <String>{};
+    for (final raw in entries) {
+      if (raw is! Map<String, dynamic>) continue;
+      final relativePath = raw['path'];
+      final encoded = raw['bytes_base64'];
+      if (relativePath is! String || encoded is! String) continue;
+      snapshotPaths.add(relativePath);
+      final target = File('${root.path}/$relativePath');
+      await target.parent.create(recursive: true);
+      await target.writeAsBytes(base64Decode(encoded), flush: true);
+    }
+
+    await for (final entity in root.list(recursive: true, followLinks: false)) {
+      if (entity is! File) continue;
+      if (entity.path.contains(
+        '${Platform.pathSeparator}exports${Platform.pathSeparator}',
+      )) continue;
+      final relativePath = entity.path.substring(root.path.length + 1);
+      if (!snapshotPaths.contains(relativePath)) await entity.delete();
+    }
+    await refreshFromDisk();
+  }
+
 }
 
 class RecoverySnapshotStore extends ChangeNotifier {
@@ -118,7 +167,30 @@ class RecoverySnapshotStore extends ChangeNotifier {
       experienceCount: 0,
       fileCount: 0,
     );
-    await file.writeAsString(jsonEncode(snapshot.toJson()), flush: true);
+    final root = await StorageService.root();
+    final persistentFiles = <Map<String, dynamic>>[];
+    await for (final entity in root.list(recursive: true, followLinks: false)) {
+      if (entity is! File) continue;
+      if (entity.path.contains(
+        '${Platform.pathSeparator}exports${Platform.pathSeparator}',
+      )) continue;
+      persistentFiles.add({
+        'path': entity.path.substring(root.path.length + 1),
+        'bytes_base64': base64Encode(await entity.readAsBytes()),
+      });
+    }
+    await file.writeAsString(
+      jsonEncode({
+        ...snapshot.toJson(),
+        'state_version': 1,
+        'persistent_files': persistentFiles,
+      }),
+      flush: true,
+    );
+    final recoveryFiles = await StorageService.listRecoverySnapshotFiles();
+    for (final oldFile in recoveryFiles.skip(3)) {
+      await oldFile.delete();
+    }
     await refreshFromDisk();
     return snapshot;
   }
