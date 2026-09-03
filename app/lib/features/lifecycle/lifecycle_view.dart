@@ -496,7 +496,12 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   }
 
   Future<void> _loadStores() async {
-    await Future.wait([_snapshots.ensureLoaded(), _integrations.ensureLoaded()]);
+    // Lifecycle detail is re-created on tab/re-entry. Recovery state must be
+    // re-derived from the physical snapshot files, not from the old instance cache.
+    await Future.wait([
+      _snapshots.refreshFromDisk(),
+      _integrations.refreshFromDisk(),
+    ]);
     if (mounted) setState(() => _storesReady = true);
   }
 
