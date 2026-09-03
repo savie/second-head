@@ -2539,8 +2539,8 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete local files?'),
-        content: const Text('This permanently removes files stored locally by SH on this device. Your account is not deleted.'),
+        title: const Text('Clear app data?'),
+        content: const Text('This clears SH app data and cache on this device. Files in SH local storage remain untouched. Your account is not deleted.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
@@ -2556,7 +2556,7 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
       await RecoverySnapshotStore.instance.refreshFromDisk();
       if (!mounted) return;
       setState(() => _localFiles = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Local SH files deleted.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('SH app data and cache cleared.')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -2566,12 +2566,12 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
   Widget build(BuildContext context) => _DPSubPage(
     title: 'Delete Data',
     children: [
-      const _DPSectionLabel('REMOVE DATA'),
+      const _DPSectionLabel('CLEAR APP DATA'),
       const SizedBox(height: 8),
       const _DPInfoCard(
         icon: Icons.delete_outline_rounded,
-        title: 'Delete local SH data',
-        description: 'This removes local files from this device only. It does not delete the SH account or server-side data.',
+        title: 'Clear SH app data',
+        description: 'This clears SH app data and cache on this device. It does not delete SH local storage files, the SH account, or server-side data.',
         destructive: true,
       ),
       const SizedBox(height: 14),
@@ -2579,8 +2579,8 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
       const SizedBox(height: 8),
       _DPSelectableCard(
         icon: Icons.folder_copy_outlined,
-        title: 'Local files',
-        subtitle: 'Attachment and generated files stored on this device',
+        title: 'App data',
+        subtitle: 'Cache and app-owned internal data stored inside the app sandbox',
         selected: _localFiles,
         onTap: _busy ? null : () => setState(() => _localFiles = !_localFiles),
       ),
@@ -2588,7 +2588,7 @@ class _DeleteDataViewState extends State<_DeleteDataView> {
       _DPActionCard(
         icon: Icons.delete_outline_rounded,
         title: _busy ? 'Deleting…' : 'Delete Selected Data',
-        subtitle: _localFiles ? 'Permanently remove local files' : 'Nothing selected',
+        subtitle: _localFiles ? 'Clear app data and cache' : 'Nothing selected',
         destructive: true,
         onTap: _busy || !_localFiles ? () {} : _delete,
       ),
