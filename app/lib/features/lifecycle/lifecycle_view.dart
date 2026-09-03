@@ -497,13 +497,13 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     return [
       for (final item in source)
         if (!item.isPrivate &&
-            seen.add(item.semanticSourceId ?? '\${item.type}|\${item.title}'))
+            seen.add(item.semanticSourceId ?? '${item.type}|${item.title}'))
           item,
     ];
   }
 
   String _itemKey(JourneyLifecyclePayload item) =>
-      item.semanticSourceId ?? '\${item.type}|\${item.title}';
+      item.semanticSourceId ?? '${item.type}|${item.title}';
 
   Set<String> _requestedKeysForTarget(String target) {
     final normalizedTarget = target.trim();
@@ -655,8 +655,8 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   String _formatDate(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return '\${value.year}-\${two(value.month)}-\${two(value.day)} '
-        '\${two(value.hour)}:\${two(value.minute)}';
+    return '${value.year}-${two(value.month)}-${two(value.day)} '
+        '${two(value.hour)}:${two(value.minute)}';
   }
 
   @override
@@ -767,7 +767,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: Text(
-                                    'Target: \${_history[i].groups.first.targetAccountId}',
+                                    'Target: ${_history[i].groups.first.targetAccountId}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 10, color: shMuted),
@@ -862,7 +862,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: Text(
-                                    '\${_history[i].groups.length} target · \${_history[i].totalDataCount} data',
+                                    '${_history[i].groups.length} target · ${_history[i].totalDataCount} data',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 10, color: shMuted),
@@ -923,7 +923,7 @@ class _RequestGroupEditor extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Target \${groupIndex + 1}',
+                'Target ${groupIndex + 1}',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
             ),
@@ -964,14 +964,14 @@ class _RequestGroupEditor extends StatelessWidget {
               dense: true,
               contentPadding: EdgeInsets.zero,
               value: group.selectedKeys.contains(
-                item.semanticSourceId ?? '\${item.type}|\${item.title}',
+                item.semanticSourceId ?? '${item.type}|${item.title}',
               ),
               onChanged: isItemAlreadyRequested(item) ? null : (_) => onItemToggle(item),
               title: Text(item.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
               subtitle: Text(
                 isItemAlreadyRequested(item)
-                    ? '\${item.type} · Already requested for this target'
-                    : '\${item.type} · Shared',
+                    ? '${item.type} · Already requested for this target'
+                    : '${item.type} · Shared',
                 style: const TextStyle(fontSize: 10, color: shMuted),
               ),
               controlAffinity: ListTileControlAffinity.leading,
