@@ -398,7 +398,6 @@ class _StageIcon extends StatelessWidget {
     );
   }
 }
-
 class _OrganicCardClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -701,6 +700,54 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
 
 
+  void _openDecision(_LifecycleDecision decision, int index) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: shSurface,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Request Detail #' + index.toString(),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 16),
+                _LifecycleDataRow(label: 'Status', value: decision.status),
+                _LifecycleDataRow(label: 'Created', value: _formatDate(decision.createdAt)),
+                _LifecycleDataRow(label: 'Targets', value: decision.groups.length.toString()),
+                _LifecycleDataRow(label: 'Data', value: decision.totalDataCount.toString()),
+                const SizedBox(height: 10),
+                Text(decision.detail, style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
+                if (decision.groups.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Text('Targets', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 8),
+                  for (final group in decision.groups)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _LifecycleSectionCard(
+                        accent: widget.stage.accent,
+                        title: group.targetAccountId,
+                        child: Text(
+                          group.selectedKeys.isEmpty ? 'No per-item selection.' : group.selectedKeys.length.toString() + ' selected data item(s)',
+                          style: const TextStyle(fontSize: 12, color: shMuted),
+                        ),
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   String _formatDate(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
     return '${value.year}-${two(value.month)}-${two(value.day)} '
@@ -797,8 +844,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                   subtitle: Text(
                                     'Type: FULL · ' + _recoveryDate(_history[i].createdAt),
                                     style: const TextStyle(fontSize: 10, color: shMuted),
-                                  ),
-                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  ),                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
                                   onTap: () => _openRecoveryDetail(_history[i], i + 1),
                                 ),
                             ],
