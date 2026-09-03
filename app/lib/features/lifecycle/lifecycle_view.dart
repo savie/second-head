@@ -347,8 +347,7 @@ class LifecycleCard extends StatelessWidget {
                     stage.subtitle,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: const TextStyle(                      fontSize: 11,
                       color: shMuted,
                       height: 1.4,
                     ),
@@ -697,8 +696,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       if (group.selectedKeys.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.')));
         return;
-      }
-      final selected = _availableItems.where((item) => group.selectedKeys.contains(_itemKey(item))).toList();
+      }      final selected = _availableItems.where((item) => group.selectedKeys.contains(_itemKey(item))).toList();
       final scope = _scopeForItems(selected);
       if (_integrations.findRequest(type: widget.stage.title, targetAccountId: target, scope: scope) != null) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request dengan target dan data yang sama sudah pernah dibuat.')));
@@ -940,6 +938,8 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                           'Target email is used for the clone authorization flow. Authorization is handled by Integrations.',
                           style: TextStyle(fontSize: 10, color: shMuted),
                         ),
+                        const SizedBox(height: 12),
+                        _JourneyCloneSummary(items: availableItems),
                       ],
                     ),
                   ),
@@ -1047,8 +1047,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                         : Column(
                             children: [
                               for (var i = 0; i < _islResults.length; i++)
-                                ListTile(
-                                  contentPadding: EdgeInsets.zero,
+                                ListTile(                                  contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
                                     radius: 15,
                                     child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
