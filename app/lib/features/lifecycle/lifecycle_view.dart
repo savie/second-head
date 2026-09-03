@@ -530,6 +530,27 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   String _itemKey(JourneyLifecyclePayload item) =>
       item.semanticSourceId ?? '${item.type}|${item.title}';
 
+  Set<String> _requestedKeysForTarget(String target) {
+    final normalizedTarget = target.trim();
+    if (normalizedTarget.isEmpty) return <String>{};
+
+    final keys = <String>{};
+    for (final decision in _history) {
+      for (final group in decision.groups) {
+        if (group.targetAccountId.trim() == normalizedTarget) {
+          keys.addAll(group.selectedKeys);
+        }
+      }
+    }
+    return keys;
+  }
+
+  bool _wasAlreadyRequested(
+    JourneyLifecyclePayload item,
+    String target,
+  ) =>
+      _requestedKeysForTarget(target).contains(_itemKey(item));
+
   void _setTarget(int index, String value) {
     final group = _groups[index];
     _groups[index] = group.copyWith(targetAccountId: value);
@@ -548,6 +569,17 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       if (group.selectedKeys.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.')),
+        );
+        return;
+      }
+      final previouslyRequested = _requestedKeysForTarget(target);
+      if (group.selectedKeys.any(previouslyRequested.contains)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Sebagian data sudah pernah diminta untuk target ini. Pilih data yang belum pernah diminta.',
+            ),
+          ),
         );
         return;
       }
@@ -702,6 +734,11 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                             availableItems: availableItems,
                             onTargetChanged: (value) => _setTarget(i, value),
                             onItemToggle: (item) => _toggleItem(i, item),
+                            isItemAlreadyRequested: (item) =>
+                                _wasAlreadyRequested(
+                                  item,
+                                  _groups[i].targetAccountId,
+                                ),
                             showRemove: _groups.length > 1,
                             onRemove: () => setState(() => _groups.removeAt(i)),
                           ),
@@ -820,6 +857,7 @@ class _RequestGroupEditor extends StatelessWidget {
     required this.availableItems,
     required this.onTargetChanged,
     required this.onItemToggle,
+    required this.isItemAlreadyRequested,
     required this.showRemove,
     required this.onRemove,
   });
@@ -829,6 +867,7 @@ class _RequestGroupEditor extends StatelessWidget {
   final List<JourneyLifecyclePayload> availableItems;
   final ValueChanged<String> onTargetChanged;
   final ValueChanged<JourneyLifecyclePayload> onItemToggle;
+  final bool Function(JourneyLifecyclePayload item) isItemAlreadyRequested;
   final bool showRemove;
   final VoidCallback onRemove;
 
@@ -890,13 +929,17 @@ class _RequestGroupEditor extends StatelessWidget {
               value: group.selectedKeys.contains(
                 item.semanticSourceId ?? '${item.type}|${item.title}',
               ),
-              onChanged: (_) => onItemToggle(item),
+              onChanged: isItemAlreadyRequested(item)
+                  ? null
+                  : (_) => onItemToggle(item),
               title: Text(
                 item.title,
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                '${item.type} · Shared',
+                isItemAlreadyRequested(item)
+                    ? '${item.type} · Already requested for this target'
+                    : '${item.type} · Shared',
                 style: const TextStyle(fontSize: 10, color: shMuted),
               ),
               controlAffinity: ListTileControlAffinity.leading,
