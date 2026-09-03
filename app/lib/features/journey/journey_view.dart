@@ -5,6 +5,7 @@ import '../../core/theme/sh_theme.dart';
 import 'semantic_domain_view.dart';
 import 'semantic_hook.dart';
 import 'journey_data.dart';
+import '../integrations/integration_authorization_store.dart';
 
 class JourneyView extends StatefulWidget {
   const JourneyView({super.key});
@@ -895,6 +896,8 @@ class _JourneyDetailState extends State<JourneyDetail> {
     );
 
     if (confirmed == true && context.mounted) {
+      final key = item.semanticSourceId ?? item.type + '|' + item.title;
+      await IntegrationAuthorizationStore.instance.removeRequestsReferencingKeys({key});
       await JourneyStore.persist();
       widget.onDelete();
     }
