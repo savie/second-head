@@ -1942,6 +1942,88 @@ class _IntegrationStatusPill extends StatelessWidget {
       );
 }
 
+class _IntegrationEmpty extends StatelessWidget {
+  const _IntegrationEmpty({
+    required this.icon,
+    required this.text,
+  });
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
+        decoration: BoxDecoration(
+          color: shSurface.withValues(alpha: .72),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: shBorder),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 19, color: shMuted),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(fontSize: 11, color: shMuted),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class _AuthAction extends StatelessWidget {
+  const _AuthAction({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.primary = false,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: primary ? shSurface : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: primary ? shPurple : shBorder,
+                width: primary ? 1.4 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 18, color: primary ? shPurple : shMuted),
+                const SizedBox(width: 7),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: primary ? shPurple : shMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
 class _IntegrationParty extends StatelessWidget {
   const _IntegrationParty({
     required this.label,
