@@ -480,11 +480,14 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     const _LifecycleRequestGroup(),
   ];
   final List<_LifecycleDecision> _history = [];
+  final TextEditingController _cloneEmailController = TextEditingController();
 
   bool get _isIsl =>
       widget.stage.title == 'Inheritance' ||
       widget.stage.title == 'Succession' ||
       widget.stage.title == 'Legacy';
+
+  bool get _isClone => widget.stage.title == 'Clone';
 
   List<JourneyLifecyclePayload> get _availableItems {
     final source = widget.incomingItems.isNotEmpty
@@ -494,27 +497,36 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     return [
       for (final item in source)
         if (!item.isPrivate &&
-            seen.add(item.semanticSourceId ?? '${item.type}|${item.title}'))
+            seen.add(item.semanticSourceId ?? '\${item.type}|\${item.title}'))
           item,
     ];
   }
 
-  String get _actionLabel => switch (widget.stage.title) {
-        'Inheritance' => 'Request Inheritance',
-        'Succession' => 'Request Succession',
-        'Legacy' => 'Request Legacy',
-        _ => 'Request',
-      };
+  String _itemKey(JourneyLifecyclePayload item) =>
+      item.semanticSourceId ?? '\${item.type}|\${item.title}';
 
-  String get _actionDescription => switch (widget.stage.title) {
-        'Inheritance' => 'Request transfer of selected shared Journey context.',
-        'Succession' => 'Request succession using selected shared Journey context.',
-        'Legacy' => 'Request legacy handling for selected shared Journey context.',
-        _ => '',
-      };
+  Set<String> _requestedKeysForTarget(String target) {
+    final normalizedTarget = target.trim();
+    if (normalizedTarget.isEmpty) return <String>{};
+    final keys = <String>{};
+    for (final decision in _history) {
+      for (final group in decision.groups) {
+        if (group.targetAccountId.trim() == normalizedTarget) {
+          keys.addAll(group.selectedKeys);
+        }
+      }
+    }
+    return keys;
+  }
 
-  void _addGroup() {
-    setState(() => _groups.add(const _LifecycleRequestGroup()));
+  bool _wasAlreadyRequested(JourneyLifecyclePayload item, String target) =>
+      _requestedKeysForTarget(target).contains(_itemKey(item));
+
+  void _setTarget(int index, String value) {
+    final group = _groups[index];
+    setState(() {
+      _groups[index] = group.copyWith(targetAccountId: value);
+    });
   }
 
   void _toggleItem(int groupIndex, JourneyLifecyclePayload item) {
@@ -527,33 +539,8 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     });
   }
 
-  String _itemKey(JourneyLifecyclePayload item) =>
-      item.semanticSourceId ?? '${item.type}|${item.title}';
-
-  Set<String> _requestedKeysForTarget(String target) {
-    final normalizedTarget = target.trim();
-    if (normalizedTarget.isEmpty) return <String>{};
-
-    final keys = <String>{};
-    for (final decision in _history) {
-      for (final group in decision.groups) {
-        if (group.targetAccountId.trim() == normalizedTarget) {
-          keys.addAll(group.selectedKeys);
-        }
-      }
-    }
-    return keys;
-  }
-
-  bool _wasAlreadyRequested(
-    JourneyLifecyclePayload item,
-    String target,
-  ) =>
-      _requestedKeysForTarget(target).contains(_itemKey(item));
-
-  void _setTarget(int index, String value) {
-    final group = _groups[index];
-    _groups[index] = group.copyWith(targetAccountId: value);
+  void _addGroup() {
+    setState(() => _groups.add(const _LifecycleRequestGroup()));
   }
 
   void _request() {
@@ -572,14 +559,10 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
         );
         return;
       }
-      final previouslyRequested = _requestedKeysForTarget(target);
-      if (group.selectedKeys.any(previouslyRequested.contains)) {
+      final previous = _requestedKeysForTarget(target);
+      if (group.selectedKeys.any(previous.contains)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Sebagian data sudah pernah diminta untuk target ini. Pilih data yang belum pernah diminta.',
-            ),
-          ),
+          const SnackBar(content: Text('Sebagian data sudah pernah diminta untuk target ini.')),
         );
         return;
       }
@@ -600,6 +583,32 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     });
   }
 
+  void _createClone() {
+    final email = _cloneEmailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Masukkan target email yang valid.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _history.insert(
+        0,
+        _LifecycleDecision(
+          status: 'Clone Created',
+          createdAt: DateTime.now(),
+          groups: [
+            _LifecycleRequestGroup(targetAccountId: email),
+          ],
+          detail:
+              'Clone target dikunci berdasarkan email. Authorization ditangani oleh Integrations.',
+        ),
+      );
+      _cloneEmailController.clear();
+    });
+  }
+
   void _openDecision(_LifecycleDecision decision, int index) {
     showModalBottomSheet<void>(
       context: context,
@@ -614,44 +623,23 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Decision #$index',
+                  'Result #$index',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 16),
+                _LifecycleDataRow(label: 'Status', value: decision.status),
                 _LifecycleDataRow(
-                  label: 'Status',
-                  value: decision.status,
+                  label: 'Target',
+                  value: decision.groups.first.targetAccountId,
                 ),
+                if (decision.cloneShId != null)
+                  _LifecycleDataRow(label: 'Clone SH', value: decision.cloneShId!),
                 _LifecycleDataRow(
-                  label: 'Targets',
-                  value: decision.groups.length.toString(),
-                ),
-                _LifecycleDataRow(
-                  label: 'Data',
-                  value: decision.totalDataCount.toString(),
-                ),
-                _LifecycleDataRow(
-                  label: 'Requested',
+                  label: 'Created',
                   value: _formatDate(decision.createdAt),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Targets & data',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
-                for (var i = 0; i < decision.groups.length; i++) ...[
-                  _LifecycleRequestSummary(
-                    group: decision.groups[i],
-                    availableItems: _availableItems,
-                  ),
-                  if (i != decision.groups.length - 1) const SizedBox(height: 10),
-                ],
-                const SizedBox(height: 12),
-                const Text(
-                  'Detail',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
+                const Text('Result', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
                 Text(
                   decision.detail,
@@ -667,15 +655,14 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   String _formatDate(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return value.year.toString() +
-        '-' +
-        two(value.month) +
-        '-' +
-        two(value.day) +
-        ' ' +
-        two(value.hour) +
-        ':' +
-        two(value.minute);
+    return '\${value.year}-\${two(value.month)}-\${two(value.day)} '
+        '\${two(value.hour)}:\${two(value.minute)}';
+  }
+
+  @override
+  void dispose() {
+    _cloneEmailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -719,7 +706,79 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                     ],
                   ),
                 ),
-                if (_isIsl) ...[
+                if (_isClone) ...[
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Target',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Email', style: TextStyle(fontSize: 11, color: shMuted)),
+                        const SizedBox(height: 7),
+                        TextField(
+                          controller: _cloneEmailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            hintText: 'Enter target email',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            filled: true,
+                            fillColor: shBackground.withValues(alpha: .55),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _createClone,
+                            icon: const Icon(Icons.copy_all_outlined),
+                            label: const Text('Create Clone'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Target email is used for the clone authorization flow. Authorization is handled by Integrations.',
+                          style: TextStyle(fontSize: 10, color: shMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Clone Result',
+                    child: _history.isEmpty
+                        ? const Text('No clone results yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _history.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: Text(
+                                    _history[i].status,
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                  ),
+                                  subtitle: Text(
+                                    'Target: \${_history[i].groups.first.targetAccountId}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openDecision(_history[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
+                ] else if (_isIsl) ...[
                   const SizedBox(height: 14),
                   _LifecycleSectionCard(
                     accent: stage.accent,
@@ -735,10 +794,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                             onTargetChanged: (value) => _setTarget(i, value),
                             onItemToggle: (item) => _toggleItem(i, item),
                             isItemAlreadyRequested: (item) =>
-                                _wasAlreadyRequested(
-                                  item,
-                                  _groups[i].targetAccountId,
-                                ),
+                                _wasAlreadyRequested(item, _groups[i].targetAccountId),
                             showRemove: _groups.length > 1,
                             onRemove: () => setState(() => _groups.removeAt(i)),
                           ),
@@ -756,12 +812,13 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          _actionDescription,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: shMuted,
-                            height: 1.5,
-                          ),
+                          switch (stage.title) {
+                            'Inheritance' => 'Request transfer of selected shared Journey context.',
+                            'Succession' => 'Request succession using selected shared Journey context.',
+                            'Legacy' => 'Request legacy handling for selected shared Journey context.',
+                            _ => '',
+                          },
+                          style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5),
                         ),
                         const SizedBox(height: 12),
                         SizedBox(
@@ -769,7 +826,12 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                           child: FilledButton.icon(
                             onPressed: _request,
                             icon: const Icon(Icons.send_rounded),
-                            label: Text(_actionLabel),
+                            label: Text(switch (stage.title) {
+                              'Inheritance' => 'Request Inheritance',
+                              'Succession' => 'Request Succession',
+                              'Legacy' => 'Request Legacy',
+                              _ => 'Request',
+                            }),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -785,10 +847,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                     accent: stage.accent,
                     title: 'Decision History',
                     child: _history.isEmpty
-                        ? const Text(
-                            'No decisions yet.',
-                            style: TextStyle(fontSize: 12, color: shMuted),
-                          )
+                        ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted))
                         : Column(
                             children: [
                               for (var i = 0; i < _history.length; i++)
@@ -796,31 +855,19 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                                   contentPadding: EdgeInsets.zero,
                                   leading: CircleAvatar(
                                     radius: 15,
-                                    child: Text(
-                                      (i + 1).toString(),
-                                      style: const TextStyle(fontSize: 11),
-                                    ),
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
                                   ),
                                   title: Text(
                                     _history[i].status,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: Text(
-                                    '${_history[i].groups.length} target · ${_history[i].totalDataCount} data',
+                                    '\${_history[i].groups.length} target · \${_history[i].totalDataCount} data',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      color: shMuted,
-                                    ),
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
                                   ),
-                                  trailing: const Icon(
-                                    Icons.chevron_right_rounded,
-                                    size: 20,
-                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
                                   onTap: () => _openDecision(_history[i], i + 1),
                                 ),
                             ],
@@ -833,11 +880,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                     title: 'Lifecycle detail',
                     child: const Text(
                       'This lifecycle detail is intentionally not implemented in this pass.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: shMuted,
-                        height: 1.5,
-                      ),
+                      style: TextStyle(fontSize: 12, color: shMuted, height: 1.5),
                     ),
                   ),
                 ],
@@ -880,7 +923,7 @@ class _RequestGroupEditor extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Target ${groupIndex + 1}',
+                'Target \${groupIndex + 1}',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
             ),
@@ -911,35 +954,24 @@ class _RequestGroupEditor extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        const Text(
-          'Incoming from Journey',
-          style: TextStyle(fontSize: 11, color: shMuted),
-        ),
+        const Text('Incoming from Journey', style: TextStyle(fontSize: 11, color: shMuted)),
         const SizedBox(height: 7),
         if (availableItems.isEmpty)
-          const Text(
-            'No shared Journey data available.',
-            style: TextStyle(fontSize: 12, color: shMuted),
-          )
+          const Text('No shared Journey data available.', style: TextStyle(fontSize: 12, color: shMuted))
         else
           for (final item in availableItems)
             CheckboxListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
               value: group.selectedKeys.contains(
-                item.semanticSourceId ?? '${item.type}|${item.title}',
+                item.semanticSourceId ?? '\${item.type}|\${item.title}',
               ),
-              onChanged: isItemAlreadyRequested(item)
-                  ? null
-                  : (_) => onItemToggle(item),
-              title: Text(
-                item.title,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              ),
+              onChanged: isItemAlreadyRequested(item) ? null : (_) => onItemToggle(item),
+              title: Text(item.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
               subtitle: Text(
                 isItemAlreadyRequested(item)
-                    ? '${item.type} · Already requested for this target'
-                    : '${item.type} · Shared',
+                    ? '\${item.type} · Already requested for this target'
+                    : '\${item.type} · Shared',
                 style: const TextStyle(fontSize: 10, color: shMuted),
               ),
               controlAffinity: ListTileControlAffinity.leading,
@@ -961,12 +993,11 @@ class _LifecycleRequestGroup {
   _LifecycleRequestGroup copyWith({
     String? targetAccountId,
     Set<String>? selectedKeys,
-  }) {
-    return _LifecycleRequestGroup(
-      targetAccountId: targetAccountId ?? this.targetAccountId,
-      selectedKeys: selectedKeys ?? this.selectedKeys,
-    );
-  }
+  }) =>
+      _LifecycleRequestGroup(
+        targetAccountId: targetAccountId ?? this.targetAccountId,
+        selectedKeys: selectedKeys ?? this.selectedKeys,
+      );
 }
 
 class _LifecycleDecision {
@@ -975,63 +1006,17 @@ class _LifecycleDecision {
     required this.createdAt,
     required this.groups,
     required this.detail,
+    this.cloneShId,
   });
 
   final String status;
   final DateTime createdAt;
   final List<_LifecycleRequestGroup> groups;
   final String detail;
+  final String? cloneShId;
 
   int get totalDataCount =>
       groups.fold(0, (sum, group) => sum + group.selectedKeys.length);
-}
-
-class _LifecycleRequestSummary extends StatelessWidget {
-  const _LifecycleRequestSummary({
-    required this.group,
-    required this.availableItems,
-  });
-
-  final _LifecycleRequestGroup group;
-  final List<JourneyLifecyclePayload> availableItems;
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = availableItems.where(
-      (item) => group.selectedKeys.contains(
-        item.semanticSourceId ?? '${item.type}|${item.title}',
-      ),
-    );
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: shBackground.withValues(alpha: .45),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: shBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _LifecycleDataRow(label: 'Target', value: group.targetAccountId),
-          const SizedBox(height: 4),
-          const Text(
-            'Data',
-            style: TextStyle(fontSize: 11, color: shMuted),
-          ),
-          const SizedBox(height: 5),
-          for (final item in selected)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                '• ${item.title}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 }
 
 class _LifecycleSectionCard extends StatelessWidget {
