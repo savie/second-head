@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
+import '../journey/journey_data.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 
 class JourneyLifecyclePayload {
@@ -59,10 +60,26 @@ class LifecycleViewState extends State<LifecycleView> {
     _showDetail(context, result);
   }
 
+  List<JourneyLifecyclePayload> get _sharedJourneyPayloads => [
+        for (final item in shJourneyItems)
+          if (!item.isPrivate)
+            JourneyLifecyclePayload(
+              title: item.title,
+              type: item.type,
+              content: item.content,
+              isPrivate: item.isPrivate,
+              date: item.date,
+              semanticSourceId: item.semanticSourceId,
+            ),
+      ];
+
   void _showDetail(BuildContext context, LifecycleStage stage) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => LifecycleDetailView(stage: stage),
+        builder: (_) => LifecycleDetailView(
+          stage: stage,
+          incomingItems: _sharedJourneyPayloads,
+        ),
       ),
     );
   }
