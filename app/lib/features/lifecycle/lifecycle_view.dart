@@ -751,12 +751,49 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                 _LifecycleDataRow(label: 'Data', value: item.scope.values.fold<int>(0, (n, v) => n + v.length).toString()),
                 const SizedBox(height: 10),
                 const Text('Authorization is managed through Integrations.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      _deleteAuthorization(item);
+                    },
+                    icon: const Icon(Icons.link_off_rounded),
+                    label: const Text('Delete Relationship'),
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _deleteAuthorization(IntegrationAuthorization item) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Relationship?'),
+        content: const Text(
+          'This removes the local relationship/request and its related Decision History. '
+          'It does not perform server-side authorization changes.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _integrations.deleteRequest(item.id);
   }
 
   String _formatDate(DateTime value) {
