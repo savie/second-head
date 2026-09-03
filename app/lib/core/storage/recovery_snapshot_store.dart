@@ -55,6 +55,7 @@ class RecoverySnapshotStore extends ChangeNotifier {
 
   List<RecoverySnapshot> _items = [];
   bool _loaded = false;
+  bool _seedDemoWhenMissing = true;
 
   List<RecoverySnapshot> get items => List.unmodifiable(_items);
 
@@ -75,7 +76,7 @@ class RecoverySnapshotStore extends ChangeNotifier {
       }
     }
 
-    if (_items.isEmpty && !await file.exists()) {
+    if (_items.isEmpty && _seedDemoWhenMissing && !await file.exists()) {
       _items = [
         RecoverySnapshot(
           id: 'SH-2026-09-03-001',
@@ -107,7 +108,9 @@ class RecoverySnapshotStore extends ChangeNotifier {
 
   Future<void> refreshFromDisk() async {
     _loaded = false;
+    _seedDemoWhenMissing = false;
     await ensureLoaded();
+    _seedDemoWhenMissing = true;
   }
 
   Future<void> deleteSnapshot(String id) async {
