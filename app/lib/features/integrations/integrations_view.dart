@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
+import '../../core/navigation/sh_navigation_shell.dart';
 import 'integration_authorization_store.dart';
 
 class IntegrationsView extends StatefulWidget {
