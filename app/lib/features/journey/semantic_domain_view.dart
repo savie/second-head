@@ -203,9 +203,9 @@ class _SemanticDomainViewState extends State<SemanticDomainView> {
                 TextField(controller: contentController, minLines: 4, maxLines: 7, decoration: const InputDecoration(hintText: 'Write content...')),
                 const SizedBox(height: 12),
                 Row(children: [
-                  Expanded(child: _Policy(label: 'Private', icon: Icons.lock_outline, selected: privatePolicy, onTap: () => setSheetState(() => privatePolicy = true))),
+                  Expanded(child: _Policy(label: 'Owner Only', icon: Icons.lock_outline, selected: privatePolicy, onTap: () => setSheetState(() => privatePolicy = true))),
                   const SizedBox(width: 10),
-                  Expanded(child: _Policy(label: 'Public', icon: Icons.public, selected: !privatePolicy, onTap: () => setSheetState(() => privatePolicy = false))),
+                  Expanded(child: _Policy(label: 'Shared', icon: Icons.public, selected: !privatePolicy, onTap: () => setSheetState(() => privatePolicy = false))),
                 ]),
                 const SizedBox(height: 14),
                 Row(children: [
