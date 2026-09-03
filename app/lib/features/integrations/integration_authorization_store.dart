@@ -33,6 +33,7 @@ class IntegrationAuthorization {
   IntegrationAuthorizationStatus status;
 }
 
+/// Persisted frontend authorization state shared by Lifecycle, Integrations, and Profile.
 class IntegrationAuthorizationStore extends ChangeNotifier {
   IntegrationAuthorizationStore._();
 
