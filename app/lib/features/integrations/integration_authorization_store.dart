@@ -36,6 +36,8 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
 
   final List<IntegrationAuthorization> _items = [];
 
+  List<IntegrationAuthorization> get items => List.unmodifiable(_items);
+
   List<IntegrationAuthorization> get pending => List.unmodifiable(
         _items.where(
           (item) => item.status == IntegrationAuthorizationStatus.pending,
