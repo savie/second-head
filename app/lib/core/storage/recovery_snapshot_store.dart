@@ -53,7 +53,7 @@ class RecoverySnapshotStore extends ChangeNotifier {
 
   static final instance = RecoverySnapshotStore._();
 
-  List<RecoverySnapshot> _items = const [];
+  List<RecoverySnapshot> _items = [];
   bool _loaded = false;
 
   List<RecoverySnapshot> get items => List.unmodifiable(_items);
