@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/sh_theme.dart';
 import '../journey/journey_data.dart';
-import '../../core/navigation/sh_navigation_shell.dart';
-import '../../core/storage/recovery_snapshot_store.dart';
-import '../profile/integrations/integration_authorization_store.dart';
 import 'eol/eol_entry_view.dart';
 import 'clone/clone_view.dart';
 import 'recovery/recovery_view.dart';
 import 'inheritance/inheritance_view.dart';
 import 'succession/succession_view.dart';
 import 'legacy/legacy_view.dart';
-import 'lifecycle_models.dart';
 import 'lifecycle_widgets.dart';
-
 
 class LifecycleView extends StatefulWidget {
   const LifecycleView({super.key});
