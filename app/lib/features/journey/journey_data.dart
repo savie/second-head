@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../core/storage/storage_service.dart';
+export '../../core/navigation/sh_navigation_shell.dart';
 
 class JourneyItem {
   JourneyItem(
@@ -34,7 +35,7 @@ class JourneyItem {
   factory JourneyItem.fromJson(Map<String, dynamic> json) => JourneyItem(
         (json['title'] as String?) ?? '',
         (json['subtitle'] as String?) ?? '',
-        (json['date'] as String?) ?? '',
+        (json['date'] as String?) ?? 'Memory',
         (json['type'] as String?) ?? 'Memory',
         (json['content'] as String?) ?? '',
         json['is_private'] != false,
