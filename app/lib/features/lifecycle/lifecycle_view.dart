@@ -662,8 +662,16 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   void _setTarget(int index, String value) {
     final group = _groups[index];
+    final lockedKeys = _requestedKeysForTarget(
+      value,
+      type: widget.stage.title,
+    );
+    final selectedKeys = group.selectedKeys.difference(lockedKeys);
     setState(() {
-      _groups[index] = group.copyWith(targetAccountId: value);
+      _groups[index] = group.copyWith(
+        targetAccountId: value,
+        selectedKeys: selectedKeys,
+      );
     });
   }
 
