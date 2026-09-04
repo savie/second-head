@@ -25,6 +25,7 @@ class JourneyLifecyclePayload {
   final String? semanticSourceId;
 }
 
+
 class LifecycleView extends StatefulWidget {
   const LifecycleView({super.key});
 
@@ -130,16 +131,51 @@ class LifecycleMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stages = [
-      const LifecycleStage('Clone', 'Create a Second Head copy for a specific purpose or scenario.', Icons.copy_all_outlined, Color(0xFF9A45FF)),
-      const LifecycleStage('Recovery', 'Restore Second Head data, memories, or state from a backup.', Icons.shield_moon_outlined, Color(0xFF3B82F6)),
-      const LifecycleStage('Inheritance', 'Pass memories, knowledge, and values to the next generation.', Icons.account_tree_outlined, Color(0xFF22D3EE)),
-      const LifecycleStage('Succession', 'Prepare and manage the transition of Second Head ownership or stewardship.', Icons.people_outline_rounded, Color(0xFF6366F1)),
-      const LifecycleStage('Legacy', 'Manage a meaningful digital legacy for the long term.', Icons.menu_book_rounded, Color(0xFFF59E0B)),
-      const LifecycleStage('End of Life', 'Handle the closure, deletion, or safe and respectful handover of Second Head.', Icons.favorite_border_rounded, Color(0xFFEC4899)),
+      const LifecycleStage(
+        'Clone',
+        'Create a Second Head copy for a specific purpose or scenario.',
+        Icons.copy_all_outlined,
+        Color(0xFF9A45FF),
+      ),
+      const LifecycleStage(
+        'Recovery',
+        'Restore Second Head data, memories, or state from a backup.',
+        Icons.shield_moon_outlined,
+        Color(0xFF3B82F6),
+      ),
+      const LifecycleStage(
+        'Inheritance',
+        'Pass memories, knowledge, and values to the next generation.',
+        Icons.account_tree_outlined,
+        Color(0xFF22D3EE),
+      ),
+      const LifecycleStage(
+        'Succession',
+        'Prepare and manage the transition of Second Head ownership or stewardship.',
+        Icons.people_outline_rounded,
+        Color(0xFF6366F1),
+      ),
+      const LifecycleStage(
+        'Legacy',
+        'Manage a meaningful digital legacy for the long term.',
+        Icons.menu_book_rounded,
+        Color(0xFFF59E0B),
+      ),
+      const LifecycleStage(
+        'End of Life',
+        'Handle the closure, deletion, or safe and respectful handover of Second Head.',
+        Icons.favorite_border_rounded,
+        Color(0xFFEC4899),
+      ),
     ];
 
     final q = query.trim().toLowerCase();
-    final visible = stages.where((s) => q.isEmpty || '${s.title} ${s.subtitle}'.toLowerCase().contains(q)).toList();
+    final visible = stages
+        .where(
+          (s) => q.isEmpty ||
+              '${s.title} ${s.subtitle}'.toLowerCase().contains(q),
+        )
+        .toList();
 
     if (visible.isEmpty) {
       return Container(
@@ -150,7 +186,10 @@ class LifecycleMap extends StatelessWidget {
           border: Border.all(color: shBorder),
         ),
         child: const Center(
-          child: Text('Tidak ada tahap lifecycle yang cocok.', style: TextStyle(fontSize: 15, color: shMuted)),
+          child: Text(
+            'Tidak ada tahap lifecycle yang cocok.',
+            style: TextStyle(fontSize: 15, color: shMuted),
+          ),
         ),
       );
     }
@@ -158,24 +197,42 @@ class LifecycleMap extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= 330;
-        if (!wide) return _MobileLifecycle(stages: visible, onStageTap: onStageTap);
-        return _WideLifecycle(stages: visible, onStageTap: onStageTap);
+
+        if (!wide) {
+          return _MobileLifecycle(
+            stages: visible,
+            onStageTap: onStageTap,
+          );
+        }
+
+        return _WideLifecycle(
+          stages: visible,
+          onStageTap: onStageTap,
+        );
       },
     );
   }
 }
 
 class _WideLifecycle extends StatelessWidget {
-  const _WideLifecycle({required this.stages, required this.onStageTap});
+  const _WideLifecycle({
+    required this.stages,
+    required this.onStageTap,
+  });
+
   final List<LifecycleStage> stages;
   final ValueChanged<LifecycleStage> onStageTap;
 
   @override
   Widget build(BuildContext context) {
-    final ordered = List<LifecycleStage>.generate(6, (index) => index < stages.length ? stages[index] : LifecycleStage.empty);
+    final ordered = List<LifecycleStage>.generate(
+      6,
+      (index) => index < stages.length ? stages[index] : LifecycleStage.empty,
+    );
+
     final width = MediaQuery.sizeOf(context).width - 20;
     final cardWidth = width * .47;
-    const cardHeight = 204.0;
+    final cardHeight = 204.0;
 
     return SizedBox(
       height: 650,
@@ -187,10 +244,17 @@ class _WideLifecycle extends StatelessWidget {
               Positioned(
                 left: i.isEven ? 8 : null,
                 right: i.isOdd ? 8 : null,
-                top: switch (i) { 0 || 1 => 8, 2 || 3 => 220, _ => 432 },
+                top: switch (i) {
+                  0 || 1 => 8,
+                  2 || 3 => 220,
+                  _ => 432,
+                },
                 width: cardWidth,
                 height: cardHeight,
-                child: LifecycleCard(stage: ordered[i], onTap: () => onStageTap(ordered[i])),
+                child: LifecycleCard(
+                  stage: ordered[i],
+                  onTap: () => onStageTap(ordered[i]),
+                ),
               ),
         ],
       ),
@@ -199,7 +263,11 @@ class _WideLifecycle extends StatelessWidget {
 }
 
 class _MobileLifecycle extends StatelessWidget {
-  const _MobileLifecycle({required this.stages, required this.onStageTap});
+  const _MobileLifecycle({
+    required this.stages,
+    required this.onStageTap,
+  });
+
   final List<LifecycleStage> stages;
   final ValueChanged<LifecycleStage> onStageTap;
 
@@ -207,8 +275,15 @@ class _MobileLifecycle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        for (final stage in stages)
-          SizedBox(height: 220, child: LifecycleCard(stage: stage, onTap: () => onStageTap(stage))),
+        for (var i = 0; i < stages.length; i++) ...[
+          SizedBox(
+            height: 220,
+            child: LifecycleCard(
+              stage: stages[i],
+              onTap: () => onStageTap(stages[i]),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -217,9 +292,22 @@ class _MobileLifecycle extends StatelessWidget {
 class LifecycleStage {
   const LifecycleStage(this.title, this.subtitle, this.icon, this.accent);
 
-  static const clone = LifecycleStage('Clone', 'Private Journey data enters the Clone / Recovery path.', Icons.copy_all_outlined, Color(0xFF9A45FF));
-  static const isl = LifecycleStage('I / S / L', 'Shared Journey data enters the I / S / L path.', Icons.account_tree_outlined, Color(0xFF22D3EE));
-  static const empty = LifecycleStage('', '', Icons.circle, Colors.transparent);
+  static const clone = LifecycleStage(
+    'Clone',
+    'Private Journey data enters the Clone / Recovery path.',
+    Icons.copy_all_outlined,
+    Color(0xFF9A45FF),
+  );
+
+  static const isl = LifecycleStage(
+    'I / S / L',
+    'Shared Journey data enters the I / S / L path.',
+    Icons.account_tree_outlined,
+    Color(0xFF22D3EE),
+  );
+
+  static const empty =
+      LifecycleStage('', '', Icons.circle, Colors.transparent);
 
   final String title;
   final String subtitle;
@@ -228,7 +316,12 @@ class LifecycleStage {
 }
 
 class LifecycleCard extends StatelessWidget {
-  const LifecycleCard({super.key, required this.stage, required this.onTap});
+  const LifecycleCard({
+    super.key,
+    required this.stage,
+    required this.onTap,
+  });
+
   final LifecycleStage stage;
   final VoidCallback onTap;
 
@@ -249,11 +342,33 @@ class LifecycleCard extends StatelessWidget {
                 children: [
                   _StageIcon(stage: stage, size: 50),
                   const SizedBox(height: 8),
-                  Text(stage.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 19, height: 1.1, fontWeight: FontWeight.w500)),
+                  Text(
+                    stage.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 19,
+                      height: 1.1,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Text(stage.subtitle, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: shMuted, height: 1.4)),
+                  Text(
+                    stage.subtitle,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: shMuted,
+                      height: 1.4,
+                    ),
+                  ),
                   const Spacer(),
-                  Icon(Icons.arrow_forward_rounded, size: 21, color: stage.accent),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 21,
+                    color: stage.accent,
+                  ),
                 ],
               ),
             ),
@@ -266,6 +381,7 @@ class LifecycleCard extends StatelessWidget {
 
 class _StageIcon extends StatelessWidget {
   const _StageIcon({required this.stage, required this.size});
+
   final LifecycleStage stage;
   final double size;
 
@@ -277,28 +393,43 @@ class _StageIcon extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: shBackground.withValues(alpha: .78),
-        border: Border.all(color: stage.accent.withValues(alpha: .42), width: 1.4),
-        boxShadow: [BoxShadow(color: stage.accent.withValues(alpha: .14), blurRadius: 20, spreadRadius: 2)],
+        border: Border.all(
+          color: stage.accent.withValues(alpha: .42),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: stage.accent.withValues(alpha: .14),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
       ),
       alignment: Alignment.center,
       child: Icon(stage.icon, size: size * .46, color: stage.accent),
     );
   }
 }
-
 class _OrganicCardClipper extends CustomClipper<Path> {
   @override
-  Path getClip(Size size) => Path()
-    ..moveTo(24, 0)
-    ..lineTo(size.width - 64, 0)
-    ..quadraticBezierTo(size.width - 12, 2, size.width - 4, 30)
-    ..lineTo(size.width, size.height - 54)
-    ..quadraticBezierTo(size.width - 2, size.height - 8, size.width - 48, size.height - 4)
-    ..lineTo(54, size.height)
-    ..quadraticBezierTo(4, size.height - 3, 2, size.height - 48)
-    ..lineTo(0, 46)
-    ..quadraticBezierTo(2, 4, 24, 0)
-    ..close();
+  Path getClip(Size size) {
+    return Path()
+      ..moveTo(24, 0)
+      ..lineTo(size.width - 64, 0)
+      ..quadraticBezierTo(size.width - 12, 2, size.width - 4, 30)
+      ..lineTo(size.width, size.height - 54)
+      ..quadraticBezierTo(
+        size.width - 2,
+        size.height - 8,
+        size.width - 48,
+        size.height - 4,
+      )
+      ..lineTo(54, size.height)
+      ..quadraticBezierTo(4, size.height - 3, 2, size.height - 48)
+      ..lineTo(0, 46)
+      ..quadraticBezierTo(2, 4, 24, 0)
+      ..close();
+  }
 
   @override
   bool shouldReclip(covariant _OrganicCardClipper oldClipper) => false;
@@ -306,23 +437,47 @@ class _OrganicCardClipper extends CustomClipper<Path> {
 
 class _OrganicCardPainter extends CustomPainter {
   _OrganicCardPainter({required this.accent});
+
   final Color accent;
 
   @override
   void paint(Canvas canvas, Size size) {
     final path = _OrganicCardClipper().getClip(size);
-    final fill = Paint()..shader = LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [accent.withValues(alpha: .12), shSurface.withValues(alpha: .96), accent.withValues(alpha: .08)]).createShader(Offset.zero & size);
+    final fill = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          accent.withValues(alpha: .12),
+          shSurface.withValues(alpha: .96),
+          accent.withValues(alpha: .08),
+        ],
+      ).createShader(Offset.zero & size);
+
     canvas.drawPath(path, fill);
-    final border = Paint()..color = accent.withValues(alpha: .78)..style = PaintingStyle.stroke..strokeWidth = 1.25;
+
+    final border = Paint()
+      ..color = accent.withValues(alpha: .78)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.25;
+
     canvas.drawPath(path, border);
   }
 
   @override
-  bool shouldRepaint(covariant _OrganicCardPainter oldDelegate) => oldDelegate.accent != accent;
+  bool shouldRepaint(covariant _OrganicCardPainter oldDelegate) =>
+      oldDelegate.accent != accent;
 }
 
+
 class LifecycleDetailView extends StatefulWidget {
-  const LifecycleDetailView({super.key, required this.stage, this.incoming, this.incomingItems = const []});
+  const LifecycleDetailView({
+    super.key,
+    required this.stage,
+    this.incoming,
+    this.incomingItems = const [],
+  });
+
   final LifecycleStage stage;
   final JourneyLifecyclePayload? incoming;
   final List<JourneyLifecyclePayload> incomingItems;
@@ -332,7 +487,9 @@ class LifecycleDetailView extends StatefulWidget {
 }
 
 class _LifecycleDetailViewState extends State<LifecycleDetailView> {
-  final List<_LifecycleRequestGroup> _groups = [const _LifecycleRequestGroup()];
+  final List<_LifecycleRequestGroup> _groups = [
+    const _LifecycleRequestGroup(),
+  ];
   final TextEditingController _cloneEmailController = TextEditingController();
   final _snapshots = RecoverySnapshotStore.instance;
   final _integrations = IntegrationAuthorizationStore.instance;
@@ -349,11 +506,19 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   }
 
   Future<void> _loadStores() async {
-    await Future.wait([JourneyStore.refreshFromDisk(), _snapshots.refreshFromDisk(), _integrations.refreshFromDisk()]);
+    // Lifecycle detail is re-created on tab/re-entry. Recovery state must be
+    // re-derived from the physical snapshot files, not from the old instance cache.
+    await Future.wait([
+      JourneyStore.refreshFromDisk(),
+      _snapshots.refreshFromDisk(),
+      _integrations.refreshFromDisk(),
+    ]);
     if (mounted) setState(() => _storesReady = true);
   }
 
-  void _storesChanged() { if (mounted) setState(() {}); }
+  void _storesChanged() {
+    if (mounted) setState(() {});
+  }
 
   List<RecoverySnapshot> get _recoveryHistory => _snapshots.items;
   List<IntegrationAuthorization> get _cloneResults => _integrations.items.where((item) => item.type == 'Clone').toList(growable: false);
@@ -361,17 +526,21 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   String _recoveryDate(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return '${value.year}-${two(value.month)}-${two(value.day)} ${two(value.hour)}:${two(value.minute)}';
+    return value.year.toString() + '-' + two(value.month) + '-' +
+        two(value.day) + ' ' + two(value.hour) + ':' + two(value.minute);
   }
 
-  Future<void> _createRecoverySnapshot() async { await JourneyStore.refreshFromDisk(); await _snapshots.createSnapshot(); }
+  Future<void> _createRecoverySnapshot() async {
+    await JourneyStore.refreshFromDisk();
+    await _snapshots.createSnapshot();
+  }
 
   Future<void> _restoreRecovery(RecoverySnapshot snapshot) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Restore Snapshot?'),
-        content: Text('This will restore the selected FULL snapshot to your current SH.\n\nCreated: ${_recoveryDate(snapshot.createdAt)}'),
+        content: Text('This will restore the selected FULL snapshot to your current SH.\n\nCreated: ' + _recoveryDate(snapshot.createdAt)),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
           FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Restore')),
@@ -384,10 +553,14 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       await JourneyStore.refreshFromDisk();
       await _integrations.refreshFromDisk();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Snapshot restored successfully.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Snapshot restored successfully.')),
+      );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore failed: $error')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Restore failed: $error')),
+      );
     }
   }
 
@@ -419,7 +592,7 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Recovery Detail #$index', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                Text('Recovery Detail #' + index.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 16),
                 _LifecycleDataRow(label: 'ID', value: snapshot.id),
                 _LifecycleDataRow(label: 'Type', value: snapshot.type),
@@ -429,11 +602,19 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                 _LifecycleDataRow(label: 'Experience', value: snapshot.experienceCount.toString()),
                 _LifecycleDataRow(label: 'Files', value: snapshot.fileCount.toString()),
                 const SizedBox(height: 14),
-                Row(children: [
-                  Expanded(child: OutlinedButton.icon(onPressed: () { Navigator.of(sheetContext).pop(); _deleteRecoverySnapshot(snapshot); }, icon: const Icon(Icons.delete_outline_rounded), label: const Text('Delete'))),
-                  const SizedBox(width: 10),
-                  Expanded(child: FilledButton.icon(onPressed: () { Navigator.of(sheetContext).pop(); _restoreRecovery(snapshot); }, icon: const Icon(Icons.restore_rounded), label: const Text('Restore'))),
-                ]),
+                Row(
+                  children: [
+                    Expanded(child: OutlinedButton.icon(
+                      onPressed: () { Navigator.of(sheetContext).pop(); _deleteRecoverySnapshot(snapshot); },
+                      icon: const Icon(Icons.delete_outline_rounded), label: const Text('Delete'),
+                    )),
+                    const SizedBox(width: 10),
+                    Expanded(child: FilledButton.icon(
+                      onPressed: () { Navigator.of(sheetContext).pop(); _restoreRecovery(snapshot); },
+                      icon: const Icon(Icons.restore_rounded), label: const Text('Restore'),
+                    )),
+                  ],
+                ),
               ],
             ),
           ),
@@ -442,16 +623,28 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     );
   }
 
-  bool get _isIsl => widget.stage.title == 'Inheritance' || widget.stage.title == 'Succession' || widget.stage.title == 'Legacy';
+  bool get _isIsl =>
+      widget.stage.title == 'Inheritance' ||
+      widget.stage.title == 'Succession' ||
+      widget.stage.title == 'Legacy';
+
   bool get _isClone => widget.stage.title == 'Clone';
 
   List<JourneyLifecyclePayload> get _availableItems {
-    final source = widget.incomingItems.isNotEmpty ? widget.incomingItems : (widget.incoming == null ? const [] : [widget.incoming!]);
+    final source = widget.incomingItems.isNotEmpty
+        ? widget.incomingItems
+        : (widget.incoming == null ? const [] : [widget.incoming!]);
     final seen = <String>{};
-    return [for (final item in source) if (!item.isPrivate && seen.add(item.semanticSourceId ?? '${item.type}|${item.title}')) item];
+    return [
+      for (final item in source)
+        if (!item.isPrivate &&
+            seen.add(item.semanticSourceId ?? '${item.type}|${item.title}'))
+          item,
+    ];
   }
 
-  String _itemKey(JourneyLifecyclePayload item) => item.semanticSourceId ?? '${item.type}|${item.title}';
+  String _itemKey(JourneyLifecyclePayload item) =>
+      item.semanticSourceId ?? '${item.type}|${item.title}';
 
   Set<String> _requestedKeysForTarget(String target, {String? type}) {
     final normalizedTarget = target.trim().toLowerCase();
@@ -464,17 +657,40 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     return keys;
   }
 
-  bool _wasAlreadyRequested(JourneyLifecyclePayload item, String target) => _requestedKeysForTarget(target, type: widget.stage.title).contains(_itemKey(item));
+  bool _wasAlreadyRequested(JourneyLifecyclePayload item, String target) =>
+      _requestedKeysForTarget(target, type: widget.stage.title).contains(_itemKey(item));
 
-  void _setTarget(int index, String value) { final group = _groups[index]; setState(() { _groups[index] = group.copyWith(targetAccountId: value); }); }
-  void _toggleItem(int groupIndex, JourneyLifecyclePayload item) { setState(() { final group = _groups[groupIndex]; final key = _itemKey(item); final selected = Set<String>.from(group.selectedKeys); if (!selected.add(key)) selected.remove(key); _groups[groupIndex] = group.copyWith(selectedKeys: selected); }); }
-  void _addGroup() { setState(() => _groups.add(const _LifecycleRequestGroup())); }
+  void _setTarget(int index, String value) {
+    final group = _groups[index];
+    setState(() {
+      _groups[index] = group.copyWith(targetAccountId: value);
+    });
+  }
+
+  void _toggleItem(int groupIndex, JourneyLifecyclePayload item) {
+    setState(() {
+      final group = _groups[groupIndex];
+      final key = _itemKey(item);
+      final selected = Set<String>.from(group.selectedKeys);
+      if (!selected.add(key)) selected.remove(key);
+      _groups[groupIndex] = group.copyWith(selectedKeys: selected);
+    });
+  }
+
+  void _addGroup() {
+    setState(() => _groups.add(const _LifecycleRequestGroup()));
+  }
 
   Map<String, List<String>> _scopeForItems(Iterable<JourneyLifecyclePayload> items) {
     final scope = <String, List<String>>{};
     for (final item in items) {
       final key = _itemKey(item);
-      final scopeKey = switch (item.type.toLowerCase()) { 'memory' => 'memory_ids', 'knowledge' => 'knowledge_ids', 'experience' => 'experience_ids', _ => 'journey_event_ids' };
+      final scopeKey = switch (item.type.toLowerCase()) {
+        'memory' => 'memory_ids',
+        'knowledge' => 'knowledge_ids',
+        'experience' => 'experience_ids',
+        _ => 'journey_event_ids',
+      };
       (scope[scopeKey] ??= <String>[]).add(key);
     }
     return scope;
@@ -484,11 +700,20 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
     final groups = <_LifecycleRequestGroup>[];
     for (final group in _groups) {
       final target = group.targetAccountId.trim();
-      if (target.isEmpty) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Masukkan Target Account ID untuk setiap target.'))); return; }
-      if (group.selectedKeys.isEmpty) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.'))); return; }
+      if (target.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Masukkan Target Account ID untuk setiap target.')));
+        return;
+      }
+      if (group.selectedKeys.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal satu data Journey untuk setiap target.')));
+        return;
+      }
       final selected = _availableItems.where((item) => group.selectedKeys.contains(_itemKey(item))).toList();
       final scope = _scopeForItems(selected);
-      if (_integrations.findRequest(type: widget.stage.title, targetAccountId: target, scope: scope) != null) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request dengan target dan data yang sama sudah pernah dibuat.'))); return; }
+      if (_integrations.findRequest(type: widget.stage.title, targetAccountId: target, scope: scope) != null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request dengan target dan data yang sama sudah pernah dibuat.')));
+        return;
+      }
       groups.add(group);
     }
     for (final group in groups) {
@@ -501,8 +726,14 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   Future<void> _createClone() async {
     final email = _cloneEmailController.text.trim();
-    if (email.isEmpty || !email.contains('@')) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Masukkan target email yang valid.'))); return; }
-    if (_integrations.findRequest(type: 'Clone', targetAccountId: email, scope: const <String, List<String>>{}) != null) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Clone untuk target ini sudah pernah dibuat.'))); return; }
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Masukkan target email yang valid.')));
+      return;
+    }
+    if (_integrations.findRequest(type: 'Clone', targetAccountId: email, scope: const <String, List<String>>{}) != null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Clone untuk target ini sudah pernah dibuat.')));
+      return;
+    }
     await _integrations.addRequest(type: 'Clone', targetAccountId: email, scope: const <String, List<String>>{});
     _cloneEmailController.clear();
     if (!mounted) return;
@@ -518,19 +749,32 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: SingleChildScrollView(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Request Detail #$index', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 16),
-              _LifecycleDataRow(label: 'Status', value: item.status.name),
-              _LifecycleDataRow(label: 'Created', value: _formatDate(item.createdAt)),
-              _LifecycleDataRow(label: 'Type', value: item.type),
-              _LifecycleDataRow(label: 'Target', value: item.targetAccountId),
-              _LifecycleDataRow(label: 'Data', value: item.scope.values.fold<int>(0, (n, v) => n + v.length).toString()),
-              const SizedBox(height: 10),
-              const Text('Authorization is managed through Integrations.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
-              const SizedBox(height: 14),
-              SizedBox(width: double.infinity, child: OutlinedButton.icon(onPressed: () { Navigator.of(sheetContext).pop(); _deleteAuthorization(item); }, icon: const Icon(Icons.link_off_rounded), label: const Text('Delete Relationship'))),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Request Detail #' + index.toString(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 16),
+                _LifecycleDataRow(label: 'Status', value: item.status.name),
+                _LifecycleDataRow(label: 'Created', value: _formatDate(item.createdAt)),
+                _LifecycleDataRow(label: 'Type', value: item.type),
+                _LifecycleDataRow(label: 'Target', value: item.targetAccountId),
+                _LifecycleDataRow(label: 'Data', value: item.scope.values.fold<int>(0, (n, v) => n + v.length).toString()),
+                const SizedBox(height: 10),
+                const Text('Authorization is managed through Integrations.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      _deleteAuthorization(item);
+                    },
+                    icon: const Icon(Icons.link_off_rounded),
+                    label: const Text('Delete Relationship'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -542,10 +786,19 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Relationship?'),
-        content: const Text('This removes the local relationship/request and its related Decision History. It does not perform server-side authorization changes.'),
+        content: const Text(
+          'This removes the local relationship/request and its related Decision History. '
+          'It does not perform server-side authorization changes.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Delete')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
         ],
       ),
     );
@@ -555,7 +808,8 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
 
   String _formatDate(DateTime value) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return '${value.year}-${two(value.month)}-${two(value.day)} ${two(value.hour)}:${two(value.minute)}';
+    return '${value.year}-${two(value.month)}-${two(value.day)} '
+        '${two(value.hour)}:${two(value.minute)}';
   }
 
   @override
@@ -576,7 +830,14 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       backgroundColor: shBackground,
       body: Column(
         children: [
-          ShTopBar(title: stage.title, leading: IconButton(tooltip: 'Back', onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back))),
+          ShTopBar(
+            title: stage.title,
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
@@ -584,66 +845,252 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
                 _LifecycleSectionCard(
                   accent: stage.accent,
                   title: stage.title,
-                  child: Row(children: [
-                    _StageIcon(stage: stage, size: 54),
-                    const SizedBox(width: 14),
-                    Expanded(child: Text(stage.subtitle, style: const TextStyle(fontSize: 13, color: shMuted, height: 1.5))),
-                  ]),
+                  child: Row(
+                    children: [
+                      _StageIcon(stage: stage, size: 54),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          stage.subtitle,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: shMuted,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 if (_isRecovery) ...[
                   const SizedBox(height: 14),
-                  _LifecycleSectionCard(accent: stage.accent, title: 'Full SH Snapshot', child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('Recovery uses a FULL snapshot of the current SH. No target or per-item selection is required.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
-                    const SizedBox(height: 14),
-                    SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _createRecoverySnapshot, icon: const Icon(Icons.camera_alt_outlined), label: const Text('Create Snapshot'))),
-                  ])),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Full SH Snapshot',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Recovery uses a FULL snapshot of the current SH. No target or per-item selection is required.',
+                          style: TextStyle(fontSize: 12, color: shMuted, height: 1.5),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _createRecoverySnapshot,
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            label: const Text('Create Snapshot'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 14),
-                  _LifecycleSectionCard(accent: stage.accent, title: 'Recovery History', child: _recoveryHistory.isEmpty ? const Text('No recovery history yet.', style: TextStyle(fontSize: 12, color: shMuted)) : Column(children: [
-                    for (var i = 0; i < _recoveryHistory.length; i++)
-                      ListTile(contentPadding: EdgeInsets.zero, leading: CircleAvatar(radius: 15, child: Text('${i + 1}', style: const TextStyle(fontSize: 11))), title: const Text('Snapshot Created', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)), subtitle: Text('Type: FULL · ${_recoveryDate(_recoveryHistory[i].createdAt)}', style: const TextStyle(fontSize: 10, color: shMuted)), trailing: const Icon(Icons.chevron_right_rounded, size: 20), onTap: () => _openRecoveryDetail(_recoveryHistory[i], i + 1)),
-                  ])),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Recovery History',
+                    child: _recoveryHistory.isEmpty
+                        ? const Text('No recovery history yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _recoveryHistory.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: const Text('Snapshot Created', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                  subtitle: Text(
+                                    'Type: FULL · ' + _recoveryDate(_recoveryHistory[i].createdAt),
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openRecoveryDetail(_recoveryHistory[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
                 ] else if (_isClone) ...[
                   const SizedBox(height: 14),
-                  _LifecycleSectionCard(accent: stage.accent, title: 'Target', child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('Email', style: TextStyle(fontSize: 11, color: shMuted)),
-                    const SizedBox(height: 7),
-                    TextField(controller: _cloneEmailController, keyboardType: TextInputType.emailAddress, decoration: InputDecoration(hintText: 'Enter target email', prefixIcon: const Icon(Icons.email_outlined), filled: true, fillColor: shBackground.withValues(alpha: .55), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none))),
-                    const SizedBox(height: 14),
-                    SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _createClone, icon: const Icon(Icons.copy_all_outlined), label: const Text('Create Clone'))),
-                    const SizedBox(height: 8),
-                    const Text('Target email is used for the clone authorization flow. Authorization is handled by Integrations.', style: TextStyle(fontSize: 10, color: shMuted)),
-                    const SizedBox(height: 12),
-                    _JourneyCloneSummary(items: availableItems),
-                  ])),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Target',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Email', style: TextStyle(fontSize: 11, color: shMuted)),
+                        const SizedBox(height: 7),
+                        TextField(
+                          controller: _cloneEmailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            hintText: 'Enter target email',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            filled: true,
+                            fillColor: shBackground.withValues(alpha: .55),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _createClone,
+                            icon: const Icon(Icons.copy_all_outlined),
+                            label: const Text('Create Clone'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Target email is used for the clone authorization flow. Authorization is handled by Integrations.',
+                          style: TextStyle(fontSize: 10, color: shMuted),
+                        ),
+                        const SizedBox(height: 12),
+                        _JourneyCloneSummary(items: availableItems),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 14),
-                  _LifecycleSectionCard(accent: stage.accent, title: 'Clone Result', child: _cloneResults.isEmpty ? const Text('No clone results yet.', style: TextStyle(fontSize: 12, color: shMuted)) : Column(children: [
-                    for (var i = 0; i < _cloneResults.length; i++)
-                      ListTile(contentPadding: EdgeInsets.zero, leading: CircleAvatar(radius: 15, child: Text('${i + 1}', style: const TextStyle(fontSize: 11))), title: Text(_cloneResults[i].status.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)), subtitle: Text('Target: ${_cloneResults[i].targetAccountId}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: shMuted)), trailing: const Icon(Icons.chevron_right_rounded, size: 20), onTap: () => _openAuthorizationDetail(_cloneResults[i], i + 1)),
-                  ])),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Clone Result',
+                    child: _cloneResults.isEmpty
+                        ? const Text('No clone results yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _cloneResults.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: Text(
+                                    _cloneResults[i].status.name,
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                  ),
+                                  subtitle: Text(
+                                    'Target: ${_cloneResults[i].targetAccountId}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openAuthorizationDetail(_cloneResults[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
                 ] else if (_isIsl) ...[
                   const SizedBox(height: 14),
-                  _LifecycleSectionCard(accent: stage.accent, title: 'Target & Incoming from Journey', child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    for (var i = 0; i < _groups.length; i++) ...[
-                      _RequestGroupEditor(group: _groups[i], groupIndex: i, availableItems: availableItems, onTargetChanged: (value) => _setTarget(i, value), onItemToggle: (item) => _toggleItem(i, item), isItemAlreadyRequested: (item) => _wasAlreadyRequested(item, _groups[i].targetAccountId), showRemove: _groups.length > 1, onRemove: () => setState(() => _groups.removeAt(i))),
-                      if (i != _groups.length - 1) const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Divider(color: shBorder)),
-                    ],
-                    const SizedBox(height: 4),
-                    OutlinedButton.icon(onPressed: _addGroup, icon: const Icon(Icons.add_rounded, size: 18), label: const Text('Add Target')),
-                    const SizedBox(height: 14),
-                    Text(switch (stage.title) { 'Inheritance' => 'Request transfer of selected shared Journey context.', 'Succession' => 'Request succession using selected shared Journey context.', 'Legacy' => 'Request legacy handling for selected shared Journey context.', _ => '' }, style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5)),
-                    const SizedBox(height: 12),
-                    SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _request, icon: const Icon(Icons.send_rounded), label: Text(switch (stage.title) { 'Inheritance' => 'Request Inheritance', 'Succession' => 'Request Succession', 'Legacy' => 'Request Legacy', _ => 'Request' }))),
-                    const SizedBox(height: 8),
-                    const Text('Authentication is handled by Integrations.', style: TextStyle(fontSize: 10, color: shMuted)),
-                  ])),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Target & Incoming from Journey',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var i = 0; i < _groups.length; i++) ...[
+                          _RequestGroupEditor(
+                            group: _groups[i],
+                            groupIndex: i,
+                            availableItems: availableItems,
+                            onTargetChanged: (value) => _setTarget(i, value),
+                            onItemToggle: (item) => _toggleItem(i, item),
+                            isItemAlreadyRequested: (item) =>
+                                _wasAlreadyRequested(item, _groups[i].targetAccountId),
+                            showRemove: _groups.length > 1,
+                            onRemove: () => setState(() => _groups.removeAt(i)),
+                          ),
+                          if (i != _groups.length - 1)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              child: Divider(color: shBorder),
+                            ),
+                        ],
+                        const SizedBox(height: 4),
+                        OutlinedButton.icon(
+                          onPressed: _addGroup,
+                          icon: const Icon(Icons.add_rounded, size: 18),
+                          label: const Text('Add Target'),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          switch (stage.title) {
+                            'Inheritance' => 'Request transfer of selected shared Journey context.',
+                            'Succession' => 'Request succession using selected shared Journey context.',
+                            'Legacy' => 'Request legacy handling for selected shared Journey context.',
+                            _ => '',
+                          },
+                          style: const TextStyle(fontSize: 12, color: shMuted, height: 1.5),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _request,
+                            icon: const Icon(Icons.send_rounded),
+                            label: Text(switch (stage.title) {
+                              'Inheritance' => 'Request Inheritance',
+                              'Succession' => 'Request Succession',
+                              'Legacy' => 'Request Legacy',
+                              _ => 'Request',
+                            }),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Authentication is handled by Integrations.',
+                          style: TextStyle(fontSize: 10, color: shMuted),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 14),
-                  _LifecycleSectionCard(accent: stage.accent, title: 'Decision History', child: _islResults.isEmpty ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted)) : Column(children: [
-                    for (var i = 0; i < _islResults.length; i++)
-                      ListTile(contentPadding: EdgeInsets.zero, leading: CircleAvatar(radius: 15, child: Text('${i + 1}', style: const TextStyle(fontSize: 11))), title: Text(_islResults[i].status.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)), subtitle: Text('${_islResults[i].scope.length} scope · ${_islResults[i].scope.values.fold<int>(0, (n, v) => n + v.length)} data', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: shMuted)), trailing: const Icon(Icons.chevron_right_rounded, size: 20), onTap: () => _openAuthorizationDetail(_islResults[i], i + 1)),
-                  ])),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Decision History',
+                    child: _islResults.isEmpty
+                        ? const Text('No decisions yet.', style: TextStyle(fontSize: 12, color: shMuted))
+                        : Column(
+                            children: [
+                              for (var i = 0; i < _islResults.length; i++)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CircleAvatar(
+                                    radius: 15,
+                                    child: Text((i + 1).toString(), style: const TextStyle(fontSize: 11)),
+                                  ),
+                                  title: Text(
+                                    _islResults[i].status.name,
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                  ),
+                                  subtitle: Text(
+                                    '${_islResults[i].scope.length} scope · ${_islResults[i].scope.values.fold<int>(0, (n, v) => n + v.length)} data',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 10, color: shMuted),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                                  onTap: () => _openAuthorizationDetail(_islResults[i], i + 1),
+                                ),
+                            ],
+                          ),
+                  ),
                 ] else ...[
                   const SizedBox(height: 14),
-                  _LifecycleSectionCard(accent: stage.accent, title: 'Lifecycle detail', child: const Text('This lifecycle detail is intentionally not implemented in this pass.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.5))),
+                  _LifecycleSectionCard(
+                    accent: stage.accent,
+                    title: 'Lifecycle detail',
+                    child: const Text(
+                      'This lifecycle detail is intentionally not implemented in this pass.',
+                      style: TextStyle(fontSize: 12, color: shMuted, height: 1.5),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -654,38 +1101,83 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
   }
 }
 
+
 class _JourneyCloneSummary extends StatelessWidget {
   const _JourneyCloneSummary({required this.items});
+
   final List<JourneyLifecyclePayload> items;
-  int _count(String type) => items.where((item) => item.type.toLowerCase() == type.toLowerCase()).length;
+
+  int _count(String type) =>
+      items.where((item) => item.type.toLowerCase() == type.toLowerCase()).length;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-    decoration: BoxDecoration(color: shBackground.withValues(alpha: .55), borderRadius: BorderRadius.circular(14), border: Border.all(color: shBorder)),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Journey Clone Summary', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-      const SizedBox(height: 8),
-      Row(children: [
-        Expanded(child: _CloneSummaryValue(label: 'Memory', value: _count('Memory'))),
-        Expanded(child: _CloneSummaryValue(label: 'Knowledge', value: _count('Knowledge'))),
-        Expanded(child: _CloneSummaryValue(label: 'Experience', value: _count('Experience'))),
-      ]),
-    ]),
-  );
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: shBackground.withValues(alpha: .55),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: shBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Journey Clone Summary',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _CloneSummaryValue(label: 'Memory', value: _count('Memory'))),
+              Expanded(child: _CloneSummaryValue(label: 'Knowledge', value: _count('Knowledge'))),
+              Expanded(child: _CloneSummaryValue(label: 'Experience', value: _count('Experience'))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _CloneSummaryValue extends StatelessWidget {
   const _CloneSummaryValue({required this.label, required this.value});
+
   final String label;
   final int value;
+
   @override
-  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('$value', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)), const SizedBox(height: 2), Text(label, style: const TextStyle(fontSize: 10, color: shMuted))]);
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value.toString(),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 10, color: shMuted),
+        ),
+      ],
+    );
+  }
 }
 
 class _RequestGroupEditor extends StatelessWidget {
-  const _RequestGroupEditor({required this.group, required this.groupIndex, required this.availableItems, required this.onTargetChanged, required this.onItemToggle, required this.isItemAlreadyRequested, required this.showRemove, required this.onRemove});
+  const _RequestGroupEditor({
+    required this.group,
+    required this.groupIndex,
+    required this.availableItems,
+    required this.onTargetChanged,
+    required this.onItemToggle,
+    required this.isItemAlreadyRequested,
+    required this.showRemove,
+    required this.onRemove,
+  });
+
   final _LifecycleRequestGroup group;
   final int groupIndex;
   final List<JourneyLifecyclePayload> availableItems;
@@ -696,39 +1188,161 @@ class _RequestGroupEditor extends StatelessWidget {
   final VoidCallback onRemove;
 
   @override
-  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Row(children: [Expanded(child: Text('Target ${groupIndex + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700))), if (showRemove) IconButton(tooltip: 'Remove target', onPressed: onRemove, icon: const Icon(Icons.close_rounded, size: 18), visualDensity: VisualDensity.compact)]),
-    const SizedBox(height: 7),
-    const Text('Account ID', style: TextStyle(fontSize: 11, color: shMuted)),
-    const SizedBox(height: 7),
-    TextFormField(initialValue: group.targetAccountId, onChanged: onTargetChanged, decoration: InputDecoration(hintText: 'Enter target Account ID', prefixIcon: const Icon(Icons.person_outline_rounded), filled: true, fillColor: shBackground.withValues(alpha: .55), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none))),
-    const SizedBox(height: 14),
-    const Text('Incoming from Journey', style: TextStyle(fontSize: 11, color: shMuted)),
-    const SizedBox(height: 7),
-    if (availableItems.isEmpty) const Text('No shared Journey data available.', style: TextStyle(fontSize: 12, color: shMuted)) else for (final item in availableItems) CheckboxListTile(dense: true, contentPadding: EdgeInsets.zero, value: group.selectedKeys.contains(item.semanticSourceId ?? '${item.type}|${item.title}'), onChanged: isItemAlreadyRequested(item) ? null : (_) => onItemToggle(item), title: Text(item.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), subtitle: Text(isItemAlreadyRequested(item) ? '${item.type} · Already requested for this target' : '${item.type} · Shared', style: const TextStyle(fontSize: 10, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
-  ]);
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Target ${groupIndex + 1}',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+            ),
+            if (showRemove)
+              IconButton(
+                tooltip: 'Remove target',
+                onPressed: onRemove,
+                icon: const Icon(Icons.close_rounded, size: 18),
+                visualDensity: VisualDensity.compact,
+              ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        const Text('Account ID', style: TextStyle(fontSize: 11, color: shMuted)),
+        const SizedBox(height: 7),
+        TextFormField(
+          initialValue: group.targetAccountId,
+          onChanged: onTargetChanged,
+          decoration: InputDecoration(
+            hintText: 'Enter target Account ID',
+            prefixIcon: const Icon(Icons.person_outline_rounded),
+            filled: true,
+            fillColor: shBackground.withValues(alpha: .55),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        const Text('Incoming from Journey', style: TextStyle(fontSize: 11, color: shMuted)),
+        const SizedBox(height: 7),
+        if (availableItems.isEmpty)
+          const Text('No shared Journey data available.', style: TextStyle(fontSize: 12, color: shMuted))
+        else
+          for (final item in availableItems)
+            CheckboxListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              value: group.selectedKeys.contains(
+                item.semanticSourceId ?? '${item.type}|${item.title}',
+              ),
+              onChanged: isItemAlreadyRequested(item) ? null : (_) => onItemToggle(item),
+              title: Text(item.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              subtitle: Text(
+                isItemAlreadyRequested(item)
+                    ? '${item.type} · Already requested for this target'
+                    : '${item.type} · Shared',
+                style: const TextStyle(fontSize: 10, color: shMuted),
+              ),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+      ],
+    );
+  }
 }
 
 class _LifecycleRequestGroup {
-  const _LifecycleRequestGroup({this.targetAccountId = '', this.selectedKeys = const <String>{}});
+  const _LifecycleRequestGroup({
+    this.targetAccountId = '',
+    this.selectedKeys = const <String>{},
+  });
+
   final String targetAccountId;
   final Set<String> selectedKeys;
-  _LifecycleRequestGroup copyWith({String? targetAccountId, Set<String>? selectedKeys}) => _LifecycleRequestGroup(targetAccountId: targetAccountId ?? this.targetAccountId, selectedKeys: selectedKeys ?? this.selectedKeys);
+
+  _LifecycleRequestGroup copyWith({
+    String? targetAccountId,
+    Set<String>? selectedKeys,
+  }) =>
+      _LifecycleRequestGroup(
+        targetAccountId: targetAccountId ?? this.targetAccountId,
+        selectedKeys: selectedKeys ?? this.selectedKeys,
+      );
 }
 
 class _LifecycleSectionCard extends StatelessWidget {
-  const _LifecycleSectionCard({required this.accent, required this.title, required this.child});
+  const _LifecycleSectionCard({
+    required this.accent,
+    required this.title,
+    required this.child,
+  });
+
   final Color accent;
   final String title;
   final Widget child;
+
   @override
-  Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(20), border: Border.all(color: shBorder), boxShadow: [BoxShadow(color: accent.withValues(alpha: .06), blurRadius: 18, spreadRadius: 1)]), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)), const SizedBox(height: 12), child]));
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: shSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: shBorder),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: .06),
+            blurRadius: 18,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
 }
 
 class _LifecycleDataRow extends StatelessWidget {
   const _LifecycleDataRow({required this.label, required this.value});
+
   final String label;
   final String value;
+
   @override
-  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(bottom: 7), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [SizedBox(width: 86, child: Text(label, style: const TextStyle(fontSize: 11, color: shMuted))), Expanded(child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)))]));
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 7),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 86,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: shMuted),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
