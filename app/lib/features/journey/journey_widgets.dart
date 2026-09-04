@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
 import '../profile/integrations/integration_authorization_store.dart';
 import 'journey_data.dart';
@@ -314,10 +315,6 @@ Future<JourneyDraft?> _showJourneyEditor(
   String initialContent = '',
   bool initialPrivate = true,
 }) {
-  // Editor is a real route, not an overlay bottom-sheet. This keeps its
-  // inherited-widget lifecycle isolated from the navigation shell and avoids
-  // the framework _dependents.isEmpty assertion when saving/cancelling or
-  // changing policy.
   return Navigator.of(context).push<JourneyDraft>(
     MaterialPageRoute<JourneyDraft>(
       builder: (_) => Scaffold(
