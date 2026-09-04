@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/theme/sh_theme.dart';
 import 'semantic_domain_view.dart';
 import 'journey_widgets.dart';
