@@ -618,6 +618,22 @@ class _LifecycleDetailViewState extends State<LifecycleDetailView> {
       children: [
         _LifecycleSectionCard(
           accent: widget.stage.accent,
+          title: 'Clone Summary',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Current Shared Journey data included in this Clone path.',
+                style: TextStyle(color: shMuted, height: 1.5),
+              ),
+              const SizedBox(height: 14),
+              _JourneyCloneSummary(items: _availableItems),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        _LifecycleSectionCard(
+          accent: widget.stage.accent,
           title: 'Clone Request',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
