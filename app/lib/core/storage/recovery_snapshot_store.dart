@@ -47,7 +47,6 @@ class RecoverySnapshot {
         fileCount: (json['file_count'] as num?)?.toInt() ?? 0,
         isDemo: json['is_demo'] == true,
       );
-
 }
 
 class RecoverySnapshotStore extends ChangeNotifier {
@@ -114,7 +113,7 @@ class RecoverySnapshotStore extends ChangeNotifier {
     var knowledgeCount = 0;
     var experienceCount = 0;
     for (final entry in persistentFiles) {
-      if (entry['path'] != 'internal/temp/journey_items.json') continue;
+      if (entry['path'] != 'internal/journey_items.json') continue;
       try {
         final decoded = jsonDecode(
           utf8.decode(base64Decode(entry['bytes_base64'] as String)),
@@ -253,5 +252,4 @@ class RecoverySnapshotStore extends ChangeNotifier {
     await removeFilesNotInSnapshot(internalRoot, snapshotInternalPaths);
     await refreshFromDisk();
   }
-
 }
