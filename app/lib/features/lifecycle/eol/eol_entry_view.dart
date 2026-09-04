@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'eol_controller.dart';
 import 'eol_overview_view.dart';
+export '../lifecycle_models.dart';
 
 /// Entry point owned by the Lifecycle feature.
 ///
