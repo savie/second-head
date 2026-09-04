@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../core/theme/sh_theme.dart';
 import '../../core/widgets/sh_brand_mark.dart';
+import '../../core/state/sh_profile_state.dart';
 
 class ProfileHero extends StatelessWidget {
   const ProfileHero({
