@@ -1,22 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../../core/navigation/sh_navigation_shell.dart';
 import '../../../core/theme/sh_theme.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/storage/recovery_snapshot_store.dart';
-import '../../../core/state/sh_profile_state.dart';
-import '../../journey/journey_data.dart';
 import 'data_privacy_widgets.dart';
 
 class ExportDataView extends StatefulWidget {
   const ExportDataView();
 
   @override
-  State<ExportDataView> createState() => _ExportDataViewState();
+  State<ExportDataView> createState() => ExportDataViewState();
 }
 
 class ExportDataViewState extends State<ExportDataView> {
