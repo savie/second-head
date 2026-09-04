@@ -6,7 +6,6 @@ import '../conversation/conversation_view.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/theme/sh_theme.dart';
-import '../../core/widgets/sh_brand_mark.dart';
 import 'about_view.dart';
 import 'help_support_view.dart';
 import 'more_widgets.dart';
