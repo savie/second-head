@@ -9,7 +9,30 @@ import 'knowledge/knowledge_view.dart';
 import 'experience/experience_view.dart';
 import 'semantic_hook.dart';
 import 'journey_data.dart';
-import '../profile/integrations/integration_authorization_store.dart';
+
+Future<JourneyDraft?> showJourneyEditor(
+  BuildContext context, {
+  required String title,
+  String initialTitle = '',
+  String initialContent = '',
+  bool initialPrivate = true,
+}) {
+  return Navigator.of(context).push<JourneyDraft>(
+    MaterialPageRoute<JourneyDraft>(
+      builder: (_) => Scaffold(
+        backgroundColor: shBackground,
+        body: SafeArea(
+          child: JourneyEditorSheet(
+            title: title,
+            initialTitle: initialTitle,
+            initialContent: initialContent,
+            initialPrivate: initialPrivate,
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 class JourneyView extends StatefulWidget {
   const JourneyView({super.key});
@@ -249,7 +272,7 @@ class JourneyViewState extends State<JourneyView> {
 
     if (!mounted || type == null) return;
 
-    final draft = await _showJourneyEditor(
+    final draft = await showJourneyEditor(
       context,
       title: 'Create $type',
     );
