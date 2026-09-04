@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../core/storage/storage_service.dart';
-export '../../core/navigation/sh_navigation_shell.dart';
 
 class JourneyItem {
   JourneyItem(
