@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../journey/journey_data.dart';
+import '../../core/navigation/sh_navigation_shell.dart';
 import 'eol/eol_entry_view.dart';
 import 'clone/clone_view.dart';
 import 'recovery/recovery_view.dart';
