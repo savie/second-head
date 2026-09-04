@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../core/theme/sh_theme.dart';
-import '../../core/widgets/sh_brand_mark.dart';
 import '../../core/state/sh_profile_state.dart';
 
 class ProfileHero extends StatelessWidget {
@@ -73,16 +72,16 @@ class ProfileHero extends StatelessWidget {
                   onTap: onEdit,
                   child: ClipOval(
                     child: photo != null
-                      ? Image.memory(
-                          photo!,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.high,
-                        )
-                      : Image.asset(
-                          'assets/brand/unity.png',
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
-                        ),
+                        ? Image.memory(
+                            photo!,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                          )
+                        : Image.asset(
+                            'assets/brand/unity.png',
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                          ),
                   ),
                 ),
               ),
@@ -98,23 +97,23 @@ class ProfileHero extends StatelessWidget {
                 valueListenable: profileEmail,
                 builder: (context, email, _) => Column(
                   children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: .2,
-                  ),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  email,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: shMuted,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: .2,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      email,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: shMuted,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ],
                 ),
               ),
