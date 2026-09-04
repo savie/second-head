@@ -183,7 +183,7 @@ class LifecycleCard extends StatelessWidget {
 }
 
 class StageIcon extends StatelessWidget {
-  const StageIcon({super.key, required this.stage, required this.size});
+  const StageIcon({required this.stage, required this.size});
 
   final LifecycleStage stage;
   final double size;
