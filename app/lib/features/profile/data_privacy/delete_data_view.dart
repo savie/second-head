@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/sh_theme.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/storage/recovery_snapshot_store.dart';
+import '../../journey/journey_data.dart';
 import '../integrations/integration_authorization_store.dart';
 import 'data_privacy_widgets.dart';
 
