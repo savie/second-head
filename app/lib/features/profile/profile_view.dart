@@ -12,6 +12,7 @@ import 'security/security_view.dart';
 import 'integrations/integrations_view.dart';
 import 'data_privacy/data_privacy_view.dart';
 import '../../core/storage/storage_service.dart';
+import 'profile_widgets.dart';
 
 
 Widget _profileDestination(String title) {
