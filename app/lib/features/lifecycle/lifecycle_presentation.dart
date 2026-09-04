@@ -143,7 +143,7 @@ class LifecycleCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _StageIcon(stage: stage, size: 50),
+                  StageIcon(stage: stage, size: 50),
                   const SizedBox(height: 8),
                   Text(
                     stage.title,
@@ -182,8 +182,8 @@ class LifecycleCard extends StatelessWidget {
   }
 }
 
-class _StageIcon extends StatelessWidget {
-  const _StageIcon({required this.stage, required this.size});
+class StageIcon extends StatelessWidget {
+  const StageIcon({super.key, required this.stage, required this.size});
 
   final LifecycleStage stage;
   final double size;
