@@ -1,11 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../../core/navigation/sh_navigation_shell.dart';
 import '../../../core/theme/sh_theme.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/storage/recovery_snapshot_store.dart';
-import '../../../core/state/sh_profile_state.dart';
-import '../../journey/journey_data.dart';
 import '../integrations/integration_authorization_store.dart';
 import 'data_privacy_widgets.dart';
 
@@ -13,7 +9,7 @@ class DeleteDataView extends StatefulWidget {
   const DeleteDataView();
 
   @override
-  State<DeleteDataView> createState() => _DeleteDataViewState();
+  State<DeleteDataView> createState() => DeleteDataViewState();
 }
 
 class DeleteDataViewState extends State<DeleteDataView> {
