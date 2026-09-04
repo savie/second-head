@@ -1,4 +1,4 @@
-import '../../integrations/integration_authorization_store.dart';
+import '../../profile/integrations/integration_authorization_store.dart';
 import '../../journey/journey_data.dart';
 import '../../../core/storage/recovery_snapshot_store.dart';
 import 'eol_state.dart';

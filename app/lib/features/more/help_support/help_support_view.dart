@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/sh_theme.dart';
-import '../../core/navigation/sh_navigation_shell.dart';
+import '../../../core/theme/sh_theme.dart';
+import '../../../core/navigation/sh_navigation_shell.dart';
 
 class HelpSupportView extends StatelessWidget {
   const HelpSupportView({super.key});

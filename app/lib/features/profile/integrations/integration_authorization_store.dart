@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../../core/storage/storage_service.dart';
+import '../../../core/storage/storage_service.dart';
 
 enum IntegrationAuthorizationStatus {
   pending,

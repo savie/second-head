@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-
 import '../auth/auth_screens.dart';
 import '../conversation/conversation_view.dart';
 import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/theme/sh_theme.dart';
-import 'help_support_view.dart';
+import 'about/about_view.dart';
+import 'help_support/help_support_view.dart';
 import 'more_widgets.dart';
 
 class SideMenu extends StatefulWidget {
@@ -101,36 +100,6 @@ class _SideMenuState extends State<SideMenu> {
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showAbout(BuildContext context) async {
-    final info = await PackageInfo.fromPlatform();
-    if (!context.mounted) return;
-
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
-              child: Text(
-                'About',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(height: 22),
-            AboutRow('Version', info.version),
-            const SizedBox(height: 8),
-            AboutRow('Build', '#' + info.buildNumber),
           ],
         ),
       ),
@@ -286,7 +255,12 @@ class _SideMenuState extends State<SideMenu> {
             MenuTile(
               icon: Icons.info_outline,
               label: 'About',
-              onTap: () => _showAbout(context),
+              onTap: () {
+                _closeDrawer();
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const AboutView()),
+                );
+              },
             ),
             const Spacer(),
             Padding(
