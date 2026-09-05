@@ -12,15 +12,16 @@ Future<void> main() async {
   try {
     await AuthSession.service.restoreSession();
   } catch (_) {
-    // A stale/incomplete identity must not grant access to Home.
     AuthSession.identityContext.clear();
   }
 
-  runApp(const SecondHeadApp());
+  runApp(const SecondHeadApp(authListenerEnabled: true));
 }
 
 class SecondHeadApp extends StatefulWidget {
-  const SecondHeadApp({super.key});
+  const SecondHeadApp({super.key, this.authListenerEnabled = false});
+
+  final bool authListenerEnabled;
 
   @override
   State<SecondHeadApp> createState() => _SecondHeadAppState();
@@ -31,11 +32,16 @@ class _SecondHeadAppState extends State<SecondHeadApp> {
   void initState() {
     super.initState();
     shAppearance.addListener(_changed);
+    AuthSession.identityContext.addListener(_changed);
+    if (widget.authListenerEnabled) {
+      AuthSession.service.startAuthStateListener(onChanged: _changed);
+    }
   }
 
   @override
   void dispose() {
     shAppearance.removeListener(_changed);
+    AuthSession.identityContext.removeListener(_changed);
     super.dispose();
   }
 
@@ -43,9 +49,14 @@ class _SecondHeadAppState extends State<SecondHeadApp> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget entry = AuthSession.isAuthenticated
-        ? const HomeScreen()
-        : const LoginScreen();
+    final Widget entry;
+    if (AuthSession.service.isPasswordRecoveryActive) {
+      entry = const UpdatePasswordScreen();
+    } else if (AuthSession.isAuthenticated) {
+      entry = const HomeScreen();
+    } else {
+      entry = const LoginScreen();
+    }
 
     return MaterialApp(
       title: 'SECOND HEAD',
