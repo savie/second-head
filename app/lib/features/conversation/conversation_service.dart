@@ -70,6 +70,62 @@ class ConversationService {
     }
     return ConversationRecord.fromMap(Map<String, dynamic>.from(result));
   }
+
+  Future<void> rename({
+    required String conversationId,
+    required String title,
+  }) async {
+    await backendClient.rpc(
+      'runtime_rename_conversation',
+      params: {
+        'p_conversation_id': conversationId,
+        'p_title': title,
+      },
+    );
+  }
+
+  Future<void> updateMessage({
+    required String conversationId,
+    required DateTime createdAt,
+    required String role,
+    required String oldContent,
+    required String newContent,
+  }) async {
+    await backendClient.rpc(
+      'runtime_update_conversation_message',
+      params: {
+        'p_conversation_id': conversationId,
+        'p_created_at': createdAt.toUtc().toIso8601String(),
+        'p_role': role,
+        'p_old_content': oldContent,
+        'p_new_content': newContent,
+      },
+    );
+  }
+
+  Future<void> deleteMessage({
+    required String conversationId,
+    required DateTime createdAt,
+    required String role,
+    required String content,
+  }) async {
+    await backendClient.rpc(
+      'runtime_delete_conversation_message',
+      params: {
+        'p_conversation_id': conversationId,
+        'p_created_at': createdAt.toUtc().toIso8601String(),
+        'p_role': role,
+        'p_content': content,
+      },
+    );
+  }
+
+  Future<void> deleteConversation({required String conversationId}) async {
+    await backendClient.rpc(
+      'runtime_delete_conversation',
+      params: {'p_conversation_id': conversationId},
+    );
+  }
 }
 
 class ConversationRecord {
@@ -88,6 +144,11 @@ class ConversationRecord {
   final Map<String, dynamic> metadata;
 
   bool get isAssistant => role == 'assistant';
+
+  String? get conversationTitle {
+    final value = metadata['conversation_title'];
+    return value is String && value.trim().isNotEmpty ? value.trim() : null;
+  }
 
   factory ConversationRecord.fromMap(Map<String, dynamic> row) {
     final conversationId = row['conversation_id']?.toString();
