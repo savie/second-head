@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/backend/backend_client.dart';
-import '../auth/auth_screens.dart';
 
 class ConversationService {
   const ConversationService();
