@@ -20,6 +20,14 @@ class ConversationService {
     return result.whereType<Map>().map((row) => ProjectSummary.fromMap(Map<String, dynamic>.from(row))).toList();
   }
 
+  Future<String> createProject(String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) throw ArgumentError('Project name is required.');
+    final result = await backendClient.rpc('runtime_create_project', params: {'p_name': trimmed});
+    if (result == null) throw StateError('Project runtime returned no project id.');
+    return result.toString();
+  }
+
   Future<String> createConversation({String? projectId, String? title}) async {
     final result = await backendClient.rpc('runtime_create_conversation', params: {'p_project_id': projectId, 'p_title': title ?? 'New Conversation'});
     if (result == null) throw StateError('Conversation runtime returned no conversation id.');
@@ -126,7 +134,6 @@ class ProjectSummary {
 
 class ConversationRecord {
   const ConversationRecord({required this.conversationId, required this.messageId, required this.threadId, required this.role, required this.content, required this.createdAt, required this.metadata});
-  /// Message id is kept in conversationId for compatibility with the existing message UI.
   final String conversationId;
   final String messageId;
   final String threadId;
@@ -134,9 +141,7 @@ class ConversationRecord {
   final String content;
   final DateTime createdAt;
   final Map<String, dynamic> metadata;
-
   bool get isAssistant => role == 'assistant';
-
   String? get conversationTitle {
     final value = metadata['conversation_title'];
     return value is String && value.trim().isNotEmpty ? value.trim() : null;
