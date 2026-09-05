@@ -14,8 +14,12 @@ class ConversationRuntimeBridge {
   Future<List<ConversationSummary>> listConversations() => _service.listConversations();
   Future<List<ProjectSummary>> listProjects() => _service.listProjects();
   Future<String> createProject(String name) => _service.createProject(name);
+  Future<void> renameProject({required String projectId, required String name}) => _service.renameProject(projectId: projectId, name: name);
+  Future<void> deleteProject({required String projectId}) => _service.deleteProject(projectId: projectId);
   Future<String> createConversation({String? projectId, String? title}) => _service.createConversation(projectId: projectId, title: title);
   Future<void> selectConversation(String conversationId) => _service.selectConversation(conversationId);
+  Future<void> moveConversation({required String conversationId, required String projectId}) => _service.moveConversation(conversationId: conversationId, projectId: projectId);
+  Future<void> removeConversationFromProject({required String conversationId}) => _service.removeConversationFromProject(conversationId: conversationId);
   Future<ConversationRecord> recordUser(String content) => _service.record(role: 'user', content: content);
   Future<ConversationRecord> recordAssistant(String content) => _service.record(role: 'assistant', content: content);
   Future<void> rename({required String conversationId, required String title}) => _service.rename(conversationId: conversationId, title: title);
