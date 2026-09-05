@@ -1,6 +1,6 @@
 # SECOND HEAD — Documentation
 
-Folder ini menampung dokumentasi SH dengan pemisahan yang jelas antara baseline reference, technology boundary, architecture, dan dokumentasi lain yang akan ditambahkan sesuai kebutuhan.
+Folder ini menampung dokumentasi SH dengan pemisahan yang jelas antara baseline reference, technology boundary, architecture, contract, dan dokumentasi lain yang akan ditambahkan sesuai kebutuhan.
 
 ## Authority
 
@@ -24,9 +24,11 @@ docs/
 ├── technology/
 │   ├── README.md
 │   └── sh_technology_boundaries.md
-└── architecture/
-    ├── README.md
-    └── sh_flutter_dart_architecture_and_implementation_working.md
+├── architecture/
+│   ├── README.md
+│   └── sh_flutter_dart_architecture_and_implementation_working.md
+└── contract/
+    └── sh_project_conversation_message_contract.md
 ```
 
 ### canonical/
@@ -40,6 +42,10 @@ Berisi Technology Boundaries yang menetapkan batas teknologi untuk implementatio
 ### architecture/
 
 Berisi architecture dan implementation working reference untuk pembangunan SH dengan Flutter + Dart.
+
+### contract/
+
+Berisi approved working contract yang menetapkan scope, boundary, behavior, dependency, dan execution constraint untuk bagian SH tertentu. Contract tidak mengubah Canonical kecuali dipromosikan secara eksplisit melalui authority yang sesuai.
 
 ## Aturan Dokumentasi
 
