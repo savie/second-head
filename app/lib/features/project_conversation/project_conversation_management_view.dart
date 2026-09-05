@@ -194,7 +194,7 @@ class _ConversationCreateDialogState extends State<_ConversationCreateDialog> {
       TextField(controller: _controller, autofocus: true, decoration: const InputDecoration(labelText: 'Conversation name')),
       const SizedBox(height: 12),
       DropdownButtonFormField<String?>(
-        value: _projectId,
+        initialValue: _projectId,
         decoration: const InputDecoration(labelText: 'Project'),
         items: [const DropdownMenuItem<String?>(value: null, child: Text('No Project')), ...widget.projects.map((p) => DropdownMenuItem<String?>(value: p.projectId, child: Text(p.name, overflow: TextOverflow.ellipsis)))],
         onChanged: (value) => setState(() => _projectId = value),
