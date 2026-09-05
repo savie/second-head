@@ -6,6 +6,7 @@ import '../../core/theme/sh_theme.dart';
 import '../auth/auth_screens.dart';
 import '../conversation/conversation_runtime_bridge.dart';
 import '../conversation/conversation_service.dart';
+import '../project_conversation/project_conversation_management_view.dart';
 import 'about/about_view.dart';
 import 'help_support/help_support_view.dart';
 import 'more_widgets.dart';
@@ -48,6 +49,13 @@ class _SideMenuState extends State<SideMenu> {
     widget.onSelectPage(index);
   }
 
+  Future<void> _openManagement() async {
+    await _closeDrawer();
+    if (!mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProjectConversationManagementView()));
+    if (mounted) await _loadSidebar();
+  }
+
   Future<void> _startNewConversation({String? projectId}) async {
     try {
       final id = await _runtime.createConversation(projectId: projectId, title: 'New Conversation');
@@ -88,15 +96,9 @@ class _SideMenuState extends State<SideMenu> {
           TextField(controller: controller, autofocus: true, textInputAction: TextInputAction.done, decoration: const InputDecoration(hintText: 'Project name')),
           const SizedBox(height: 14),
           Row(children: [
-            Expanded(child: OutlinedButton(
-              style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2),
-              onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'),
-            )),
+            Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
             const SizedBox(width: 10),
-            Expanded(child: FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric),
-              onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'),
-            )),
+            Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
           ]),
         ]),
       ),
@@ -119,15 +121,9 @@ class _SideMenuState extends State<SideMenu> {
           const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12), TextField(controller: controller, autofocus: true), const SizedBox(height: 14),
           Row(children: [
-            Expanded(child: OutlinedButton(
-              style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2),
-              onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'),
-            )),
+            Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
             const SizedBox(width: 10),
-            Expanded(child: FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric),
-              onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'),
-            )),
+            Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
           ]),
         ]),
       ),
@@ -150,41 +146,49 @@ class _SideMenuState extends State<SideMenu> {
     ),
   );
 
-  Widget _projectsEntries() => Padding(
-    padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
-    child: Column(children: [
-      _sectionAction(icon: Icons.add, label: 'New Project', onTap: _createProject),
-      const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Projects', style: TextStyle(fontSize: 9, color: shMuted)))),
-      for (final project in _projects) ListTile(
-        dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
-        leading: const Icon(Icons.folder_outlined, size: 16, color: shMuted),
-        title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
-        trailing: Text('${_conversations.where((c) => c.projectId == project.projectId).length}', style: const TextStyle(fontSize: 9, color: shMuted)),
-        onTap: () => setState(() => _conversationExpanded = true),
-      ),
-      if (!_loading && _projects.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted)))),
-    ]),
-  );
+  Widget _projectsEntries() {
+    final recent = _projects.take(5).toList();
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
+      child: Column(children: [
+        _sectionAction(icon: Icons.add, label: 'New Project', onTap: _createProject),
+        const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Projects', style: TextStyle(fontSize: 9, color: shMuted)))),
+        for (final project in recent) ListTile(
+          dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
+          leading: const Icon(Icons.folder_outlined, size: 16, color: shMuted),
+          title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
+          trailing: Text('${_conversations.where((c) => c.projectId == project.projectId).length}', style: const TextStyle(fontSize: 9, color: shMuted)),
+          onTap: () => setState(() => _conversationExpanded = true),
+        ),
+        if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted)))),
+        if (_projects.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Projects', onTap: _openManagement),
+      ]),
+    );
+  }
 
   Widget _conversationEntries() => ValueListenableBuilder<String?>(
     valueListenable: ConversationService.activeConversationId,
-    builder: (context, activeId, _) => Padding(
-      padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
-      child: Column(children: [
-        _sectionAction(icon: Icons.add, label: 'New Conversation', onTap: () => _startNewConversation()),
-        const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Conversations', style: TextStyle(fontSize: 9, color: shMuted)))),
-        for (final item in _conversations) GestureDetector(
-          onLongPress: () => _rename(context, item),
-          child: ListTile(
-            dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
-            leading: Icon(Icons.chat_bubble_outline, size: 16, color: activeId == item.conversationId ? shCyan : shMuted),
-            title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
-            onTap: () => _openConversation(item),
+    builder: (context, activeId, _) {
+      final recent = _conversations.take(5).toList();
+      return Padding(
+        padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
+        child: Column(children: [
+          _sectionAction(icon: Icons.add, label: 'New Conversation', onTap: () => _startNewConversation()),
+          const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Conversations', style: TextStyle(fontSize: 9, color: shMuted)))),
+          for (final item in recent) GestureDetector(
+            onLongPress: () => _rename(context, item),
+            child: ListTile(
+              dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
+              leading: Icon(Icons.chat_bubble_outline, size: 16, color: activeId == item.conversationId ? shCyan : shMuted),
+              title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
+              onTap: () => _openConversation(item),
+            ),
           ),
-        ),
-        if (!_loading && _conversations.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted)))),
-      ]),
-    ),
+          if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted)))),
+          if (_conversations.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Conversations', onTap: _openManagement),
+        ]),
+      );
+    },
   );
 
   Future<void> _logout() async {
