@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'core/backend/backend_client.dart';
 import 'core/theme/sh_theme.dart';
-import 'features/auth/auth_flow_screen.dart';
 import 'features/auth/auth_screens.dart';
 import 'features/auth/update_password_screen.dart';
 import 'features/home/home_screen.dart';
@@ -57,7 +56,7 @@ class _SecondHeadAppState extends State<SecondHeadApp> {
     } else if (AuthSession.isAuthenticated) {
       entry = const HomeScreen();
     } else {
-      entry = const AuthFlowScreen();
+      entry = const LoginScreen();
     }
 
     return MaterialApp(
