@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/theme/sh_theme.dart';
 import '../auth/auth_screens.dart';
@@ -33,18 +34,17 @@ class _SideMenuState extends State<SideMenu> {
 
   Future<void> _loadSidebar() async {
     try {
-      final results = await Future.wait([_runtime.listProjects(), _runtime.listConversations()]);
+      final projects = await _runtime.listProjects();
+      final conversations = await _runtime.listConversations();
       if (!mounted) return;
-      setState(() { _projects = results[0] as List<ProjectSummary>; _conversations = results[1] as List<ConversationSummary>; _loading = false; });
+      setState(() { _projects = projects; _conversations = conversations; _loading = false; });
     } catch (_) { if (mounted) setState(() => _loading = false); }
   }
 
-  Future<void> _startNewConversation({String? projectId}) async {
+  Future<void> _startNewConversation() async {
     try {
-      await _runtime.createConversation(projectId: projectId);
+      await _runtime.createConversation();
       if (!mounted) return;
-      conversationTitle.value = 'New Conversation';
-      conversationRevision.value++;
       _closeDrawer();
       widget.onSelectPage(0);
     } catch (_) {
@@ -53,12 +53,14 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Future<void> _openConversation(ConversationSummary item) async {
-    await _runtime.selectConversation(item.conversationId);
-    if (!mounted) return;
-    conversationTitle.value = item.title;
-    conversationRevision.value++;
-    _closeDrawer();
-    widget.onSelectPage(0);
+    try {
+      await _runtime.selectConversation(item.conversationId);
+      if (!mounted) return;
+      _closeDrawer();
+      widget.onSelectPage(0);
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to open conversation')));
+    }
   }
 
   Future<void> _rename(BuildContext context, ConversationSummary item) async {
@@ -83,12 +85,11 @@ class _SideMenuState extends State<SideMenu> {
         ]),
       ),
     );
+    controller.dispose();
     if (name == null || name.isEmpty) return;
     try {
       await _runtime.rename(conversationId: item.conversationId, title: name);
-      if (!mounted) return;
-      await _loadSidebar();
-      if (ConversationService.activeConversationId.value == item.conversationId) conversationTitle.value = name;
+      if (mounted) await _loadSidebar();
     } catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
   }
 
@@ -105,7 +106,10 @@ class _SideMenuState extends State<SideMenu> {
             title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
           ),
         if (!_loading && _projects.isEmpty)
-          const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted))),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(38, 6, 8, 8),
+            child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted))),
+          ),
       ]),
     );
   }
@@ -120,7 +124,7 @@ class _SideMenuState extends State<SideMenu> {
             padding: const EdgeInsets.only(left: 38, bottom: 4),
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
-              onTap: () => _startNewConversation(),
+              onTap: _startNewConversation,
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
@@ -143,7 +147,10 @@ class _SideMenuState extends State<SideMenu> {
               ),
             ),
           if (!_loading && _conversations.isEmpty)
-            const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted))),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(38, 6, 8, 8),
+              child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted))),
+            ),
         ]),
       ),
     );
