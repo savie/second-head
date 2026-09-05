@@ -12,6 +12,7 @@ import 'more_widgets.dart';
 
 class SideMenu extends StatefulWidget {
   const SideMenu({super.key, required this.onSelectPage});
+
   final ValueChanged<int> onSelectPage;
 
   @override
@@ -20,10 +21,8 @@ class SideMenu extends StatefulWidget {
 
 class _SideMenuState extends State<SideMenu> {
   final ConversationRuntimeBridge _runtime = const ConversationRuntimeBridge();
-  bool _conversationExpanded = true;
-  bool _projectExpanded = true;
+  bool _conversationExpanded = false;
   bool _loading = true;
-  List<ProjectSummary> _projects = const [];
   List<ConversationSummary> _conversations = const [];
 
   void _closeDrawer() => Navigator.of(context).pop();
@@ -36,16 +35,14 @@ class _SideMenuState extends State<SideMenu> {
   @override
   void initState() {
     super.initState();
-    _loadSidebar();
+    _loadConversations();
   }
 
-  Future<void> _loadSidebar() async {
+  Future<void> _loadConversations() async {
     try {
-      final projects = await _runtime.listProjects();
       final conversations = await _runtime.listConversations();
       if (!mounted) return;
       setState(() {
-        _projects = projects;
         _conversations = conversations;
         _loading = false;
       });
@@ -57,6 +54,7 @@ class _SideMenuState extends State<SideMenu> {
   Future<void> _startNewConversation() async {
     try {
       await _runtime.createConversation();
+      await _loadConversations();
       if (!mounted) return;
       _closeDrawer();
       widget.onSelectPage(0);
@@ -95,10 +93,7 @@ class _SideMenuState extends State<SideMenu> {
       ),
       builder: (sheet) => Padding(
         padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.of(sheet).viewInsets.bottom + 18,
+          18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -135,7 +130,7 @@ class _SideMenuState extends State<SideMenu> {
     if (name == null || name.isEmpty) return;
     try {
       await _runtime.rename(conversationId: item.conversationId, title: name);
-      if (mounted) await _loadSidebar();
+      await _loadConversations();
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -143,40 +138,6 @@ class _SideMenuState extends State<SideMenu> {
         );
       }
     }
-  }
-
-  Widget _projectEntries() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
-      child: Column(
-        children: [
-          for (final project in _projects)
-            ListTile(
-              dense: true,
-              visualDensity: const VisualDensity(vertical: -2),
-              contentPadding: const EdgeInsets.only(left: 28, right: 4),
-              leading: const Icon(Icons.folder_outlined, size: 17, color: shCyan),
-              title: Text(
-                project.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-              ),
-            ),
-          if (!_loading && _projects.isEmpty)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(38, 6, 8, 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'No projects yet',
-                  style: TextStyle(fontSize: 10, color: shMuted),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 
   Widget _conversationEntries() {
@@ -215,10 +176,10 @@ class _SideMenuState extends State<SideMenu> {
                 child: ListTile(
                   dense: true,
                   visualDensity: const VisualDensity(vertical: -2),
-                  contentPadding: const EdgeInsets.only(left: 38, right: 4),
+                  contentPadding: const EdgeInsets.only(left: 36, right: 4),
                   leading: Icon(
                     Icons.chat_bubble_outline,
-                    size: 15,
+                    size: 16,
                     color: activeId == item.conversationId ? shCyan : shMuted,
                   ),
                   title: Text(
@@ -230,14 +191,6 @@ class _SideMenuState extends State<SideMenu> {
                       color: activeId == item.conversationId ? shCyan : null,
                     ),
                   ),
-                  subtitle: item.preview.isEmpty
-                      ? null
-                      : Text(
-                          item.preview,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 9, color: shMuted),
-                        ),
                   onTap: () => _openConversation(item),
                 ),
               ),
@@ -246,10 +199,7 @@ class _SideMenuState extends State<SideMenu> {
                 padding: EdgeInsets.fromLTRB(38, 6, 8, 8),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    'No conversations yet',
-                    style: TextStyle(fontSize: 10, color: shMuted),
-                  ),
+                  child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted)),
                 ),
               ),
           ],
@@ -301,12 +251,6 @@ class _SideMenuState extends State<SideMenu> {
               ),
             ),
             const Divider(color: shBorder),
-            MenuTile(
-              icon: Icons.folder_outlined,
-              label: 'Project',
-              onTap: () => setState(() => _projectExpanded = !_projectExpanded),
-            ),
-            if (_projectExpanded) _projectEntries(),
             MenuTile(
               icon: Icons.chat_bubble_outline,
               label: 'Conversation',
