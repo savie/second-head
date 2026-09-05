@@ -17,8 +17,7 @@ class AuthSession {
   static final fullNameController = TextEditingController();
   static final confirmPasswordController = TextEditingController();
 
-  static bool get isAuthenticated =>
-      supabaseClient.auth.currentSession != null && identityContext.hasIdentity;
+  static bool get isAuthenticated => identityContext.hasIdentity;
 }
 
 class _AuthScaffold extends StatelessWidget {
