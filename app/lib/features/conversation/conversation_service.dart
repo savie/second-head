@@ -133,8 +133,7 @@ class ProjectSummary {
 }
 
 class ConversationRecord {
-  const ConversationRecord({required this.conversationId, required this.messageId, required this.threadId, required this.role, required this.content, required this.createdAt, required this.metadata});
-  final String conversationId;
+  const ConversationRecord({required this.messageId, required this.threadId, required this.role, required this.content, required this.createdAt, required this.metadata});
   final String messageId;
   final String threadId;
   final String role;
@@ -148,7 +147,7 @@ class ConversationRecord {
   }
 
   factory ConversationRecord.fromMap(Map<String, dynamic> row) {
-    final messageId = row['message_id']?.toString() ?? row['conversation_id']?.toString();
+    final messageId = row['message_id']?.toString();
     final threadId = row['thread_id']?.toString() ?? row['conversation_id']?.toString();
     final role = row['role']?.toString();
     final content = row['content']?.toString();
@@ -157,6 +156,6 @@ class ConversationRecord {
     final createdAt = DateTime.tryParse(createdAtRaw);
     if (createdAt == null) throw StateError('Conversation runtime returned an invalid timestamp.');
     final metadata = row['metadata'];
-    return ConversationRecord(conversationId: messageId, messageId: messageId, threadId: threadId, role: role, content: content, createdAt: createdAt, metadata: metadata is Map ? Map<String, dynamic>.from(metadata) : const <String, dynamic>{});
+    return ConversationRecord(messageId: messageId, threadId: threadId, role: role, content: content, createdAt: createdAt, metadata: metadata is Map ? Map<String, dynamic>.from(metadata) : const <String, dynamic>{});
   }
 }
