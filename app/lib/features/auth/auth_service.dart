@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/identity/sh_identity.dart';
 import '../../core/supabase/supabase_client.dart';
@@ -37,7 +36,6 @@ class AuthService {
             onChanged?.call();
             break;
           case AuthChangeEvent.signedOut:
-          case AuthChangeEvent.userDeleted:
             _passwordRecoveryActive = false;
             identityContext.clear();
             onChanged?.call();
@@ -51,7 +49,10 @@ class AuthService {
   }
 
   Future<void> signIn({required String email, required String password}) async {
-    await supabaseClient.auth.signInWithPassword(email: email.trim(), password: password);
+    await supabaseClient.auth.signInWithPassword(
+      email: email.trim(),
+      password: password,
+    );
     await resolveIdentity();
   }
 
@@ -62,14 +63,22 @@ class AuthService {
     );
   }
 
-  Future<void> signUp({required String email, required String password, String? fullName}) async {
+  Future<void> signUp({
+    required String email,
+    required String password,
+    String? fullName,
+  }) async {
     final response = await supabaseClient.auth.signUp(
       email: email.trim(),
       password: password,
-      data: fullName == null || fullName.trim().isEmpty ? null : {'full_name': fullName.trim()},
+      data: fullName == null || fullName.trim().isEmpty
+          ? null
+          : {'full_name': fullName.trim()},
     );
     if (response.session == null) {
-      throw const AuthException('Account created. Check your email to confirm the account before signing in.');
+      throw const AuthException(
+        'Account created. Check your email to confirm the account before signing in.',
+      );
     }
     await resolveIdentity();
   }
@@ -113,7 +122,13 @@ class AuthService {
     if (accountId == null || shId == null || ownershipRole == null) {
       throw const AuthException('Authenticated identity is incomplete.');
     }
-    identityContext.setIdentity(ShIdentity(accountId: accountId, shId: shId, ownershipRole: ownershipRole));
+    identityContext.setIdentity(
+      ShIdentity(
+        accountId: accountId,
+        shId: shId,
+        ownershipRole: ownershipRole,
+      ),
+    );
   }
 
   Future<void> signOut() async {
