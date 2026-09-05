@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/theme/sh_theme.dart';
 import '../auth/auth_screens.dart';
@@ -27,33 +26,17 @@ class _SideMenuState extends State<SideMenu> {
   List<ConversationSummary> _conversations = const [];
 
   void _closeDrawer() => Navigator.of(context).pop();
-
-  void _openPage(int index) {
-    _closeDrawer();
-    widget.onSelectPage(index);
-  }
+  void _openPage(int index) { _closeDrawer(); widget.onSelectPage(index); }
 
   @override
-  void initState() {
-    super.initState();
-    _loadSidebar();
-  }
+  void initState() { super.initState(); _loadSidebar(); }
 
   Future<void> _loadSidebar() async {
     try {
-      final results = await Future.wait([
-        _runtime.listProjects(),
-        _runtime.listConversations(),
-      ]);
+      final results = await Future.wait([_runtime.listProjects(), _runtime.listConversations()]);
       if (!mounted) return;
-      setState(() {
-        _projects = results[0] as List<ProjectSummary>;
-        _conversations = results[1] as List<ConversationSummary>;
-        _loading = false;
-      });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
-    }
+      setState(() { _projects = results[0] as List<ProjectSummary>; _conversations = results[1] as List<ConversationSummary>; _loading = false; });
+    } catch (_) { if (mounted) setState(() => _loading = false); }
   }
 
   Future<void> _startNewConversation({String? projectId}) async {
@@ -65,11 +48,7 @@ class _SideMenuState extends State<SideMenu> {
       _closeDrawer();
       widget.onSelectPage(0);
     } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to create conversation')),
-        );
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create conversation')));
     }
   }
 
@@ -88,25 +67,20 @@ class _SideMenuState extends State<SideMenu> {
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
       builder: (sheet) => Padding(
         padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 12),
-            TextField(controller: controller, autofocus: true),
-            const SizedBox(height: 14),
-            Row(children: [
-              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
-              const SizedBox(width: 10),
-              Expanded(child: FilledButton(onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
-            ]),
-          ],
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 12),
+          TextField(controller: controller, autofocus: true),
+          const SizedBox(height: 14),
+          Row(children: [
+            Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
+            const SizedBox(width: 10),
+            Expanded(child: FilledButton(onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
+          ]),
+        ]),
       ),
     );
     if (name == null || name.isEmpty) return;
@@ -114,92 +88,69 @@ class _SideMenuState extends State<SideMenu> {
       await _runtime.rename(conversationId: item.conversationId, title: name);
       if (!mounted) return;
       await _loadSidebar();
-      if (ConversationService.activeConversationId.value == item.conversationId) {
-        conversationTitle.value = name;
-      }
-    } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation')));
-    }
+      if (ConversationService.activeConversationId.value == item.conversationId) conversationTitle.value = name;
+    } catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
   }
 
-  Widget _projectSection() {
-    final byProject = <String?, List<ConversationSummary>>{};
-    for (final conversation in _conversations) {
-      byProject.putIfAbsent(conversation.projectId, () => []).add(conversation);
-    }
+  Widget _projectEntries() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
+      child: Column(children: [
+        for (final project in _projects)
+          ListTile(
+            dense: true,
+            visualDensity: const VisualDensity(vertical: -2),
+            contentPadding: const EdgeInsets.only(left: 28, right: 4),
+            leading: const Icon(Icons.folder_outlined, size: 17, color: shCyan),
+            title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+          ),
+        if (!_loading && _projects.isEmpty)
+          const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted))),
+      ]),
+    );
+  }
+
+  Widget _conversationEntries() {
     return ValueListenableBuilder<String?>(
       valueListenable: ConversationService.activeConversationId,
       builder: (context, activeId, _) => Padding(
         padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
         child: Column(children: [
-          for (final project in _projects) ...[
-            ListTile(
-              dense: true,
-              visualDensity: const VisualDensity(vertical: -2),
-              contentPadding: const EdgeInsets.only(left: 28, right: 4),
-              leading: const Icon(Icons.folder_outlined, size: 17, color: shCyan),
-              title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+          Padding(
+            padding: const EdgeInsets.only(left: 38, bottom: 4),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () => _startNewConversation(),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(10), border: Border.all(color: shBorder)),
+                child: const Row(children: [Icon(Icons.add, size: 18, color: shCyan), SizedBox(width: 9), Text('New Conversation', style: TextStyle(fontSize: 11, color: shCyan))]),
+              ),
             ),
-            ...?byProject[project.projectId]?.map((item) => _conversationTile(item, activeId)),
-          ],
-          if (byProject[null]?.isNotEmpty == true) ...[
-            const ListTile(
-              dense: true,
-              visualDensity: VisualDensity(vertical: -2),
-              contentPadding: EdgeInsets.only(left: 28, right: 4),
-              leading: Icon(Icons.inbox_outlined, size: 17, color: shMuted),
-              title: Text('Standalone', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+          ),
+          for (final item in _conversations)
+            GestureDetector(
+              onLongPress: () => _rename(context, item),
+              child: ListTile(
+                dense: true,
+                visualDensity: const VisualDensity(vertical: -2),
+                contentPadding: const EdgeInsets.only(left: 38, right: 4),
+                leading: Icon(Icons.chat_bubble_outline, size: 15, color: activeId == item.conversationId ? shCyan : shMuted),
+                title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
+                subtitle: item.preview.isEmpty ? null : Text(item.preview, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9, color: shMuted)),
+                onTap: () => _openConversation(item),
+              ),
             ),
-            ...byProject[null]!.map((item) => _conversationTile(item, activeId)),
-          ],
           if (!_loading && _conversations.isEmpty)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(38, 6, 8, 8),
-              child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted))),
-            ),
+            const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted))),
         ]),
       ),
     );
   }
 
-  Widget _conversationTile(ConversationSummary item, String? activeId) {
-    return GestureDetector(
-      onLongPress: () => _rename(context, item),
-      child: ListTile(
-        dense: true,
-        visualDensity: const VisualDensity(vertical: -2),
-        contentPadding: const EdgeInsets.only(left: 52, right: 4),
-        leading: Icon(Icons.chat_bubble_outline, size: 15, color: activeId == item.conversationId ? shCyan : shMuted),
-        title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
-        subtitle: item.preview.isEmpty ? null : Text(item.preview, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9, color: shMuted)),
-        onTap: () => _openConversation(item),
-      ),
-    );
-  }
-
-  Widget _conversationEntries() {
-    return Column(children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 38, right: 10, bottom: 4),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => _startNewConversation(),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-            decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(10), border: Border.all(color: shBorder)),
-            child: const Row(children: [Icon(Icons.add, size: 18, color: shCyan), SizedBox(width: 9), Text('New Conversation', style: TextStyle(fontSize: 11, color: shCyan))]),
-          ),
-        ),
-      ),
-      if (_projectExpanded) _projectSection(),
-    ]);
-  }
-
   Future<void> _logout() async {
-    try {
-      await AuthSession.service.signOut();
-    } finally {
+    try { await AuthSession.service.signOut(); } finally {
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginScreen()), (route) => false);
     }
@@ -220,6 +171,7 @@ class _SideMenuState extends State<SideMenu> {
           ),
           const Divider(color: shBorder),
           MenuTile(icon: Icons.folder_outlined, label: 'Project', onTap: () => setState(() => _projectExpanded = !_projectExpanded)),
+          if (_projectExpanded) _projectEntries(),
           MenuTile(icon: Icons.chat_bubble_outline, label: 'Conversation', onTap: () => setState(() => _conversationExpanded = !_conversationExpanded)),
           if (_conversationExpanded) _conversationEntries(),
           MenuTile(customIcon: const ShSectionNavIcon.journey(), label: 'Journey', onTap: () => _openPage(1)),
