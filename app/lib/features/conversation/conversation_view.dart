@@ -9,6 +9,7 @@ import '../../core/storage/storage_service.dart';
 import '../../core/theme/sh_theme.dart';
 import '../journey/semantic_hook.dart';
 import 'conversation_runtime_bridge.dart';
+import 'conversation_service.dart';
 
 final ValueNotifier<String> conversationTitle =
     ValueNotifier<String>('Today Priorities');
@@ -36,7 +37,7 @@ class ConversationViewState extends State<ConversationView> {
   bool _responding = false;
 
   String? get _activeConversationId =>
-      ConversationRuntimeBridgeActive.activeConversationId;
+      ConversationService.activeConversationId.value;
 
   @override
   void initState() {
@@ -48,63 +49,67 @@ class ConversationViewState extends State<ConversationView> {
     try {
       final conversations = await _runtime.listConversations();
       final activeId = _activeConversationId;
-      final summary = conversations.where((item) => item.conversationId == activeId).firstOrNull;
-      if (summary != null) conversationTitle.value = summary.title;
+      for (final item in conversations) {
+        if (item.conversationId == activeId) {
+          conversationTitle.value = item.title;
+          break;
+        }
+      }
 
       final records = await _runtime.load(limit: 100);
-      final loaded = records.map(_messageFromBackend).toList();
-
-      // Backend contract is chronological (oldest -> newest). Keep that order
-      // in memory; the reverse viewport below anchors the latest message at bottom.
       _messages
         ..clear()
-        ..addAll(loaded);
+        ..addAll(records.map(_messageFromBackend));
 
-      final key = _activeConversationId ?? 'default';
-      final attachments = _localAttachments[key];
+      final attachments = _localAttachments[_activeConversationId ?? 'default'];
       if (attachments != null) _messages.addAll(attachments);
+      _sortMessagesChronologically();
 
       final localState = await StorageService.readConversationState();
       if (records.isEmpty && localState != null) {
-        final title = localState['title'];
-        final raw = localState['messages'];
-        if (title is String && title.trim().isNotEmpty) {
-          conversationTitle.value = title;
-        }
-        if (raw is List) {
-          final restored = raw
-              .whereType<Map>()
-              .map((item) => ConversationMessage.fromJson(
-                    Map<String, dynamic>.from(item),
-                  ))
-              .toList();
-          if (restored.isNotEmpty) {
-            _messages
-              ..clear()
-              ..addAll(restored);
-          }
-        }
+        _restoreLocalState(localState);
       }
     } catch (_) {
-      final localState = await StorageService.readConversationState();
-      if (localState != null) {
-        final title = localState['title'];
-        final raw = localState['messages'];
-        if (title is String && title.trim().isNotEmpty) {
-          conversationTitle.value = title;
-        }
-        if (raw is List) {
-          _messages
-            ..clear()
-            ..addAll(raw.whereType<Map>().map((item) => ConversationMessage.fromJson(
-                  Map<String, dynamic>.from(item),
-                )));
-        }
-      }
+      try {
+        final localState = await StorageService.readConversationState();
+        if (localState != null) _restoreLocalState(localState);
+      } catch (_) {}
     }
 
     if (!mounted) return;
     setState(() => _loading = false);
+  }
+
+  void _restoreLocalState(Map<String, dynamic> state) {
+    final title = state['title'];
+    final raw = state['messages'];
+    if (title is String && title.trim().isNotEmpty) {
+      conversationTitle.value = title;
+    }
+    if (raw is List) {
+      final restored = raw
+          .whereType<Map>()
+          .map((item) => ConversationMessage.fromJson(
+                Map<String, dynamic>.from(item),
+              ))
+          .toList();
+      if (restored.isNotEmpty) {
+        _messages
+          ..clear()
+          ..addAll(restored);
+      }
+    }
+  }
+
+  void _sortMessagesChronologically() {
+    _messages.sort((a, b) {
+      final aTime = a.createdAt;
+      final bTime = b.createdAt;
+      if (aTime == null && bTime == null) return 0;
+      if (aTime == null) return -1;
+      if (bTime == null) return 1;
+      return aTime.compareTo(bTime);
+    });
   }
 
   ConversationMessage _messageFromBackend(ConversationRecord record) =>
@@ -153,7 +158,7 @@ class ConversationViewState extends State<ConversationView> {
       if (!mounted) return;
       setState(() {
         _messages.add(ConversationMessage(text, false, _now()));
-        _messages.add(const ConversationMessage(
+        _messages.add(ConversationMessage(
           'Got it. SH menerima pesan ini dan jalur respons aktif. Respons dinamis akan terhubung ke model AI nanti.',
           true,
           'Now',
@@ -189,7 +194,10 @@ class ConversationViewState extends State<ConversationView> {
     final picked = result.files.single;
     final bytes = picked.bytes;
     if (bytes == null) return;
-    final file = await StorageService.saveConversationFile(bytes, filename: picked.name);
+    final file = await StorageService.saveConversationFile(
+      bytes,
+      filename: picked.name,
+    );
     _addAttachment(file.path);
   }
 
@@ -207,10 +215,19 @@ class ConversationViewState extends State<ConversationView> {
 
   void _addAttachment(String path) {
     if (!mounted) return;
-    final message = ConversationMessage('', false, _now(), attachmentPath: path);
+    final message = ConversationMessage(
+      '',
+      false,
+      _now(),
+      attachmentPath: path,
+      createdAt: DateTime.now(),
+    );
     final key = _activeConversationId ?? 'default';
     (_localAttachments[key] ??= []).add(message);
-    setState(() => _messages.add(message));
+    setState(() {
+      _messages.add(message);
+      _sortMessagesChronologically();
+    });
     _persistConversation();
   }
 
@@ -248,7 +265,9 @@ class ConversationViewState extends State<ConversationView> {
   }
 
   void _messageActions(int index, {required bool assistant}) {
-    final actions = assistant ? const ['Copy', 'Delete'] : const ['Copy', 'Edit', 'Delete'];
+    final actions = assistant
+        ? const ['Copy', 'Delete']
+        : const ['Copy', 'Edit', 'Delete'];
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: shSurface,
@@ -281,7 +300,9 @@ class ConversationViewState extends State<ConversationView> {
     if (index >= _messages.length) return;
     final message = _messages[index];
     if (action == 'Copy') {
-      if (message.text.isNotEmpty) Clipboard.setData(ClipboardData(text: message.text));
+      if (message.text.isNotEmpty) {
+        Clipboard.setData(ClipboardData(text: message.text));
+      }
       return;
     }
     if (action == 'Delete') {
@@ -297,26 +318,44 @@ class ConversationViewState extends State<ConversationView> {
         backgroundColor: shSurface,
         showDragHandle: true,
         builder: (sheet) => Padding(
-          padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
+          padding: EdgeInsets.fromLTRB(
+            18,
+            8,
+            18,
+            MediaQuery.of(sheet).viewInsets.bottom + 18,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Edit message', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              const Text(
+                'Edit message',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 12),
               TextField(controller: controller, maxLines: 5),
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(sheet),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  Expanded(child: FilledButton(onPressed: () {
-                    final value = controller.text.trim();
-                    if (value.isNotEmpty) {
-                      setState(() => message.text = value);
-                      _persistConversation();
-                    }
-                    Navigator.pop(sheet);
-                  }, child: const Text('Save'))),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        final value = controller.text.trim();
+                        if (value.isNotEmpty) {
+                          setState(() => message.text = value);
+                          _persistConversation();
+                        }
+                        Navigator.pop(sheet);
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -353,15 +392,18 @@ class ConversationViewState extends State<ConversationView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ShTopBar(
-          title: conversationTitle.value,
-          actions: [
-            IconButton(
-              tooltip: 'Conversation menu',
-              onPressed: () {},
-              icon: const Icon(Icons.more_horiz, size: 28),
-            ),
-          ],
+        ValueListenableBuilder<String>(
+          valueListenable: conversationTitle,
+          builder: (_, title, __) => ShTopBar(
+            title: title,
+            actions: [
+              IconButton(
+                tooltip: 'Conversation menu',
+                onPressed: () {},
+                icon: const Icon(Icons.more_horiz, size: 28),
+              ),
+            ],
+          ),
         ),
         if (_loading) const LinearProgressIndicator(minHeight: 2),
         Expanded(
@@ -371,14 +413,17 @@ class ConversationViewState extends State<ConversationView> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             itemCount: _messages.length,
             itemBuilder: (context, index) {
-              final message = _messages[_messages.length - 1 - index];
               final actualIndex = _messages.length - 1 - index;
+              final message = _messages[actualIndex];
               return ConversationBubble(
                 message: message,
                 selected: selected.contains(actualIndex),
                 onLongPress: () => _enterSelection(actualIndex),
                 onTap: selected.isEmpty ? null : () => _toggleSelection(actualIndex),
-                onActions: () => _messageActions(actualIndex, assistant: message.assistant),
+                onActions: () => _messageActions(
+                  actualIndex,
+                  assistant: message.assistant,
+                ),
               );
             },
           ),
@@ -390,7 +435,10 @@ class ConversationViewState extends State<ConversationView> {
               children: [
                 Text('${selected.length} selected', style: const TextStyle(color: shMuted)),
                 const Spacer(),
-                IconButton(onPressed: _deleteSelected, icon: const Icon(Icons.delete_outline)),
+                IconButton(
+                  onPressed: _deleteSelected,
+                  icon: const Icon(Icons.delete_outline),
+                ),
               ],
             ),
           ),
@@ -416,7 +464,10 @@ class ConversationViewState extends State<ConversationView> {
                     hintText: 'Message SH…',
                     filled: true,
                     fillColor: shSurface,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 13,
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
                       borderSide: const BorderSide(color: shBorder, width: 1.2),
@@ -441,13 +492,8 @@ class ConversationViewState extends State<ConversationView> {
   }
 }
 
-class ConversationRuntimeBridgeActive {
-  static String? get activeConversationId =>
-      ConversationService.activeConversationId.value;
-}
-
 class ConversationMessage {
-  const ConversationMessage(
+  ConversationMessage(
     this.text,
     this.assistant,
     this.time, {
@@ -456,7 +502,7 @@ class ConversationMessage {
     this.createdAt,
   });
 
-  final String text;
+  String text;
   final bool assistant;
   final String time;
   final String? attachmentPath;
@@ -472,13 +518,16 @@ class ConversationMessage {
         'createdAt': createdAt?.toIso8601String(),
       };
 
-  factory ConversationMessage.fromJson(Map<String, dynamic> json) => ConversationMessage(
+  factory ConversationMessage.fromJson(Map<String, dynamic> json) =>
+      ConversationMessage(
         json['text']?.toString() ?? '',
         json['assistant'] == true,
         json['time']?.toString() ?? 'Now',
         attachmentPath: json['attachmentPath']?.toString(),
         runtimeRecordId: json['runtimeRecordId']?.toString(),
-        createdAt: json['createdAt'] is String ? DateTime.tryParse(json['createdAt'] as String) : null,
+        createdAt: json['createdAt'] is String
+            ? DateTime.tryParse(json['createdAt'] as String)
+            : null,
       );
 }
 
@@ -501,9 +550,12 @@ class ConversationBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isImage = message.attachmentPath != null &&
-        RegExp(r'\.(jpg|jpeg|png|gif|webp|heic|heif|bmp)$', caseSensitive: false)
-            .hasMatch(message.attachmentPath!);
-    final alignment = message.assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end;
+        RegExp(
+          r'\.(jpg|jpeg|png|gif|webp|heic|heif|bmp)$',
+          caseSensitive: false,
+        ).hasMatch(message.attachmentPath!);
+    final alignment =
+        message.assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end;
     final bubbleColor = message.assistant ? shSurface : shAccent;
     final textColor = message.assistant ? shTextPrimary : shTextOnAccent;
 
@@ -548,9 +600,18 @@ class ConversationBubble extends StatelessWidget {
                           : Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.insert_drive_file_outlined, color: textColor, size: 20),
+                                Icon(
+                                  Icons.insert_drive_file_outlined,
+                                  color: textColor,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 7),
-                                Flexible(child: Text(message.attachmentPath!.split('/').last, style: TextStyle(color: textColor))),
+                                Flexible(
+                                  child: Text(
+                                    message.attachmentPath!.split('/').last,
+                                    style: TextStyle(color: textColor),
+                                  ),
+                                ),
                               ],
                             ),
                     ),
@@ -559,20 +620,51 @@ class ConversationBubble extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Flexible(child: Text(message.text, style: TextStyle(color: textColor, height: 1.35))),
+                        Flexible(
+                          child: Text(
+                            message.text,
+                            style: TextStyle(color: textColor, height: 1.35),
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Text(message.time, style: TextStyle(color: textColor.withValues(alpha: 0.65), fontSize: 10)),
+                        Text(
+                          message.time,
+                          style: TextStyle(
+                            color: textColor.withValues(alpha: 0.65),
+                            fontSize: 10,
+                          ),
+                        ),
                         const SizedBox(width: 2),
-                        InkWell(onTap: onActions, child: Icon(Icons.more_horiz, size: 16, color: textColor.withValues(alpha: 0.7))),
+                        InkWell(
+                          onTap: onActions,
+                          child: Icon(
+                            Icons.more_horiz,
+                            size: 16,
+                            color: textColor.withValues(alpha: 0.7),
+                          ),
+                        ),
                       ],
                     )
                   else
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(message.time, style: TextStyle(color: textColor.withValues(alpha: 0.65), fontSize: 10)),
+                        Text(
+                          message.time,
+                          style: TextStyle(
+                            color: textColor.withValues(alpha: 0.65),
+                            fontSize: 10,
+                          ),
+                        ),
                         const SizedBox(width: 2),
-                        InkWell(onTap: onActions, child: Icon(Icons.more_horiz, size: 16, color: textColor.withValues(alpha: 0.7))),
+                        InkWell(
+                          onTap: onActions,
+                          child: Icon(
+                            Icons.more_horiz,
+                            size: 16,
+                            color: textColor.withValues(alpha: 0.7),
+                          ),
+                        ),
                       ],
                     ),
                 ],
@@ -586,7 +678,12 @@ class ConversationBubble extends StatelessWidget {
 }
 
 class ActionTile extends StatelessWidget {
-  const ActionTile({super.key, required this.icon, required this.label, required this.onTap});
+  const ActionTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -609,7 +706,12 @@ class ActionTile extends StatelessWidget {
 }
 
 class AttachAction extends StatelessWidget {
-  const AttachAction({super.key, required this.icon, required this.label, required this.onTap});
+  const AttachAction({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
