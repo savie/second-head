@@ -31,7 +31,7 @@ class _AboutViewState extends State<AboutView> {
 
     return Column(
       children: [
-        const ShTopBar(title: 'About'),
+        ShTopBar(title: 'About'),
         Expanded(
           child: ListView(
             physics: const BouncingScrollPhysics(),
