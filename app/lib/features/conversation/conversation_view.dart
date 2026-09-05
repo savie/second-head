@@ -140,9 +140,13 @@ class ConversationViewState extends State<ConversationView> {
     if (!mounted) return;
 
     if (backendError == null && backendRecords.isNotEmpty) {
+      // The runtime load contract returns newest → oldest. Normalize the
+      // application message list to oldest → newest so the chat viewport can
+      // use the normal bottom-anchored conversation behavior.
+      final chronological = backendRecords.reversed;
       _messages
         ..clear()
-        ..addAll(backendRecords.map(_messageFromBackend));
+        ..addAll(chronological.map(_messageFromBackend));
       await _persistConversation();
       if (!mounted) return;
       setState(() {
@@ -516,254 +520,116 @@ class ConversationViewState extends State<ConversationView> {
             ],
           ),
         ),
-      );
+      ).whenComplete(ctl.dispose);
     }
   }
 
   @override
   void dispose() {
     conversationRevision.removeListener(_resetConversation);
-    _composerController.dispose();
-    _searchController.dispose();
-    _messageScrollController.dispose();
     _connectivitySubscription?.cancel();
     _internetCheckTimer?.cancel();
+    _composerController.dispose();
+    _messageScrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final selecting = selected.isNotEmpty;
-    return Column(
-      children: [
-        ValueListenableBuilder<String>(
+    return Scaffold(
+      backgroundColor: shBackground,
+      appBar: AppBar(
+        title: ValueListenableBuilder<String>(
           valueListenable: conversationTitle,
-          builder: (context, title, _) => ConversationHeader(
-            title: title,
-            onTitleTap: () => _renameConversation(context, title),
-            onSearch: () => _showSearch(context),
-            onMenu: _conversationMenu,
-            isOnline: _isOnline,
-          ),
+          builder: (_, title, __) => Text(title),
         ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-            controller: _messageScrollController,
-            children: [
-              if (_isLoadingConversation)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                  child: LinearProgressIndicator(minHeight: 2),
+        actions: [
+          IconButton(
+            onPressed: _conversationMenu,
+            icon: const Icon(Icons.more_horiz),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            if (_isLoadingConversation)
+              const LinearProgressIndicator(minHeight: 2),
+            Expanded(
+              child: ListView.builder(
+                controller: _messageScrollController,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  return ConversationBubble(
+                    message: message,
+                    selected: selected.contains(index),
+                    onLongPress: () => _enterSelection(index),
+                    onTap: selected.isEmpty
+                        ? null
+                        : () => _toggleSelection(index),
+                    onActions: () =>
+                        _messageActions(index, assistant: message.assistant),
+                  );
+                },
+              ),
+            ),
+            if (selected.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  children: [
+                    Text('${selected.length} selected'),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: _deleteSelected,
+                      icon: const Icon(Icons.delete_outline),
+                    ),
+                  ],
                 ),
-              if (!_isLoadingConversation) DateLabel(_conversationStatus),
-              if (_isLoadingConversation) const DateLabel('Today'),
-              for (var i = 0; i < _messages.length; i++)
-                SelectableMessage(
-                  index: i,
-                  assistant: _messages[i].assistant,
-                  selected: selected.contains(i),
-                  onLongPress: () => _enterSelection(i),
-                  onTap: () => selecting ? _toggleSelection(i) : null,
-                  child: Message(
-                    text: _messages[i].text,
-                    time: _messages[i].time,
-                    assistant: _messages[i].assistant,
-                    attachmentPath: _messages[i].attachmentPath,
-                    onAvatarTap: () => _messageActions(
-                      i,
-                      assistant: _messages[i].assistant,
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: _showAttachments,
+                    icon: const Icon(Icons.add_circle_outline),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _composerController,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _send(),
+                      decoration: InputDecoration(
+                        hintText: _isOnline ? 'Message SH…' : 'Message SH (local only)…',
+                        filled: true,
+                        fillColor: shSurface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              const SummaryCard(),
-            ],
-          ),
-        ),
-        if (selecting)
-          Container(
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 8),
-            decoration: const BoxDecoration(color: shSurface),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ActionTile(
-                  icon: Icons.delete_outline,
-                  label: 'Delete',
-                  onTap: _deleteSelected,
-                ),
-              ],
-            ),
-          )
-        else
-          Composer(
-            controller: _composerController,
-            onSend: _send,
-            onAttach: _showAttachments,
-          ),
-      ],
-    );
-  }
-
-  Future<void> _showSearch(BuildContext context) async {
-    final result = await showShInternalSearch<int>(
-      context: context,
-      hintText: 'Search conversation',
-      search: (query) {
-        return [
-          for (var i = 0; i < _messages.length; i++)
-            if (query.isEmpty ||
-                _messages[i].text.toLowerCase().contains(query) ||
-                _messages[i].time.toLowerCase().contains(query))
-              ShSearchResult<int>(
-                value: i,
-                title: _messages[i].text.isEmpty
-                    ? 'Image message'
-                    : _messages[i].text,
-                subtitle: _messages[i].time,
+                  IconButton(
+                    onPressed: _send,
+                    icon: const Icon(Icons.arrow_upward_rounded),
+                  ),
+                ],
               ),
-        ];
-      },
-    );
-
-    if (!mounted || result == null || !_messageScrollController.hasClients) {
-      return;
-    }
-
-    await _messageScrollController.animateTo(
-      (result * 115.0).clamp(
-        0.0,
-        _messageScrollController.position.maxScrollExtent,
-      ),
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeOut,
-    );
-  }
-
-  void _renameConversation(BuildContext context, String title) {
-    final controller = TextEditingController(text: title);
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: shSurface,
-      showDragHandle: true,
-      builder: (sheet) => SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.of(sheet).viewInsets.bottom + 18,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Rename conversation',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) {
-                final name = controller.text.trim();
-                if (name.isNotEmpty) {
-                  conversationTitle.value = name;
-                  final list = [...recentConversations.value];
-                  final index = list.indexWhere((item) => item.title == title);
-                  if (index >= 0) {
-                    final item = list[index];
-                    list[index] = RecentConversationEntry(name, item.preview);
-                    recentConversations.value = list;
-                  }
-                  Navigator.pop(sheet);
-                }
-              },
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(sheet),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () {
-                      final name = controller.text.trim();
-                      if (name.isNotEmpty) {
-                        conversationTitle.value = name;
-                        final list = [...recentConversations.value];
-                        final index = list.indexWhere(
-                          (item) => item.title == title,
-                        );
-                        if (index >= 0) {
-                          final item = list[index];
-                          list[index] = RecentConversationEntry(
-                            name,
-                            item.preview,
-                          );
-                          recentConversations.value = list;
-                        }
-                      }
-                      Navigator.pop(sheet);
-                    },
-                    child: const Text('Save'),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class SelectableMessage extends StatelessWidget {
-  const SelectableMessage({
-    required this.index,
-    required this.assistant,
-    required this.selected,
-    required this.onLongPress,
-    required this.onTap,
-    required this.child,
-  });
-
-  final int index;
-  final bool assistant;
-  final bool selected;
-  final VoidCallback onLongPress;
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-        onLongPress: onLongPress,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: selected ? shPurple.withValues(alpha: .12) : Colors.transparent,
-          ),
-          child: Stack(
-            children: [
-              child,
-              if (selected)
-                const Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Icon(Icons.check_circle, size: 17),
-                ),
-            ],
-          ),
-        ),
-      );
 }
 
 class ConversationMessage {
@@ -792,21 +658,111 @@ class ConversationMessage {
         'createdAt': createdAt?.toIso8601String(),
       };
 
-  factory ConversationMessage.fromJson(Map<String, dynamic> json) =>
-      ConversationMessage(
-        json['text'] is String ? json['text'] as String : '',
-        json['assistant'] == true,
-        json['time'] is String ? json['time'] as String : 'Now',
-        attachmentPath: json['attachmentPath'] is String
-            ? json['attachmentPath'] as String
+  factory ConversationMessage.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    return ConversationMessage(
+      json['text'] is String ? json['text'] as String : '',
+      json['assistant'] == true,
+      json['time'] is String ? json['time'] as String : 'Now',
+      attachmentPath: json['attachmentPath'] is String
+          ? json['attachmentPath'] as String
+          : null,
+      runtimeRecordId: json['runtimeRecordId'] is String
+          ? json['runtimeRecordId'] as String
+          : null,
+      createdAt: created is String ? DateTime.tryParse(created) : null,
+    );
+  }
+}
+
+class ConversationBubble extends StatelessWidget {
+  const ConversationBubble({
+    super.key,
+    required this.message,
+    required this.selected,
+    required this.onLongPress,
+    required this.onTap,
+    required this.onActions,
+  });
+
+  final ConversationMessage message;
+  final bool selected;
+  final VoidCallback onLongPress;
+  final VoidCallback? onTap;
+  final VoidCallback onActions;
+
+  @override
+  Widget build(BuildContext context) {
+    final alignment = message.assistant
+        ? CrossAxisAlignment.start
+        : CrossAxisAlignment.end;
+    final color = message.assistant ? shSurface : shAccent;
+    final textColor = message.assistant ? shTextPrimary : shTextOnAccent;
+
+    return GestureDetector(
+      onLongPress: onLongPress,
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: selected
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: shAccent, width: 1.5),
+              )
             : null,
-        runtimeRecordId: json['runtimeRecordId'] is String
-            ? json['runtimeRecordId'] as String
-            : null,
-        createdAt: json['createdAt'] is String
-            ? DateTime.tryParse(json['createdAt'] as String)
-            : null,
-      );
+        padding: const EdgeInsets.all(2),
+        child: Column(
+          crossAxisAlignment: alignment,
+          children: [
+            Container(
+              constraints: const BoxConstraints(maxWidth: 340),
+              padding: const EdgeInsets.fromLTRB(14, 11, 10, 9),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Flexible(
+                    child: message.attachmentPath == null
+                        ? Text(
+                            message.text,
+                            style: TextStyle(color: textColor, height: 1.35),
+                          )
+                        : Text(
+                            message.text.isEmpty
+                                ? 'Attachment: ${message.attachmentPath!.split('/').last}'
+                                : message.text,
+                            style: TextStyle(color: textColor, height: 1.35),
+                          ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    message.time,
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.65),
+                      fontSize: 10,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  InkWell(
+                    onTap: onActions,
+                    child: Icon(
+                      Icons.more_horiz,
+                      size: 16,
+                      color: textColor.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class ActionTile extends StatelessWidget {
@@ -822,474 +778,22 @@ class ActionTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [shPurple, shElectric]),
-                ),
-                child: Icon(icon, size: 25),
-              ),
-              const SizedBox(height: 7),
-              Text(label, style: const TextStyle(fontSize: 10)),
-            ],
-          ),
-        ),
-      );
-}
-
-class ConversationHeader extends StatelessWidget {
-  const ConversationHeader({
-    super.key,
-    required this.title,
-    required this.onTitleTap,
-    required this.onSearch,
-    required this.onMenu,
-    required this.isOnline,
-  });
-
-  final String title;
-  final VoidCallback onTitleTap;
-  final VoidCallback onSearch;
-  final VoidCallback onMenu;
-  final bool isOnline;
-
-  @override
   Widget build(BuildContext context) {
-    final topInset = MediaQuery.paddingOf(context).top;
-
-    return SizedBox(
-      height: topInset + 64,
-      child: Padding(
-        padding: EdgeInsets.only(top: topInset),
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: [
-              IconButton(
-                tooltip: 'Menu',
-                onPressed: () => Scaffold.of(context).openDrawer(),
-                icon: const Icon(Icons.menu, size: 30),
-              ),
-              const SizedBox(width: 2),
-              SizedBox(
-                width: 112,
-                child: _AssistantHeaderIdentity(isOnline: isOnline),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: GestureDetector(
-                  onTap: onTitleTap,
-                  behavior: HitTestBehavior.opaque,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Search',
-                onPressed: onSearch,
-                icon: const Icon(Icons.search_outlined, size: 29),
-              ),
-              IconButton(
-                tooltip: 'More',
-                onPressed: onMenu,
-                icon: const Icon(Icons.more_vert, size: 27),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AssistantHeaderIdentity extends StatelessWidget {
-  const _AssistantHeaderIdentity({required this.isOnline});
-
-  final bool isOnline;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 38,
-          height: 38,
-          padding: const EdgeInsets.all(2),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(colors: [shPurple, shElectric]),
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              'assets/brand/unity.png',
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            ),
-          ),
-        ),
-        const SizedBox(width: 7),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Status',
-                maxLines: 1,
-                overflow: TextOverflow.clip,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 2),
-              Row(
-                children: [
-                  Icon(
-                    Icons.circle,
-                    size: 6,
-                    color: isOnline ? Colors.green : Colors.red,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    isOnline ? 'Online' : 'Offline',
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    style: const TextStyle(fontSize: 9, color: shMuted),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class DateLabel extends StatelessWidget {
-  const DateLabel(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Text(text, style: const TextStyle(fontSize: 9, color: shMuted)),
-        ),
-      );
-}
-
-Future<void> _openAttachment(BuildContext context, String path) async {
-  final uri = Uri.file(path);
-  final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-  if (!opened && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tidak ada aplikasi yang dapat membuka file ini.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-}
-
-class Message extends StatelessWidget {
-  const Message({
-    required this.text,
-    required this.time,
-    required this.assistant,
-    required this.onAvatarTap,
-    this.attachmentPath,
-  });
-
-  final String text;
-  final String time;
-  final bool assistant;
-  final VoidCallback onAvatarTap;
-  final String? attachmentPath;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: assistant ? Alignment.centerLeft : Alignment.centerRight,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (assistant)
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onAvatarTap,
-                child: ChatAvatar(assistant: true),
-              ),
-            ),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 300),
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              gradient: assistant
-                  ? null
-                  : const LinearGradient(colors: [shPurple, shElectric]),
-              color: assistant ? shSurface2 : null,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(18),
-                topRight: const Radius.circular(18),
-                bottomLeft: Radius.circular(assistant ? 5 : 18),
-                bottomRight: Radius.circular(assistant ? 18 : 5),
-              ),
-              border: assistant ? Border.all(color: shBorder) : null,
-            ),
-            child: Column(
-              crossAxisAlignment:
-                  assistant ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-              children: [
-                if (attachmentPath != null)
-                  _AttachmentPreview(
-                    path: attachmentPath!,
-                    onOpen: () => _openAttachment(context, attachmentPath!),
-                  ),
-                if (attachmentPath != null && text.isNotEmpty)
-                  const SizedBox(height: 7),
-                if (text.isNotEmpty)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      text,
-                      style: const TextStyle(fontSize: 14, height: 1.45),
-                    ),
-                  ),
-                const SizedBox(height: 4),
-                Text(
-                  time,
-                  style: const TextStyle(fontSize: 9, color: shMuted),
-                ),
-              ],
-            ),
-          ),
-          if (!assistant)
-            Padding(
-              padding: const EdgeInsets.only(left: 6),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onAvatarTap,
-                child: ChatAvatar(assistant: false),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AttachmentPreview extends StatelessWidget {
-  const _AttachmentPreview({required this.path, required this.onOpen});
-  final String path;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final category = StorageService.categoryFor(File(path));
-    if (category == 'images') {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.file(
-          File(path),
-          width: 245,
-          height: 175,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-    final icon = category == 'audio'
-        ? Icons.audio_file_outlined
-        : category == 'video'
-            ? Icons.video_file_outlined
-            : Icons.insert_drive_file_outlined;
-    final name = path.split(Platform.pathSeparator).last;
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onOpen,
-      child: Container(
-        width: 245,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: shSurface2,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: shBorder),
-        ),
-        child: Row(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: SizedBox(
+        width: 68,
+        child: Column(
           children: [
-            Icon(icon, size: 30),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Icon(Icons.open_in_new_outlined, size: 18),
+            Icon(icon, size: 24),
+            const SizedBox(height: 6),
+            Text(label, style: const TextStyle(fontSize: 11)),
           ],
         ),
       ),
     );
   }
-}
-
-class ChatAvatar extends StatelessWidget {
-  const ChatAvatar({required this.assistant});
-  final bool assistant;
-
-  @override
-  Widget build(BuildContext context) {
-    if (assistant) {
-      return Container(
-        width: 22,
-        height: 22,
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(colors: [shPurple, shElectric]),
-        ),
-        child: ClipOval(
-          child: Image.asset(
-            'assets/brand/unity.png',
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
-          ),
-        ),
-      );
-    }
-    return ValueListenableBuilder<Uint8List?>(
-      valueListenable: profilePhoto,
-      builder: (context, photo, _) => CircleAvatar(
-        radius: 11,
-        backgroundColor: shSurface2,
-        backgroundImage: photo != null ? MemoryImage(photo) : null,
-        child: photo == null
-            ? const Icon(Icons.person_outline, size: 13, color: shMuted)
-            : null,
-      ),
-    );
-  }
-}
-
-class SummaryCard extends StatelessWidget {
-  const SummaryCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: shSurface,
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: shBorder),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Today Summary',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(height: 6),
-          Text(
-            '• Meeting with team SH – 10:00 AM\n• Review document R6 – 1:00 PM\n• Implement feature A – 3:00 PM',
-            style: TextStyle(fontSize: 10, color: shMuted, height: 1.55),
-          ),
-          SizedBox(height: 9),
-          Text(
-            'Top Priorities',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(height: 5),
-          Text(
-            '1. Complete feature A\n2. Integrate calendar\n3. Write documentation',
-            style: TextStyle(fontSize: 10, color: shMuted, height: 1.55),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class Composer extends StatelessWidget {
-  const Composer({
-    super.key,
-    required this.controller,
-    required this.onSend,
-    required this.onAttach,
-  });
-
-  final TextEditingController controller;
-  final VoidCallback onSend;
-  final VoidCallback onAttach;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            IconButton(
-              onPressed: onAttach,
-              icon: const Icon(Icons.add_circle_outline, size: 28),
-              padding: const EdgeInsets.all(6),
-              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 50, maxHeight: 130),
-                child: TextField(
-                  controller: controller,
-                  minLines: 1,
-                  maxLines: 5,
-                  textInputAction: TextInputAction.newline,
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(
-                    hintText: 'Message SH...',
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 50,
-              height: 50,
-              child: IconButton(
-                onPressed: onSend,
-                tooltip: 'Send',
-                icon: const Icon(Icons.arrow_upward, size: 25),
-              ),
-            ),
-          ],
-        ),
-      );
 }
 
 class AttachAction extends StatelessWidget {
@@ -1305,40 +809,20 @@ class AttachAction extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [shPurple, shElectric]),
-                ),
-                child: Icon(icon),
-              ),
-              const SizedBox(height: 7),
-              Text(label, style: const TextStyle(fontSize: 10)),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Column(
+          children: [
+            Icon(icon, size: 28),
+            const SizedBox(height: 6),
+            Text(label),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
-
-class RecentConversationEntry {
-  const RecentConversationEntry(this.title, this.preview);
-  final String title;
-  final String preview;
-}
-
-final ValueNotifier<List<RecentConversationEntry>> recentConversations =
-    ValueNotifier<List<RecentConversationEntry>>([
-  const RecentConversationEntry('Today Priorities', 'Summary and top priorities'),
-  const RecentConversationEntry('SH Roadmap', 'Project planning and milestones'),
-  const RecentConversationEntry('Ideas & Notes', 'Personalized ideas and notes'),
-]);
