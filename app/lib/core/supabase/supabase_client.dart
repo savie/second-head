@@ -1,16 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-const _supabaseUrl = 'https://pkhkgvsrqeupvwoqjwmd.supabase.co';
+const _backendUrl = 'https://pkhkgvsrqeupvwoqjwmd.supabase.co';
+const _backendPublishableKey = 'sb_publishable_T9vHVJy999ipBLkxKoBD1w_lWZcmk60';
 
-// Supabase publishable keys are intended for client applications. Runtime
-// authorization remains enforced by Supabase Auth + RLS.
-const _supabasePublishableKey = 'sb_publishable_T9vHVJy999ipBLkxKoBD1w_lWZcmk60';
-
-Future<void> initializeSupabase() async {
+Future<void> initializeBackend() async {
   await Supabase.initialize(
-    url: _supabaseUrl,
-    publishableKey: _supabasePublishableKey,
+    url: _backendUrl,
+    publishableKey: _backendPublishableKey,
   );
 }
 
-SupabaseClient get supabaseClient => Supabase.instance.client;
+SupabaseClient get backendClient => Supabase.instance.client;
