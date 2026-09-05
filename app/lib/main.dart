@@ -8,6 +8,14 @@ import 'features/home/home_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeSupabase();
+
+  try {
+    await AuthSession.service.restoreSession();
+  } catch (_) {
+    // A stale/incomplete identity must not grant access to Home.
+    AuthSession.identityContext.clear();
+  }
+
   runApp(const SecondHeadApp());
 }
 
