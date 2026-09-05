@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'core/supabase/supabase_client.dart';
+import 'core/backend/backend_client.dart';
 import 'core/theme/sh_theme.dart';
 import 'features/auth/auth_flow_screen.dart';
 import 'features/auth/auth_screens.dart';
@@ -9,7 +9,7 @@ import 'features/home/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeSupabase();
+  await initializeBackend();
 
   try {
     await AuthSession.service.restoreSession();
