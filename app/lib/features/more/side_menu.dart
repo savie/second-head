@@ -83,55 +83,45 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Future<void> _createProject() async {
-    final controller = TextEditingController();
-    final name = await showModalBottomSheet<String>(
-      context: context, isScrollControlled: true, backgroundColor: shSurface,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
-      builder: (sheet) => Padding(
-        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('New Project', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 12),
-          TextField(controller: controller, autofocus: true, textInputAction: TextInputAction.done, decoration: const InputDecoration(hintText: 'Project name')),
-          const SizedBox(height: 14),
-          Row(children: [
-            Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
-            const SizedBox(width: 10),
-            Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
-          ]),
-        ]),
-      ),
-    );
-    controller.dispose();
-    if (!mounted || name == null || name.isEmpty) return;
-    try { await _runtime.createProject(name); await _loadSidebar(); }
+    final value = await _textEditorSheet(title: 'New Project', hintText: 'Project name');
+    if (!mounted || value == null || value.isEmpty) return;
+    try { await _runtime.createProject(value); await _loadSidebar(); }
     catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create project'))); }
   }
 
   Future<void> _rename(BuildContext context, ConversationSummary item) async {
-    final controller = TextEditingController(text: item.title);
-    final name = await showModalBottomSheet<String>(
-      context: context, isScrollControlled: true, backgroundColor: shSurface,
+    final value = await _textEditorSheet(title: 'Rename conversation', initialText: item.title);
+    if (!mounted || value == null || value.isEmpty) return;
+    try { await _runtime.rename(conversationId: item.conversationId, title: value); await _loadSidebar(); }
+    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
+  }
+
+  Future<String?> _textEditorSheet({required String title, String? hintText, String? initialText}) async {
+    final controller = TextEditingController(text: initialText ?? '');
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: shSurface,
       showDragHandle: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
-      builder: (sheet) => Padding(
-        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheet).viewInsets.bottom + 18),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Rename conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 12), TextField(controller: controller, autofocus: true), const SizedBox(height: 14),
-          Row(children: [
-            Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
-            const SizedBox(width: 10),
-            Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
+      builder: (sheet) => StatefulBuilder(
+        builder: (sheet, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.viewInsetsOf(sheet).bottom + 18),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 12),
+            TextField(controller: controller, autofocus: true, textInputAction: TextInputAction.done, decoration: InputDecoration(hintText: hintText), onChanged: (_) => setSheetState(() {})),
+            const SizedBox(height: 14),
+            Row(children: [
+              Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
+              const SizedBox(width: 10),
+              Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: controller.text.trim().isEmpty ? null : () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
+            ]),
           ]),
-        ]),
+        ),
       ),
-    );
-    controller.dispose();
-    if (!mounted || name == null || name.isEmpty) return;
-    try { await _runtime.rename(conversationId: item.conversationId, title: name); await _loadSidebar(); }
-    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
+    ).whenComplete(() => controller.dispose());
+    return result;
   }
 
   Widget _sectionAction({required IconData icon, required String label, required VoidCallback onTap}) => Padding(
