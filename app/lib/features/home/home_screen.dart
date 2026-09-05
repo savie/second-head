@@ -13,20 +13,22 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String?>(
-      valueListenable: ConversationService.activeConversationId,
-      builder: (context, activeConversationId, _) {
-        return ShNavigationShell(
-          drawerBuilder: (context, onSelectPage) =>
-              SideMenu(onSelectPage: onSelectPage),
-          pages: [
-            ConversationView(key: ValueKey(activeConversationId ?? 'active-conversation')),
-            const JourneyView(),
-            const LifecycleView(),
-            const ProfileView(),
-          ],
-        );
-      },
+    return ShNavigationShell(
+      drawerBuilder: (context, onSelectPage) =>
+          SideMenu(onSelectPage: onSelectPage),
+      pages: [
+        ValueListenableBuilder<String?>(
+          valueListenable: ConversationService.activeConversationId,
+          builder: (context, activeConversationId, _) {
+            return ConversationView(
+              key: ValueKey(activeConversationId ?? 'active-conversation'),
+            );
+          },
+        ),
+        const JourneyView(),
+        const LifecycleView(),
+        const ProfileView(),
+      ],
     );
   }
 }
