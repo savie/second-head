@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/backend/backend_client.dart';
-import '../auth/auth_screens.dart';
 
 class ConversationService {
   const ConversationService();
@@ -125,7 +124,6 @@ class ProjectSummary {
 
 class ConversationRecord {
   const ConversationRecord({required this.conversationId, required this.messageId, required this.threadId, required this.role, required this.content, required this.createdAt, required this.metadata});
-  /// Message id is kept in conversationId for compatibility with the existing message UI.
   final String conversationId;
   final String messageId;
   final String threadId;
