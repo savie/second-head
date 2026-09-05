@@ -37,7 +37,7 @@ jobs:
           cp assets/brand/unity.png android/app/src/main/res/drawable/sh_launcher.png
           sed -i 's#android:icon="@mipmap/ic_launcher"#android:icon="@drawable/sh_launcher"#' android/app/src/main/AndroidManifest.xml
 
-      - name: Restore stable DEV debug signing key
+      - name: Generate stable DEV signing key
         shell: bash
         env:
           SH_DEV_SIGNING_SEED: ${{ secrets.SH_DEV_SIGNING_SEED }}
@@ -48,7 +48,7 @@ jobs:
             exit 1
           fi
           python3 -m pip install --disable-pip-version-check --quiet cryptography
-          python3 scripts/generate_dev_signing_keystore.py "$SH_DEV_SIGNING_SEED" "$HOME/.android/debug.keystore" > /tmp/sh-dev-signing-fingerprint
+          python3 scripts/generate_dev_signing_keystore.py "$HOME/.android/debug.keystore" > /tmp/sh-dev-signing-fingerprint
           chmod 600 "$HOME/.android/debug.keystore"
           fingerprint="$(cat /tmp/sh-dev-signing-fingerprint)"
           echo "DEV signing certificate SHA-256: $fingerprint"
@@ -102,12 +102,12 @@ jobs:
         run: |
           set -euo pipefail
           expected="$(cat /tmp/sh-dev-signing-fingerprint)"
-          sdkmanager_path="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner | sort -V | tail -1)"
-          if [[ -z "$sdkmanager_path" ]]; then
+          apksigner_path="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner | sort -V | tail -1)"
+          if [[ -z "$apksigner_path" ]]; then
             echo "apksigner not found in Android SDK build-tools."
             exit 1
           fi
-          actual="$("$sdkmanager_path" verify --print-certs build/app/outputs/flutter-apk/app-debug.apk 2>/dev/null | awk -F': ' '/Signer #1 certificate SHA-256 digest:/ {print $2; exit}' | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          actual="$("$apksigner_path" verify --print-certs build/app/outputs/flutter-apk/app-debug.apk 2>/dev/null | awk -F': ' '/Signer #1 certificate SHA-256 digest:/ {print $2; exit}' | tr -d ':' | tr '[:upper:]' '[:lower:]')"
           if [[ -z "$actual" ]]; then
             echo "Could not read APK signing certificate fingerprint."
             exit 1
