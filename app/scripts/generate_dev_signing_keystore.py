@@ -20,13 +20,6 @@ BITS = 1024
 E = 65537
 
 
-def stream(seed: bytes, label: bytes):
-    counter = 0
-    while True:
-        yield hmac.new(seed, label + counter.to_bytes(8, "big"), hashlib.sha256).digest()
-        counter += 1
-
-
 def candidate(seed: bytes, label: bytes, index: int) -> int:
     raw = hmac.new(seed, label + index.to_bytes(8, "big"), hashlib.sha256).digest()
     blocks = [raw]
@@ -35,7 +28,6 @@ def candidate(seed: bytes, label: bytes, index: int) -> int:
         blocks.append(hmac.new(seed, label + index.to_bytes(8, "big") + counter.to_bytes(4, "big"), hashlib.sha256).digest())
         counter += 1
     value = int.from_bytes(b"".join(blocks), "big") & ((1 << BITS) - 1)
-    # Force a 1024-bit odd candidate and both top bits, keeping the RSA modulus 2048-bit.
     value |= 3 << (BITS - 2)
     value |= 1
     return value
@@ -71,18 +63,19 @@ def prime(seed: bytes, label: bytes) -> int:
     index = 0
     while True:
         value = candidate(seed, label, index)
-        if is_prime(value):
+        if is_prime(value) and (value - 1) % E != 0:
             return value
         index += 1
 
 
 def main() -> None:
-    if len(sys.argv) != 3:
-        raise SystemExit("usage: generate_dev_signing_keystore.py <seed> <output>")
-    seed = sys.argv[1].encode("utf-8")
-    output = sys.argv[2]
-    if len(seed) < 16:
-        raise SystemExit("SH_DEV_SIGNING_SEED must be at least 16 characters")
+    if len(sys.argv) != 2:
+        raise SystemExit("usage: generate_dev_signing_keystore.py <output>")
+    seed_text = os.environ.get("SH_DEV_SIGNING_SEED")
+    if seed_text is None:
+        raise SystemExit("SH_DEV_SIGNING_SEED environment variable is required")
+    seed = seed_text.encode("utf-8")
+    output = sys.argv[1]
 
     p = prime(seed, b"SH-DEV-RSA-P")
     q = prime(seed, b"SH-DEV-RSA-Q")
