@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/identity/sh_identity.dart';
@@ -7,6 +9,38 @@ class AuthService {
   AuthService({required this.identityContext});
 
   final ShIdentityContext identityContext;
+  StreamSubscription<AuthState>? _authSubscription;
+  bool _passwordRecoveryActive = false;
+
+  bool get isPasswordRecoveryActive => _passwordRecoveryActive;
+
+  void startAuthStateListener({void Function()? onChanged}) {
+    _authSubscription ??= supabaseClient.auth.onAuthStateChange.listen((data) async {
+      switch (data.event) {
+        case AuthChangeEvent.signedIn:
+        case AuthChangeEvent.tokenRefreshed:
+        case AuthChangeEvent.userUpdated:
+          if (data.session != null) {
+            try {
+              await resolveIdentity();
+            } catch (_) {
+              identityContext.clear();
+            }
+          }
+          break;
+        case AuthChangeEvent.passwordRecovery:
+          _passwordRecoveryActive = true;
+          onChanged?.call();
+          break;
+        case AuthChangeEvent.signedOut:
+        case AuthChangeEvent.userDeleted:
+          _passwordRecoveryActive = false;
+          identityContext.clear();
+          onChanged?.call();
+          break;
+      }
+    });
+  }
 
   Future<void> signIn({required String email, required String password}) async {
     await supabaseClient.auth.signInWithPassword(
@@ -14,6 +48,13 @@ class AuthService {
       password: password,
     );
     await resolveIdentity();
+  }
+
+  Future<void> signInWithGoogle() async {
+    await supabaseClient.auth.signInWithOAuth(
+      OAuthProvider.google,
+      authScreenLaunchMode: LaunchMode.externalApplication,
+    );
   }
 
   Future<void> signUp({
@@ -29,8 +70,6 @@ class AuthService {
           : {'full_name': fullName.trim()},
     );
 
-    // With email confirmation enabled, signUp can succeed without creating an
-    // active session. Do not enter Home until an authenticated session exists.
     if (response.session == null) {
       throw const AuthException(
         'Account created. Check your email to confirm the account before signing in.',
@@ -38,6 +77,23 @@ class AuthService {
     }
 
     await resolveIdentity();
+  }
+
+  Future<void> sendPasswordReset(String email) async {
+    await supabaseClient.auth.resetPasswordForEmail(email.trim());
+  }
+
+  Future<void> updatePassword(String password) async {
+    if (supabaseClient.auth.currentSession == null) {
+      throw const AuthException('Password recovery session is no longer active.');
+    }
+    await supabaseClient.auth.updateUser(UserAttributes(password: password));
+    _passwordRecoveryActive = false;
+    await resolveIdentity();
+  }
+
+  void finishPasswordRecovery() {
+    _passwordRecoveryActive = false;
   }
 
   Future<void> restoreSession() async {
@@ -80,6 +136,12 @@ class AuthService {
 
   Future<void> signOut() async {
     await supabaseClient.auth.signOut();
+    _passwordRecoveryActive = false;
     identityContext.clear();
+  }
+
+  Future<void> dispose() async {
+    await _authSubscription?.cancel();
+    _authSubscription = null;
   }
 }
