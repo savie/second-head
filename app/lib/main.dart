@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'core/supabase/supabase_client.dart';
 import 'core/theme/sh_theme.dart';
 import 'features/auth/auth_screens.dart';
 import 'features/home/home_screen.dart';
 
-void main() => runApp(const SecondHeadApp());
-
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeSupabase();
+  runApp(const SecondHeadApp());
+}
 
 class SecondHeadApp extends StatefulWidget {
   const SecondHeadApp({super.key});
