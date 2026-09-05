@@ -1,5 +1,7 @@
 import 'conversation_service.dart';
 
+export 'conversation_service.dart' show ConversationRecord;
+
 /// Application-side bridge for the Conversation persistence slice.
 ///
 /// Keeps backend records separate from the existing local ConversationMessage
