@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/backend/backend_client.dart';
+import '../../core/storage/storage_service.dart';
 
 class ConversationService {
   const ConversationService();
@@ -24,6 +25,7 @@ class ConversationService {
     if (result == null) throw StateError('Conversation runtime returned no conversation id.');
     final id = result.toString();
     activeConversationId.value = id;
+    await StorageService.saveConversationState(title: title ?? 'New Conversation', messages: const []);
     return id;
   }
 
