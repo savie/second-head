@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/theme/sh_theme.dart';
 import '../journey/semantic_hook.dart';
