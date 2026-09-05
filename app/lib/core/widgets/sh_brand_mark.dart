@@ -14,9 +14,7 @@ class ShBrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Keep the compact mark safe inside constrained auth/header containers.
-    // Large remains intentionally unchanged for dedicated brand surfaces.
-    final size = large ? 180.0 : 64.0;
+    final size = large ? 180.0 : 88.0;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
