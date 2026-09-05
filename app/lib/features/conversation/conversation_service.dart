@@ -1,4 +1,4 @@
-import '../../core/supabase/supabase_client.dart';
+import '../../core/backend/backend_client.dart';
 import '../auth/auth_screens.dart';
 
 /// Backend adapter for the Conversation runtime contract.
@@ -18,7 +18,7 @@ class ConversationService {
   }
 
   Future<List<ConversationRecord>> load({int limit = 50}) async {
-    final result = await supabaseClient.rpc(
+    final result = await backendClient.rpc(
       'runtime_load_conversation',
       params: {'p_limit': limit.clamp(1, 100)},
     );
@@ -33,7 +33,7 @@ class ConversationService {
   }
 
   Future<List<ConversationRecord>> loadContext({int limit = 12}) async {
-    final result = await supabaseClient.rpc(
+    final result = await backendClient.rpc(
       'runtime_load_conversation_context',
       params: {
         'p_sh_id': _shId,
@@ -55,7 +55,7 @@ class ConversationService {
     required String content,
     Map<String, dynamic>? metadata,
   }) async {
-    final result = await supabaseClient.rpc(
+    final result = await backendClient.rpc(
       'runtime_record_conversation',
       params: {
         'p_sh_id': _shId,
