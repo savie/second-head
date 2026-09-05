@@ -13,11 +13,10 @@ Future<void> _loadProfilePhoto() async {
   try {
     profilePhoto.value = await StorageService.readProfilePhoto();
   } catch (_) {
-    // Local storage is optional; keep the default SH mark if unavailable.
+    profilePhoto.value = null;
   }
 }
 
-// Frontend profile identity state. Backend persistence will be wired later.
 final ValueNotifier<String> profileName = ValueNotifier<String>('Savie');
 final ValueNotifier<String> profileEmail = ValueNotifier<String>('savie@secondhead.app');
 
@@ -35,13 +34,22 @@ class ShProfileMark extends StatelessWidget {
           width: size,
           height: size,
           padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(colors: [shPurple, shElectric]),
+            gradient: LinearGradient(colors: [shPurple, shElectric]),
           ),
           child: ClipOval(
             child: photo != null
-                ? Image.memory(photo, fit: BoxFit.cover, filterQuality: FilterQuality.high)
+                ? Image.memory(
+                    photo,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      'assets/brand/unity.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  )
                 : Image.asset(
                     'assets/brand/unity.png',
                     fit: BoxFit.contain,
