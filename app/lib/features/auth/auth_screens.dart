@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/backend/auth/auth_backend_error.dart';
 import '../../core/identity/sh_identity.dart';
-import '../../core/supabase/supabase_client.dart';
 import '../../core/theme/sh_theme.dart';
 import '../../core/widgets/sh_brand_mark.dart';
 import '../home/home_screen.dart';
@@ -161,13 +160,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     setState(() => _loading = true);
     try {
-      await AuthSession.service.signIn(
-        email: AuthSession.emailController.text,
-        password: AuthSession.passwordController.text,
-      );
+      await AuthSession.service.signIn(email: AuthSession.emailController.text, password: AuthSession.passwordController.text);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
-    } on AuthException catch (error) {
+    } on AuthBackendError catch (error) {
       if (mounted) _showError(error.message);
     } catch (error) {
       if (mounted) _showError('Sign in gagal: $error');
@@ -187,27 +183,13 @@ class _LoginScreenState extends State<LoginScreen> {
         _AuthField(hint: 'Email', controller: AuthSession.emailController),
         _AuthField(hint: 'Password', icon: Icons.lock_outline, obscure: true, trailing: true, controller: AuthSession.passwordController),
       ],
-      primaryLabel: 'Sign In',
-      onPrimary: _signIn,
-      loading: _loading,
+      primaryLabel: 'Sign In', onPrimary: _signIn, loading: _loading,
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: _loading ? null : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-              child: const Text('Forgot password?', style: TextStyle(fontSize: 14)),
-            ),
-          ),
+          Align(alignment: Alignment.centerLeft, child: TextButton(onPressed: _loading ? null : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())), style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)), child: const Text('Forgot password?', style: TextStyle(fontSize: 14)))),
           const SizedBox(height: 2),
-          Center(
-            child: TextButton(
-              onPressed: _loading ? null : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpScreen())),
-              child: const Text.rich(TextSpan(text: 'Don’t have an account? ', style: TextStyle(fontSize: 14, color: shMuted), children: [TextSpan(text: 'Sign up', style: TextStyle(color: shCyan))])),
-            ),
-          ),
+          Center(child: TextButton(onPressed: _loading ? null : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpScreen())), child: const Text.rich(TextSpan(text: 'Don’t have an account? ', style: TextStyle(fontSize: 14, color: shMuted), children: [TextSpan(text: 'Sign up', style: TextStyle(color: shCyan))])))),
         ],
       ),
       secondary: const _SocialButtons(),
@@ -233,10 +215,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
     setState(() => _loading = true);
     try {
-      await supabaseClient.auth.resetPasswordForEmail(email);
+      await AuthSession.service.sendPasswordReset(email);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset link sudah dikirim jika email terdaftar.')));
-    } on AuthException catch (error) {
+    } on AuthBackendError catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -246,16 +228,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return _AuthScaffold(
-      title: 'Forgot password',
-      subtitle: 'Enter your email and we’ll send you a link to reset your password.',
+      title: 'Forgot password', subtitle: 'Enter your email and we’ll send you a link to reset your password.',
       fields: [_AuthField(hint: 'Email', controller: AuthSession.emailController)],
-      primaryLabel: 'Send Reset Link',
-      onPrimary: _sendReset,
-      loading: _loading,
-      footer: Align(
-        alignment: Alignment.center,
-        child: TextButton(onPressed: _loading ? null : () => Navigator.of(context).pop(), child: const Text('Back to sign in', style: TextStyle(fontSize: 14))),
-      ),
+      primaryLabel: 'Send Reset Link', onPrimary: _sendReset, loading: _loading,
+      footer: Align(alignment: Alignment.center, child: TextButton(onPressed: _loading ? null : () => Navigator.of(context).pop(), child: const Text('Back to sign in', style: TextStyle(fontSize: 14)))),
     );
   }
 }
@@ -288,7 +264,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await AuthSession.service.signUp(email: email, password: password, fullName: AuthSession.fullNameController.text);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
-    } on AuthException catch (error) {
+    } on AuthBackendError catch (error) {
       if (mounted) _showError(error.message);
     } catch (error) {
       if (mounted) _showError('Sign up gagal: $error');
@@ -302,23 +278,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return _AuthScaffold(
-      title: 'Create Second Head Account',
-      subtitle: 'Let’s get you started',
+      title: 'Create Second Head Account', subtitle: 'Let’s get you started',
       fields: [
         _AuthField(hint: 'Full name', icon: Icons.person_outline, controller: AuthSession.fullNameController),
         _AuthField(hint: 'Email', controller: AuthSession.emailController),
         _AuthField(hint: 'Password', icon: Icons.lock_outline, obscure: true, trailing: true, controller: AuthSession.passwordController),
         _AuthField(hint: 'Confirm password', icon: Icons.lock_outline, obscure: true, trailing: true, controller: AuthSession.confirmPasswordController),
       ],
-      primaryLabel: 'Create Account',
-      onPrimary: _signUp,
-      loading: _loading,
-      footer: Center(
-        child: TextButton(
-          onPressed: _loading ? null : () => Navigator.of(context).pop(),
-          child: const Text.rich(TextSpan(text: 'Already have an account? ', style: TextStyle(fontSize: 14, color: shMuted), children: [TextSpan(text: 'Sign in', style: TextStyle(color: shCyan))])),
-        ),
-      ),
+      primaryLabel: 'Create Account', onPrimary: _signUp, loading: _loading,
+      footer: Center(child: TextButton(onPressed: _loading ? null : () => Navigator.of(context).pop(), child: const Text.rich(TextSpan(text: 'Already have an account? ', style: TextStyle(fontSize: 14, color: shMuted), children: [TextSpan(text: 'Sign in', style: TextStyle(color: shCyan))])))),
       secondary: const _SocialButtons(),
     );
   }
@@ -329,17 +297,12 @@ class _SocialButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          child: Row(children: [Expanded(child: Divider(color: shBorder)), Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('or continue with', style: TextStyle(fontSize: 13, color: shMuted))), Expanded(child: Divider(color: shBorder))]),
-        ),
-        const _SocialButton(label: 'Google', leading: Text('G', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700))),
-        const SizedBox(height: 10),
-        const _SocialButton(label: 'Apple', leading: Icon(Icons.apple, size: 23)),
-      ],
-    );
+    return Column(children: [
+      const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Row(children: [Expanded(child: Divider(color: shBorder)), Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('or continue with', style: TextStyle(fontSize: 13, color: shMuted))), Expanded(child: Divider(color: shBorder))])),
+      const _SocialButton(label: 'Google', leading: Text('G', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700))),
+      const SizedBox(height: 10),
+      const _SocialButton(label: 'Apple', leading: Icon(Icons.apple, size: 23)),
+    ]);
   }
 }
 
@@ -351,20 +314,10 @@ class _SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: leading,
-        label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        style: OutlinedButton.styleFrom(
-          backgroundColor: shSurface2,
-          foregroundColor: Colors.white,
-          side: const BorderSide(color: shBorder, width: 1.2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        ),
-      ),
-    );
+    return SizedBox(width: double.infinity, height: 56, child: OutlinedButton.icon(
+      onPressed: () {}, icon: leading,
+      label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      style: OutlinedButton.styleFrom(backgroundColor: shSurface2, foregroundColor: Colors.white, side: const BorderSide(color: shBorder, width: 1.2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+    ));
   }
 }
