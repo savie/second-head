@@ -37,8 +37,16 @@ class _SideMenuState extends State<SideMenu> {
     } catch (_) { if (mounted) setState(() => _loading = false); }
   }
 
-  void _closeDrawer() => Navigator.of(context).pop();
-  void _openPage(int index) { _closeDrawer(); widget.onSelectPage(index); }
+  Future<void> _closeDrawer() async {
+    if (!mounted) return;
+    await Navigator.of(context).maybePop();
+  }
+
+  Future<void> _openPage(int index) async {
+    await _closeDrawer();
+    if (!mounted) return;
+    widget.onSelectPage(index);
+  }
 
   Future<void> _startNewConversation({String? projectId}) async {
     try {
@@ -46,7 +54,9 @@ class _SideMenuState extends State<SideMenu> {
       await _runtime.selectConversation(id);
       await _loadSidebar();
       if (!mounted) return;
-      _closeDrawer(); widget.onSelectPage(0);
+      await _closeDrawer();
+      if (!mounted) return;
+      widget.onSelectPage(0);
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create conversation')));
     }
@@ -56,7 +66,9 @@ class _SideMenuState extends State<SideMenu> {
     try {
       await _runtime.selectConversation(item.conversationId);
       if (!mounted) return;
-      _closeDrawer(); widget.onSelectPage(0);
+      await _closeDrawer();
+      if (!mounted) return;
+      widget.onSelectPage(0);
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to open conversation')));
     }
@@ -204,8 +216,8 @@ class _SideMenuState extends State<SideMenu> {
         MenuTile(customIcon: const ShSectionNavIcon.journey(), label: 'Journey', onTap: () => _openPage(1)),
         MenuTile(customIcon: const ShSectionNavIcon.lifecycle(), label: 'Lifecycle', onTap: () => _openPage(2)),
         MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(3)),
-        MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () { _closeDrawer(); Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpSupportView())); }),
-        MenuTile(icon: Icons.info_outline, label: 'About', onTap: () { _closeDrawer(); Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AboutView())); }),
+        MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () async { await _closeDrawer(); if (!mounted) return; Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpSupportView())); }),
+        MenuTile(icon: Icons.info_outline, label: 'About', onTap: () async { await _closeDrawer(); if (!mounted) return; Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AboutView())); }),
       ])),
       Padding(padding: const EdgeInsets.fromLTRB(10, 0, 10, 8), child: Align(alignment: Alignment.centerLeft, child: MenuTile(icon: Icons.logout_outlined, label: 'Log Out', onTap: _logout, danger: true))),
     ])),
