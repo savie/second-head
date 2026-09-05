@@ -38,7 +38,7 @@ class _AboutViewState extends State<AboutView> {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
             children: [
               const SizedBox(height: 4),
-              const Center(
+              Center(
                 child: SizedBox(
                   width: 250,
                   height: 250,
