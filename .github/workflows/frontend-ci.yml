@@ -37,6 +37,12 @@ jobs:
           cp assets/brand/unity.png android/app/src/main/res/drawable/sh_launcher.png
           sed -i 's#android:icon="@mipmap/ic_launcher"#android:icon="@drawable/sh_launcher"#' android/app/src/main/AndroidManifest.xml
 
+      - name: Restore stable DEV debug signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: second-head-dev-debug-keystore-v1
+
       - name: Install dependencies
         run: flutter pub get
 
