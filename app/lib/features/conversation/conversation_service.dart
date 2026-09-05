@@ -28,6 +28,35 @@ class ConversationService {
     return result.toString();
   }
 
+  Future<void> renameProject({required String projectId, required String name}) async {
+    await backendClient.rpc('runtime_rename_project', params: {'p_project_id': projectId, 'p_name': name});
+  }
+
+  Future<void> deleteProject({required String projectId}) async {
+    final deletedActiveConversation = activeConversationId.value;
+    await backendClient.rpc('runtime_delete_project', params: {'p_project_id': projectId});
+
+    if (deletedActiveConversation != null && deletedActiveConversation.isNotEmpty) {
+      final conversations = await listConversations();
+      final stillExists = conversations.any((item) => item.conversationId == deletedActiveConversation);
+      if (!stillExists) activeConversationId.value = null;
+    }
+  }
+
+  Future<void> moveConversation({required String conversationId, required String projectId}) async {
+    await backendClient.rpc('runtime_assign_conversation_project', params: {
+      'p_conversation_id': conversationId,
+      'p_project_id': projectId,
+    });
+  }
+
+  Future<void> removeConversationFromProject({required String conversationId}) async {
+    await backendClient.rpc('runtime_assign_conversation_project', params: {
+      'p_conversation_id': conversationId,
+      'p_project_id': null,
+    });
+  }
+
   Future<String> createConversation({String? projectId, String? title}) async {
     final result = await backendClient.rpc('runtime_create_conversation', params: {'p_project_id': projectId, 'p_title': title ?? 'New Conversation'});
     if (result == null) throw StateError('Conversation runtime returned no conversation id.');
