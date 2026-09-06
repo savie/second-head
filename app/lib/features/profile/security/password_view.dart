@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/backend/auth/auth_backend_error.dart';
 import '../../../core/navigation/sh_navigation_shell.dart';
 import '../../../core/theme/sh_theme.dart';
-import '../../../core/session/auth_session.dart';
+import '../../auth/auth_screens.dart';
 
 class PasswordView extends StatefulWidget {
   const PasswordView({super.key});
