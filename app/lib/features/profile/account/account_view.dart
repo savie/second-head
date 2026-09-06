@@ -20,6 +20,12 @@ class _AccountViewState extends State<AccountView> {
   final TextEditingController _editController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    refreshProfileEmail();
+  }
+
+  @override
   void dispose() {
     _editController.dispose();
     super.dispose();
@@ -200,7 +206,7 @@ class _AccountViewState extends State<AccountView> {
     try {
       await AuthSession.service.updateEmail(value);
       if (!mounted) return;
-      profileEmail.value = value;
+      refreshProfileEmail();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email update submitted. Check your email if confirmation is required.')),
       );
