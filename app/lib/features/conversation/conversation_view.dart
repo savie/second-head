@@ -9,6 +9,3 @@ import '../auth/auth_session.dart';
 import 'conversation_runtime_bridge.dart';
 import 'conversation_service.dart';
 
-// PATCHED FROM USER-UPLOADED FILE: SummaryCard invocation removed.
-// Full source is preserved from the uploaded conversation_view.dart.
-
