@@ -14,8 +14,7 @@ import 'more_widgets.dart';
 class SideMenu extends StatefulWidget {
   const SideMenu({super.key, required this.onSelectPage});
   final ValueChanged<int> onSelectPage;
-  @override
-  State<SideMenu> createState() => _SideMenuState();
+  @override State<SideMenu> createState() => _SideMenuState();
 }
 
 class _SideMenuState extends State<SideMenu> {
@@ -26,8 +25,7 @@ class _SideMenuState extends State<SideMenu> {
   List<ProjectSummary> _projects = const [];
   List<ConversationSummary> _conversations = const [];
 
-  @override
-  void initState() { super.initState(); _loadSidebar(); }
+  @override void initState() { super.initState(); _loadSidebar(); }
 
   Future<void> _loadSidebar() async {
     try {
@@ -39,7 +37,6 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Future<void> _closeDrawer() async { if (mounted) await Navigator.of(context).maybePop(); }
-
   Future<void> _openPage(int index) async { await _closeDrawer(); if (mounted) widget.onSelectPage(index); }
 
   Future<void> _openManagement() async {
@@ -79,24 +76,26 @@ class _SideMenuState extends State<SideMenu> {
   Future<void> _renameProject(ProjectSummary project) async {
     final value = await _textEditorSheet(title: 'Rename Project', hintText: 'Project name', initialText: project.name);
     if (!mounted || value == null || value.isEmpty) return;
-    try { await _runtime.renameProject(project.projectId, value); await _loadSidebar(); }
-    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename project'))); }
+    try {
+      await _runtime.renameProject(projectId: project.projectId, name: value);
+      await _loadSidebar();
+    } catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename project'))); }
   }
 
   Future<void> _renameConversation(ConversationSummary item) async {
     final value = await _textEditorSheet(title: 'Rename Conversation', hintText: 'Conversation name', initialText: item.title);
     if (!mounted || value == null || value.isEmpty) return;
-    try { await _runtime.rename(item.conversationId, value); await _loadSidebar(); }
-    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
+    try {
+      await _runtime.rename(conversationId: item.conversationId, title: value);
+      await _loadSidebar();
+    } catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
   }
 
-  Future<String?> _textEditorSheet({required String title, String? hintText, String? initialText}) async {
-    return showModalBottomSheet<String>(
-      context: context, isScrollControlled: true, backgroundColor: shSurface, showDragHandle: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
-      builder: (_) => _SidebarTextEditor(title: title, hintText: hintText, initialText: initialText),
-    );
-  }
+  Future<String?> _textEditorSheet({required String title, String? hintText, String? initialText}) => showModalBottomSheet<String>(
+    context: context, isScrollControlled: true, backgroundColor: shSurface, showDragHandle: true,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+    builder: (_) => _SidebarTextEditor(title: title, hintText: hintText, initialText: initialText),
+  );
 
   Widget _sectionAction({required IconData icon, required String label, required VoidCallback onTap}) => Padding(
     padding: const EdgeInsets.only(left: 36, right: 10, bottom: 4),
