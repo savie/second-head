@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 /// Local file storage owned by SECOND HEAD.
 class StorageService {
   static const profilePhotoName = 'profile_photo.jpg';
+  static const profileNameName = 'profile_name.txt';
 
   static bool _legacyMigrationDone = false;
 
@@ -83,16 +84,12 @@ class StorageService {
         if (await target.exists()) {
           await entity.delete();
         } else {
-          // Legacy temp lived on external storage; copy into app-private
-          // storage because this may cross filesystem boundaries.
           await target.writeAsBytes(await entity.readAsBytes(), flush: true);
           await entity.delete();
         }
       }
     }
 
-    // Only remove the legacy container after all known content has moved.
-    // Never recursively delete unknown legacy files.
     try {
       await legacyRoot.delete();
     } catch (_) {}
@@ -120,6 +117,22 @@ class StorageService {
     if (await file.exists()) await file.delete();
   }
 
+  static Future<File> profileNameFile() async {
+    final dir = await internalRoot();
+    return File('${dir.path}/$profileNameName');
+  }
+
+  static Future<void> saveProfileName(String name) async {
+    final file = await profileNameFile();
+    await file.writeAsString(name.trim(), flush: true);
+  }
+
+  static Future<String?> readProfileName() async {
+    final file = await profileNameFile();
+    if (!await file.exists()) return null;
+    return file.readAsString();
+  }
+
   static Future<File> saveConversationFile(
     Uint8List bytes, {
     required String filename,
@@ -129,8 +142,7 @@ class StorageService {
     final category = _categoryForExtension(extension);
     final dir = await directory(category);
     final timestamp = DateTime.now().microsecondsSinceEpoch;
-    final safeName =
-        filename.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    final safeName = filename.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
     final file = File('${dir.path}/conversation_${timestamp}_$safeName');
     await file.writeAsBytes(bytes, flush: true);
     return file;
@@ -147,8 +159,7 @@ class StorageService {
   }
 
   static String _categoryForExtension(String extension) {
-    if (RegExp(r'^(jpg|jpeg|png|gif|webp|heic|heif|bmp)$')
-        .hasMatch(extension)) {
+    if (RegExp(r'^(jpg|jpeg|png|gif|webp|heic|heif|bmp)$').hasMatch(extension)) {
       return 'images';
     }
     if (RegExp(r'^(mp4|mov|m4v|webm|avi|mkv|3gp)$').hasMatch(extension)) {
@@ -163,15 +174,9 @@ class StorageService {
   static Future<List<File>> listFiles({bool includeExports = true}) async {
     final rootDir = await root();
     final files = <File>[];
-    await for (final entity
-        in rootDir.list(recursive: true, followLinks: false)) {
+    await for (final entity in rootDir.list(recursive: true, followLinks: false)) {
       if (entity is File) {
-        if (!includeExports &&
-            entity.path.contains(
-              '${Platform.pathSeparator}exports${Platform.pathSeparator}',
-            )) {
-          continue;
-        }
+        if (!includeExports && entity.path.contains('${Platform.pathSeparator}exports${Platform.pathSeparator}')) continue;
         files.add(entity);
       }
     }
@@ -180,15 +185,9 @@ class StorageService {
 
   static String categoryFor(File file) {
     final path = file.path.toLowerCase();
-    if (RegExp(r'\.(jpg|jpeg|png|gif|webp|heic)$').hasMatch(path)) {
-      return 'images';
-    }
-    if (RegExp(r'\.(mp4|mov|m4v|webm|avi)$').hasMatch(path)) {
-      return 'video';
-    }
-    if (RegExp(r'\.(mp3|m4a|wav|aac|ogg|opus)$').hasMatch(path)) {
-      return 'audio';
-    }
+    if (RegExp(r'\.(jpg|jpeg|png|gif|webp|heic)$').hasMatch(path)) return 'images';
+    if (RegExp(r'\.(mp4|mov|m4v|webm|avi)$').hasMatch(path)) return 'video';
+    if (RegExp(r'\.(mp3|m4a|wav|aac|ogg|opus)$').hasMatch(path)) return 'audio';
     return 'documents';
   }
 
@@ -197,19 +196,9 @@ class StorageService {
     return File('${dir.path}/conversation_state.json');
   }
 
-  static Future<void> saveConversationState({
-    required String title,
-    required List<Map<String, dynamic>> messages,
-  }) async {
+  static Future<void> saveConversationState({required String title, required List<Map<String, dynamic>> messages}) async {
     final file = await conversationStateFile();
-    await file.writeAsString(
-      jsonEncode({
-        'title': title,
-        'messages': messages,
-        'savedAt': DateTime.now().toIso8601String(),
-      }),
-      flush: true,
-    );
+    await file.writeAsString(jsonEncode({'title': title, 'messages': messages, 'savedAt': DateTime.now().toIso8601String()}), flush: true);
   }
 
   static Future<Map<String, dynamic>?> readConversationState() async {
@@ -223,21 +212,13 @@ class StorageService {
     }
   }
 
-  /// Recovery snapshots are canonical local export files.
-  /// Data & Privacy and Export both read this same directory.
-  static Future<Directory> recoverySnapshotsDirectory() {
-    return directory('exports');
-  }
+  static Future<Directory> recoverySnapshotsDirectory() => directory('exports');
 
   static Future<List<File>> listRecoverySnapshotFiles() async {
     final dir = await recoverySnapshotsDirectory();
     final files = <File>[];
     await for (final entity in dir.list(followLinks: false)) {
-      if (entity is File &&
-          RegExp(r'^recovery_snapshots_\d{6}_\d{6}\.json$')
-              .hasMatch(entity.uri.pathSegments.last)) {
-        files.add(entity);
-      }
+      if (entity is File && RegExp(r'^recovery_snapshots_\d{6}_\d{6}\.json$').hasMatch(entity.uri.pathSegments.last)) files.add(entity);
     }
     files.sort((a, b) => b.path.compareTo(a.path));
     return files;
@@ -246,10 +227,7 @@ class StorageService {
   static Future<File> recoverySnapshotFileFor(DateTime createdAt) async {
     final dir = await recoverySnapshotsDirectory();
     String two(int n) => n.toString().padLeft(2, '0');
-    final filename =
-        'recovery_snapshots_${two(createdAt.month)}${two(createdAt.day)}'
-        '${createdAt.year.toString().substring(2)}_'
-        '${two(createdAt.hour)}${two(createdAt.minute)}${two(createdAt.second)}.json';
+    final filename = 'recovery_snapshots_${two(createdAt.month)}${two(createdAt.day)}${createdAt.year.toString().substring(2)}_${two(createdAt.hour)}${two(createdAt.minute)}${two(createdAt.second)}.json';
     return File('${dir.path}/$filename');
   }
 
@@ -265,25 +243,15 @@ class StorageService {
 
   static Future<List<Map<String, dynamic>>> listPersistentFilesForRecovery() async {
     final result = <Map<String, dynamic>>[];
-
     Future<void> collect(Directory base, String prefix, {String? excludedPath}) async {
       if (!await base.exists()) return;
       await for (final entity in base.list(recursive: true, followLinks: false)) {
         if (entity is! File) continue;
-        if (excludedPath != null &&
-            entity.path.contains(
-              '${Platform.pathSeparator}$excludedPath${Platform.pathSeparator}',
-            )) {
-          continue;
-        }
+        if (excludedPath != null && entity.path.contains('${Platform.pathSeparator}$excludedPath${Platform.pathSeparator}')) continue;
         final relative = entity.path.substring(base.path.length + 1);
-        result.add({
-          'path': '$prefix/$relative',
-          'bytes_base64': base64Encode(await entity.readAsBytes()),
-        });
+        result.add({'path': '$prefix/$relative', 'bytes_base64': base64Encode(await entity.readAsBytes())});
       }
     }
-
     await collect(await internalRoot(), 'internal');
     await collect(await root(), 'external', excludedPath: 'exports');
     return result;
@@ -292,24 +260,18 @@ class StorageService {
   static Future<void> clearApplicationData() async {
     final dir = await internalRoot();
     if (await dir.exists()) {
-      await for (final entity in dir.list(followLinks: false)) {
-        await entity.delete(recursive: true);
-      }
+      await for (final entity in dir.list(followLinks: false)) await entity.delete(recursive: true);
     }
     final cache = await getTemporaryDirectory();
     if (await cache.exists()) {
-      await for (final entity in cache.list(followLinks: false)) {
-        await entity.delete(recursive: true);
-      }
+      await for (final entity in cache.list(followLinks: false)) await entity.delete(recursive: true);
     }
     await internalRoot();
   }
 
   static Future<int> totalBytes() async {
     var total = 0;
-    for (final file in await listFiles(includeExports: false)) {
-      total += await file.length();
-    }
+    for (final file in await listFiles(includeExports: false)) total += await file.length();
     return total;
   }
 }

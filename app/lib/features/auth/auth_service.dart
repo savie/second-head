@@ -24,10 +24,13 @@ class AuthService {
           case 'AuthChangeEvent.userUpdated':
             if (data.session != null) {
               try {
-                refreshProfileEmail();
                 await resolveIdentity();
+                refreshProfileEmail();
+                final identity = identityContext.identity;
+                if (identity != null) refreshProfileIdentity(identity);
                 onChanged?.call();
               } catch (_) {
+                clearProfileIdentity();
                 identityContext.clear();
                 onChanged?.call();
               }
@@ -39,7 +42,7 @@ class AuthService {
             break;
           case 'AuthChangeEvent.signedOut':
             _passwordRecoveryActive = false;
-            profileEmail.value = '';
+            clearProfileIdentity();
             identityContext.clear();
             onChanged?.call();
             break;
@@ -54,8 +57,8 @@ class AuthService {
   Future<void> signIn({required String email, required String password}) async {
     try {
       await _backend.signIn(email: email.trim(), password: password);
-      refreshProfileEmail();
       await resolveIdentity();
+      _refreshProfileState();
     } catch (error) {
       throw _toError(error);
     }
@@ -69,24 +72,14 @@ class AuthService {
     }
   }
 
-  Future<void> signUp({
-    required String email,
-    required String password,
-    String? fullName,
-  }) async {
+  Future<void> signUp({required String email, required String password, String? fullName}) async {
     try {
-      final session = await _backend.signUp(
-        email: email.trim(),
-        password: password,
-        fullName: fullName,
-      );
+      final session = await _backend.signUp(email: email.trim(), password: password, fullName: fullName);
       if (session == null) {
-        throw const AuthBackendError(
-          'Account created. Check your email to confirm the account before signing in.',
-        );
+        throw const AuthBackendError('Account created. Check your email to confirm the account before signing in.');
       }
-      refreshProfileEmail();
       await resolveIdentity();
+      _refreshProfileState();
     } catch (error) {
       throw _toError(error);
     }
@@ -104,6 +97,7 @@ class AuthService {
     try {
       await _backend.updatePassword(password);
       await resolveIdentity();
+      _refreshProfileState();
     } catch (error) {
       throw _toError(error);
     }
@@ -112,7 +106,7 @@ class AuthService {
   Future<void> updateEmail(String email) async {
     try {
       await _backend.updateEmail(email.trim());
-      refreshProfileEmail();
+      _refreshProfileState();
     } catch (error) {
       throw _toError(error);
     }
@@ -122,17 +116,17 @@ class AuthService {
 
   Future<void> restoreSession() async {
     if (_backend.currentSession == null) {
-      profileEmail.value = '';
+      clearProfileIdentity();
       identityContext.clear();
       return;
     }
-    refreshProfileEmail();
     await resolveIdentity();
+    _refreshProfileState();
   }
 
   Future<void> resolveIdentity() async {
     if (_backend.currentSession == null) {
-      profileEmail.value = '';
+      clearProfileIdentity();
       identityContext.clear();
       throw const AuthBackendError('No authenticated session.');
     }
@@ -148,13 +142,7 @@ class AuthService {
       if (accountId == null || shId == null || ownershipRole == null) {
         throw const AuthBackendError('Authenticated identity is incomplete.');
       }
-      identityContext.setIdentity(
-        ShIdentity(
-          accountId: accountId,
-          shId: shId,
-          ownershipRole: ownershipRole,
-        ),
-      );
+      identityContext.setIdentity(ShIdentity(accountId: accountId, shId: shId, ownershipRole: ownershipRole));
     } catch (error) {
       throw _toError(error);
     }
@@ -167,7 +155,7 @@ class AuthService {
       throw _toError(error);
     } finally {
       _passwordRecoveryActive = false;
-      profileEmail.value = '';
+      clearProfileIdentity();
       identityContext.clear();
     }
   }
@@ -175,6 +163,12 @@ class AuthService {
   Future<void> dispose() async {
     await _authSubscription?.cancel();
     _authSubscription = null;
+  }
+
+  void _refreshProfileState() {
+    refreshProfileEmail();
+    final identity = identityContext.identity;
+    if (identity != null) refreshProfileIdentity(identity);
   }
 
   AuthBackendError _toError(Object error) {

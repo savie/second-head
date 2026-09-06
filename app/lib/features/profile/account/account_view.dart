@@ -22,7 +22,7 @@ class _AccountViewState extends State<AccountView> {
   @override
   void initState() {
     super.initState();
-    refreshProfileEmail();
+    profileNameLoad;
   }
 
   @override
@@ -33,11 +33,7 @@ class _AccountViewState extends State<AccountView> {
 
   Future<void> _pickPhoto(ImageSource source) async {
     final picker = ImagePicker();
-    final file = await picker.pickImage(
-      source: source,
-      imageQuality: 88,
-      maxWidth: 900,
-    );
+    final file = await picker.pickImage(source: source, imageQuality: 88, maxWidth: 900);
     if (file == null) return;
     profilePhoto.value = await file.readAsBytes();
   }
@@ -47,41 +43,16 @@ class _AccountViewState extends State<AccountView> {
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(18, 6, 18, 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ProfilePhotoAction(
-                icon: Icons.camera_alt_outlined,
-                label: 'Camera',
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickPhoto(ImageSource.camera);
-                },
-              ),
-              ProfilePhotoAction(
-                icon: Icons.photo_library_outlined,
-                label: 'Photos',
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickPhoto(ImageSource.gallery);
-                },
-              ),
-              ProfilePhotoAction(
-                icon: Icons.delete_outline,
-                label: 'Remove',
-                onTap: profilePhoto.value == null
-                    ? null
-                    : () {
-                        Navigator.pop(context);
-                        profilePhoto.value = null;
-                      },
-              ),
+              ProfilePhotoAction(icon: Icons.camera_alt_outlined, label: 'Camera', onTap: () { Navigator.pop(context); _pickPhoto(ImageSource.camera); }),
+              ProfilePhotoAction(icon: Icons.photo_library_outlined, label: 'Photos', onTap: () { Navigator.pop(context); _pickPhoto(ImageSource.gallery); }),
+              ProfilePhotoAction(icon: Icons.delete_outline, label: 'Remove', onTap: profilePhoto.value == null ? null : () { Navigator.pop(context); profilePhoto.value = null; }),
             ],
           ),
         ),
@@ -89,30 +60,16 @@ class _AccountViewState extends State<AccountView> {
     );
   }
 
-  Future<void> _editValue({
-    required String title,
-    required String initial,
-    required ValueChanged<String> onSave,
-  }) async {
-    _editController.value = TextEditingValue(
-      text: initial,
-      selection: TextSelection.collapsed(offset: initial.length),
-    );
+  Future<void> _editValue({required String title, required String initial, required ValueChanged<String> onSave}) async {
+    _editController.value = TextEditingValue(text: initial, selection: TextSelection.collapsed(offset: initial.length));
     final value = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: shSurface,
       isScrollControlled: true,
       showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.of(sheetContext).viewInsets.bottom + 20,
-        ),
+        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheetContext).viewInsets.bottom + 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,23 +81,10 @@ class _AccountViewState extends State<AccountView> {
               autofocus: true,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: shBackground,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: shBorder),
-                ),
-              ),
+              decoration: InputDecoration(filled: true, fillColor: shBackground, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: shBorder))),
             ),
             const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()),
-                child: const Text('Save'),
-              ),
-            ),
+            SizedBox(width: double.infinity, child: FilledButton(onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()), child: const Text('Save'))),
           ],
         ),
       ),
@@ -150,25 +94,15 @@ class _AccountViewState extends State<AccountView> {
   }
 
   Future<void> _editEmail() async {
-    _editController.value = TextEditingValue(
-      text: profileEmail.value,
-      selection: TextSelection.collapsed(offset: profileEmail.value.length),
-    );
+    _editController.value = TextEditingValue(text: profileEmail.value, selection: TextSelection.collapsed(offset: profileEmail.value.length));
     final value = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: shSurface,
       isScrollControlled: true,
       showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.of(sheetContext).viewInsets.bottom + 20,
-        ),
+        padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.of(sheetContext).viewInsets.bottom + 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,23 +115,10 @@ class _AccountViewState extends State<AccountView> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: shBackground,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: shBorder),
-                ),
-              ),
+              decoration: InputDecoration(filled: true, fillColor: shBackground, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: shBorder))),
             ),
             const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()),
-                child: const Text('Save'),
-              ),
-            ),
+            SizedBox(width: double.infinity, child: FilledButton(onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()), child: const Text('Save'))),
           ],
         ),
       ),
@@ -206,15 +127,18 @@ class _AccountViewState extends State<AccountView> {
     try {
       await AuthSession.service.updateEmail(value);
       if (!mounted) return;
-      refreshProfileEmail();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email update submitted. Check your email if confirmation is required.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email update submitted. Check your email if confirmation is required.')));
     } on AuthBackendError catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
     } catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Unable to update email: $error')));
     }
+  }
+
+  String _formatCreatedAt(DateTime? value) {
+    if (value == null) return '—';
+    String two(int number) => number.toString().padLeft(2, '0');
+    return '${two(value.month)}-${two(value.day)}-${value.year}';
   }
 
   @override
@@ -223,31 +147,14 @@ class _AccountViewState extends State<AccountView> {
       backgroundColor: shBackground,
       body: Column(
         children: [
-          ShTopBar(
-            title: 'Account',
-            leading: IconButton(
-              tooltip: 'Back',
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back_rounded),
-            ),
-          ),
+          ShTopBar(title: 'Account', leading: IconButton(tooltip: 'Back', onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_rounded))),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 28),
               children: [
-                Center(
-                  child: GestureDetector(
-                    onTap: _showPhotoOptions,
-                    child: const ShProfileMark(size: 112),
-                  ),
-                ),
+                Center(child: GestureDetector(onTap: _showPhotoOptions, child: const ShProfileMark(size: 112))),
                 const SizedBox(height: 10),
-                const Center(
-                  child: Text(
-                    'Tap photo to change',
-                    style: TextStyle(fontSize: 11, color: shMuted),
-                  ),
-                ),
+                const Center(child: Text('Tap photo to change', style: TextStyle(fontSize: 11, color: shMuted))),
                 const SizedBox(height: 22),
                 ValueListenableBuilder<String>(
                   valueListenable: profileName,
@@ -256,54 +163,36 @@ class _AccountViewState extends State<AccountView> {
                     builder: (context, email, _) => _AccountSection(
                       title: 'Personal',
                       rows: [
-                        _AccountRow(
-                          icon: Icons.person_outline_rounded,
-                          label: 'Name',
-                          value: name,
-                          editable: true,
-                          onTap: () => _editValue(
-                            title: 'Name',
-                            initial: name,
-                            onSave: (value) => profileName.value = value,
-                          ),
-                        ),
-                        _AccountRow(
-                          icon: Icons.mail_outline_rounded,
-                          label: 'Email',
-                          value: email,
-                          editable: true,
-                          onTap: _editEmail,
-                        ),
+                        _AccountRow(icon: Icons.person_outline_rounded, label: 'Name', value: name, editable: true, onTap: () => _editValue(title: 'Name', initial: name, onSave: (value) { saveProfileName(value); })),
+                        _AccountRow(icon: Icons.mail_outline_rounded, label: 'Email', value: email, editable: true, onTap: _editEmail),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 14),
-                _AccountSection(
-                  title: 'Identifiers',
-                  rows: const [
-                    _AccountRow(
-                      icon: Icons.badge_outlined,
-                      label: 'Account ID',
-                      value: 'xxxxx',
+                ValueListenableBuilder<String>(
+                  valueListenable: profileAccountId,
+                  builder: (context, accountId, _) => ValueListenableBuilder<String>(
+                    valueListenable: profileShId,
+                    builder: (context, shId, _) => ValueListenableBuilder<DateTime?>(
+                      valueListenable: profileAccountCreatedAt,
+                      builder: (context, createdAt, _) => _AccountSection(
+                        title: 'Identifiers',
+                        rows: [
+                          _AccountRow(icon: Icons.badge_outlined, label: 'Account ID', value: accountId.isEmpty ? '—' : accountId),
+                          _AccountRow(icon: Icons.fingerprint_rounded, label: 'SH ID', value: shId.isEmpty ? '—' : shId),
+                        ],
+                      ),
                     ),
-                    _AccountRow(
-                      icon: Icons.fingerprint_rounded,
-                      label: 'SH ID',
-                      value: 'xxxxx',
-                    ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 14),
-                _AccountSection(
-                  title: 'Account',
-                  rows: const [
-                    _AccountRow(
-                      icon: Icons.calendar_today_outlined,
-                      label: 'Account created',
-                      value: 'mm-dd-yyyy',
-                    ),
-                  ],
+                ValueListenableBuilder<DateTime?>(
+                  valueListenable: profileAccountCreatedAt,
+                  builder: (context, createdAt, _) => _AccountSection(
+                    title: 'Account',
+                    rows: [_AccountRow(icon: Icons.calendar_today_outlined, label: 'Account created', value: _formatCreatedAt(createdAt))],
+                  ),
                 ),
               ],
             ),
