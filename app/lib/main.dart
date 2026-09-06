@@ -32,7 +32,7 @@ class SecondHeadApp extends StatefulWidget {
 }
 
 class _SecondHeadAppState extends State<SecondHeadApp> {
-  final AuthCallbackHandler _authCallbackHandler = AuthCallbackHandler();
+  late final AuthCallbackHandler _authCallbackHandler;
 
   @override
   void initState() {
@@ -41,13 +41,18 @@ class _SecondHeadAppState extends State<SecondHeadApp> {
     AuthSession.identityContext.addListener(_changed);
     if (widget.authListenerEnabled) {
       AuthSession.service.startAuthStateListener(onChanged: _changed);
+      _authCallbackHandler = AuthCallbackHandler(
+        onPasswordRecovery: () => AuthSession.service.activatePasswordRecovery(onChanged: _changed),
+      );
       unawaited(_authCallbackHandler.start());
     }
   }
 
   @override
   void dispose() {
-    unawaited(_authCallbackHandler.dispose());
+    if (widget.authListenerEnabled) {
+      unawaited(_authCallbackHandler.dispose());
+    }
     shAppearance.removeListener(_changed);
     AuthSession.identityContext.removeListener(_changed);
     super.dispose();
