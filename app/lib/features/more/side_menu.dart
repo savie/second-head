@@ -89,6 +89,13 @@ class _SideMenuState extends State<SideMenu> {
     catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create project'))); }
   }
 
+  Future<void> _rename(BuildContext context, ConversationSummary item) async {
+    final value = await _textEditorSheet(title: 'Rename conversation', initialText: item.title);
+    if (!mounted || value == null || value.isEmpty) return;
+    try { await _runtime.rename(conversationId: item.conversationId, title: value); await _loadSidebar(); }
+    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
+  }
+
   Future<String?> _textEditorSheet({required String title, String? hintText, String? initialText}) async {
     final result = await showModalBottomSheet<String>(
       context: context,
@@ -151,6 +158,11 @@ class _SideMenuState extends State<SideMenu> {
             dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
             leading: Icon(Icons.chat_bubble_outline, size: 16, color: activeId == item.conversationId ? shCyan : shMuted),
             title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
+            trailing: IconButton(
+              tooltip: 'Rename conversation',
+              icon: const Icon(Icons.edit_outlined, size: 15, color: shMuted),
+              onPressed: () => _rename(context, item),
+            ),
             onTap: () => _openConversation(item),
             onLongPress: _openManagement,
           ),
