@@ -15,9 +15,10 @@ class AuthBackend {
     );
   }
 
-  Future<void> signInWithGoogle() async {
-    await Supabase.instance.client.auth.signInWithOAuth(
+  Future<bool> signInWithGoogle() async {
+    return Supabase.instance.client.auth.signInWithOAuth(
       OAuthProvider.google,
+      redirectTo: 'io.supabase.flutter://login-callback',
       authScreenLaunchMode: LaunchMode.externalApplication,
     );
   }

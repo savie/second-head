@@ -1,5 +1,33 @@
 #!/usr/bin/env python3
+import re
 from pathlib import Path
+
+manifest_path = Path("android/app/src/main/AndroidManifest.xml")
+manifest = manifest_path.read_text()
+
+intent = '''        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="io.supabase.flutter" android:host="login-callback" />
+        </intent-filter>'''
+
+if 'android:scheme="io.supabase.flutter"' not in manifest:
+    activity_pattern = re.compile(r'(<activity\b[^>]*>)(.*?)(</activity>)', re.DOTALL)
+
+    def add_callback(match):
+        block = match.group(0)
+        if (
+            'android.intent.action.MAIN' in block
+            and 'android.intent.category.LAUNCHER' in block
+        ):
+            return f"{match.group(1)}{match.group(2)}\n{intent}\n    {match.group(3)}"
+        return block
+
+    updated, count = activity_pattern.subn(add_callback, manifest, count=0)
+    if count == 0 or updated == manifest:
+        raise SystemExit("launcher activity not found")
+    manifest_path.write_text(updated)
 
 path = Path("android/app/build.gradle.kts")
 text = path.read_text()
@@ -27,4 +55,4 @@ signing = '''android {
     }
 '''
 path.write_text(text.replace(marker, signing, 1))
-print("Configured SH DEV signing for debug APK.")
+print("Configured SH DEV signing and OAuth callback for debug APK.")

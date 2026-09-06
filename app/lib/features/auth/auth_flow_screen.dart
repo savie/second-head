@@ -47,8 +47,12 @@ class _AuthFlowScreenState extends State<AuthFlowScreen> {
 
   Future<void> _google() async {
     setState(() => _loading = true);
-    try { await AuthSession.service.signInWithGoogle(); }
-    on AuthBackendError catch (error) { if (mounted) _show(error.message); }
+    try {
+      final launched = await AuthSession.service.signInWithGoogle();
+      if (!launched && mounted) {
+        _show('Google sign in tidak dapat membuka browser.');
+      }
+    } on AuthBackendError catch (error) { if (mounted) _show(error.message); }
     catch (error) { if (mounted) _show('Google sign in gagal: $error'); }
     finally { if (mounted) setState(() => _loading = false); }
   }

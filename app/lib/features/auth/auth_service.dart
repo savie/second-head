@@ -64,9 +64,9 @@ class AuthService {
     }
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     try {
-      await _backend.signInWithGoogle();
+      return await _backend.signInWithGoogle();
     } catch (error) {
       throw _toError(error);
     }
