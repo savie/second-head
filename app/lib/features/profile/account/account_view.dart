@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/navigation/sh_navigation_shell.dart';
 import '../../../core/state/sh_profile_state.dart';
 import '../../../core/theme/sh_theme.dart';
+import '../../auth/auth_screens.dart';
 import '../profile_widgets.dart';
 
 part 'account_widgets.dart';
@@ -141,11 +142,73 @@ class _AccountViewState extends State<AccountView> {
     onSave(value);
   }
 
-  Future<void> _editEmail() => _editValue(
-        title: 'Email',
-        initial: profileEmail.value,
-        onSave: (value) => profileEmail.value = value,
+  Future<void> _editEmail() async {
+    _editController.value = TextEditingValue(
+      text: profileEmail.value,
+      selection: TextSelection.collapsed(offset: profileEmail.value.length),
+    );
+    final value = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: shSurface,
+      isScrollControlled: true,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          18,
+          8,
+          18,
+          MediaQuery.of(sheetContext).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Email', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _editController,
+              autofocus: true,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: shBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: shBorder),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()),
+                child: const Text('Save'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || value == null || value.isEmpty) return;
+    try {
+      await AuthSession.service.updateEmail(value);
+      if (!mounted) return;
+      profileEmail.value = value;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email update submitted. Check your email if confirmation is required.')),
       );
+    } on AuthBackendError catch (error) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Unable to update email: $error')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +265,7 @@ class _AccountViewState extends State<AccountView> {
                           label: 'Email',
                           value: email,
                           editable: true,
-                          onTap: () => _editEmail(),
+                          onTap: _editEmail,
                         ),
                       ],
                     ),
