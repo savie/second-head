@@ -109,23 +109,10 @@ class _ProjectConversationManagementViewState extends State<ProjectConversationM
   }
 
   Future<String?> _textDialog({required String title, required String label, String? initialValue}) async {
-    final controller = TextEditingController(text: initialValue ?? '');
     final value = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: shSurface,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: shBorder)),
-        title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        content: TextField(controller: controller, autofocus: true, decoration: InputDecoration(labelText: label), onSubmitted: (_) => Navigator.pop(context, controller.text.trim())),
-        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Save')),
-        ],
-      ),
+      builder: (_) => _ManagerTextEditor(title: title, label: label, initialValue: initialValue),
     );
-    controller.dispose();
     return value?.trim().isEmpty == true ? null : value?.trim();
   }
 
@@ -303,6 +290,46 @@ class _ProjectConversationManagementViewState extends State<ProjectConversationM
   );
 
   String _projectName(String? projectId) => projectId == null ? 'No Project' : _projects.where((p) => p.projectId == projectId).map((p) => p.name).firstOrNull ?? 'Project';
+}
+
+class _ManagerTextEditor extends StatefulWidget {
+  const _ManagerTextEditor({required this.title, required this.label, this.initialValue});
+  final String title;
+  final String label;
+  final String? initialValue;
+
+  @override
+  State<_ManagerTextEditor> createState() => _ManagerTextEditorState();
+}
+
+class _ManagerTextEditorState extends State<_ManagerTextEditor> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue ?? '');
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    backgroundColor: shSurface,
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: shBorder)),
+    title: Text(widget.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+    content: TextField(controller: _controller, autofocus: true, decoration: InputDecoration(labelText: widget.label), onSubmitted: (_) => Navigator.pop(context, _controller.text.trim())),
+    actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      FilledButton(onPressed: () => Navigator.pop(context, _controller.text.trim()), child: const Text('Save')),
+    ],
+  );
 }
 
 class _ManagementSection extends StatelessWidget {
