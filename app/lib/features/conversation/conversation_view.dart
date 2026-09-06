@@ -694,7 +694,6 @@ class ConversationViewState extends State<ConversationView> {
                     ),
                   ),
                 ),
-              const SummaryCard(),
             ],
           ),
         ),
