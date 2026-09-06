@@ -404,19 +404,19 @@ class ConversationViewState extends State<ConversationView> {
     );
   }
 
-  void _messageActions(int index, {required bool assistant}) {
+  Future<void> _messageActions(int index, {required bool assistant}) async {
     final actions = assistant
         ? const ['Copy', 'Regenerate', 'Delete']
         : const ['Copy', 'Edit', 'Delete'];
 
-    showModalBottomSheet<void>(
+    final action = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: shSurface,
       showDragHandle: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-      builder: (_) => SafeArea(
+      builder: (sheet) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
           child: Row(
@@ -432,17 +432,19 @@ class ConversationViewState extends State<ConversationView> {
                               ? Icons.refresh_outlined
                               : Icons.delete_outline,
                   label: action,
-                  onTap: () => _runMessageAction(index, action),
+                  onTap: () => Navigator.pop(sheet, action),
                 ),
             ],
           ),
         ),
       ),
     );
+
+    if (!mounted || action == null) return;
+    await _runMessageAction(index, action);
   }
 
   Future<void> _runMessageAction(int index, String action) async {
-    Navigator.pop(context);
     if (index < 0 || index >= _messages.length) return;
     final message = _messages[index];
 
@@ -506,51 +508,17 @@ class ConversationViewState extends State<ConversationView> {
 
   Future<void> _editMessage(int index) async {
     final message = _messages[index];
-    final controller = TextEditingController(text: message.text);
     final value = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: shSurface,
       showDragHandle: true,
-      builder: (sheet) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.of(sheet).viewInsets.bottom + 18,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Edit message',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            TextField(controller: controller, maxLines: 5),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(sheet),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(sheet, controller.text.trim()),
-                    child: const Text('Save'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+      builder: (_) => _ConversationTextEditorSheet(
+        title: 'Edit message',
+        initialText: message.text,
+        multiline: true,
       ),
     );
-    controller.dispose();
 
     if (!mounted || value == null || value.isEmpty) return;
     try {
@@ -641,51 +609,17 @@ class ConversationViewState extends State<ConversationView> {
   }
 
   Future<void> _renameConversation(BuildContext context, String title) async {
-    final controller = TextEditingController(text: title);
     final value = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: shSurface,
       showDragHandle: true,
-      builder: (sheet) => SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          MediaQuery.of(sheet).viewInsets.bottom + 18,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Rename conversation',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            TextField(controller: controller, autofocus: true),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(sheet),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(sheet, controller.text.trim()),
-                    child: const Text('Save'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+      builder: (_) => _ConversationTextEditorSheet(
+        title: 'Rename conversation',
+        initialText: title,
+        multiline: false,
       ),
     );
-    controller.dispose();
 
     if (!mounted || value == null || value.isEmpty) return;
     try {
@@ -797,6 +731,82 @@ class ConversationViewState extends State<ConversationView> {
         selected.add(index);
       }
     });
+  }
+}
+
+class _ConversationTextEditorSheet extends StatefulWidget {
+  const _ConversationTextEditorSheet({
+    required this.title,
+    required this.initialText,
+    required this.multiline,
+  });
+
+  final String title;
+  final String initialText;
+  final bool multiline;
+
+  @override
+  State<_ConversationTextEditorSheet> createState() =>
+      _ConversationTextEditorSheetState();
+}
+
+class _ConversationTextEditorSheetState
+    extends State<_ConversationTextEditorSheet> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialText);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(18, 8, 18, bottom + 18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            widget.title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            maxLines: widget.multiline ? 5 : 1,
+            textInputAction:
+                widget.multiline ? TextInputAction.newline : TextInputAction.done,
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context, _controller.text.trim()),
+                  child: const Text('Save'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
