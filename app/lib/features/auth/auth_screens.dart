@@ -172,6 +172,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _loading = true);
+    try {
+      final launched = await AuthSession.service.signInWithGoogle();
+      if (!launched && mounted) _showError('Google sign in tidak dapat membuka browser.');
+    } on AuthBackendError catch (error) {
+      if (mounted) _showError(error.message);
+    } catch (error) {
+      if (mounted) _showError('Google sign in gagal: $error');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   void _showError(String message) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 
   @override
@@ -192,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Center(child: TextButton(onPressed: _loading ? null : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpScreen())), child: const Text.rich(TextSpan(text: 'Don’t have an account? ', style: TextStyle(fontSize: 14, color: shMuted), children: [TextSpan(text: 'Sign up', style: TextStyle(color: shCyan))])))),
         ],
       ),
-      secondary: const _SocialButtons(),
+      secondary: _SocialButtons(onGoogle: _signInWithGoogle, loading: _loading),
     );
   }
 }
@@ -273,6 +288,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _loading = true);
+    try {
+      final launched = await AuthSession.service.signInWithGoogle();
+      if (!launched && mounted) _showError('Google sign in tidak dapat membuka browser.');
+    } on AuthBackendError catch (error) {
+      if (mounted) _showError(error.message);
+    } catch (error) {
+      if (mounted) _showError('Google sign in gagal: $error');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   void _showError(String message) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 
   @override
@@ -287,19 +317,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ],
       primaryLabel: 'Create Account', onPrimary: _signUp, loading: _loading,
       footer: Center(child: TextButton(onPressed: _loading ? null : () => Navigator.of(context).pop(), child: const Text.rich(TextSpan(text: 'Already have an account? ', style: TextStyle(fontSize: 14, color: shMuted), children: [TextSpan(text: 'Sign in', style: TextStyle(color: shCyan))])))),
-      secondary: const _SocialButtons(),
+      secondary: _SocialButtons(onGoogle: _signInWithGoogle, loading: _loading),
     );
   }
 }
 
 class _SocialButtons extends StatelessWidget {
-  const _SocialButtons();
+  const _SocialButtons({required this.onGoogle, required this.loading});
+
+  final VoidCallback onGoogle;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
       const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Row(children: [Expanded(child: Divider(color: shBorder)), Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('or continue with', style: TextStyle(fontSize: 13, color: shMuted))), Expanded(child: Divider(color: shBorder))])),
-      const _SocialButton(label: 'Google', leading: Text('G', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700))),
+      _SocialButton(label: 'Google', leading: const Text('G', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)), onPressed: loading ? null : onGoogle),
       const SizedBox(height: 10),
       const _SocialButton(label: 'Apple', leading: Icon(Icons.apple, size: 23)),
     ]);
@@ -307,15 +340,17 @@ class _SocialButtons extends StatelessWidget {
 }
 
 class _SocialButton extends StatelessWidget {
-  const _SocialButton({required this.label, required this.leading});
+  const _SocialButton({required this.label, required this.leading, this.onPressed});
 
   final String label;
   final Widget leading;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(width: double.infinity, height: 56, child: OutlinedButton.icon(
-      onPressed: () {}, icon: leading,
+      onPressed: onPressed,
+      icon: leading,
       label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       style: OutlinedButton.styleFrom(backgroundColor: shSurface2, foregroundColor: Colors.white, side: const BorderSide(color: shBorder, width: 1.2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
     ));
