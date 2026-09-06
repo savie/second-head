@@ -97,30 +97,18 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Future<String?> _textEditorSheet({required String title, String? hintText, String? initialText}) async {
-    final controller = TextEditingController(text: initialText ?? '');
     final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: shSurface,
       showDragHandle: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
-      builder: (sheet) => StatefulBuilder(
-        builder: (sheet, setSheetState) => Padding(
-          padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.viewInsetsOf(sheet).bottom + 18),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 12),
-            TextField(controller: controller, autofocus: true, textInputAction: TextInputAction.done, decoration: InputDecoration(hintText: hintText), onChanged: (_) => setSheetState(() {})),
-            const SizedBox(height: 14),
-            Row(children: [
-              Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(sheet), child: const Text('Cancel'))),
-              const SizedBox(width: 10),
-              Expanded(child: FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: controller.text.trim().isEmpty ? null : () => Navigator.pop(sheet, controller.text.trim()), child: const Text('Save'))),
-            ]),
-          ]),
-        ),
+      builder: (_) => _SidebarTextEditor(
+        title: title,
+        hintText: hintText,
+        initialText: initialText,
       ),
-    ).whenComplete(() => controller.dispose());
+    );
     return result;
   }
 
@@ -216,4 +204,96 @@ class _SideMenuState extends State<SideMenu> {
       Padding(padding: const EdgeInsets.fromLTRB(10, 0, 10, 8), child: Align(alignment: Alignment.centerLeft, child: MenuTile(icon: Icons.logout_outlined, label: 'Log Out', onTap: _logout, danger: true))),
     ])),
   );
+}
+
+class _SidebarTextEditor extends StatefulWidget {
+  const _SidebarTextEditor({
+    required this.title,
+    this.hintText,
+    this.initialText,
+  });
+
+  final String title;
+  final String? hintText;
+  final String? initialText;
+
+  @override
+  State<_SidebarTextEditor> createState() => _SidebarTextEditorState();
+}
+
+class _SidebarTextEditorState extends State<_SidebarTextEditor> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialText ?? '');
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        18,
+        8,
+        18,
+        MediaQuery.viewInsetsOf(context).bottom + 18,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            widget.title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(hintText: widget.hintText),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: shMuted,
+                    side: const BorderSide(color: shBorder),
+                    overlayColor: shSurface2,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _controller,
+                  builder: (_, value, __) => FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: shPurple,
+                      foregroundColor: Colors.white,
+                      overlayColor: shElectric,
+                    ),
+                    onPressed: value.text.trim().isEmpty
+                        ? null
+                        : () => Navigator.pop(context, value.text.trim()),
+                    child: const Text('Save'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
