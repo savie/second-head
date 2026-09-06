@@ -166,18 +166,30 @@ class _ProjectConversationManagementViewState extends State<ProjectConversationM
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Projects & Conversations', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            SizedBox(height: 2),
-            Text('Organize your conversations.', style: TextStyle(fontSize: 11, color: shMuted, fontWeight: FontWeight.w400)),
+            Text('Management', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            SizedBox(height: 3),
+            Text('Organize your conversations and projects.', style: TextStyle(fontSize: 11, color: shMuted, fontWeight: FontWeight.w400)),
           ],
         ),
         actions: [
           IconButton(
             tooltip: 'Refresh',
             onPressed: _load,
-            icon: const Icon(Icons.refresh_rounded, size: 21),
+            icon: const Icon(Icons.refresh_rounded, size: 20),
           ),
           const SizedBox(width: 8),
+          FilledButton.icon(
+            onPressed: _createProject,
+            icon: const Icon(Icons.add_rounded, size: 18),
+            label: const Text('Project'),
+            style: FilledButton.styleFrom(
+              backgroundColor: shPurple,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+            ),
+          ),
+          const SizedBox(width: 20),
         ],
       ),
       body: _loading
@@ -194,29 +206,21 @@ class _ProjectConversationManagementViewState extends State<ProjectConversationM
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
                     children: [
                       _buildSearch(),
-                      const SizedBox(height: 26),
+                      const SizedBox(height: 22),
                       if (wide)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(child: _buildProjects()),
-                            const SizedBox(width: 20),
-                            Container(width: 1, height: 520, color: shBorder),
-                            const SizedBox(width: 20),
-                            Expanded(child: _buildConversations()),
+                            Expanded(flex: 7, child: _buildConversations()),
+                            const SizedBox(width: 16),
+                            Expanded(flex: 4, child: _buildProjects()),
                           ],
                         )
                       else ...[
-                        _buildProjects(),
-                        const SizedBox(height: 28),
                         _buildConversations(),
+                        const SizedBox(height: 28),
+                        _buildProjects(),
                       ],
-                      const SizedBox(height: 18),
-                      const Text(
-                        'Management actions live here; the sidebar stays focused on navigation and recent items.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 10, color: shMuted, height: 1.4),
-                      ),
                     ],
                   );
                 },
@@ -226,27 +230,27 @@ class _ProjectConversationManagementViewState extends State<ProjectConversationM
   }
 
   Widget _buildSearch() => Container(
+    height: 48,
     decoration: BoxDecoration(
-      color: shSurface.withAlpha(220),
-      borderRadius: BorderRadius.circular(14),
+      color: shSurface.withAlpha(210),
+      borderRadius: BorderRadius.circular(13),
       border: Border.all(color: shBorder),
-      boxShadow: [BoxShadow(color: Colors.black.withAlpha(30), blurRadius: 18, offset: const Offset(0, 8))],
     ),
     child: TextField(
       controller: _searchController,
-      style: const TextStyle(fontSize: 13),
+      style: const TextStyle(fontSize: 12.5),
       decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.search_rounded, size: 20, color: shMuted),
+        prefixIcon: const Icon(Icons.search_rounded, size: 19, color: shMuted),
         suffixIcon: _query.isEmpty
             ? null
-            : IconButton(icon: const Icon(Icons.close_rounded, size: 18, color: shMuted), onPressed: _searchController.clear),
-        hintText: 'Search projects & conversations...',
+            : IconButton(icon: const Icon(Icons.close_rounded, size: 17, color: shMuted), onPressed: _searchController.clear),
+        hintText: 'Search projects or conversations...',
         hintStyle: const TextStyle(fontSize: 12, color: shMuted),
         filled: false,
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       ),
     ),
   );
@@ -342,19 +346,42 @@ class _ManagementSection extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Row(children: [
-      Icon(icon, size: 19, color: shMuted),
-      const SizedBox(width: 9),
-      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-      const SizedBox(width: 8),
-      Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: shSurface2, borderRadius: BorderRadius.circular(20)), child: Text('$count', style: const TextStyle(fontSize: 9, color: shMuted, fontWeight: FontWeight.w600))),
-      const Spacer(),
-      OutlinedButton.icon(onPressed: onAction, icon: const Icon(Icons.add_rounded, size: 16), label: Text(actionLabel, style: const TextStyle(fontSize: 10))),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+    decoration: BoxDecoration(
+      color: shSurface.withAlpha(115),
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: shBorder),
+    ),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(color: shPurple.withAlpha(22), borderRadius: BorderRadius.circular(10)),
+          child: Icon(icon, size: 18, color: shPurple),
+        ),
+        const SizedBox(width: 10),
+        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(width: 8),
+        Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: shSurface2, borderRadius: BorderRadius.circular(20)), child: Text('$count', style: const TextStyle(fontSize: 9, color: shMuted, fontWeight: FontWeight.w600))),
+        const Spacer(),
+        OutlinedButton.icon(
+          onPressed: onAction,
+          icon: const Icon(Icons.add_rounded, size: 15),
+          label: Text(actionLabel, style: const TextStyle(fontSize: 10)),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+          ),
+        ),
+      ]),
+      const SizedBox(height: 12),
+      child,
     ]),
-    const SizedBox(height: 10),
-    child,
-  ]);
+  );
 }
 
 class _ProjectTile extends StatelessWidget {
@@ -365,17 +392,18 @@ class _ProjectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(14), border: Border.all(color: shBorder)),
+    decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(13), border: Border.all(color: shBorder)),
     child: ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       leading: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(color: shPurple.withAlpha(24), shape: BoxShape.circle),
-        child: const Icon(Icons.folder_outlined, color: shPurple, size: 22),
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(color: shPurple.withAlpha(22), borderRadius: BorderRadius.circular(10)),
+        child: const Icon(Icons.folder_outlined, color: shPurple, size: 20),
       ),
-      title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-      subtitle: const Padding(padding: EdgeInsets.only(top: 3), child: Text('Project', style: TextStyle(fontSize: 10, color: shMuted))),
+      title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+      subtitle: const Padding(padding: EdgeInsets.only(top: 2), child: Text('Project', style: TextStyle(fontSize: 9, color: shMuted))),
       trailing: _ActionMenu(items: [
         _ActionItem(icon: Icons.edit_outlined, label: 'Rename', onTap: onRename),
         _ActionItem(icon: Icons.delete_outline_rounded, label: 'Delete', onTap: onDelete, destructive: true),
@@ -393,34 +421,42 @@ class _ConversationTile extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(13), border: Border.all(color: shBorder)),
-    child: ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(color: shPurple.withAlpha(24), shape: BoxShape.circle),
-        child: const Icon(Icons.chat_bubble_outline_rounded, color: shPurple, size: 20),
-      ),
-      title: Text(conversation.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Row(children: [
-          Flexible(child: Text(projectName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9, color: projectName == 'No Project' ? shMuted : shCyan))),
-          if (conversation.preview.isNotEmpty) ...[
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('•', style: TextStyle(fontSize: 8, color: shBorder))),
-            Expanded(child: Text(conversation.preview, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9, color: shMuted))),
-          ],
+  Widget build(BuildContext context) {
+    final hasProject = projectName != 'No Project';
+    return Container(
+      decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(13), border: Border.all(color: shBorder)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+        leading: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(color: shPurple.withAlpha(18), borderRadius: BorderRadius.circular(10)),
+          child: const Icon(Icons.chat_bubble_outline_rounded, color: shPurple, size: 19),
+        ),
+        title: Text(conversation.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 3),
+          child: Row(children: [
+            if (hasProject) ...[
+              Flexible(child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(color: shPurple.withAlpha(18), borderRadius: BorderRadius.circular(6)),
+                child: Text(projectName, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 8.5, color: shPurple)),
+              )),
+              if (conversation.preview.isNotEmpty) const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('•', style: TextStyle(fontSize: 8, color: shBorder))),
+            ],
+            if (conversation.preview.isNotEmpty)
+              Expanded(child: Text(conversation.preview, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9, color: shMuted))),
+          ]),
+        ),
+        trailing: _ActionMenu(items: [
+          _ActionItem(icon: Icons.edit_outlined, label: 'Rename', onTap: onRename),
+          _ActionItem(icon: Icons.folder_open_outlined, label: 'Move to Project', onTap: onMove),
+          _ActionItem(icon: Icons.delete_outline_rounded, label: 'Delete', onTap: onDelete, destructive: true),
         ]),
       ),
-      trailing: _ActionMenu(items: [
-        _ActionItem(icon: Icons.edit_outlined, label: 'Rename', onTap: onRename),
-        _ActionItem(icon: Icons.folder_open_outlined, label: 'Move to Project', onTap: onMove),
-        _ActionItem(icon: Icons.delete_outline_rounded, label: 'Delete', onTap: onDelete, destructive: true),
-      ]),
-    ),
-  );
+    );
+  }
 }
 
 class _ActionItem {
@@ -438,7 +474,7 @@ class _ActionMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) => PopupMenuButton<_ActionItem>(
     tooltip: 'More actions',
-    icon: const Icon(Icons.more_vert_rounded, size: 20, color: shMuted),
+    icon: const Icon(Icons.more_vert_rounded, size: 19, color: shMuted),
     color: shSurface2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: shBorder)),
     onSelected: (item) => item.onTap(),
