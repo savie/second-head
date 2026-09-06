@@ -389,7 +389,7 @@ class _ConversationTile extends StatelessWidget {
       ),
       trailing: _ActionMenu(items: [
         _ActionItem(icon: Icons.edit_outlined, label: 'Rename', onTap: onRename),
-        _ActionItem(icon: Icons.drive_file_move_outline_rounded, label: 'Move to Project', onTap: onMove),
+        _ActionItem(icon: Icons.folder_open_outlined, label: 'Move to Project', onTap: onMove),
         _ActionItem(icon: Icons.delete_outline_rounded, label: 'Delete', onTap: onDelete, destructive: true),
       ]),
     ),
