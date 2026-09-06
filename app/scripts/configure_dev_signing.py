@@ -9,10 +9,10 @@ intent = '''        <intent-filter>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="io.supabase.flutter" android:host="login-callback" />
+            <data android:scheme="secondhead" />
         </intent-filter>'''
 
-if 'android:scheme="io.supabase.flutter"' not in manifest:
+if 'android:scheme="secondhead"' not in manifest:
     activity_pattern = re.compile(r'(<activity\b[^>]*>)(.*?)(</activity>)', re.DOTALL)
 
     def add_callback(match):
@@ -55,4 +55,4 @@ signing = '''android {
     }
 '''
 path.write_text(text.replace(marker, signing, 1))
-print("Configured SH DEV signing and OAuth callback for debug APK.")
+print("Configured SH DEV signing and secondhead auth callback scheme for debug APK.")
