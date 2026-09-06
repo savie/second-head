@@ -7,9 +7,14 @@ const authResetCallbackUri = 'secondhead://reset-password';
 const authOAuthCallbackUri = 'secondhead://auth-callback';
 
 class AuthCallbackHandler {
-  AuthCallbackHandler({AppLinks? appLinks}) : _appLinks = appLinks ?? AppLinks();
+  AuthCallbackHandler({
+    AppLinks? appLinks,
+    void Function()? onPasswordRecovery,
+  })  : _appLinks = appLinks ?? AppLinks(),
+        _onPasswordRecovery = onPasswordRecovery;
 
   final AppLinks _appLinks;
+  final void Function()? _onPasswordRecovery;
   StreamSubscription<Uri>? _subscription;
   String? _lastHandledUri;
 
@@ -33,6 +38,12 @@ class AuthCallbackHandler {
     _lastHandledUri = value;
 
     await Supabase.instance.client.auth.getSessionFromUrl(uri);
+
+    if (uri.scheme == 'secondhead' && uri.host == 'reset-password') {
+      if (Supabase.instance.client.auth.currentSession != null) {
+        _onPasswordRecovery?.call();
+      }
+    }
   }
 
   bool _isAuthCallback(Uri uri) =>
