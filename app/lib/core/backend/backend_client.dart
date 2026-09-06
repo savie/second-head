@@ -7,6 +7,10 @@ Future<void> initializeBackend() async {
   await Supabase.initialize(
     url: _backendUrl,
     publishableKey: _backendPublishableKey,
+    authOptions: const FlutterAuthClientOptions(
+      detectSessionInUri: false,
+      authFlowType: AuthFlowType.pkce,
+    ),
   );
 }
 
