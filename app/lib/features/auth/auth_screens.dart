@@ -332,7 +332,7 @@ class _SocialButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(children: [
       const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Row(children: [Expanded(child: Divider(color: shBorder)), Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('or continue with', style: TextStyle(fontSize: 13, color: shMuted))), Expanded(child: Divider(color: shBorder))])),
-      _SocialButton(label: 'Google', leading: const Text('G', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)), onPressed: loading ? null : onGoogle),
+      _SocialButton(label: 'Google', leading: const Icon(Icons.g_mobiledata, size: 28), onPressed: loading ? null : onGoogle),
       const SizedBox(height: 10),
       const _SocialButton(label: 'Apple', leading: Icon(Icons.apple, size: 23)),
     ]);
