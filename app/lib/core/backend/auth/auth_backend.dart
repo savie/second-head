@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../backend_client.dart';
+
 class AuthBackend {
   const AuthBackend();
 
@@ -18,7 +20,7 @@ class AuthBackend {
   Future<bool> signInWithGoogle() async {
     return Supabase.instance.client.auth.signInWithOAuth(
       OAuthProvider.google,
-      redirectTo: 'io.supabase.flutter://login-callback',
+      redirectTo: authCallbackUri,
       authScreenLaunchMode: LaunchMode.externalApplication,
     );
   }
@@ -39,7 +41,10 @@ class AuthBackend {
   }
 
   Future<void> sendPasswordReset(String email) async {
-    await Supabase.instance.client.auth.resetPasswordForEmail(email);
+    await Supabase.instance.client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: authCallbackUri,
+    );
   }
 
   Future<void> updatePassword(String password) async {
