@@ -89,13 +89,6 @@ class _SideMenuState extends State<SideMenu> {
     catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create project'))); }
   }
 
-  Future<void> _rename(BuildContext context, ConversationSummary item) async {
-    final value = await _textEditorSheet(title: 'Rename conversation', initialText: item.title);
-    if (!mounted || value == null || value.isEmpty) return;
-    try { await _runtime.rename(conversationId: item.conversationId, title: value); await _loadSidebar(); }
-    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
-  }
-
   Future<String?> _textEditorSheet({required String title, String? hintText, String? initialText}) async {
     final result = await showModalBottomSheet<String>(
       context: context,
@@ -137,6 +130,7 @@ class _SideMenuState extends State<SideMenu> {
           title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
           trailing: Text('${_conversations.where((c) => c.projectId == project.projectId).length}', style: const TextStyle(fontSize: 9, color: shMuted)),
           onTap: () => setState(() => _conversationExpanded = true),
+          onLongPress: _openManagement,
         ),
         if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted)))),
         if (_projects.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Projects', onTap: _openManagement),
@@ -153,14 +147,12 @@ class _SideMenuState extends State<SideMenu> {
         child: Column(children: [
           _sectionAction(icon: Icons.add, label: 'New Conversation', onTap: () => _startNewConversation()),
           const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Conversations', style: TextStyle(fontSize: 9, color: shMuted)))),
-          for (final item in recent) GestureDetector(
-            onLongPress: () => _rename(context, item),
-            child: ListTile(
-              dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
-              leading: Icon(Icons.chat_bubble_outline, size: 16, color: activeId == item.conversationId ? shCyan : shMuted),
-              title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
-              onTap: () => _openConversation(item),
-            ),
+          for (final item in recent) ListTile(
+            dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
+            leading: Icon(Icons.chat_bubble_outline, size: 16, color: activeId == item.conversationId ? shCyan : shMuted),
+            title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
+            onTap: () => _openConversation(item),
+            onLongPress: _openManagement,
           ),
           if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted)))),
           if (_conversations.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Conversations', onTap: _openManagement),
@@ -191,9 +183,15 @@ class _SideMenuState extends State<SideMenu> {
       ])),
       const Divider(color: shBorder),
       Expanded(child: ListView(padding: EdgeInsets.zero, children: [
-        MenuTile(icon: Icons.folder_outlined, label: 'Project', onTap: () => setState(() => _projectExpanded = !_projectExpanded)),
+        GestureDetector(
+          onLongPress: _openManagement,
+          child: MenuTile(icon: Icons.folder_outlined, label: 'Project', onTap: () => setState(() => _projectExpanded = !_projectExpanded)),
+        ),
         if (_projectExpanded) _projectsEntries(),
-        MenuTile(icon: Icons.chat_bubble_outline, label: 'Conversation', onTap: () => setState(() => _conversationExpanded = !_conversationExpanded)),
+        GestureDetector(
+          onLongPress: _openManagement,
+          child: MenuTile(icon: Icons.chat_bubble_outline, label: 'Conversation', onTap: () => setState(() => _conversationExpanded = !_conversationExpanded)),
+        ),
         if (_conversationExpanded) _conversationEntries(),
         MenuTile(customIcon: const ShSectionNavIcon.journey(), label: 'Journey', onTap: () => _openPage(1)),
         MenuTile(customIcon: const ShSectionNavIcon.lifecycle(), label: 'Lifecycle', onTap: () => _openPage(2)),
