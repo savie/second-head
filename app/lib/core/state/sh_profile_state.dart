@@ -19,7 +19,7 @@ Future<void> _loadProfilePhoto() async {
   }
 }
 
-final ValueNotifier<String> profileName = ValueNotifier<String>('Savie');
+final ValueNotifier<String> profileName = ValueNotifier<String>('');
 final Future<void> profileNameLoad = _loadProfileName();
 
 Future<void> _loadProfileName() async {
@@ -45,8 +45,11 @@ final ValueNotifier<DateTime?> profileAccountCreatedAt =
     ValueNotifier<DateTime?>(null);
 
 void refreshProfileEmail() {
-  profileEmail.value =
-      Supabase.instance.client.auth.currentUser?.email?.trim() ?? '';
+  final email = Supabase.instance.client.auth.currentUser?.email?.trim() ?? '';
+  profileEmail.value = email;
+  if (profileName.value.trim().isEmpty && email.isNotEmpty) {
+    profileName.value = email;
+  }
 }
 
 void refreshProfileIdentity(ShIdentity identity) {
