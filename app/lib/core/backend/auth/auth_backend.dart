@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../backend_client.dart';
+import 'auth_callback_handler.dart';
 
 class AuthBackend {
   const AuthBackend();
