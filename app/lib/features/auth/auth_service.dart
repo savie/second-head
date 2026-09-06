@@ -37,8 +37,7 @@ class AuthService {
             }
             break;
           case 'AuthChangeEvent.passwordRecovery':
-            _passwordRecoveryActive = true;
-            onChanged?.call();
+            activatePasswordRecovery(onChanged: onChanged);
             break;
           case 'AuthChangeEvent.signedOut':
             _passwordRecoveryActive = false;
@@ -52,6 +51,12 @@ class AuthService {
       },
       onError: (_, __) => onChanged?.call(),
     );
+  }
+
+  void activatePasswordRecovery({void Function()? onChanged}) {
+    if (_passwordRecoveryActive) return;
+    _passwordRecoveryActive = true;
+    onChanged?.call();
   }
 
   Future<void> signIn({required String email, required String password}) async {
