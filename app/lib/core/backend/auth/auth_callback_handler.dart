@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-const authCallbackUri = 'io.supabase.flutter://login-callback';
+const authResetCallbackUri = 'secondhead://reset-password';
+const authOAuthCallbackUri = 'secondhead://auth-callback';
 
 class AuthCallbackHandler {
   AuthCallbackHandler({AppLinks? appLinks}) : _appLinks = appLinks ?? AppLinks();
@@ -35,7 +36,8 @@ class AuthCallbackHandler {
   }
 
   bool _isAuthCallback(Uri uri) =>
-      uri.scheme == 'io.supabase.flutter' && uri.host == 'login-callback';
+      uri.scheme == 'secondhead' &&
+      (uri.host == 'reset-password' || uri.host == 'auth-callback');
 
   Future<void> dispose() async {
     await _subscription?.cancel();
