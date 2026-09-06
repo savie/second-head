@@ -50,6 +50,15 @@ class AuthBackend {
     );
   }
 
+  Future<void> updateEmail(String email) async {
+    if (currentSession == null) {
+      throw const AuthException('No authenticated session.');
+    }
+    await Supabase.instance.client.auth.updateUser(
+      UserAttributes(email: email.trim()),
+    );
+  }
+
   Future<dynamic> resolveIdentity() async {
     return Supabase.instance.client.rpc('resolve_identity');
   }
