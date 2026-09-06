@@ -1,0 +1,44 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+const authCallbackUri = 'io.supabase.flutter://login-callback';
+
+class AuthCallbackHandler {
+  AuthCallbackHandler({AppLinks? appLinks}) : _appLinks = appLinks ?? AppLinks();
+
+  final AppLinks _appLinks;
+  StreamSubscription<Uri>? _subscription;
+  String? _lastHandledUri;
+
+  Future<void> start() async {
+    _subscription ??= _appLinks.uriLinkStream.listen(
+      (uri) => unawaited(_handle(uri)),
+      onError: (_, __) {},
+    );
+
+    final initialUri = await _appLinks.getInitialLink();
+    if (initialUri != null) {
+      await _handle(initialUri);
+    }
+  }
+
+  Future<void> _handle(Uri uri) async {
+    if (!_isAuthCallback(uri)) return;
+
+    final value = uri.toString();
+    if (_lastHandledUri == value) return;
+    _lastHandledUri = value;
+
+    await Supabase.instance.client.auth.getSessionFromUrl(uri);
+  }
+
+  bool _isAuthCallback(Uri uri) =>
+      uri.scheme == 'io.supabase.flutter' && uri.host == 'login-callback';
+
+  Future<void> dispose() async {
+    await _subscription?.cancel();
+    _subscription = null;
+  }
+}
