@@ -186,10 +186,7 @@ class _SidebarTextEditorState extends State<_SidebarTextEditor> {
     child: Column(mainAxisSize: MainAxisSize.min, children: [
       Text(widget.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)), const SizedBox(height: 12),
       TextField(controller: _controller, autofocus: true, textInputAction: TextInputAction.done, decoration: InputDecoration(hintText: widget.hintText)), const SizedBox(height: 14),
-      Row(children: [
-        Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(context), child: const Text('Cancel'))), const SizedBox(width: 10),
-        Expanded(child: ValueListenableBuilder<TextEditingValue>(valueListenable: _controller, builder: (_, value, __) => FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: value.text.trim().isEmpty ? null : () => Navigator.pop(context, value.text.trim()), child: const Text('Save')))),
-      ]),
+      SizedBox(width: double.infinity, child: ValueListenableBuilder<TextEditingValue>(valueListenable: _controller, builder: (_, value, __) => FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: value.text.trim().isEmpty ? null : () => Navigator.pop(context, value.text.trim()), child: const Text('Save')))),
     ]),
   );
 }
