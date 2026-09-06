@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuthBackend {
   const AuthBackend();
@@ -16,10 +17,13 @@ class AuthBackend {
   }
 
   Future<bool> signInWithGoogle() async {
-    return Supabase.instance.client.auth.signInWithOAuth(
-      OAuthProvider.google,
+    final response = await Supabase.instance.client.auth.getOAuthSignInUrl(
+      provider: OAuthProvider.google,
       redirectTo: 'io.supabase.flutter://login-callback',
-      authScreenLaunchMode: LaunchMode.externalApplication,
+    );
+    return launchUrl(
+      response.url,
+      mode: LaunchMode.externalApplication,
     );
   }
 
