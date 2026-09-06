@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/backend/auth/auth_backend_error.dart';
 import '../../../core/navigation/sh_navigation_shell.dart';
 import '../../../core/theme/sh_theme.dart';
+import '../../../core/session/auth_session.dart';
+
 class PasswordView extends StatefulWidget {
   const PasswordView({super.key});
 
@@ -13,6 +16,7 @@ class _PasswordViewState extends State<PasswordView> {
   final _confirmController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -21,14 +25,39 @@ class _PasswordViewState extends State<PasswordView> {
     super.dispose();
   }
 
-  void _confirm() {
+  Future<void> _confirm() async {
     FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Password configuration is not connected yet.'),
-      ),
-    );
+    final password = _passwordController.text;
+    final confirmation = _confirmController.text;
+
+    if (password.length < 8) {
+      _show('Password baru minimal 8 karakter.');
+      return;
+    }
+    if (password != confirmation) {
+      _show('Password dan konfirmasi password tidak sama.');
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      await AuthSession.service.updatePassword(password);
+      if (!mounted) return;
+      _passwordController.clear();
+      _confirmController.clear();
+      _show('Password berhasil diperbarui.');
+    } on AuthBackendError catch (error) {
+      if (mounted) _show(error.message);
+    } catch (error) {
+      if (mounted) _show('Gagal memperbarui password: $error');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
+
+  void _show(String message) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +70,7 @@ class _PasswordViewState extends State<PasswordView> {
               title: 'Password',
               leading: IconButton(
                 tooltip: 'Back',
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: _loading ? null : () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.arrow_back_rounded),
               ),
             ),
@@ -85,12 +114,15 @@ class _PasswordViewState extends State<PasswordView> {
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
+                          enabled: !_loading,
                           decoration: InputDecoration(
                             labelText: 'New password',
                             suffixIcon: IconButton(
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
+                              onPressed: _loading
+                                  ? null
+                                  : () => setState(
+                                        () => _obscurePassword = !_obscurePassword,
+                                      ),
                               icon: Icon(
                                 _obscurePassword
                                     ? Icons.visibility_outlined
@@ -103,12 +135,15 @@ class _PasswordViewState extends State<PasswordView> {
                         TextField(
                           controller: _confirmController,
                           obscureText: _obscureConfirm,
+                          enabled: !_loading,
                           decoration: InputDecoration(
                             labelText: 'Confirm password',
                             suffixIcon: IconButton(
-                              onPressed: () => setState(
-                                () => _obscureConfirm = !_obscureConfirm,
-                              ),
+                              onPressed: _loading
+                                  ? null
+                                  : () => setState(
+                                        () => _obscureConfirm = !_obscureConfirm,
+                                      ),
                               icon: Icon(
                                 _obscureConfirm
                                     ? Icons.visibility_outlined
@@ -125,29 +160,25 @@ class _PasswordViewState extends State<PasswordView> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed:
+                              _loading ? null : () => Navigator.of(context).pop(),
                           child: const Text('Cancel'),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: FilledButton(
-                          onPressed: _confirm,
-                          child: const Text('Confirm'),
+                          onPressed: _loading ? null : _confirm,
+                          child: _loading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text('Confirm'),
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 14),
-                  const Center(
-                    child: Text(
-                      'Password changes are currently frontend-only.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: shMuted,
-                      ),
-                    ),
                   ),
                 ],
               ),
