@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../core/backend/auth/auth_backend.dart';
 import '../../core/backend/auth/auth_backend_error.dart';
 import '../../core/identity/sh_identity.dart';
+import '../../core/state/sh_profile_state.dart';
 
 class AuthService {
   AuthService({required this.identityContext});
@@ -23,6 +24,7 @@ class AuthService {
           case 'AuthChangeEvent.userUpdated':
             if (data.session != null) {
               try {
+                refreshProfileEmail();
                 await resolveIdentity();
                 onChanged?.call();
               } catch (_) {
@@ -37,6 +39,7 @@ class AuthService {
             break;
           case 'AuthChangeEvent.signedOut':
             _passwordRecoveryActive = false;
+            profileEmail.value = '';
             identityContext.clear();
             onChanged?.call();
             break;
@@ -51,6 +54,7 @@ class AuthService {
   Future<void> signIn({required String email, required String password}) async {
     try {
       await _backend.signIn(email: email.trim(), password: password);
+      refreshProfileEmail();
       await resolveIdentity();
     } catch (error) {
       throw _toError(error);
@@ -81,6 +85,7 @@ class AuthService {
           'Account created. Check your email to confirm the account before signing in.',
         );
       }
+      refreshProfileEmail();
       await resolveIdentity();
     } catch (error) {
       throw _toError(error);
@@ -107,6 +112,7 @@ class AuthService {
   Future<void> updateEmail(String email) async {
     try {
       await _backend.updateEmail(email.trim());
+      refreshProfileEmail();
     } catch (error) {
       throw _toError(error);
     }
@@ -116,14 +122,17 @@ class AuthService {
 
   Future<void> restoreSession() async {
     if (_backend.currentSession == null) {
+      profileEmail.value = '';
       identityContext.clear();
       return;
     }
+    refreshProfileEmail();
     await resolveIdentity();
   }
 
   Future<void> resolveIdentity() async {
     if (_backend.currentSession == null) {
+      profileEmail.value = '';
       identityContext.clear();
       throw const AuthBackendError('No authenticated session.');
     }
@@ -158,6 +167,7 @@ class AuthService {
       throw _toError(error);
     } finally {
       _passwordRecoveryActive = false;
+      profileEmail.value = '';
       identityContext.clear();
     }
   }
