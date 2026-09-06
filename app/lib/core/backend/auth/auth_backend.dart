@@ -65,6 +65,11 @@ class AuthBackend {
     );
   }
 
+  Future<List<String>> getSignInMethods() async {
+    final identities = await Supabase.instance.client.auth.getUserIdentities();
+    return identities.map((identity) => identity.provider).toList(growable: false);
+  }
+
   Future<dynamic> resolveIdentity() async {
     return Supabase.instance.client.rpc('resolve_identity');
   }
