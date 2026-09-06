@@ -22,7 +22,7 @@ class AuthBackend {
       redirectTo: 'io.supabase.flutter://login-callback',
     );
     return launchUrl(
-      response.url,
+      Uri.parse(response.url),
       mode: LaunchMode.externalApplication,
     );
   }
