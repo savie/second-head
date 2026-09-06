@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/backend/auth/auth_backend_error.dart';
 import '../../../core/navigation/sh_navigation_shell.dart';
 import '../../../core/state/sh_profile_state.dart';
 import '../../../core/theme/sh_theme.dart';
