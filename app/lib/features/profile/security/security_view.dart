@@ -1,10 +1,41 @@
 import 'package:flutter/material.dart';
+import '../../../core/backend/auth/auth_backend.dart';
 import '../../../core/navigation/sh_navigation_shell.dart';
 import '../../../core/theme/sh_theme.dart';
 import 'password_view.dart';
 
-class SecurityView extends StatelessWidget {
+class SecurityView extends StatefulWidget {
   const SecurityView({super.key});
+
+  @override
+  State<SecurityView> createState() => _SecurityViewState();
+}
+
+class _SecurityViewState extends State<SecurityView> {
+  late Future<List<String>> _signInMethodsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _signInMethodsFuture = const AuthBackend().getSignInMethods();
+  }
+
+  String _formatSignInMethods(List<String> providers) {
+    const labels = <String, String>{
+      'email': 'Email',
+      'google': 'Google',
+      'github': 'GitHub',
+      'apple': 'Apple',
+    };
+
+    final formatted = providers
+        .map((provider) => labels[provider] ?? provider)
+        .where((provider) => provider.isNotEmpty)
+        .toList(growable: false);
+
+    if (formatted.isEmpty) return 'Unknown';
+    return formatted.join(', ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +62,20 @@ class SecurityView extends StatelessWidget {
                     style: TextStyle(fontSize: 13, color: shMuted, fontWeight: FontWeight.w600),
                   ),
                 ),
-                _SecurityRow(
-                  icon: Icons.mail_outline_rounded,
-                  label: 'Sign-in method',
-                  value: 'Email',
+                FutureBuilder<List<String>>(
+                  future: _signInMethodsFuture,
+                  builder: (context, snapshot) {
+                    final value = snapshot.hasData
+                        ? _formatSignInMethods(snapshot.data!)
+                        : snapshot.hasError
+                            ? 'Unavailable'
+                            : 'Loading…';
+                    return _SecurityRow(
+                      icon: Icons.mail_outline_rounded,
+                      label: 'Sign-in method',
+                      value: value,
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 _SecurityRow(
