@@ -38,16 +38,9 @@ class _SideMenuState extends State<SideMenu> {
     } catch (_) { if (mounted) setState(() => _loading = false); }
   }
 
-  Future<void> _closeDrawer() async {
-    if (!mounted) return;
-    await Navigator.of(context).maybePop();
-  }
+  Future<void> _closeDrawer() async { if (mounted) await Navigator.of(context).maybePop(); }
 
-  Future<void> _openPage(int index) async {
-    await _closeDrawer();
-    if (!mounted) return;
-    widget.onSelectPage(index);
-  }
+  Future<void> _openPage(int index) async { await _closeDrawer(); if (mounted) widget.onSelectPage(index); }
 
   Future<void> _openManagement() async {
     await _closeDrawer();
@@ -63,11 +56,8 @@ class _SideMenuState extends State<SideMenu> {
       await _loadSidebar();
       if (!mounted) return;
       await _closeDrawer();
-      if (!mounted) return;
-      widget.onSelectPage(0);
-    } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create conversation')));
-    }
+      if (mounted) widget.onSelectPage(0);
+    } catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create conversation'))); }
   }
 
   Future<void> _openConversation(ConversationSummary item) async {
@@ -75,11 +65,8 @@ class _SideMenuState extends State<SideMenu> {
       await _runtime.selectConversation(item.conversationId);
       if (!mounted) return;
       await _closeDrawer();
-      if (!mounted) return;
-      widget.onSelectPage(0);
-    } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to open conversation')));
-    }
+      if (mounted) widget.onSelectPage(0);
+    } catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to open conversation'))); }
   }
 
   Future<void> _createProject() async {
@@ -89,87 +76,74 @@ class _SideMenuState extends State<SideMenu> {
     catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to create project'))); }
   }
 
-  Future<void> _rename(BuildContext context, ConversationSummary item) async {
-    final value = await _textEditorSheet(title: 'Rename conversation', initialText: item.title);
+  Future<void> _renameProject(ProjectSummary project) async {
+    final value = await _textEditorSheet(title: 'Rename Project', hintText: 'Project name', initialText: project.name);
     if (!mounted || value == null || value.isEmpty) return;
-    try { await _runtime.rename(conversationId: item.conversationId, title: value); await _loadSidebar(); }
+    try { await _runtime.renameProject(project.projectId, value); await _loadSidebar(); }
+    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename project'))); }
+  }
+
+  Future<void> _renameConversation(ConversationSummary item) async {
+    final value = await _textEditorSheet(title: 'Rename Conversation', hintText: 'Conversation name', initialText: item.title);
+    if (!mounted || value == null || value.isEmpty) return;
+    try { await _runtime.rename(item.conversationId, value); await _loadSidebar(); }
     catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to rename conversation'))); }
   }
 
   Future<String?> _textEditorSheet({required String title, String? hintText, String? initialText}) async {
-    final result = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: shSurface,
-      showDragHandle: true,
+    return showModalBottomSheet<String>(
+      context: context, isScrollControlled: true, backgroundColor: shSurface, showDragHandle: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
-      builder: (_) => _SidebarTextEditor(
-        title: title,
-        hintText: hintText,
-        initialText: initialText,
-      ),
+      builder: (_) => _SidebarTextEditor(title: title, hintText: hintText, initialText: initialText),
     );
-    return result;
   }
 
   Widget _sectionAction({required IconData icon, required String label, required VoidCallback onTap}) => Padding(
     padding: const EdgeInsets.only(left: 36, right: 10, bottom: 4),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(10), onTap: onTap,
-      child: Container(
-        width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-        decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(10), border: Border.all(color: shBorder)),
-        child: Row(children: [Icon(icon, size: 18, color: shCyan), const SizedBox(width: 9), Text(label, style: const TextStyle(fontSize: 11, color: shCyan))]),
-      ),
-    ),
+    child: InkWell(borderRadius: BorderRadius.circular(10), onTap: onTap, child: Container(
+      width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(10), border: Border.all(color: shBorder)),
+      child: Row(children: [Icon(icon, size: 18, color: shCyan), const SizedBox(width: 9), Text(label, style: const TextStyle(fontSize: 11, color: shCyan))]),
+    )),
   );
 
   Widget _projectsEntries() {
     final recent = _projects.take(5).toList();
-    return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
-      child: Column(children: [
-        _sectionAction(icon: Icons.add, label: 'New Project', onTap: _createProject),
-        const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Projects', style: TextStyle(fontSize: 9, color: shMuted)))),
-        for (final project in recent) ListTile(
-          dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
-          leading: const Icon(Icons.folder_outlined, size: 16, color: shMuted),
-          title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
-          trailing: Text('${_conversations.where((c) => c.projectId == project.projectId).length}', style: const TextStyle(fontSize: 9, color: shMuted)),
-          onTap: () => setState(() => _conversationExpanded = true),
-          onLongPress: _openManagement,
-        ),
-        if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted)))),
-        if (_projects.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Projects', onTap: _openManagement),
-      ]),
-    );
+    return Padding(padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6), child: Column(children: [
+      _sectionAction(icon: Icons.add, label: 'New Project', onTap: _createProject),
+      const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Projects', style: TextStyle(fontSize: 9, color: shMuted)))),
+      for (final project in recent) ListTile(
+        dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 0),
+        leading: const Icon(Icons.folder_outlined, size: 16, color: shMuted),
+        title: Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+          Text('${_conversations.where((c) => c.projectId == project.projectId).length}', style: const TextStyle(fontSize: 9, color: shMuted)),
+          IconButton(icon: const Icon(Icons.edit_outlined, size: 15), color: shMuted, tooltip: 'Rename Project', onPressed: () => _renameProject(project)),
+        ]),
+        onTap: () => setState(() => _conversationExpanded = true), onLongPress: _openManagement,
+      ),
+      if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No projects yet', style: TextStyle(fontSize: 10, color: shMuted)))),
+      if (_projects.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Projects', onTap: _openManagement),
+    ]));
   }
 
   Widget _conversationEntries() => ValueListenableBuilder<String?>(
     valueListenable: ConversationService.activeConversationId,
     builder: (context, activeId, _) {
       final recent = _conversations.take(5).toList();
-      return Padding(
-        padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6),
-        child: Column(children: [
-          _sectionAction(icon: Icons.add, label: 'New Conversation', onTap: () => _startNewConversation()),
-          const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Conversations', style: TextStyle(fontSize: 9, color: shMuted)))),
-          for (final item in recent) ListTile(
-            dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 4),
-            leading: Icon(Icons.chat_bubble_outline, size: 16, color: activeId == item.conversationId ? shCyan : shMuted),
-            title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
-            trailing: IconButton(
-              tooltip: 'Rename conversation',
-              icon: const Icon(Icons.edit_outlined, size: 15, color: shMuted),
-              onPressed: () => _rename(context, item),
-            ),
-            onTap: () => _openConversation(item),
-            onLongPress: _openManagement,
-          ),
-          if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted)))),
-          if (_conversations.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Conversations', onTap: _openManagement),
-        ]),
-      );
+      return Padding(padding: const EdgeInsets.only(left: 20, right: 10, bottom: 6), child: Column(children: [
+        _sectionAction(icon: Icons.add, label: 'New Conversation', onTap: () => _startNewConversation()),
+        const Padding(padding: EdgeInsets.only(left: 38, top: 3, bottom: 4), child: Align(alignment: Alignment.centerLeft, child: Text('Recent Conversations', style: TextStyle(fontSize: 9, color: shMuted)))),
+        for (final item in recent) ListTile(
+          dense: true, visualDensity: const VisualDensity(vertical: -2), contentPadding: const EdgeInsets.only(left: 36, right: 0),
+          leading: Icon(Icons.chat_bubble_outline, size: 16, color: activeId == item.conversationId ? shCyan : shMuted),
+          title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: activeId == item.conversationId ? shCyan : null)),
+          trailing: IconButton(icon: const Icon(Icons.edit_outlined, size: 15), color: shMuted, tooltip: 'Rename Conversation', onPressed: () => _renameConversation(item)),
+          onTap: () => _openConversation(item), onLongPress: _openManagement,
+        ),
+        if (!_loading && recent.isEmpty) const Padding(padding: EdgeInsets.fromLTRB(38, 6, 8, 8), child: Align(alignment: Alignment.centerLeft, child: Text('No conversations yet', style: TextStyle(fontSize: 10, color: shMuted)))),
+        if (_conversations.length > 5) _sectionAction(icon: Icons.manage_search_outlined, label: 'View All Conversations', onTap: _openManagement),
+      ]));
     },
   );
 
@@ -179,131 +153,44 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   @override
-  Widget build(BuildContext context) => Drawer(
-    backgroundColor: shBackground, width: 292,
-    child: SafeArea(child: Column(children: [
-      Padding(padding: const EdgeInsets.all(18), child: Row(children: [
-        const ShProfileMark(size: 52), const SizedBox(width: 10), Expanded(child: ValueListenableBuilder<String>(
-          valueListenable: profileName,
-          builder: (context, name, _) => ValueListenableBuilder<String>(
-            valueListenable: profileEmail,
-            builder: (context, email, _) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)), Text(email, style: const TextStyle(fontSize: 9, color: shMuted)),
-            ]),
-          ),
-        )),
-      ])),
-      const Divider(color: shBorder),
-      Expanded(child: ListView(padding: EdgeInsets.zero, children: [
-        GestureDetector(
-          onLongPress: _openManagement,
-          child: MenuTile(icon: Icons.folder_outlined, label: 'Project', onTap: () => setState(() => _projectExpanded = !_projectExpanded)),
-        ),
-        if (_projectExpanded) _projectsEntries(),
-        GestureDetector(
-          onLongPress: _openManagement,
-          child: MenuTile(icon: Icons.chat_bubble_outline, label: 'Conversation', onTap: () => setState(() => _conversationExpanded = !_conversationExpanded)),
-        ),
-        if (_conversationExpanded) _conversationEntries(),
-        MenuTile(customIcon: const ShSectionNavIcon.journey(), label: 'Journey', onTap: () => _openPage(1)),
-        MenuTile(customIcon: const ShSectionNavIcon.lifecycle(), label: 'Lifecycle', onTap: () => _openPage(2)),
-        MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(3)),
-        MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () async { await _closeDrawer(); if (!mounted) return; Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpSupportView())); }),
-        MenuTile(icon: Icons.info_outline, label: 'About', onTap: () async { await _closeDrawer(); if (!mounted) return; Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AboutView())); }),
-      ])),
-      Padding(padding: const EdgeInsets.fromLTRB(10, 0, 10, 8), child: Align(alignment: Alignment.centerLeft, child: MenuTile(icon: Icons.logout_outlined, label: 'Log Out', onTap: _logout, danger: true))),
+  Widget build(BuildContext context) => Drawer(backgroundColor: shBackground, width: 292, child: SafeArea(child: Column(children: [
+    Padding(padding: const EdgeInsets.all(18), child: Row(children: [
+      const ShProfileMark(size: 52), const SizedBox(width: 10), Expanded(child: ValueListenableBuilder<String>(valueListenable: profileName, builder: (context, name, _) => ValueListenableBuilder<String>(valueListenable: profileEmail, builder: (context, email, _) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)), Text(email, style: const TextStyle(fontSize: 9, color: shMuted))])))),
     ])),
-  );
+    const Divider(color: shBorder),
+    Expanded(child: ListView(padding: EdgeInsets.zero, children: [
+      GestureDetector(onLongPress: _openManagement, child: MenuTile(icon: Icons.folder_outlined, label: 'Project', onTap: () => setState(() => _projectExpanded = !_projectExpanded))),
+      if (_projectExpanded) _projectsEntries(),
+      GestureDetector(onLongPress: _openManagement, child: MenuTile(icon: Icons.chat_bubble_outline, label: 'Conversation', onTap: () => setState(() => _conversationExpanded = !_conversationExpanded))),
+      if (_conversationExpanded) _conversationEntries(),
+      MenuTile(customIcon: const ShSectionNavIcon.journey(), label: 'Journey', onTap: () => _openPage(1)),
+      MenuTile(customIcon: const ShSectionNavIcon.lifecycle(), label: 'Lifecycle', onTap: () => _openPage(2)),
+      MenuTile(icon: Icons.person_outline, label: 'Profile', onTap: () => _openPage(3)),
+      MenuTile(icon: Icons.help_outline, label: 'Help & Support', onTap: () async { await _closeDrawer(); if (mounted) Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpSupportView())); }),
+      MenuTile(icon: Icons.info_outline, label: 'About', onTap: () async { await _closeDrawer(); if (mounted) Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AboutView())); }),
+    ])),
+    Padding(padding: const EdgeInsets.fromLTRB(10, 0, 10, 8), child: Align(alignment: Alignment.centerLeft, child: MenuTile(icon: Icons.logout_outlined, label: 'Log Out', onTap: _logout, danger: true))),
+  ])));
 }
 
 class _SidebarTextEditor extends StatefulWidget {
-  const _SidebarTextEditor({
-    required this.title,
-    this.hintText,
-    this.initialText,
-  });
-
-  final String title;
-  final String? hintText;
-  final String? initialText;
-
-  @override
-  State<_SidebarTextEditor> createState() => _SidebarTextEditorState();
+  const _SidebarTextEditor({required this.title, this.hintText, this.initialText});
+  final String title; final String? hintText; final String? initialText;
+  @override State<_SidebarTextEditor> createState() => _SidebarTextEditorState();
 }
-
 class _SidebarTextEditorState extends State<_SidebarTextEditor> {
   late final TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.initialText ?? '');
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        18,
-        8,
-        18,
-        MediaQuery.viewInsetsOf(context).bottom + 18,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            widget.title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            textInputAction: TextInputAction.done,
-            decoration: InputDecoration(hintText: widget.hintText),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: shMuted,
-                    side: const BorderSide(color: shBorder),
-                    overlayColor: shSurface2,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _controller,
-                  builder: (_, value, __) => FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: shPurple,
-                      foregroundColor: Colors.white,
-                      overlayColor: shElectric,
-                    ),
-                    onPressed: value.text.trim().isEmpty
-                        ? null
-                        : () => Navigator.pop(context, value.text.trim()),
-                    child: const Text('Save'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  @override void initState() { super.initState(); _controller = TextEditingController(text: widget.initialText ?? ''); }
+  @override void dispose() { _controller.dispose(); super.dispose(); }
+  @override Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.viewInsetsOf(context).bottom + 18),
+    child: Column(mainAxisSize: MainAxisSize.min, children: [
+      Text(widget.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)), const SizedBox(height: 12),
+      TextField(controller: _controller, autofocus: true, textInputAction: TextInputAction.done, decoration: InputDecoration(hintText: widget.hintText)), const SizedBox(height: 14),
+      Row(children: [
+        Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(foregroundColor: shMuted, side: const BorderSide(color: shBorder), overlayColor: shSurface2), onPressed: () => Navigator.pop(context), child: const Text('Cancel'))), const SizedBox(width: 10),
+        Expanded(child: ValueListenableBuilder<TextEditingValue>(valueListenable: _controller, builder: (_, value, __) => FilledButton(style: FilledButton.styleFrom(backgroundColor: shPurple, foregroundColor: Colors.white, overlayColor: shElectric), onPressed: value.text.trim().isEmpty ? null : () => Navigator.pop(context, value.text.trim()), child: const Text('Save')))),
+      ]),
+    ]),
+  );
 }
