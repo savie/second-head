@@ -36,32 +36,32 @@ class _ShNavigationShellState extends State<ShNavigationShell> {
         drawerEdgeDragWidth: 28,
         body: GestureDetector(
           behavior: HitTestBehavior.translucent,
-            onHorizontalDragStart: (details) {
-              final width = MediaQuery.sizeOf(context).width;
-              _horizontalSwipeStartedAtSystemEdge =
-                  details.globalPosition.dx <= 28 ||
-                  details.globalPosition.dx >= width - 28;
-            },
-            onHorizontalDragEnd: (details) {
-              if (_horizontalSwipeStartedAtSystemEdge) {
-                _horizontalSwipeStartedAtSystemEdge = false;
-                return;
-              }
-
-              final velocity = details.primaryVelocity ?? 0;
-              if (velocity < -450 && index < widget.pages.length - 1) {
-                _selectPage(index + 1);
-              } else if (velocity > 450 && index > 0) {
-                _selectPage(index - 1);
-              }
+          onHorizontalDragStart: (details) {
+            final width = MediaQuery.sizeOf(context).width;
+            _horizontalSwipeStartedAtSystemEdge =
+                details.globalPosition.dx <= 28 ||
+                details.globalPosition.dx >= width - 28;
+          },
+          onHorizontalDragEnd: (details) {
+            if (_horizontalSwipeStartedAtSystemEdge) {
               _horizontalSwipeStartedAtSystemEdge = false;
-            },
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              child: KeyedSubtree(
-                key: ValueKey(index),
-                child: widget.pages[index],
-              ),
+              return;
+            }
+
+            final velocity = details.primaryVelocity ?? 0;
+            if (velocity < -450 && index < widget.pages.length - 1) {
+              _selectPage(index + 1);
+            } else if (velocity > 450 && index > 0) {
+              _selectPage(index - 1);
+            }
+            _horizontalSwipeStartedAtSystemEdge = false;
+          },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            child: KeyedSubtree(
+              key: ValueKey(index),
+              child: widget.pages[index],
+            ),
           ),
         ),
         bottomNavigationBar: NavigationBar(
@@ -145,63 +145,61 @@ class ShTopBar extends StatelessWidget {
     const contentHeight = 64.0;
 
     return SizedBox(
-      // The top inset is owned by the shared header so every screen
-      // (shell pages and pushed detail routes) gets the same vertical rhythm.
       height: topInset + contentHeight,
       child: Padding(
         padding: EdgeInsets.only(top: topInset),
         child: SizedBox(
           height: contentHeight,
           child: Stack(
-          alignment: Alignment.center,
-        children: [
-          Positioned(
-            left: 4,
-            top: 0,
-            bottom: 0,
-            child: leading ??
-                IconButton(
-                  tooltip: 'Menu',
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                  icon: const Icon(Icons.menu, size: 30),
-                ),
-          ),
-          Positioned(
-            left: 72,
-            right: 72,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w600,
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                left: 4,
+                top: 0,
+                bottom: 0,
+                child: leading ??
+                    IconButton(
+                      tooltip: 'Menu',
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                      icon: const Icon(Icons.menu, size: 30),
+                    ),
+              ),
+              Positioned(
+                left: 72,
+                right: 100,
+                top: 0,
+                bottom: 0,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            right: 4,
-            top: 0,
-            bottom: 0,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (onSearch != null)
-                  IconButton(
-                    tooltip: 'Search',
-                    onPressed: onSearch,
-                    icon: const Icon(Icons.search_outlined, size: 30),
-                  ),
-                ...actions,
-              ],
-            ),
-          ),
-        ],
+              Positioned(
+                right: 4,
+                top: 0,
+                bottom: 0,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onSearch != null)
+                      IconButton(
+                        tooltip: 'Search',
+                        onPressed: onSearch,
+                        icon: const Icon(Icons.search_outlined, size: 29),
+                      ),
+                    ...actions,
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -252,8 +250,7 @@ class _ShInternalSearchSheet<T> extends StatefulWidget {
       _ShInternalSearchSheetState<T>();
 }
 
-class _ShInternalSearchSheetState<T>
-    extends State<_ShInternalSearchSheet<T>> {
+class _ShInternalSearchSheetState<T> extends State<_ShInternalSearchSheet<T>> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   String query = '';
@@ -317,8 +314,7 @@ class _ShInternalSearchSheetState<T>
                   itemBuilder: (_, index) {
                     final result = results[index];
                     return ListTile(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 4),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                       title: Text(result.title),
                       subtitle: result.subtitle == null
                           ? null
