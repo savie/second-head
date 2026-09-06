@@ -104,6 +104,14 @@ class AuthService {
     }
   }
 
+  Future<void> updateEmail(String email) async {
+    try {
+      await _backend.updateEmail(email.trim());
+    } catch (error) {
+      throw _toError(error);
+    }
+  }
+
   void finishPasswordRecovery() => _passwordRecoveryActive = false;
 
   Future<void> restoreSession() async {
