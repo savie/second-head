@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../theme/sh_theme.dart';
 import '../storage/storage_service.dart';
@@ -18,7 +19,12 @@ Future<void> _loadProfilePhoto() async {
 }
 
 final ValueNotifier<String> profileName = ValueNotifier<String>('Savie');
-final ValueNotifier<String> profileEmail = ValueNotifier<String>('savie@secondhead.app');
+final ValueNotifier<String> profileEmail = ValueNotifier<String>('');
+
+void refreshProfileEmail() {
+  profileEmail.value =
+      Supabase.instance.client.auth.currentUser?.email?.trim() ?? '';
+}
 
 class ShProfileMark extends StatelessWidget {
   const ShProfileMark({super.key, this.size = 52});
