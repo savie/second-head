@@ -20,7 +20,7 @@ class AuthBackend {
   Future<bool> signInWithGoogle() async {
     return Supabase.instance.client.auth.signInWithOAuth(
       OAuthProvider.google,
-      redirectTo: authCallbackUri,
+      redirectTo: authOAuthCallbackUri,
       authScreenLaunchMode: LaunchMode.externalApplication,
     );
   }
@@ -43,7 +43,7 @@ class AuthBackend {
   Future<void> sendPasswordReset(String email) async {
     await Supabase.instance.client.auth.resetPasswordForEmail(
       email,
-      redirectTo: authCallbackUri,
+      redirectTo: authResetCallbackUri,
     );
   }
 
