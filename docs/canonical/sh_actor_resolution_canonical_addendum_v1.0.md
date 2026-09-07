@@ -277,7 +277,7 @@ Makna konseptual SH-000 berasal dari relationship yang sudah dipercaya antara Ac
 
 Implementasi tidak boleh menggunakan `creator_ref`, UI state, atau reserved string pada client sebagai source of truth authority.
 
-Apakah designation ini disimpan secara eksplisit, diturunkan secara deterministic dari trusted relationships, atau menggunakan mekanisme lain harus ditetapkan dalam Technical Resolver Design setelah Addendum disetujui.
+Apakah designation ini disimpan secara eksplisit, diturunkan secara deterministic, atau menggunakan mekanisme lain harus ditetapkan dalam Technical Resolver Design setelah Addendum disetujui.
 
 ### 6.5 Boundary
 
@@ -319,13 +319,23 @@ SH DESIGNATION
 
 Namun, implementasi final tetap harus memastikan bahwa designation tidak menjadi source of authority yang berdiri sendiri. Authority dan permission tetap harus berasal dari trusted identity/authority resolution dan policy.
 
-### 7.4 Open Decision
+### 7.4 Agreed Working Rule
 
-Hal-hal berikut masih perlu dikunci sebelum resolver final:
+Untuk build saat ini telah disepakati sebagai working semantics:
 
-1. Apakah setiap Primary SH milik Account tanpa Creator Authority selalu `ORDINARY_SH`?
-2. Apakah ada kategori SH lain yang secara sah bukan `SH-000` tetapi juga bukan `ORDINARY_SH`?
-3. Apakah `ORDINARY_SH` perlu diekspos sebagai actor dalam resolved session context atau cukup sebagai policy classification?
+```text
+Primary SH + active Creator Authority
+        ↓
+      SH-000
+
+Primary SH + no active Creator Authority
+        ↓
+    ORDINARY_SH
+```
+
+Dengan demikian, setiap Primary SH milik Account yang tidak memiliki active Creator Authority diklasifikasikan sebagai `ORDINARY_SH` dalam working model ini.
+
+Hal yang masih terbuka hanya apakah pada masa depan SH memiliki kategori sah lain di luar dua designation tersebut; hal tersebut tidak boleh diasumsikan untuk implementation saat ini.
 
 ---
 
@@ -493,7 +503,7 @@ runtime flag di client → SYSTEM_RUNTIME
 
 Frontend harus mengikuti resolved identity/actor context dan capability / authorization result yang diberikan oleh backend.
 
-User-visible actor/status harus eksplisit sehingga user dapat mengetahui context yang sedang aktif tanpa perlu menebak.
+User-visible actor/status harus eksplisit sehingga user dapat mengetahui context yang sedang aktif.
 
 ---
 
@@ -532,66 +542,399 @@ Menebak siapa actor-nya
 3. Runtime context tidak boleh disamakan dengan SH identity.
 4. Creator authority tidak otomatis memberikan private-data access.
 5. SH-000 Core Governance Authority tidak otomatis memberikan private-data access.
-6. Ownership tidak boleh diinferensikan dari UI.
-7. `SYSTEM_RUNTIME` tidak boleh diturunkan dari `SH_ID`.
-8. Actor yang tidak dapat di-resolve secara terpercaya harus fail closed.
-9. Permission policy harus tetap terpisah dari identity resolution.
-10. Enforcement harus tetap berjalan di backend.
-11. User-visible actor/status harus berasal dari backend-resolved context, bukan inferensi frontend.
+6. Ownership tidak boleh di... 
 
 ---
 
-## 15. Status Keputusan
+# 15. 5D — MIGRATION DESIGN
+
+## 15.1 Design Boundary
+
+5D ini adalah **design only**. Tidak ada perubahan schema, function, grant, permission matrix, frontend, atau runtime enforcement yang diterapkan sebagai bagian dari section ini.
+
+Migration hanya boleh dilakukan setelah design dikunci dan source migration dicatat di GitHub DEV. Urutan kerja yang berlaku:
+
+```text
+DESIGN LOCK
+    ↓
+Migration SQL recorded in GitHub DEV
+    ↓
+Apply to Supabase DEV
+    ↓
+Verify DB
+    ↓
+Verify GitHub ↔ Supabase
+```
+
+Migration source reconstruction untuk history lama tetap berada di luar scope.
+
+## 15.2 Design Objective
+
+Tujuan migration adalah menambahkan **trusted resolution boundary**, bukan membangun ulang governance subsystem.
+
+Target:
+
+```text
+Authenticated Principal
+        ↓
+Unified Resolver
+        ↓
+Resolved Actor/Identity Context
+        ↓
+Governance / Runtime / Isolation Consumers
+```
+
+Existing foundations yang dipertahankan:
+
+- `public.accounts`
+- `public.sh_ownership`
+- `private.authority_assignments`
+- `public.sh_instances`
+- `public.permission_matrix`
+- `private.access_decision_gate`
+- `private.governance_evaluator`
+- `private.policy_enforcement_engine`
+- `private.isolation_checker`
+- `private.runtime_access_boundary`
+- `private.system_governance_boundary`
+
+Tidak ada alasan pada 5D untuk mengganti atau menghapus object-object tersebut hanya karena resolver belum unified.
+
+## 15.3 Proposed Resolver Object
+
+**Working design name:** `private.resolve_actor_identity_context()`.
+
+Status: **PROPOSED — belum implementation contract final.**
+
+Karakteristik yang diwajibkan:
+
+- source caller identity dari `auth.uid()`;
+- tidak menerima `account_id`, `sh_id`, actor, authority, designation, atau runtime actor sebagai caller-controlled identity input;
+- resolve Account melalui trusted existing identity path;
+- resolve ownership dari `sh_ownership`;
+- resolve exactly one Primary SH;
+- resolve active Creator Authority dari `authority_assignments`;
+- derive `SH-000` apabila Account memiliki active Creator Authority dan Primary SH yang valid;
+- derive `ORDINARY_SH` apabila Account tidak memiliki active Creator Authority dan Primary SH valid;
+- tidak menggunakan `creator_ref` sebagai authority source;
+- fail closed bila identity/ownership/Primary SH context tidak valid atau ambigu;
+- tidak memberikan permission decision sendiri.
+
+## 15.4 Proposed Context Shape
+
+Working result contract:
+
+```text
+ResolvedActorIdentityContext
+├── authenticated_principal
+│   └── authenticated
+├── account
+│   └── account_id
+├── ownership
+│   └── role = ACCOUNT_OWNER
+├── authority
+│   └── creator = true / false
+├── primary_sh
+│   ├── sh_id
+│   └── designation = SH-000 / ORDINARY_SH
+└── runtime
+    └── context = AUTHENTICATED_PRINCIPAL / SYSTEM_RUNTIME
+```
+
+Catatan: bentuk SQL return type final (TABLE vs composite type vs JSON contract) belum dikunci dalam 5D ini. Pemilihan bentuk harus mempertimbangkan konsumsi internal function dan frontend contract tanpa mengubah semantics di atas.
+
+## 15.5 Function Dependency Changes
+
+### A. `governance_evaluator`
+
+**Target:** consume unified resolved context.
+
+Current identity/actor resolution:
+
+```text
+current_account_id()
+      ↓
+Creator assignment?
+      ├── yes → CREATOR
+      └── no  → ACCOUNT_OWNER
+```
+
+Target:
+
+```text
+resolve_actor_identity_context()
+      ↓
+account + ownership + authority + SH designation
+      ↓
+policy selection
+```
+
+`p_actor_account_id` tetap hanya dapat dipakai sebagai consistency assertion terhadap trusted resolved Account, bukan sebagai source of authority.
+
+### B. `policy_enforcement_engine`
+
+Tidak menjadi resolver kedua.
+
+Target dependency:
+
+```text
+resolved context / governance result
+        ↓
+policy enforcement
+```
+
+Apakah function signature perlu diubah atau cukup memusatkan resolution di `governance_evaluator` harus diputuskan setelah implementation-level dependency inspection. Jangan mengubah signature secara prematur.
+
+### C. `isolation_checker`
+
+Tetap bertanggung jawab atas target isolation.
+
+Targetnya dapat menggunakan trusted Account context yang sama, tetapi tidak mengambil alih authority classification.
+
+### D. `runtime_access_boundary`
+
+Tetap merupakan runtime boundary terpisah.
+
+Tidak boleh sekadar mengubah authenticated Account menjadi `SYSTEM_RUNTIME`.
+
+Ia membutuhkan trusted runtime-context source yang berbeda dari user identity.
+
+### E. `system_governance_boundary`
+
+Tetap menggunakan `access_decision_gate` sebagai downstream governance gate.
+
+Tidak perlu diganti menjadi direct permission-matrix lookup.
+
+## 15.6 SYSTEM_RUNTIME Migration Boundary
+
+`SYSTEM_RUNTIME` tidak boleh diaktifkan hanya karena policy row sudah ada.
+
+Sebelum migration implementation, harus ada desain eksplisit mengenai:
+
+```text
+Trusted System Execution Context
+        ↓
+Proof / source of trust
+        ↓
+SYSTEM_RUNTIME
+```
+
+Sumber tersebut harus tidak dapat dipalsukan oleh authenticated client biasa.
+
+Jika source of trust belum tersedia, migration **tidak boleh** membuat user request dapat memilih `SYSTEM_RUNTIME` melalui parameter.
+
+Karena itu, 5D hanya mendefinisikan integration point; implementasi runtime resolver menjadi prerequisite tersendiri.
+
+## 15.7 Permission Matrix Strategy
+
+Tidak ada migration untuk mengganti taxonomy actor pada 5D.
+
+Existing policy taxonomy dipertahankan:
+
+```text
+CREATOR
+ACCOUNT_OWNER
+SH-000
+ORDINARY_SH
+SYSTEM_RUNTIME
+```
+
+Yang diubah nanti adalah **jalur masuk actor terpercaya ke policy**, bukan arti rule secara diam-diam.
+
+Special attention:
+
+- `CREATOR` adalah Account authority dimension.
+- `SH-000` adalah Primary SH designation.
+- `ORDINARY_SH` adalah Primary SH designation.
+- `SYSTEM_RUNTIME` adalah execution context.
+
+## 15.8 Migration Sequence
+
+Jika design ini disetujui, migration implementation sebaiknya dipecah agar mudah diverifikasi:
+
+```text
+M1 — Unified Actor Resolver
+        ↓
+M2 — Governance Integration
+        ↓
+M3 — Runtime Context Integration
+        ↓
+M4 — Downstream Consumer Alignment
+        ↓
+Verification
+```
+
+Tidak disarankan membuat satu migration besar yang sekaligus mengubah seluruh governance/runtime chain.
+
+### M1 — Unified Actor Resolver
+
+Deliver:
+
+- trusted resolver function;
+- deterministic SH designation;
+- fail-closed validation;
+- explicit result contract;
+- controlled EXECUTE surface.
+
+Verification:
+
+- Creator account resolves `ACCOUNT_OWNER + CREATOR + SH-000`;
+- non-Creator account resolves `ACCOUNT_OWNER + non-Creator + ORDINARY_SH`;
+- no caller-supplied identity can override result;
+- invalid/missing primary context rejects/fails closed.
+
+### M2 — Governance Integration
+
+Deliver:
+
+- governance evaluator consumes resolver;
+- existing policy matrix remains policy source;
+- target relation remains separately evaluated;
+- Creator governance still requires governance process where matrix requires it;
+- SH-000 Core authority remains distinct from private-data access.
+
+Verification:
+
+- Creator/SH-000 governance path reaches correct policy subject;
+- ordinary SH governance is denied;
+- cross-SH private access remains isolated.
+
+### M3 — Runtime Context Integration
+
+Deliver only after trusted runtime source is specified.
+
+Verification:
+
+- ordinary authenticated request cannot self-identify as `SYSTEM_RUNTIME`;
+- trusted system execution can resolve `SYSTEM_RUNTIME`;
+- runtime execution does not grant ownership.
+
+### M4 — Downstream Consumer Alignment
+
+Review and align:
+
+- `access_decision_gate`;
+- `policy_enforcement_engine`;
+- `isolation_checker`;
+- `runtime_access_boundary`;
+- `system_governance_boundary`.
+
+No object is removed merely for duplication unless verification demonstrates that the new resolver makes the old path redundant and removal is safe.
+
+## 15.9 Grants / Security Boundary
+
+Resolver implementation must be treated as privileged identity infrastructure.
+
+Design requirements:
+
+- keep privileged resolver in `private` schema;
+- no direct public/anonymous execution;
+- authenticated execution only where a consumer requires it;
+- explicit `auth.uid()` boundary inside the resolver;
+- fixed `search_path` for SECURITY DEFINER implementation if SECURITY DEFINER remains necessary;
+- no client-controlled actor/authority parameters;
+- review EXECUTE grants after migration;
+- verify no unintended `anon` execution path is introduced.
+
+Exact GRANT/REVOKE SQL remains an implementation artifact of 5E after final signature is locked.
+
+## 15.10 Migration Verification Matrix
+
+| Test | Expected |
+|---|---|
+| Unauthenticated resolver | fail closed |
+| Creator authenticated resolver | Owner + Creator + Primary SH + SH-000 |
+| Ordinary account resolver | Owner + non-Creator + Primary SH + ORDINARY_SH |
+| Caller supplies another Account_ID | ignored/rejected; trusted Account remains caller identity |
+| Caller supplies another SH_ID | cannot change resolved Primary SH |
+| `creator_ref` changed/filled | no effect on Creator resolution |
+| Creator private OTHER read | denied unless separately authorized by valid scoped policy |
+| Ordinary SH GOVERN SYSTEM_CORE | denied |
+| SH-000 GOVERN SYSTEM_CORE | reaches governance-process boundary, not automatic unrestricted allow |
+| Runtime client claims SYSTEM_RUNTIME | denied |
+| Cross-SH private isolation | denied |
+
+## 15.11 Migration Safety Rules
+
+1. Do not create a second Account or Primary SH for SH-000.
+2. Do not add a `creator_ref`-based authority path.
+3. Do not make `SH_ID` itself an authority source.
+4. Do not expose actor-selection parameters to clients.
+5. Do not silently rewrite Canonical semantics.
+6. Do not weaken existing private-data isolation while wiring governance actors.
+7. Do not activate `SYSTEM_RUNTIME` without a trusted execution proof.
+8. Do not apply migration before its SQL source is durably recorded in GitHub DEV.
+9. Verify Supabase after every migration step.
+10. If verification fails, stop and reconcile before proceeding to the next migration.
+
+## 15.12 5D Exit Criteria
+
+5D is considered design-complete only when the following are explicitly locked:
+
+- resolver object/signature;
+- exact SQL result contract;
+- deterministic SH designation rules;
+- governance integration point;
+- runtime trust source;
+- EXECUTE/grant boundary;
+- migration split/order;
+- verification matrix;
+- rollback/recovery strategy appropriate to each migration step.
+
+Until these are locked, **5E Implement + Verify must not start**.
+
+---
+
+## 16. Status Classification
 
 ### CANONICAL / VALIDATED
 
-- `1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH`.
-- `Creator Authority ≠ Private Data Access`.
-- `SH-000 Core Authority ≠ Private Data Access`.
-- `Runtime ≠ SH Identity`.
-- `Account_ID ≠ SH_ID`.
-- SH-000 adalah konsep Canonical yang berhubungan dengan Creator's SH dan memiliki special Core Governance Authority dalam boundary yang ditentukan.
-- Ordinary SH tidak memiliki authority untuk mengubah SH Core, sesuai definisi konseptual dan policy evidence yang telah diaudit.
+- `1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH`
+- `Account_ID ≠ SH_ID`
+- Creator Authority ≠ Private Data Access
+- SH-000 Core Authority ≠ Private Data Access
+- Runtime Access ≠ Ownership
+- SH-000 is Creator's SH / Creator's Primary SH concept
 
 ### CURRENT IMPLEMENTATION EVIDENCE
 
-- `CREATOR` dapat dikenali melalui active Creator authority assignment.
-- `ACCOUNT_OWNER` digunakan sebagai fallback actor untuk account yang telah ter-resolve dan tidak memiliki active Creator assignment.
-- Permission matrix saat ini memuat lima kategori actor.
-- `ORDINARY_SH` memiliki explicit policy `DENY` untuk `GOVERN` terhadap `SYSTEM_CORE`.
+- Creator authority is represented by active `private.authority_assignments`.
+- Account ownership is represented by `public.sh_ownership`.
+- Primary SH is represented by `public.sh_instances.is_primary`.
+- Current governance evaluator resolves `CREATOR` or `ACCOUNT_OWNER` only.
+- `permission_matrix` contains five policy taxonomy values.
+- Current runtime boundary does not resolve `SYSTEM_RUNTIME` as an actor.
 
-### PROPOSED / WORKING MODEL
+### AGREED WORKING SEMANTICS
 
-- Actor taxonomy tidak diperlakukan sebagai lima identity type yang setara.
-- `ACCOUNT_OWNER` diposisikan sebagai ownership role/context pada Account.
-- `CREATOR` diposisikan sebagai authority designation pada Account.
-- `SH-000` diposisikan sebagai designation konseptual pada Creator's Primary SH, bukan Account kedua atau Primary SH kedua.
-- `ORDINARY_SH` diposisikan sebagai SH-level designation/category untuk SH biasa, dengan governance boundary yang sudah terbukti.
-- `SYSTEM_RUNTIME` diposisikan sebagai execution context terpisah.
-- Resolved Session / Actor Context perlu diekspos secara eksplisit ke frontend agar user dapat mengetahui identity/authority/SH context yang aktif.
+- Every non-Creator Primary SH is classified as `ORDINARY_SH` for the current build.
+- SH-000 is derived deterministically from active Creator Authority + the Account's Primary SH.
+- These are working build semantics and do not silently rewrite the parent Canonical.
+
+### PROPOSED / DESIGN ONLY
+
+- Unified `private.resolve_actor_identity_context()` resolver.
+- Unified context consumption across governance/runtime consumers.
+- Migration split M1–M4.
+- Exact SQL return shape and final runtime trust mechanism.
 
 ### OPEN / UNRESOLVED
 
-- Technical source of truth dan mekanisme final untuk Creator's Primary SH → `SH-000` designation.
-- Apakah `SH-000` designation disimpan atau diturunkan secara deterministic.
-- Apakah setiap non-Creator Primary SH otomatis `ORDINARY_SH`.
-- Apakah ada SH category lain di masa depan yang bukan `SH-000` maupun `ORDINARY_SH`.
-- Apakah `ORDINARY_SH` perlu menjadi runtime actor atau cukup policy classification.
-- Technical source of truth untuk trusted `SYSTEM_RUNTIME` context.
-- Final contract untuk user-visible Resolved Session / Actor Context.
-- Apakah actor taxonomy lima kategori ini final untuk seluruh domain SH atau dapat diperluas melalui addendum berikutnya.
+- Exact resolver SQL return type/signature.
+- Trusted `SYSTEM_RUNTIME` proof/source.
+- Whether future SH categories beyond `SH-000` and `ORDINARY_SH` will exist.
+- Final frontend representation contract.
+- Security harness implementation.
 
 ---
 
-## 16. Implementasi
+## 17. Implementation Boundary
 
-Addendum ini pada tahap draft **tidak mengubah database, permission matrix, actor resolver, frontend, atau runtime enforcement**.
+Addendum ini pada tahap draft tidak mengubah database, permission matrix, actor resolver, frontend, atau runtime enforcement.
 
-Urutan implementasi setelah addendum disetujui:
+Setelah Addendum dan 5D design dikunci, implementation sequence adalah:
 
 ```text
-Actor Resolution Addendum Final
-        ↓
 Technical Resolver Design
         ↓
 Backend Implementation
@@ -602,39 +945,7 @@ Frontend Capability / Identity Alignment
         ↓
 APK E2E
         ↓
-Verification Evidence
+Verification
 ```
 
-Tidak ada tahap berikutnya yang dianggap siap apabila prerequisite di atas belum selesai.
-
----
-
-## 17. Authority & Change Control
-
-Dokumen ini berada di folder `docs/canonical` karena dimaksudkan menjadi Canonical Addendum.
-
-Namun, selama statusnya masih `Draft — Canonical Addendum in Development`, dokumen ini **belum boleh dianggap sebagai authority final untuk mengubah implementation atau Canonical semantics**.
-
-Perubahan menuju status authoritative dilakukan setelah isi dan boundary actor disetujui secara eksplisit.
-
-Setelah authoritative, dokumen ini menjadi authority tambahan untuk area actor resolution yang diaturnya tanpa menggantikan SH Core Canonical secara keseluruhan.
-
----
-
-## 18. Prinsip Penutup
-
-SECOND HEAD berkembang melalui penambahan semantic layer yang terdokumentasi, bukan melalui perubahan diam-diam terhadap foundation.
-
-Jika actor taxonomy berkembang di masa depan, perubahan harus dilakukan melalui addendum atau amendment yang memiliki authority dan change control yang jelas.
-
-Prinsip dasarnya:
-
-```text
-Jangan menebak siapa actor-nya.
-Jangan mencampur identity dengan authority.
-Jangan mencampur runtime dengan SH identity.
-Jangan menganggap policy sebagai source of truth identity.
-Jangan membuat identity kedua hanya untuk merepresentasikan SH-000.
-
-Resolve → Classify → Authorize → Evaluate → Enforce.
-```
+Clone integration tetap berada setelah seluruh identity/authority/enforcement path tervalidasi.
