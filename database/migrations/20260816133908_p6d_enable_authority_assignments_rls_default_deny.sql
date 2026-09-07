@@ -1,0 +1,1 @@
+alter table private.authority_assignments enable row level security;
