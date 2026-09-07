@@ -41,6 +41,7 @@ Addendum ini harus dibaca bersama SH Core Canonical dan Canonical Addendum yang 
 
 Boundary fundamental berikut tetap berlaku:
 
+- `1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH`
 - `Account_ID ≠ SH_ID`
 - `Runtime ≠ SH Identity`
 - `Model ≠ SH Identity`
@@ -53,27 +54,66 @@ Addendum ini tidak mengubah prinsip-prinsip tersebut.
 
 ---
 
-## 3. Model Actor
+## 3. Model Identity, Ownership, Authority, dan SH Designation
 
-Untuk kebutuhan sistem, actor dibedakan menjadi lima kategori yang saat ini sudah muncul dalam policy taxonomy SH:
+Actor taxonomy tidak boleh dibaca sebagai lima jenis identity yang setara. Konsep-konsep tersebut berada pada level semantik yang berbeda.
+
+Model konseptual kerja saat ini:
 
 ```text
-CREATOR
-ACCOUNT_OWNER
-SH-000
-ORDINARY_SH
-SYSTEM_RUNTIME
+                         EMAIL
+                           │
+                           ▼
+                        ACCOUNT
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+              ▼            ▼            ▼
+         ACCOUNT_ID   OWNERSHIP     AUTHORITY
+                           │            │
+                           ▼            ▼
+                    ACCOUNT_OWNER     CREATOR
+                           │            │
+                           └─────┬──────┘
+                                 │
+                                 ▼
+                            PRIMARY SH
+                                 │
+                         ┌───────┴────────┐
+                         │                │
+                       SH_ID       SH DESIGNATION
+                                          │
+                                  ┌───────┴───────┐
+                                  │               │
+                               SH-000        ORDINARY_SH
+
+
+                 SYSTEM_RUNTIME
+                       │
+                       ▼
+                EXECUTION CONTEXT
 ```
 
-Kelima istilah tersebut tidak boleh dianggap otomatis setara.
+Boundary identity yang tidak boleh berubah:
 
-Secara konseptual:
+```text
+1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH
+ACCOUNT_ID ≠ SH_ID
+```
 
-- `CREATOR` menunjuk authority pada level Creator.
-- `ACCOUNT_OWNER` menunjuk pemilik Account/SH yang sedang ter-resolve.
-- `SH-000` menunjuk SH khusus yang berhubungan dengan Creator dan memiliki Core Governance Authority dalam batas Canonical.
-- `ORDINARY_SH` menunjuk kategori SH biasa, tetapi definisi final kategori ini harus ditetapkan secara eksplisit.
-- `SYSTEM_RUNTIME` menunjuk execution context sistem dan bukan identitas SH.
+Interpretasi model:
+
+- `ACCOUNT` adalah identity/domain object.
+- `ACCOUNT_ID` adalah identifier dari Account.
+- `ACCOUNT_OWNER` adalah ownership role/context, bukan jenis Account yang berbeda.
+- `CREATOR` adalah authority designation pada Account, bukan pengganti Account dan bukan SH identity.
+- `PRIMARY SH` adalah SH identity yang terkait dengan Account dalam invariant Canonical.
+- `SH_ID` adalah identifier dari SH.
+- `SH-000` adalah designation konseptual untuk Creator's Primary SH; ia tidak diperlakukan sebagai Account kedua atau Primary SH kedua.
+- `ORDINARY_SH` adalah designation/category pada SH biasa milik user biasa; boundary governance-nya dijelaskan lebih lanjut di Section 7.
+- `SYSTEM_RUNTIME` berada pada jalur execution context yang terpisah dari Account dan SH identity.
+
+Model ini adalah **working conceptual model** dalam Addendum draft dan belum dengan sendirinya menjadi perubahan schema atau implementation contract.
 
 ---
 
@@ -81,7 +121,7 @@ Secara konseptual:
 
 ### 4.1 Makna
 
-`CREATOR` adalah actor yang secara sah ditetapkan sebagai Creator SH.
+`CREATOR` adalah authority designation yang secara sah menetapkan Account sebagai Creator dalam boundary SH Core Canonical.
 
 Creator authority berasal dari sumber authority yang terpercaya, bukan dari nilai UI, `creator_ref`, atau asumsi bahwa pemilik suatu SH otomatis adalah Creator.
 
@@ -101,7 +141,21 @@ Active Creator Authority Assignment
 CREATOR
 ```
 
-### 4.3 Boundary
+### 4.3 Relasi dengan ACCOUNT_OWNER
+
+`CREATOR` dan `ACCOUNT_OWNER` bukan dua jenis Account yang saling menggantikan.
+
+Keduanya dapat berada pada Account yang sama tetapi berasal dari dimensi berbeda:
+
+```text
+ACCOUNT
+ ├── Ownership → ACCOUNT_OWNER
+ └── Authority → CREATOR
+```
+
+Dengan demikian, Creator Account dapat sekaligus merupakan Account Owner dan Creator. Account Owner yang tidak memiliki active Creator Authority tetap merupakan Account Owner tetapi bukan Creator.
+
+### 4.4 Boundary
 
 Menjadi `CREATOR` tidak berarti otomatis memiliki akses ke seluruh private data.
 
@@ -113,7 +167,9 @@ Creator Authority tetap terpisah dari Private Data Access.
 
 ### 5.1 Makna
 
-`ACCOUNT_OWNER` adalah actor yang merupakan pemilik Account/SH yang sedang menjadi subject dari authenticated identity resolution dan tidak sedang diklasifikasikan sebagai Creator.
+`ACCOUNT_OWNER` adalah ownership role/context yang menunjukkan Account/SH yang sedang menjadi milik authenticated principal berdasarkan identity dan ownership resolution yang terpercaya.
+
+`ACCOUNT_OWNER` bukan tipe identity yang menggantikan `ACCOUNT`, dan bukan sinonim `CREATOR`.
 
 ### 5.2 Sumber Identitas
 
@@ -129,7 +185,26 @@ Ownership / Primary SH Resolution
 ACCOUNT_OWNER
 ```
 
-### 5.3 Boundary
+### 5.3 Relasi dengan CREATOR
+
+Account dapat memiliki kedua dimensi sekaligus:
+
+```text
+ACCOUNT
+ ├── Ownership → ACCOUNT_OWNER
+ └── Authority → CREATOR
+```
+
+atau hanya ownership:
+
+```text
+ACCOUNT
+ └── Ownership → ACCOUNT_OWNER
+```
+
+Apakah suatu Account juga Creator harus ditentukan oleh trusted Creator Authority Assignment.
+
+### 5.4 Boundary
 
 Ownership tidak boleh disimpulkan hanya dari UI atau field yang dikirim client.
 
@@ -137,73 +212,120 @@ Account ownership dan SH identity tetap merupakan konsep yang berbeda walaupun k
 
 ---
 
-## 6. SH-000
+## 6. PRIMARY SH, SH_ID, dan SH-000
 
-### 6.1 Makna Canonical
+### 6.1 Primary SH
 
-`SH-000` adalah SH khusus yang berhubungan dengan Creator dan memiliki Core Governance Authority dalam boundary yang ditentukan SH Core Canonical.
-
-SH-000 bukan pemilik seluruh SH instance dan bukan berarti memiliki akses omniscient terhadap private data.
-
-### 6.2 Prinsip Identifikasi
-
-SH-000 harus dikenali melalui hubungan identity yang terpercaya, bukan melalui tebakan frontend atau sekadar string yang dikirim client.
-
-Model konseptual yang sedang dikembangkan:
+Canonical identity boundary:
 
 ```text
-Authenticated Identity
-        ↓
-ACCOUNT_ID
-        ↓
-CREATOR AUTHORITY
-        ↓
-Creator-associated SH Identity
-        ↓
-SH-000
+EMAIL
+  ↓
+ACCOUNT
+  ↓
+PRIMARY SH
 ```
 
-### 6.3 Technical Mapping
+Tidak boleh dibuat Account kedua atau Primary SH kedua hanya untuk merepresentasikan SH-000.
 
-Cara teknis yang tepat untuk memetakan Creator-associated SH menjadi `SH-000` belum menjadi keputusan implementasi final pada saat draft ini dibuat.
+### 6.2 SH_ID
 
-Implementasi tidak boleh menganggap `creator_ref` sebagai source of truth untuk Creator authority.
+`SH_ID` adalah identifier dari Primary SH/SH identity.
 
-### 6.4 Boundary
+```text
+PRIMARY SH
+    ↓
+  SH_ID
+```
+
+`SH_ID` bukan authority source dan bukan pengganti Account identity.
+
+### 6.3 SH-000 — Makna Canonical
+
+`SH-000` adalah designation konseptual untuk **Creator's SH / Creator's Primary SH** yang memiliki special Core Governance Authority dalam boundary yang ditentukan SH Core Canonical.
+
+SH-000 bukan Account kedua, bukan Primary SH kedua, bukan pengganti `CREATOR`, dan bukan pemilik seluruh SH instance.
+
+Secara konseptual:
+
+```text
+ACCOUNT
+ ├── Ownership → ACCOUNT_OWNER
+ ├── Authority → CREATOR
+ │
+ └── PRIMARY SH
+        │
+        ├── SH_ID
+        └── SH-000 designation
+```
+
+Untuk Account Owner biasa:
+
+```text
+ACCOUNT
+ ├── Ownership → ACCOUNT_OWNER
+ │
+ └── PRIMARY SH
+        │
+        ├── SH_ID
+        └── ORDINARY_SH designation
+```
+
+### 6.4 Source of Truth dan Technical Mapping
+
+Makna konseptual SH-000 berasal dari relationship yang sudah dipercaya antara Account, Creator Authority, dan Creator's Primary SH. Namun, bentuk teknis final untuk menyatakan atau me-resolve designation `SH-000` belum menjadi keputusan implementasi final.
+
+Implementasi tidak boleh menggunakan `creator_ref`, UI state, atau reserved string pada client sebagai source of truth authority.
+
+Apakah designation ini disimpan secara eksplisit, diturunkan secara deterministic dari trusted relationships, atau menggunakan mekanisme lain harus ditetapkan dalam Technical Resolver Design setelah Addendum disetujui.
+
+### 6.5 Boundary
 
 ```text
 SH-000 Core Authority ≠ Private Data Access
 SH-000 ≠ All SH Owners
 SH-000 ≠ Omniscient System Access
+SH-000 ≠ Account_ID
+SH-000 ≠ SH_ID
 ```
 
 ---
 
 ## 7. ORDINARY_SH
 
-### 7.1 Makna yang Ditargetkan
+### 7.1 Makna Konseptual
 
-`ORDINARY_SH` dimaksudkan sebagai kategori untuk SH yang bukan SH khusus seperti SH-000.
+`ORDINARY_SH` adalah SH instance milik user biasa (bukan Creator), yang secara konseptual dikontraskan dengan `SH-000` dan `CREATOR`.
 
-Namun, apakah seluruh SH non-SH-000 otomatis termasuk `ORDINARY_SH` belum ditetapkan sebagai semantic rule final.
+Ordinary SH tidak memiliki authority untuk mengubah SH Core. Boundary ini tidak berarti bahwa Ordinary SH tidak memiliki seluruh permission pada private domain miliknya; governance authority terhadap Core dan private-data access adalah concern yang berbeda.
 
-### 7.2 Aturan Saat Ini
+### 7.2 Policy Evidence
 
-Sampai definisi final disetujui:
+Permission taxonomy DEV/DEV_old secara eksplisit memuat `ORDINARY_SH` dan memberikan `DENY` untuk operasi `GOVERN` terhadap `SYSTEM_CORE`.
 
-- jangan menganggap semua SH non-SH-000 otomatis `ORDINARY_SH`;
-- jangan membuat actor resolution baru hanya berdasarkan nama actor pada permission matrix;
-- jangan menggunakan `ORDINARY_SH` untuk menggantikan konsep ownership atau Account Owner;
-- jangan menganggap `ORDINARY_SH` sebagai authority level yang lebih rendah tanpa definisi eksplisit.
+Dengan demikian, `ORDINARY_SH` dapat diperlakukan sebagai SH-level designation/category dalam working model ini, dengan boundary governance yang jelas.
 
-### 7.3 Open Decision
+### 7.3 Classification Boundary
 
-Definisi final perlu menjawab:
+Untuk working model ini:
 
-1. Apakah setiap SH biasa selalu merupakan `ORDINARY_SH`?
-2. Apakah `ORDINARY_SH` adalah klasifikasi berdasarkan identity, authority, atau keduanya?
-3. Apakah ada SH lain di masa depan yang bukan SH-000 tetapi juga bukan `ORDINARY_SH`?
-4. Apakah actor `ORDINARY_SH` diperlukan sebagai runtime actor atau hanya sebagai policy category?
+```text
+PRIMARY SH
+    ↓
+SH DESIGNATION
+    ├── SH-000
+    └── ORDINARY_SH
+```
+
+Namun, implementasi final tetap harus memastikan bahwa designation tidak menjadi source of authority yang berdiri sendiri. Authority dan permission tetap harus berasal dari trusted identity/authority resolution dan policy.
+
+### 7.4 Open Decision
+
+Hal-hal berikut masih perlu dikunci sebelum resolver final:
+
+1. Apakah setiap Primary SH milik Account tanpa Creator Authority selalu `ORDINARY_SH`?
+2. Apakah ada kategori SH lain yang secara sah bukan `SH-000` tetapi juga bukan `ORDINARY_SH`?
+3. Apakah `ORDINARY_SH` perlu diekspos sebagai actor dalam resolved session context atau cukup sebagai policy classification?
 
 ---
 
@@ -278,7 +400,7 @@ Menentukan Account dan SH identity yang memang dimiliki / terkait dengan authent
 
 ### 9.3 Actor Classification
 
-Menentukan kategori actor berdasarkan identity dan/atau execution context yang telah dipercaya.
+Menentukan kategori atau designation actor berdasarkan identity dan/atau execution context yang telah dipercaya.
 
 ### 9.4 Authority Resolution
 
@@ -298,7 +420,49 @@ Access boundary dan runtime enforcement menolak operasi yang tidak memenuhi poli
 
 ---
 
-## 10. Pemisahan Source of Truth
+## 10. Resolved Session / Actor Context
+
+Actor resolution tidak hanya dibutuhkan untuk enforcement. Sistem juga perlu memiliki hasil resolution yang eksplisit agar frontend dan user dapat mengetahui context yang sedang aktif tanpa menebak dari UI.
+
+Model konseptual:
+
+```text
+Authenticated Identity
+        ↓
+ACCOUNT
+        ↓
+Ownership + Authority
+        ↓
+PRIMARY SH + SH Designation
+        ↓
+Resolved Session / Actor Context
+        ↓
+User-visible Identity / Capability Status
+```
+
+Contoh konseptual, bukan final UI contract:
+
+```text
+Account: Owner
+Authority: Creator
+Primary SH: SH-000
+```
+
+atau:
+
+```text
+Account: Owner
+Authority: —
+Primary SH: ORDINARY_SH
+```
+
+Informasi tersebut harus berasal dari backend-resolved context, bukan hasil inferensi frontend.
+
+Istilah “login sebagai” perlu dipakai hati-hati agar tidak menyamakan authentication identity, ownership, authority, SH designation, dan runtime context.
+
+---
+
+## 11. Pemisahan Source of Truth
 
 Setiap layer memiliki tanggung jawab berbeda.
 
@@ -306,7 +470,7 @@ Setiap layer memiliki tanggung jawab berbeda.
 |---|---|---|
 | Authentication | Siapa principal yang authenticated? | Authority aplikasi secara langsung |
 | Identity Resolution | Account/SH mana yang terkait? | Permission policy |
-| Actor Classification | Actor ini termasuk kategori apa? | Identity mentah |
+| Actor Classification | Actor/designation ini termasuk kategori apa? | Identity mentah |
 | Authority Resolution | Authority apa yang dimiliki? | UI state |
 | Runtime Context | Siapa yang mengeksekusi proses? | SH identity |
 | Permission Policy | Apa yang boleh dilakukan actor? | Identity resolution |
@@ -314,7 +478,7 @@ Setiap layer memiliki tanggung jawab berbeda.
 
 ---
 
-## 11. Frontend Boundary
+## 12. Frontend Boundary
 
 Frontend tidak boleh menentukan actor berdasarkan tampilan atau asumsi lokal.
 
@@ -327,11 +491,13 @@ creator_ref terisi → otomatis Creator
 runtime flag di client → SYSTEM_RUNTIME
 ```
 
-Frontend harus mengikuti capability / authorization result yang diberikan oleh backend.
+Frontend harus mengikuti resolved identity/actor context dan capability / authorization result yang diberikan oleh backend.
+
+User-visible actor/status harus eksplisit sehingga user dapat mengetahui context yang sedang aktif tanpa perlu menebak.
 
 ---
 
-## 12. Permission Matrix Boundary
+## 13. Permission Matrix Boundary
 
 `permission_matrix.actor` adalah policy taxonomy.
 
@@ -340,7 +506,7 @@ Ia bukan registry identitas dan bukan mekanisme actor resolution.
 Dengan demikian:
 
 ```text
-Actor Resolution
+Actor / Context Resolution
         ↓
 Actor yang terpercaya
         ↓
@@ -359,7 +525,7 @@ Menebak siapa actor-nya
 
 ---
 
-## 13. Security Principles
+## 14. Security Principles
 
 1. Actor tidak boleh ditentukan dari input client yang tidak dipercaya.
 2. Account identity tidak boleh disamakan dengan SH identity.
@@ -371,42 +537,53 @@ Menebak siapa actor-nya
 8. Actor yang tidak dapat di-resolve secara terpercaya harus fail closed.
 9. Permission policy harus tetap terpisah dari identity resolution.
 10. Enforcement harus tetap berjalan di backend.
+11. User-visible actor/status harus berasal dari backend-resolved context, bukan inferensi frontend.
 
 ---
 
-## 14. Status Keputusan
+## 15. Status Keputusan
 
 ### CANONICAL / VALIDATED
 
-- Creator Authority ≠ Private Data Access.
-- SH-000 Core Authority ≠ Private Data Access.
-- Runtime ≠ SH Identity.
-- Account_ID ≠ SH_ID.
-- SH-000 adalah entitas konseptual Canonical yang berhubungan dengan Creator dan memiliki Core Governance Authority dalam boundary yang ditentukan.
+- `1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH`.
+- `Creator Authority ≠ Private Data Access`.
+- `SH-000 Core Authority ≠ Private Data Access`.
+- `Runtime ≠ SH Identity`.
+- `Account_ID ≠ SH_ID`.
+- SH-000 adalah konsep Canonical yang berhubungan dengan Creator's SH dan memiliki special Core Governance Authority dalam boundary yang ditentukan.
+- Ordinary SH tidak memiliki authority untuk mengubah SH Core, sesuai definisi konseptual dan policy evidence yang telah diaudit.
 
 ### CURRENT IMPLEMENTATION EVIDENCE
 
 - `CREATOR` dapat dikenali melalui active Creator authority assignment.
 - `ACCOUNT_OWNER` digunakan sebagai fallback actor untuk account yang telah ter-resolve dan tidak memiliki active Creator assignment.
 - Permission matrix saat ini memuat lima kategori actor.
+- `ORDINARY_SH` memiliki explicit policy `DENY` untuk `GOVERN` terhadap `SYSTEM_CORE`.
 
-### PROPOSED BY THIS ADDENDUM
+### PROPOSED / WORKING MODEL
 
-- Pemisahan formal Identity Resolution → Actor Classification → Authority Resolution → Runtime Context → Permission Policy → Enforcement.
-- `SH-000` memiliki actor classification yang dapat di-resolve dari Creator-associated SH identity setelah mapping teknis disetujui.
-- `SYSTEM_RUNTIME` di-resolve dari trusted execution context, bukan SH identity.
+- Actor taxonomy tidak diperlakukan sebagai lima identity type yang setara.
+- `ACCOUNT_OWNER` diposisikan sebagai ownership role/context pada Account.
+- `CREATOR` diposisikan sebagai authority designation pada Account.
+- `SH-000` diposisikan sebagai designation konseptual pada Creator's Primary SH, bukan Account kedua atau Primary SH kedua.
+- `ORDINARY_SH` diposisikan sebagai SH-level designation/category untuk SH biasa, dengan governance boundary yang sudah terbukti.
+- `SYSTEM_RUNTIME` diposisikan sebagai execution context terpisah.
+- Resolved Session / Actor Context perlu diekspos secara eksplisit ke frontend agar user dapat mengetahui identity/authority/SH context yang aktif.
 
 ### OPEN / UNRESOLVED
 
-- Definisi final `ORDINARY_SH`.
-- Apakah `ORDINARY_SH` merupakan runtime actor atau policy-only category.
-- Technical source of truth untuk Creator-associated SH → `SH-000`.
+- Technical source of truth dan mekanisme final untuk Creator's Primary SH → `SH-000` designation.
+- Apakah `SH-000` designation disimpan atau diturunkan secara deterministic.
+- Apakah setiap non-Creator Primary SH otomatis `ORDINARY_SH`.
+- Apakah ada SH category lain di masa depan yang bukan `SH-000` maupun `ORDINARY_SH`.
+- Apakah `ORDINARY_SH` perlu menjadi runtime actor atau cukup policy classification.
 - Technical source of truth untuk trusted `SYSTEM_RUNTIME` context.
+- Final contract untuk user-visible Resolved Session / Actor Context.
 - Apakah actor taxonomy lima kategori ini final untuk seluruh domain SH atau dapat diperluas melalui addendum berikutnya.
 
 ---
 
-## 15. Implementasi
+## 16. Implementasi
 
 Addendum ini pada tahap draft **tidak mengubah database, permission matrix, actor resolver, frontend, atau runtime enforcement**.
 
@@ -421,7 +598,7 @@ Backend Implementation
         ↓
 Security Harness
         ↓
-Frontend Capability Alignment
+Frontend Capability / Identity Alignment
         ↓
 APK E2E
         ↓
@@ -432,7 +609,7 @@ Tidak ada tahap berikutnya yang dianggap siap apabila prerequisite di atas belum
 
 ---
 
-## 16. Authority & Change Control
+## 17. Authority & Change Control
 
 Dokumen ini berada di folder `docs/canonical` karena dimaksudkan menjadi Canonical Addendum.
 
@@ -444,7 +621,7 @@ Setelah authoritative, dokumen ini menjadi authority tambahan untuk area actor r
 
 ---
 
-## 17. Prinsip Penutup
+## 18. Prinsip Penutup
 
 SECOND HEAD berkembang melalui penambahan semantic layer yang terdokumentasi, bukan melalui perubahan diam-diam terhadap foundation.
 
@@ -457,6 +634,7 @@ Jangan menebak siapa actor-nya.
 Jangan mencampur identity dengan authority.
 Jangan mencampur runtime dengan SH identity.
 Jangan menganggap policy sebagai source of truth identity.
+Jangan membuat identity kedua hanya untuk merepresentasikan SH-000.
 
 Resolve → Classify → Authorize → Evaluate → Enforce.
 ```
