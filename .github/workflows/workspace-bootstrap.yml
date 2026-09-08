@@ -1,12 +1,6 @@
 name: Workspace Bootstrap Smoke
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'devtools/**'
-      - '.github/workflows/workspace-bootstrap.yml'
-      - 'app/pubspec.yaml'
   workflow_dispatch:
 
 permissions:
