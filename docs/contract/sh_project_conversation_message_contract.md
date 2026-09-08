@@ -8,6 +8,8 @@ Dokumen ini menjadi acuan kerja untuk perapihan struktur, UI/UX, service, runtim
 
 Dokumen ini **bukan Canonical** dan tidak mengubah Canonical. Jika terdapat konflik dengan Canonical atau keputusan yang lebih tinggi, Canonical dan authority yang lebih tinggi tetap berlaku.
 
+Dokumen ini telah direkonsiliasi terhadap current `dev` implementation. Capability matrix di bawah membedakan **contract semantics** dari **current implementation evidence**; keberadaan implementation tidak dengan sendirinya mengubah authority contract.
+
 ---
 
 ## 1. Tujuan dan Boundary
@@ -29,7 +31,7 @@ Contract mencakup:
 - behavior utama create, list, rename, move, clear, dan delete;
 - Sidebar dan management surface;
 - boundary frontend ↔ runtime ↔ Supabase;
-- backend capability yang sudah tersedia dan yang masih menjadi gap;
+- backend capability dan current implementation status;
 - UI state dan verification yang wajib dijaga.
 
 Contract ini tidak memperluas scope ke redesign visual SH atau perubahan semantics Journey/Lifecycle.
@@ -55,17 +57,18 @@ Implementation
 Prinsip kerja:
 
 1. Jangan mengubah Canonical melalui contract ini.
-2. Jangan menganggap capability sudah tersedia hanya karena UI dapat dibuat.
+2. Jangan menganggap capability sudah benar secara semantic hanya karena UI atau RPC sudah ada.
 3. Backend contract harus mendukung semantics yang ditampilkan UI.
 4. Mutation data tetap melalui runtime/RPC boundary yang sesuai.
 5. Tidak membuat visual language baru; UI mengikuti design language SH yang sudah ada.
 6. Jika prerequisite atau backend capability belum tersedia, implementation tidak boleh menganggapnya selesai.
+7. Current implementation evidence harus direkonsiliasi kembali bila contract berubah.
 
 ---
 
 ## 3. Model Relasi
 
-Relasi yang menjadi dasar scope:
+Relasi yang menjadi dasar scope current DEV:
 
 ```text
 accounts
@@ -129,13 +132,11 @@ Management surface menyediakan pengelolaan penuh.
 
 ### 4.2 Delete Project
 
-Untuk tahap ini, **UX Delete Project disiapkan terlebih dahulu**. Backend execution belum menjadi bagian dari implementation sampai backend contract disepakati dan tersedia.
+Delete Project merupakan destructive capability yang harus memiliki confirmation, backend authorization, dan explicit transaction semantics.
 
-UX harus menyediakan confirmation yang jelas sebelum destructive action.
+Current DEV sudah memiliki runtime path `runtime_delete_project`; current frontend juga sudah memanggil capability tersebut. Namun keberadaan path tersebut **bukan** pengganti authenticated semantic verification.
 
-Jika semantics final menyatakan bahwa penghapusan Project menghapus Conversation yang masih berada di dalamnya, maka Messages yang menjadi child Conversation ikut terhapus melalui lifecycle Conversation.
-
-Namun, semantics tersebut **tidak boleh diasumsikan sebagai behavior database saat ini**. Implementasi backend harus dibuat eksplisit dan transactional ketika capability tersebut masuk execution scope.
+Jika semantics final menyatakan bahwa penghapusan Project menghapus Conversation yang masih berada di dalamnya, maka Messages yang menjadi child Conversation ikut terhapus melalui lifecycle Conversation. Semantics tersebut harus tetap dibuktikan dari current backend implementation dan verification.
 
 ---
 
@@ -177,7 +178,7 @@ Child messages ikut terhapus
 
 Untuk hierarchy baru, execution path yang menjadi target adalah deletion pada `conversation_threads`, bukan legacy deletion pada `conversations`.
 
-Runtime capability yang sudah tersedia untuk target ini adalah:
+Runtime capability current DEV:
 
 `runtime_delete_conversation_thread`
 
@@ -241,7 +242,7 @@ ProjectConversationManagementView
     └── Delete
 ```
 
-Search harus menggunakan pattern/design search SH yang sudah ada. Tidak membuat visual language search baru.
+Current DEV memang memiliki `ProjectConversationManagementView` dengan operation tersebut. Search saat ini adalah local filtering terhadap loaded Project/Conversation summaries; ini bukan bukti backend search capability terpisah.
 
 Management surface wajib mengikuti visual language dan interaction pattern SH yang sudah berjalan.
 
@@ -279,45 +280,18 @@ Logic CRUD dan management yang lebih kompleks tidak ditempatkan seluruhnya di `S
 
 ## 9. Feature / Folder Boundary
 
-Struktur target:
+Current implementation menggunakan:
 
 ```text
 features/
-│
 ├── conversation/
-│   ├── conversation_view.dart
-│   ├── conversation_service.dart
-│   ├── conversation_runtime_bridge.dart
-│   └── widgets/
-│
 ├── project_conversation/
-│   ├── project_conversation_management_view.dart
-│   └── widgets/
-│       ├── project_section.dart
-│       ├── project_item.dart
-│       ├── conversation_section.dart
-│       └── conversation_item.dart
-│
 ├── chat/
-│   └── ...
-│
 ├── journey/
-│   └── ...
-│
 ├── lifecycle/
-│   └── ...
-│
 ├── profile/
-│   └── ...
-│
 ├── more/
-│   ├── side_menu.dart
-│   ├── more_widgets.dart
-│   ├── about/
-│   └── help_support/
-│
 └── auth/
-    └── ...
 ```
 
 Boundary utama:
@@ -349,40 +323,39 @@ Database
 
 `ConversationRuntimeBridge` tetap menjadi adapter yang mendelegasikan capability ke service yang ada.
 
+Current Flutter evidence menunjukkan `ConversationService` memanggil RPC untuk list/create/rename/delete Project, create/list/select/rename/delete Conversation, move/remove Conversation, load/record/update/delete Message, dan context loading.
+
 Refactor tidak boleh mengubah semantics hanya untuk merapikan folder.
 
 Model existing yang saat ini diekspos melalui `conversation_service.dart` dapat dipertahankan sementara. Pemindahan model ke file/layer lain hanya dilakukan bila dibutuhkan untuk boundary yang lebih jelas.
 
 ---
 
-## 11. Backend Capability Matrix
+## 11. Backend Capability Matrix — Reconciled
 
-### Sudah tersedia
+| Capability | Current runtime path | Current FE consumer | Current status |
+|---|---|---|---|
+| Create Project | `runtime_create_project` | `ConversationService` | CURRENT / implemented |
+| List Project | `runtime_list_projects` | `ConversationService` | CURRENT / implemented |
+| Rename Project | `runtime_rename_project` | `ConversationService` | CURRENT / implemented |
+| Delete Project | `runtime_delete_project` | `ConversationService` | CURRENT / implemented; semantic verification required |
+| Create Conversation | `runtime_create_conversation` | `ConversationService` | CURRENT / implemented |
+| List Conversation | `runtime_list_conversations` | `ConversationService` | CURRENT / implemented |
+| Rename Conversation | `runtime_rename_conversation_thread` | `ConversationService` | CURRENT / implemented |
+| Delete Conversation | `runtime_delete_conversation_thread` | `ConversationService` | CURRENT / implemented |
+| Move Conversation | `runtime_assign_conversation_project` | `ConversationService` | CURRENT / implemented |
+| Remove from Project | `runtime_assign_conversation_project` with null project | `ConversationService` | CURRENT / implemented |
+| Load Messages | `runtime_load_conversation_messages` | `ConversationService` | CURRENT / implemented |
+| Record Message | `runtime_record_conversation_message` | `ConversationService` | CURRENT / implemented |
+| Update Message | `runtime_update_conversation_message_v2` | `ConversationService` | CURRENT / implemented |
+| Delete Message | `runtime_delete_conversation_message_v2` | `ConversationService` | CURRENT / implemented |
+| Load Context | `runtime_load_conversation_context_for_thread` | `ConversationService` | CURRENT / implemented |
 
-| Capability | Runtime | Status |
-|---|---|---|
-| Create Project | `runtime_create_project` | Ada |
-| List Project | `runtime_list_projects` | Ada |
-| Create Conversation | `runtime_create_conversation` | Ada |
-| List Conversation | `runtime_list_conversations` | Ada |
-| Rename Conversation | `runtime_rename_conversation_thread` | Ada |
-| Delete Conversation | `runtime_delete_conversation_thread` | Ada |
-| Delete Message | `runtime_delete_conversation_message_v2` | Ada |
-
-### Masih menjadi backend gap
-
-| Capability | Target | Status |
-|---|---|---|
-| Rename Project | `runtime_rename_project` atau contract equivalent | Belum tersedia |
-| Delete Project | `runtime_delete_project` atau contract equivalent | Belum tersedia |
-| Move Conversation | runtime capability yang mendukung assignment | Belum tersedia |
-| Remove from Project | assignment ke `project_id = NULL` | Belum tersedia |
-
-Nama RPC final untuk capability yang belum tersedia **belum dikunci** oleh contract ini. Yang dikunci adalah capability dan semantics-nya.
+**Important:** `CURRENT / implemented` means the runtime path and FE consumer are present in current DEV. It does **not** mean authenticated adversarial verification, complete AI integration, or final semantic DoD has already passed.
 
 ---
 
-## 12. Database Constraint yang Harus Diperhatikan
+## 12. Database Constraint
 
 Current relationship:
 
@@ -392,19 +365,9 @@ conversation_threads.project_id
 projects.project_id
 ```
 
-saat ini menggunakan:
+Current hierarchy must be interpreted together with current migrations/backend implementation. Existing FK behavior alone is not sufficient evidence for complete Delete Project semantics.
 
-`ON DELETE SET NULL`
-
-Dengan demikian, direct database deletion terhadap Project saat ini tidak memenuhi semantics Delete Project yang menghapus Conversation di dalamnya.
-
-Karena itu:
-
-- jangan mengandalkan FK existing untuk Delete Project;
-- jangan mengimplementasikan destructive behavior di client;
-- backend deletion harus memiliki explicit contract dan transaction boundary ketika execution dimulai.
-
-Conversation deletion menggunakan hierarchy baru:
+Conversation deletion uses hierarchy baru:
 
 ```text
 conversation_threads
@@ -412,7 +375,7 @@ conversation_threads
 conversations
 ```
 
-Ini sesuai dengan lifecycle Delete Conversation yang menjadi target contract.
+Target deletion path remains `runtime_delete_conversation_thread`.
 
 ---
 
@@ -448,7 +411,7 @@ Empty state dan error state harus tersedia untuk list dan management surface ses
 
 ## 14. Verification Contract
 
-Implementation scope ini belum dianggap selesai hanya karena UI tampil.
+Implementation scope ini belum dianggap selesai hanya karena UI tampil atau RPC tersedia.
 
 Minimum verification:
 
@@ -457,9 +420,10 @@ Minimum verification:
 - Create
 - List
 - Rename
-- Delete UX
+- Delete
 - Empty Project
 - Project dengan Conversation
+- destructive behavior dan authorization
 
 ### Conversation
 
@@ -489,6 +453,13 @@ Minimum verification:
 - Loading/error state
 - Backend failure tidak menghasilkan false success
 
+### Security / isolation
+
+- Account A own resources → ALLOW
+- Account A → Account B resources → DENY
+- spoofed identity → DENY
+- unauthenticated protected mutation → DENY
+
 ### Regression
 
 - Google Login tetap menjadi regression item terpisah.
@@ -505,27 +476,28 @@ Scope ini hanya dapat dinyatakan selesai jika:
 2. Sidebar tidak lagi menjadi pusat seluruh management logic.
 3. Management surface menggunakan visual language SH yang sudah ada.
 4. Conversation dapat dikelola dengan dan tanpa Project.
-5. Move dan Remove from Project memiliki backend capability yang benar sebelum diaktifkan penuh.
+5. Move dan Remove from Project menggunakan backend capability yang benar dan terverifikasi.
 6. Delete Conversation menggunakan hierarchy/thread deletion yang benar.
-7. Delete Project tidak dieksekusi sebelum backend semantics tersedia dan diverifikasi.
+7. Delete Project memiliki backend semantics yang eksplisit dan terverifikasi.
 8. Clear tidak disamakan dengan Delete.
 9. Semua mutation melewati runtime/backend boundary yang sesuai.
-10. Verification mencakup behavior, error, state, dan regression yang relevan.
+10. Verification mencakup behavior, error, state, security isolation, dan regression yang relevan.
+11. Dynamic AI response/runtime integration dibedakan dari conversation persistence/UI implementation.
 
 ---
 
 ## 16. Open Items / Tidak Boleh Dianggap Selesai
 
-Item berikut tetap terbuka dan tidak boleh diam-diam dianggap solved:
+Item berikut tetap terbuka:
 
-- Project Rename backend capability.
-- Project Delete backend capability dan exact transaction semantics.
-- Conversation Move backend capability.
-- Remove Conversation from Project backend capability.
-- Final validation terhadap Clear behavior.
-- Management search integration.
-- Full Sidebar responsibility refactor.
-- Google Login regression audit.
+- authenticated adversarial verification untuk seluruh Project/Conversation/Message mutation;
+- final validation terhadap Delete Project transaction semantics;
+- final validation terhadap Clear behavior;
+- dynamic AI conversation runtime/model integration;
+- full Sidebar responsibility reconciliation;
+- Google Login regression audit;
+- full offline synchronization/conflict behavior;
+- final Conversation contract closure terhadap broader SH continuity/AI semantics.
 
 Open item berarti **belum ready untuk execution penuh**, bukan alasan untuk membuat workaround yang mengubah semantics.
 
@@ -538,13 +510,11 @@ Urutan kerja yang mengikuti contract ini:
 ```text
 Contract
    ↓
-Folder / Responsibility
+Current backend/runtime evidence
    ↓
-Backend Gap
+Verification / confirmed gaps
    ↓
-Management UI
-   ↓
-Service / Bridge Integration
+Management UI / FE integration
    ↓
 End-to-End Verification
    ↓
