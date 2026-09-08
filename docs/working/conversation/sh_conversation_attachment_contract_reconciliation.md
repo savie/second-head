@@ -2,7 +2,7 @@
 
 ## Status
 
-**RECONCILIATION COMPLETE — PROMOTED TO APPROVED CONTRACT**
+**RECONCILIATION COMPLETE — APPROVED CONTRACT + IMPLEMENTATION CHECKPOINT UPDATED**
 
 Dokumen ini adalah working reconciliation record untuk domain Conversation → Message → Attachment.
 
@@ -143,37 +143,36 @@ Conversation Delete mengikuti semantics yang sama setelah child Messages dihapus
 
 ---
 
-## 4. Recovery Reconciliation
+## 4. Recovery Reconciliation — CURRENT CHECKPOINT
 
-Current DEV Recovery sudah menangkap dan restore Conversation Messages, tetapi belum menangani attachment persistence/reconstruction.
+Current DEV Recovery **sudah menangkap dan restore** Conversation Messages dengan explicit attachment relationship support.
 
-Final target:
+Current resources:
+
+```text
+public.conversation_attachments
+public.conversation_attachment_recovery_refs
+```
+
+Current target/implementation path:
 
 ```text
 Recovery Snapshot
    ↓
 Message
    ↓
-Attachment reference / descriptor
+persisted attachment descriptor/reference
    ↓
-Durable Storage Object
+conversation_attachment_recovery_refs
+   ↓
+existing durable Attachment / Storage Object
 ```
 
-Recovery Snapshot dapat menjadi retention dependency yang sah.
+Restore hanya mereconnect attachment relationship jika durable attachment resource, Storage Object, dan target Message dependency tersedia. Missing dependency dihitung sebagai recovery gap dan tidak boleh diklaim sebagai successful attachment recovery.
 
-Karena itu:
+Binary object tidak di-embed ke JSON manifest; Recovery mempertahankan descriptor/reference yang diperlukan untuk reconstruction dan retention.
 
-```text
-Message lifecycle
-        ≠
-Storage Object retention lifecycle
-```
-
-Jika Message aktif dihapus tetapi Recovery masih membutuhkan attachment, Storage Object dipertahankan.
-
-Restore harus dapat mereconstruct Message + Attachment tanpa local filesystem path lama.
-
-Jika durable Storage Object tidak tersedia saat restore, sistem harus menghasilkan explicit recovery gap/error dan tidak boleh mengklaim attachment recovered.
+**Status: BACKEND IMPLEMENTATION PRESENT / SEMANTIC + E2E VERIFICATION OPEN.**
 
 ---
 
@@ -195,12 +194,16 @@ Attachment Resource tanpa Message dan tanpa dependency sah
 
 Karena Storage upload dan PostgreSQL transaction tidak atomic, implementation harus menangani failure window antara object upload, descriptor persistence, dan Message association.
 
+Current implementation sudah menyediakan PENDING / PERSISTED / FAILED resource lifecycle dan mempertahankan attachment identity untuk retry. Yang belum boleh dianggap PASS tanpa verification adalah full cleanup/reconciliation behavior untuk orphan object/resource dan ambiguous failure windows.
+
 Required outcome:
 
 - failed upload tidak menjadi durable success;
 - database failure setelah upload mempunyai cleanup path;
 - retry idempotent terhadap logical attachment;
 - orphan object/resource dapat direkonsiliasi dan dibersihkan secara aman.
+
+**Status: IMPLEMENTATION PRESENT / CLEANUP VERIFICATION OPEN.**
 
 ---
 
@@ -240,46 +243,91 @@ Unauthenticated             DENY
 
 Filename, local path, UI state, storage reference, atau attachment ID saja bukan authority source.
 
-Exact Storage policy/bucket/path belum ditetapkan pada reconciliation karena itu adalah Migration Design concern.
+Current migration already applies private Storage bucket and trusted attachment RPC boundary. Full authenticated semantic harness tetap harus dijalankan untuk membuktikan isolation aktual.
+
+**Status: DESIGN/IMPLEMENTATION PRESENT / SEMANTIC VERIFICATION OPEN.**
 
 ---
 
-## 8. Current Implementation Gaps Carried Forward
+## 8. Current Implementation Reconciliation
 
-Reconciliation final **tidak berarti implementation sudah selesai**.
+Attachment implementation saat ini sudah tersedia pada BE dan FE.
 
-Confirmed gaps yang tetap ada:
+### Backend
 
-- backend attachment persistence belum ada;
-- backend Message → Attachment reconstruction belum ada;
-- current FE attachment representation masih local-path based;
-- Recovery attachment persistence/reconstruction belum ada;
-- Recovery snapshot cleanup/retention runtime saat ini belum lengkap;
-- current attachment upload/retry/orphan handling belum diimplementasikan;
-- current attachment security boundary belum tersedia karena backend attachment resource/storage belum ada.
+```text
+public.conversation_attachments
+public.conversation_attachment_recovery_refs
+private bucket: second-head-conversation
+trusted create/finalize/fail/load/detach RPC boundary
+```
 
-Current DEV juga belum memiliki active attachment Storage bucket pada checkpoint audit.
+Migration yang sudah applied di DEV:
 
-DEV saat ini memiliki 29 public tables; tidak ada dedicated attachment resource table pada baseline audit tersebut.
+```text
+20260908113655_conversation_attachments
+20260908120543_revoke_conversation_attachment_truncate
+```
+
+### Frontend
+
+```text
+ConversationView
+      ↓
+ConversationRuntimeBridge
+      ↓
+ConversationService
+      ↓
+ConversationAttachmentService
+      ↓
+Supabase RPC / Storage
+```
+
+Current FE sudah mencakup local cache, durable attachment creation/upload/finalize, persisted attachment hydration saat reload, download fallback, failed-state retry, dan descriptor serialization.
+
+**Status: IMPLEMENTED / BACKEND + FE WIRED.**
+
+Implementation presence bukan E2E PASS. Verification tetap mencakup upload, reload, retry, isolation, delete/cleanup, recovery, dan APK behavior.
 
 ---
 
 ## 9. Migration Design Gate
 
-Attachment migration/design **baru boleh dimulai setelah contract ini locked**, dan sekarang condition tersebut terpenuhi.
+Attachment migration/design **sudah frozen/locked dan sudah dieksekusi di DEV**.
 
-Migration Design berikutnya wajib merekonsiliasi:
+Design authority:
 
-1. backend Attachment Resource schema;
-2. Message ↔ Attachment relationship;
-3. private durable Storage bucket/object boundary;
-4. upload/idempotency flow;
-5. orphan cleanup/reconciliation;
-6. Message/Conversation delete behavior;
-7. Recovery snapshot representation;
-8. Recovery restore/reconstruction;
-9. RLS/authorization boundary;
-10. FE model/adapter reconstruction;
-11. verification harness.
+`docs/working/conversation/sh_conversation_attachment_migration_design.md`
 
-Tidak ada migration atau implementation attachment yang dilakukan dalam reconciliation step ini.
+Execution checkpoint saat ini:
+
+```text
+Migration/schema          IMPLEMENTED
+Private storage boundary  IMPLEMENTED
+RPC boundary              IMPLEMENTED
+Recovery relationship     IMPLEMENTED
+FE integration            IMPLEMENTED
+Semantic verification     OPEN
+Authenticated E2E         OPEN
+```
+
+Tidak ada migration/schema alternatif yang boleh dibuat tanpa conflict evidence atau perubahan authority.
+
+---
+
+## 10. Verification Queue
+
+Remaining verification:
+
+1. authenticated upload → persisted;
+2. reload/reopen → attachment reconstructed;
+3. private storage download dengan identity yang benar;
+4. failed/ambiguous upload → retry memakai attachment identity yang sama;
+5. wrong Account/SH access denied;
+6. Message Delete / Conversation Delete → active relationship removal dan cleanup/retention behavior;
+7. Clear → tidak ada destructive attachment mutation;
+8. recovery snapshot → restore relationship/object dependency;
+9. missing object/resource → explicit recovery gap;
+10. real APK E2E.
+
+**Overall attachment status: IMPLEMENTED / CONTRACT PASS / VERIFICATION OPEN.**
