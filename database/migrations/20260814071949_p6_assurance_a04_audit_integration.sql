@@ -1,0 +1,2 @@
+-- ⑥A-04 uses the existing runtime_record_audit() RPC and audit_events schema.
+-- No schema mutation is required for this integration fix.

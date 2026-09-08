@@ -1,0 +1,15 @@
+revoke execute on function public.get_experience(uuid) from anon;
+revoke execute on function public.list_experiences(uuid, integer) from anon;
+revoke execute on function public.runtime_record_experience(uuid, text, text, text, text, text, jsonb, timestamptz) from anon;
+revoke execute on function public.runtime_record_memory(uuid, text, text, text, numeric, text, text, text) from anon;
+revoke execute on function public.runtime_record_knowledge_candidate(uuid, text, text, text, jsonb, text, text, numeric) from anon;
+revoke execute on function public.runtime_create_recovery_snapshot(uuid) from anon;
+revoke execute on function public.runtime_restore_recovery_snapshot(uuid) from anon;
+revoke execute on function public.runtime_materialize_registered_clone() from anon;
+revoke execute on function public.runtime_record_inheritance(uuid, jsonb, jsonb) from anon;
+revoke execute on function public.runtime_preserve_selected_journey_as_legacy(uuid, uuid[]) from anon;
+revoke execute on function public.runtime_preserve_selected_transfer_as_legacy(uuid, jsonb) from anon;
+revoke execute on function public.runtime_record_legacy(uuid, text, jsonb, jsonb, timestamptz) from anon;
+revoke execute on function public.runtime_execute_succession(uuid) from anon;
+revoke execute on function public.runtime_end_of_life_sh(uuid, text) from anon;
+revoke execute on function public.runtime_transfer_selected_journey_events(text, uuid, uuid, uuid[]) from anon;

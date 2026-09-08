@@ -1,0 +1,17 @@
+REVOKE EXECUTE ON FUNCTION public.runtime_assign_conversation_project(uuid, uuid) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_create_conversation(uuid, text) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_create_project(text) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_delete_conversation_message_v2(uuid) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_delete_conversation_thread(uuid) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_delete_project(uuid) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_get_sh_state(uuid) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_list_conversations() FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_list_projects() FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_load_conversation(integer) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_load_conversation_context_for_thread(uuid, integer) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_load_conversation_messages(uuid, integer) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_mutate_sh_state(uuid, bigint, jsonb) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_record_conversation_message(uuid, text, text, jsonb) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_rename_conversation_thread(uuid, text) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_rename_project(uuid, text) FROM anon, public;
+REVOKE EXECUTE ON FUNCTION public.runtime_update_conversation_message_v2(uuid, text, text) FROM anon, public;
