@@ -1,0 +1,44 @@
+name: Workspace Bootstrap Smoke
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap-full:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout bootstrap source
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: bootstrap-source
+
+      - name: Run FULL bootstrap in isolated HOME
+        env:
+          HOME: ${{ runner.temp }}/sh-home
+        run: |
+          rm -rf "$HOME"
+          mkdir -p "$HOME"
+          bash "$GITHUB_WORKSPACE/bootstrap-source/devtools/bootstrap.sh" \
+            --profile FULL \
+            --repo-dir "$HOME/second-head"
+
+      - name: Verify bootstrap result
+        env:
+          HOME: ${{ runner.temp }}/sh-home
+        run: |
+          test -x "$HOME/second-head/app/.dart_tool/package_config.json" || true
+          test -x "$HOME/.second-head/toolchain/flutter/bin/flutter"
+          test -x "$HOME/.second-head/android-sdk/platform-tools/adb"
+          command -v supabase
+          command -v psql
+          git -C "$HOME/second-head" branch --show-current
+          test "$(git -C "$HOME/second-head" branch --show-current)" = "dev"
+          test -z "$(git -C "$HOME/second-head" status --porcelain)"
+          test -f "$HOME/.second-head/env.sh"
