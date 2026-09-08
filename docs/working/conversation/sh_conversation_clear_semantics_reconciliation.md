@@ -202,7 +202,7 @@ UI tidak harus selalu menampilkan detail internal, tetapi behavior tidak boleh m
 
 ## 8. Attachment Consequence
 
-Dengan Hybrid Attachment Model yang sudah menjadi Owner Decision:
+Approved attachment contract dan current DEV implementation sama-sama menegaskan bahwa attachment durable memiliki resource/storage boundary sendiri:
 
 ```text
 Local attachment
@@ -210,6 +210,14 @@ Local attachment
 
 Backend attachment
 → durable source of truth
+```
+
+Current DEV sudah memiliki:
+
+```text
+public.conversation_attachments
+public.conversation_attachment_recovery_refs
+private bucket: second-head-conversation
 ```
 
 Maka temporary Clear harus berperilaku:
@@ -228,13 +236,13 @@ Recovery state tidak dihapus
 
 Jadi:
 
-**Clear tidak boleh menjadi trigger attachment deletion.**
+**Clear tidak boleh menjadi trigger attachment deletion, detach, atau storage cleanup.**
 
 ---
 
 ## 9. Recovery Consequence
 
-Current Recovery menyimpan Message state dan dapat restore Conversation + Message.
+Current Recovery backend **sudah memiliki attachment relationship support** melalui persisted attachment descriptors dan `conversation_attachment_recovery_refs`. Restore dapat mereconnect relationship hanya jika durable attachment resource, storage object, dan target Message dependency tersedia.
 
 Jika Clear hanya temporary:
 
@@ -246,7 +254,9 @@ Recovery snapshot tetap tidak berubah
 
 Recovery tidak perlu membuat snapshot baru hanya karena user melakukan Clear, kecuali contract Recovery berikutnya secara eksplisit menentukan demikian.
 
-Attachment Recovery tetap merupakan dependency terpisah yang saat ini belum tersedia.
+Missing attachment dependency tetap harus dilaporkan sebagai recovery gap dan tidak boleh dianggap silently restored.
+
+**Status: IMPLEMENTATION PRESENT / SEMANTIC VERIFICATION OPEN.**
 
 ---
 
@@ -255,10 +265,10 @@ Attachment Recovery tetap merupakan dependency terpisah yang saat ini belum ters
 | Operation | Conversation | Message | Attachment | Recovery snapshot |
 |---|---|---|---|---|
 | Clear candidate | tetap | tetap durable, tidak ditampilkan sementara | tetap | tetap |
-| Delete Message | tetap | dihapus | lifecycle terpisah; tidak otomatis hard-delete | snapshot existing tetap historical |
-| Delete Conversation | dihapus | child ikut deletion | lifecycle terpisah; policy wajib ditentukan | existing snapshot tetap historical |
+| Delete Message | tetap | dihapus | active relationship dihapus; Storage Object mengikuti retention dependency | snapshot existing tetap historical |
+| Delete Conversation | dihapus | child ikut deletion | active relationships dihapus; Storage Object tidak blind-delete bila masih diperlukan Recovery | existing snapshot tetap historical |
 
-Matrix ini adalah reconciliation model. Detail attachment retention/deletion masih open.
+Matrix ini adalah reconciliation model. Detail attachment cleanup/retention runtime tetap merupakan verification gap, bukan alasan untuk menjadikan Clear destructive.
 
 ---
 
@@ -324,9 +334,9 @@ Clear hanya mengubah presentation/session state. Ia tidak mengubah ownership, ac
 
 - **Current FE Clear implementation masih destructive:** Clear memanggil delete Message untuk setiap Message yang memiliki runtimeRecordId.
 - Backend belum memiliki dedicated Clear operation/presentation-state capability.
-- Attachment persistence/reconstruction belum tersedia.
-- Attachment Recovery belum tersedia.
-- Attachment deletion/retention lifecycle belum tersedia.
+- Attachment backend persistence/reconstruction **sudah implemented**; verification/E2E masih open.
+- Attachment Recovery relationship **sudah implemented**; authenticated recovery/E2E masih open.
+- Attachment deletion/retention runtime dan cleanup semantics masih memerlukan verification.
 
 ### OPEN OWNER DECISIONS
 
@@ -370,6 +380,10 @@ Parent working document:
 Attachment reconciliation:
 
 `docs/working/conversation/sh_conversation_attachment_contract_reconciliation.md`
+
+Attachment migration design:
+
+`docs/working/conversation/sh_conversation_attachment_migration_design.md`
 
 Approved contract:
 
