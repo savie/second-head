@@ -253,7 +253,8 @@ class ConversationViewState extends State<ConversationView> {
     try {
       final user = await _runtime.recordUser(text);
       if (!mounted) return;
-      setState(() => _messages.add(_messageFromBackend(user)));
+      final userMessage = await _messageFromBackend(user);
+      setState(() => _messages.add(userMessage));
       await _persistConversation();
       _processFrontendSemantic(text);
       _scrollToLatest();
@@ -265,8 +266,9 @@ class ConversationViewState extends State<ConversationView> {
           'Got it. SH menerima pesan ini dan jalur respons aktif. Respons dinamis akan terhubung ke model AI nanti.';
       final assistant = await _runtime.recordAssistant(reply);
       if (!mounted) return;
+      final assistantMessage = await _messageFromBackend(assistant);
       setState(() {
-        _messages.add(_messageFromBackend(assistant));
+        _messages.add(assistantMessage);
         _staticReplyPending = false;
         _conversationStatus = 'Ready';
       });
