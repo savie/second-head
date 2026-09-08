@@ -297,7 +297,7 @@ FE memiliki picker/camera/gallery/file/preview/local attachment interaction. Bel
 | Lifecycle / EOL | Backend lineage exists | Current lifecycle/EOL surfaces | BE ↔ FE | OPEN |
 | Clone | DEV schema/runtime lineage | Current surface | BE ↔ FE | OPEN |
 | Inheritance | DEV schema/runtime lineage | Current surface | BE ↔ FE | OPEN |
-| Succession | DEV schema/runtime lineage | Current surface | BE ↔ FE | SECURITY/SEMANTIC OPEN |
+| Succession | DEV schema/runtime lineage | Current surface | BE ↔ FE | SECURITY / SEMANTIC OPEN |
 | Recovery | Recovery events/integration | Current recovery surface | BE ↔ FE | OPEN |
 | Governance / Runtime | Boundary functions + runtime RPCs | Runtime-dependent consumers | BE ↔ FE | SECURITY VERIFICATION IN PROGRESS |
 | Tools / External | Google/task/external lineage | Representative UI/integration | BE ↔ FE | PARTIAL / OPEN |
@@ -306,7 +306,7 @@ FE memiliki picker/camera/gallery/file/preview/local attachment interaction. Bel
 
 # 7. DOCUMENT DRIFT REGISTER — UPDATED
 
-Reconciliation document drift yang **sudah diperbaiki pada checkpoint ini**:
+Reconciliation document drift yang **sudah diperbaiki pada checkpoint sebelumnya**:
 
 | Document | Drift | Disposition |
 |---|---|---|
@@ -314,15 +314,15 @@ Reconciliation document drift yang **sudah diperbaiki pada checkpoint ini**:
 | `docs/contract/sh_backend_frontend_reconciliation_status.md` | FE integration masih berstatus `PENDING` walau current integration sudah ada | **REVISED / RECONCILED** |
 | `docs/canonical/sh_supabase_map.md` | Map belum mencerminkan Project/Conversation/SH State dan migration reconstruction current | **REFERENCE MAP REVISED; SEMANTIC CANONICAL UNCHANGED** |
 
-Dokumen di atas **tidak lagi diperlakukan sebagai stale pada poin-poin tersebut**.
+Dokumen di atas tidak lagi diperlakukan sebagai stale pada poin-poin tersebut.
 
-Masih perlu audit/reconciliation berikutnya bila current source menunjukkan drift baru. Jangan menganggap dokumen lain stale hanya berdasarkan umur; gunakan pola current source → evidence → classify → revise only what is justified.
+Gunakan pola **current source → evidence → classify → revise only what is justified → verify SHA/content** untuk drift berikutnya. Jangan menganggap dokumen lain stale hanya berdasarkan umur.
 
 ---
 
 # 8. SECURITY HARNESS / BACKEND GATE
 
-Security harness Step 7 **belum PASS final**.
+## 8.1 Existing security verification
 
 Yang sudah diverifikasi pada checkpoint sebelumnya:
 
@@ -332,23 +332,64 @@ Yang sudah diverifikasi pada checkpoint sebelumnya:
 - unchecked primitive isolation;
 - sebagian besar public runtime functions menggunakan trusted identity boundary.
 
-Confirmed open target:
+## 8.2 Succession wrapper audit — CLOSED AS CODE GAP
+
+Audit current Supabase DEV terhadap:
 
 ```text
-runtime_validate_selected_transfer_scope()
-        ↓
-succession_rules semantics
-        ↓
 runtime_execute_succession()
         ↓
-wrapper / trusted identity / ownership boundary
+runtime_validate_selected_transfer_scope()
         ↓
-GAP atau NO-CODE-GAP determination
+runtime_execute_succession_unchecked()
 ```
 
-`runtime_execute_succession(uuid)` masih merupakan wrapper yang harus diaudit karena authenticated EXECUTE tersedia sementara penggunaan resolver trusted identity tidak terlihat langsung pada wrapper.
+menghasilkan **NO CONFIRMED CODE GAP pada wrapper/validation security boundary**.
 
-Jangan menyatakan Step 7 PASS sebelum target di atas selesai diverifikasi.
+Evidence current:
+
+- `runtime_execute_succession(uuid)` adalah `SECURITY DEFINER`, owner `postgres`, `search_path=public`, dan authenticated EXECUTE tersedia;
+- wrapper hanya menerima succession rule yang `ACTIVE`;
+- wrapper memanggil `runtime_validate_selected_transfer_scope(..., 'succession')` sebelum primitive execution;
+- validator memastikan source SH untuk SUCCESSION berada pada status end-of-life dan memvalidasi ownership + `transfer_policy` untuk selected Memory / Knowledge / Experience;
+- `runtime_execute_succession_unchecked(uuid)` tidak memiliki EXECUTE untuk `anon` maupun `authenticated`; hanya service role;
+- primitive tetap memeriksa `auth.uid()`, active rule, source EOL, `successor_account_id = current_account_id()`, dan active successor PRIMARY SH;
+- `current_account_id()` menyelesaikan Account melalui `account_auth_links` berdasarkan `auth.uid()`, bukan client-supplied Account ID.
+
+**Classification:**
+
+```text
+runtime_execute_succession wrapper
+→ CURRENT IMPLEMENTATION
+→ SECURITY BOUNDARY PRESERVED
+
+runtime_validate_selected_transfer_scope
+→ TRUSTED VALIDATION LAYER
+
+runtime_execute_succession_unchecked
+→ PRIVILEGED INTERNAL PRIMITIVE
+→ AUTHENTICATED / ANON ISOLATED
+
+Confirmed code gap
+→ NO
+```
+
+## 8.3 Remaining succession verification
+
+Step 7 belum boleh dinyatakan **PASS final**. Yang tersisa bukan confirmed wrapper code gap, melainkan **semantic / positive-negative execution verification**.
+
+Current DEV tidak memiliki active `succession_rules` pada audit checkpoint ini, sehingga positive destructive succession execution belum dijalankan. Karena itu masih perlu membuktikan secara harness:
+
+- valid active succession → ALLOW;
+- wrong successor Account → DENY;
+- non-EOL source → DENY;
+- selected resource bukan milik source SH → DENY;
+- selected resource tidak eligible untuk `SUCCESSION` → DENY;
+- invalid/empty selection → DENY;
+- privileged unchecked primitive tetap tidak callable oleh authenticated/anon;
+- successful execution menghasilkan `succession_events` dan consumes the rule sesuai semantics yang telah ditetapkan.
+
+**Current classification:** `NO-CODE-GAP / SEMANTIC-E2E OPEN`.
 
 ---
 
@@ -400,12 +441,10 @@ Clone integration
 
 # 10. NEXT RECONCILIATION TARGET
 
-Setelah documentation drift pass ini, next target bukan mengulang dokumen yang sudah direvisi.
-
-Prioritas berikut:
+Setelah succession wrapper audit ini, prioritas berikutnya:
 
 ```text
-1. Security Harness Step 7 — succession wrapper / validation boundary
+1. Succession semantic / positive-negative harness
 2. Conversation adapter audit — update/delete message parameter contract
 3. Memory / Knowledge / Experience / Journey semantic BE ↔ FE reconciliation
 4. Lifecycle / EOL backend ↔ FE semantic reconciliation
@@ -414,4 +453,4 @@ Prioritas berikut:
 7. APK E2E after backend + contract gates
 ```
 
-**Current checkpoint conclusion:** documentation drift yang terbukti pada tiga dokumen di atas sudah direkonsiliasi. Living inventory sekarang harus dipakai sebagai index kerja terbaru, tetapi **belum menjadi declaration bahwa seluruh SH Core/domain implementation selesai**.
+**Current checkpoint conclusion:** documentation drift yang terbukti telah direkonsiliasi; succession wrapper/validation security audit menghasilkan **NO CONFIRMED CODE GAP**. Step 7 tetap OPEN hanya pada semantic/E2E verification succession, bukan karena wrapper security defect. Living inventory ini tetap merupakan index kerja dan **bukan declaration bahwa seluruh SH Core/domain implementation selesai**.
