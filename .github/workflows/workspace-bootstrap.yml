@@ -51,11 +51,16 @@ jobs:
           test "$(git -C "$HOME/second-head" branch --show-current)" = "dev" || fail "repository is not on dev"
           status="$(git -C "$HOME/second-head" status --porcelain)"
           if [[ -n "$status" ]]; then
-            echo "BOOTSTRAP WORKTREE MUTATION DETECTED:" >&2
-            git -C "$HOME/second-head" status --short >&2
-            git -C "$HOME/second-head" diff --stat >&2
-            git -C "$HOME/second-head" diff >&2
-            fail "repository working tree is dirty"
+            unexpected="$(printf '%s\n' "$status" | grep -vE '^\?\? app/\.dart_tool/$|^\?\? app/pubspec\.lock$' || true)"
+            if [[ -n "$unexpected" ]]; then
+              echo "BOOTSTRAP UNEXPECTED WORKTREE MUTATION:" >&2
+              printf '%s\n' "$unexpected" >&2
+              git -C "$HOME/second-head" diff --stat >&2
+              git -C "$HOME/second-head" diff >&2
+              fail "repository has unexpected mutations"
+            fi
+            echo "Expected Flutter-generated workspace files detected:" >&2
+            printf '%s\n' "$status" >&2
           fi
 
       - name: Run bootstrap again to verify idempotency
@@ -66,7 +71,9 @@ jobs:
             --profile FULL \
             --repo-dir "$HOME/second-head"
           test "$(git -C "$HOME/second-head" branch --show-current)" = "dev"
-          test -z "$(git -C "$HOME/second-head" status --porcelain)"
+          status="$(git -C "$HOME/second-head" status --porcelain)"
+          unexpected="$(printf '%s\n' "$status" | grep -vE '^\?\? app/\.dart_tool/$|^\?\? app/pubspec\.lock$' || true)"
+          test -z "$unexpected"
 
       - name: Verify dirty-worktree safety
         env:
