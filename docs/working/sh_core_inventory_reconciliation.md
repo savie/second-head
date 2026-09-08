@@ -92,6 +92,8 @@ verification requirement
 
 Analisis BE dan FE dilakukan **paralel** pada inventory. Execution implementation tetap **BE-first**.
 
+**Penting:** paralel di sini berarti **inventory/evidence analysis**, bukan parallel implementation. FE implementation tidak dimulai hanya karena FE surface sudah tersedia atau backend code sudah ada. Capability yang membutuhkan backend authority harus melewati **BE READY gate** sebelum FE masuk user-visible implementation.
+
 ---
 
 ## 3. Classification
@@ -395,7 +397,7 @@ Current DEV tidak memiliki active `succession_rules` pada audit checkpoint ini, 
 
 # 9. CURRENT EXECUTION GATES
 
-Urutan kerja yang berlaku:
+Urutan kerja yang berlaku untuk setiap capability/domain:
 
 ```text
 Current source inventory
@@ -418,14 +420,86 @@ Backend verification
         ↓
 Contract verification
         ↓
-FE user-visible representation
+BE READY GATE
+        ↓
+FE minimal user-visible representation
+        ↓
+FE verification
+        ↓
+Clone integration / dependency verification
         ↓
 Security harness
         ↓
+FE + BE READY FOR E2E
+        ↓
 APK E2E / regression
         ↓
-Clone integration
+Domain / capability closure
 ```
+
+### 9.1 Interpretation of the gates
+
+**BE-first bukan sekadar urutan coding.** Backend harus mencapai readiness terhadap scope capability sebelum FE implementation masuk.
+
+### BE READY
+
+Capability dinyatakan **BE READY** hanya jika, untuk scope yang sedang dikerjakan:
+
+- authority/contract sudah jelas dan tidak sedang diubah oleh implementation;
+- backend authority/enforcement sudah implemented;
+- security boundary sudah diverifikasi;
+- persistence/data integrity sudah diverifikasi;
+- recovery/continuity dependency yang relevan sudah diverifikasi atau secara eksplisit classified sebagai N/A;
+- migration/source reconciliation sudah verified bila ada perubahan schema;
+- tidak ada known backend blocker/prerequisite yang sengaja dilewati untuk memulai FE.
+
+**BE READY bukan berarti seluruh SH backend selesai.** Gate berlaku per capability/domain scope.
+
+### FE minimal representation
+
+Setelah BE READY, FE boleh masuk sebagai **minimal user-visible representation**:
+
+- consume contract yang sudah final;
+- wiring ke backend/runtime path;
+- state dan error handling minimum yang diwajibkan contract;
+- persistence/reconstruction behavior yang diwajibkan scope;
+- tidak mendesain ulang semantics backend melalui UI.
+
+FE tidak perlu menunggu polish/UX final untuk melewati gate ini, tetapi tidak boleh menjadi substitute untuk backend readiness.
+
+### FE READY FOR E2E
+
+FE dinyatakan ready untuk E2E setelah minimal representation dan verification scope-nya selesai, tidak ada known FE blocker, dan integration path menggunakan contract/backend yang sudah verified.
+
+### Clone integration / dependency verification
+
+Clone bukan sesi implementasi terakhir yang baru dimulai setelah E2E. Clone adalah **cross-domain dependency/integration concern**.
+
+Untuk setiap capability, sebelum E2E, lakukan:
+
+```text
+Capability
+   ↓
+Does it affect Clone / cloned state / ownership / excluded data / lineage?
+   ├── NO → classify N/A / no Clone impact
+   └── YES
+        ↓
+   reconcile against Clone contract/boundary
+        ↓
+   verify integration/dependency
+```
+
+Clone integration tidak berarti setiap capability harus memiliki implementasi Clone baru. Hanya capability yang mempunyai impact/dependency terhadap Clone yang wajib melewati verification tersebut.
+
+### Security harness
+
+Security harness memvalidasi boundary setelah backend dan FE integration berada pada contract yang sama. Security failure/blocker menghentikan klaim completion capability terkait.
+
+### APK E2E / regression
+
+APK E2E adalah **full integration validation setelah BE READY + FE READY**, bukan alat untuk menemukan fundamental backend contract/persistence gaps yang seharusnya sudah tertutup pada gate sebelumnya.
+
+E2E sebaiknya dilakukan sebagai flow capability/domain yang utuh agar tidak terpecah menjadi test parsial yang terus berubah karena backend masih bergerak.
 
 ### Hard gates
 
@@ -433,9 +507,13 @@ Clone integration
 2. Historical `dev_old` tidak menjadi current source.
 3. Current UI tidak otomatis menjadi semantic authority.
 4. Tidak coding sebelum gap confirmed dan prerequisite jelas.
-5. Backend verification mendahului FE semantic completion ketika capability membutuhkan backend authority.
-6. Security failure/blocker menghentikan klaim completion domain terkait.
-7. `SYSTEM_RUNTIME` tetap open sampai technical mechanism diputuskan dan diverifikasi.
+5. Analisis BE/FE boleh paralel pada inventory, tetapi implementation tidak paralel sebelum BE READY untuk capability yang membutuhkan backend authority.
+6. Backend verification dan contract verification harus PASS sebelum FE minimal user-visible implementation dianggap ready untuk scope tersebut.
+7. Tidak ada E2E/regression final sebelum BE READY + FE READY.
+8. Capability dengan Clone impact harus melewati Clone integration/dependency verification sebelum E2E; capability tanpa impact dapat classified N/A.
+9. Security failure/blocker menghentikan klaim completion domain terkait.
+10. `SYSTEM_RUNTIME` tetap open sampai technical mechanism diputuskan dan diverifikasi.
+11. Known blocker/prerequisite tidak boleh disembunyikan dengan label CURRENT IMPLEMENTATION atau E2E.
 
 ---
 
@@ -446,11 +524,12 @@ Setelah succession wrapper audit ini, prioritas berikutnya:
 ```text
 1. Succession semantic / positive-negative harness
 2. Conversation adapter audit — update/delete message parameter contract
-3. Memory / Knowledge / Experience / Journey semantic BE ↔ FE reconciliation
-4. Lifecycle / EOL backend ↔ FE semantic reconciliation
-5. Clone / Inheritance / Recovery / Succession reconciliation
-6. Confirmed-gap implementation only
-7. APK E2E after backend + contract gates
+3. Conversation attachment BE readiness + verification, lalu FE/E2E gate sesuai execution flow
+4. Memory / Knowledge / Experience / Journey semantic BE ↔ FE reconciliation
+5. Lifecycle / EOL backend ↔ FE semantic reconciliation
+6. Clone / Inheritance / Recovery / Succession reconciliation sebagai cross-domain dependencies
+7. Confirmed-gap implementation only
+8. APK E2E after BE READY + FE READY + applicable Clone/security gates
 ```
 
 **Current checkpoint conclusion:** documentation drift yang terbukti telah direkonsiliasi; succession wrapper/validation security audit menghasilkan **NO CONFIRMED CODE GAP**. Step 7 tetap OPEN hanya pada semantic/E2E verification succession, bukan karena wrapper security defect. Living inventory ini tetap merupakan index kerja dan **bukan declaration bahwa seluruh SH Core/domain implementation selesai**.
