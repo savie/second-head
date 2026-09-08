@@ -2,23 +2,17 @@
 
 ## Status
 
-**Working status record — sementara.**
+**Working status record — current reconciliation checkpoint.**
 
-Dokumen ini mencatat hasil pekerjaan dan posisi sementara rekonsiliasi Backend (Supabase) → Frontend (Flutter) sampai titik kerja saat ini.
+Dokumen ini mencatat posisi Backend (Supabase), Frontend (Flutter), verification, blocker, dan dependency berdasarkan current `dev` sampai checkpoint ini.
 
-Dokumen ini **bukan Canonical** dan tidak mengubah Canonical maupun Approved Contract yang sudah ada.
-
-Dokumen ini dibuat sebagai **working checkpoint** agar urutan pekerjaan, blocker, dependency, dan status tidak hilang selama proses pembangunan masih berlangsung.
-
-Setelah seluruh pekerjaan selesai dan baseline final sudah stabil, dokumen ini dapat digantikan dengan dokumen final yang menetapkan langkah kerja final (9 atau 10 langkah sesuai hasil akhir).
+Dokumen ini **bukan Canonical** dan tidak mengubah Canonical maupun Approved Contract.
 
 `dev_old` digunakan sebagai historical reference/evidence dan bukan baseline implementation baru.
 
 ---
 
 ## 1. Authority dan Prinsip Kerja
-
-Urutan authority tetap:
 
 ```text
 OWNER / USER DECISION
@@ -32,14 +26,12 @@ ARCHITECTURE / DESIGN
 IMPLEMENTATION
 ```
 
-Prinsip kerja untuk checkpoint ini:
-
 1. Backend / Supabase menjadi authority untuk identity, ownership, authority, permission, capability, dan runtime enforcement.
-2. Frontend mengikuti contract dan capability yang disediakan backend; frontend tidak boleh menebak authority secara mandiri dari field ownership yang tidak dimaksudkan sebagai authority.
-3. Tidak ada perubahan Canonical melalui pekerjaan di dokumen ini.
-4. Historical implementation dari `dev_old` hanya digunakan untuk rekonstruksi maksud, lineage, dan evidence.
-5. Status `deferred`, `superseded`, `pending`, dan `completed` harus dibedakan secara eksplisit.
-6. Pekerjaan berikutnya tidak dianggap siap hanya karena pekerjaan sebelumnya secara nominal selesai apabila masih ada prerequisite atau verification gap yang relevan.
+2. Frontend mengikuti contract dan capability backend; frontend tidak boleh menebak authority secara mandiri.
+3. Tidak ada perubahan Canonical melalui dokumen ini.
+4. `dev_old` hanya historical evidence.
+5. `pending`, `partial`, `completed`, `superseded`, dan `deferred` harus dibedakan.
+6. Current implementation evidence tidak otomatis berarti verified atau semantically final.
 
 ---
 
@@ -47,364 +39,245 @@ Prinsip kerja untuk checkpoint ini:
 
 | No. | Workstream | Status | Disposition |
 |---|---|---|---|
-| 1 | Task RPC dependency | ✅ **COMPLETED** | Broken `r6_tasks` dependency direkonsiliasi ke `task_reminders`. |
-| 2 | Migration source reconstruction | ⏸️ **INTENTIONALLY DEFERRED** | Ditunda sebagai keputusan strategi selama SH masih dalam development; tidak membuat migration source fiktif. |
-| 3 | Old Conversation contract | ⏸️ **INTENTIONALLY SUPERSEDED** | Contract lama tidak dijadikan baseline baru; akan digantikan oleh Conversation contract baru setelah backend model dan kebutuhan final lebih stabil. |
-| 4 | Knowledge FK validation | ✅ **COMPLETED** | FK `knowledge_private_sh_id_fk` sudah divalidasi. |
-| 5 | anon EXECUTE hardening | ✅ **COMPLETED** | Runtime privileged surface sudah di-hardening; residual public/anon surface tetap harus dipahami sesuai fungsi masing-masing. |
-| 6 | Recovery ↔ Conversation continuity backend | ✅ **COMPLETED** | Recovery snapshot/restore sudah mencakup hierarchy Project → Conversation Thread → Message dan mempertahankan identity/thread continuity. |
-| 7 | Contract reconciliation | ✅ **COMPLETED** | Contract yang ada direkonsiliasi terhadap kondisi DEV tanpa mengubah Canonical; drift Project/Conversation dicatat sebagai keputusan kerja, bukan blocker. |
-| 8 | Backend fixes | ✅ **COMPLETED** | Backend runtime fixes yang teridentifikasi dari audit sudah diterapkan, termasuk retirement execute surface legacy Conversation RPC. |
-| 9 | Verification | 🟡 **PARTIAL / PENDING** | Static/security baseline CLEAR; authenticated adversarial runtime harness masih pending. |
-| 10 | Frontend integration | ⏳ **PENDING** | Frontend belum menjadi baseline final; akan mengikuti backend authority/capability contract setelah backend reconciliation cukup stabil. |
+| 1 | Task RPC dependency | ✅ COMPLETED | Broken `r6_tasks` dependency direkonsiliasi ke `task_reminders`. |
+| 2 | Migration source reconstruction | ✅ COMPLETED | Current DEV migration lineage/source artifact sudah direkonstruksi; tidak menggunakan migration fiktif atau `dev_old` sebagai current source. |
+| 3 | Old Conversation contract | 🟡 SUPERSEDED / RECONCILED | Capability matrix lama sudah stale terhadap current DEV; contract sekarang direkonsiliasi dan tetap bukan Canonical. |
+| 4 | Knowledge FK validation | ✅ COMPLETED | FK `knowledge_private_sh_id_fk` sudah divalidasi. |
+| 5 | anon EXECUTE hardening | ✅ COMPLETED | Runtime privileged surface sudah di-hardening; residual surface tetap dianalisis berdasarkan execution context. |
+| 6 | Recovery ↔ Conversation continuity backend | ✅ COMPLETED | Recovery hierarchy sudah mencakup Project → Conversation Thread → Message continuity sesuai current backend implementation. |
+| 7 | Contract reconciliation | 🟢 CURRENT CHECKPOINT | Contract/docs drift direkonsiliasi terhadap current DEV evidence; remaining semantic/open items dicatat eksplisit. |
+| 8 | Backend fixes | ✅ COMPLETED FOR IDENTIFIED GAPS | Backend fixes yang sudah teridentifikasi telah diterapkan. Ini bukan klaim bahwa seluruh backend capability SH sudah final. |
+| 9 | Security / authenticated verification | 🟡 PARTIAL | Static/security baseline dan boundary tests sudah dilakukan; succession wrapper validation dan authenticated adversarial coverage masih harus ditutup. |
+| 10 | Frontend integration | 🟡 PARTIAL / CURRENT IMPLEMENTATION EXISTS | FE sudah memiliki substantial current integration untuk Identity dan Project/Conversation; broader SH capability integration belum final. |
 
 ---
 
-## 3. Detail Workstream
+## 3. Current Backend / Supabase Position
 
-### 3.1 Task RPC Dependency — COMPLETED
+Current DEV memiliki migration history **173 entries**, dengan latest actor-resolution context migration `20260908032300_actor_resolution_context` pada checkpoint ini.
 
-Masalah awal:
+Current runtime foundation mencakup identity/ownership, Project/Conversation hierarchy, SH State, Recovery hierarchy, governance/runtime boundaries, external capability surfaces, dan related persistence.
 
-- RPC `create_task` dan `list_tasks` masih mereferensikan `public.r6_tasks`.
-- `r6_tasks` sudah tidak ada.
-- Current table yang digunakan adalah `public.task_reminders`.
+Current DEV migration reconstruction sudah selesai. Repository migration artifacts tidak boleh dianggap sebagai pengganti current remote state tanpa verification terhadap Supabase DEV.
 
-Perbaikan:
+---
 
-- `create_task` direkonsiliasi untuk menggunakan `task_reminders`.
-- `list_tasks` direkonsiliasi untuk menggunakan `task_reminders`.
-- Anonymous execute surface untuk kedua RPC tidak dibuka.
+## 4. Actor / Identity
 
-Hasil:
+Actor Resolution Addendum telah diimplementasikan pada current DEV:
 
 ```text
-legacy r6_tasks reference → removed
-current task_reminders    → authoritative runtime target
+Supabase resolver
+      ↓
+Backend auth service
+      ↓
+ResolvedActorContext
+      ↓
+Flutter identity context
+      ↓
+Account representation
 ```
 
-Catatan: ini menyelesaikan dependency/function-schema break, bukan authenticated end-to-end verification.
-
----
-
-### 3.2 Migration Source Reconstruction — INTENTIONALLY DEFERRED
-
-Current DEV database dan historical migration lineage sudah diaudit.
-
-Temuan:
-
-- Current `dev` repository belum memiliki source migration/database yang mereproduksi seluruh remote DEV.
-- `dev_old` memiliki historical migration lineage.
-- Historical evidence menetapkan bahwa migration source reconstruction tidak boleh dilakukan dengan migration fiktif atau replacement yang tidak terverifikasi.
-
-Keputusan kerja saat ini:
-
-> Migration source reconstruction **sengaja ditunda** selama SH masih dalam fase development.
-
-Tidak ada migration source fiktif yang dibuat untuk menutupi gap tersebut.
-
-Status ini adalah **deferred debt / future reconciliation item**, bukan blocker aktif untuk pekerjaan runtime yang sedang berjalan.
-
----
-
-### 3.3 Old Conversation Contract — INTENTIONALLY SUPERSEDED
-
-Approved Working Contract Conversation yang lama sudah diaudit terhadap current DEV.
-
-Current DEV ternyata sudah memiliki capability yang pada contract lama masih dicatat sebagai gap, termasuk beberapa project/conversation management operation.
-
-Drift tersebut merupakan hasil keputusan kerja selama implementasi dan tidak diperlakukan sebagai blocker.
-
-Keputusan kerja:
-
-- Contract lama tidak diubah secara diam-diam.
-- Contract lama tidak dijadikan baseline baru untuk implementation berikutnya.
-- Akan dibuat **Conversation contract baru** ketika backend authority/capability model dan kebutuhan Conversation sudah cukup stabil.
-- Contract baru akan menyerap capability yang benar-benar disepakati serta kebutuhan tambahan yang muncul.
-
----
-
-### 3.4 Knowledge FK Validation — COMPLETED
-
-Validation gap pada:
+Current verified classifications:
 
 ```text
-public.knowledge
-    ↓
-knowledge_private_sh_id_fk
-    ↓
-public.sh_instances(sh_id)
+Creator account
+→ actor CREATOR
+→ authority CREATOR
+→ SH-000
+
+Ordinary account
+→ actor ACCOUNT_OWNER
+→ authority null
+→ ORDINARY_SH
 ```
 
-sudah ditutup melalui validation constraint.
+Frontend mengonsumsi backend-resolved context dan tidak menjadi authority actor.
 
-Tidak ada perubahan semantic model Knowledge yang dilakukan.
+Scope Actor Resolution dinyatakan closed untuk current contract; `SYSTEM_RUNTIME` technical mechanism tetap OPEN.
 
 ---
 
-### 3.5 anon EXECUTE Hardening — COMPLETED
+## 5. Project / Conversation / Message
 
-Audit menemukan privileged runtime functions yang sebelumnya masih memiliki anonymous execute surface.
+Current DEV dan current Flutter sudah memiliki substantial implementation.
 
-Hardening dilakukan dengan mencabut anonymous/public execute dari runtime functions yang memerlukan authenticated identity.
+### Backend evidence
 
-Residual anonymous execute surface tidak dicabut secara blind apabila fungsi tersebut merupakan:
-
-- trigger helper;
-- SECURITY INVOKER bounded function; atau
-- fungsi lain yang perlu dianalisis berdasarkan execution context-nya.
-
-Status:
+Current runtime paths mencakup antara lain:
 
 ```text
-Broad runtime anon execute surface → hardened
+runtime_create_project
+runtime_list_projects
+runtime_rename_project
+runtime_delete_project
+runtime_create_conversation
+runtime_list_conversations
+runtime_rename_conversation_thread
+runtime_delete_conversation_thread
+runtime_assign_conversation_project
+runtime_load_conversation_messages
+runtime_record_conversation_message
+runtime_update_conversation_message_v2
+runtime_delete_conversation_message_v2
+runtime_load_conversation_context_for_thread
 ```
 
-Residual review harus tetap dibedakan dari proven security vulnerability.
+### Frontend evidence
 
----
+`ConversationService` / `ConversationRuntimeBridge` dan `ProjectConversationManagementView` saat ini mengonsumsi capability tersebut untuk create/list/select/rename/delete, project management, move/remove, message CRUD, context loading, search, loading/error/empty states, dan destructive confirmations.
 
-### 3.6 Recovery ↔ Conversation Continuity Backend — COMPLETED
-
-Gap awal:
-
-- Recovery snapshot belum menyimpan `conversation_threads` sebagai first-class recovery object.
-- Restore belum secara eksplisit memulihkan thread hierarchy.
-- Trigger fallback berpotensi merekonstruksi thread secara tidak identik dengan thread asli.
-
-Perbaikan:
+### Current classification
 
 ```text
-Projects
-   ↓
-Conversation Threads
-   ↓
-Messages / Conversations
+Project / Conversation management UI → CURRENT IMPLEMENTATION
+Runtime RPC paths                 → CURRENT IMPLEMENTATION
+Semantic/security verification    → PARTIAL / OPEN
+Dynamic AI response pipeline      → NOT YET COMPLETE
 ```
 
-Recovery sekarang mempertahankan informasi hierarchy dan identity yang relevan, termasuk original thread/project/message identity dan boundary SH/account.
-
-Restore dilakukan dalam urutan hierarchy yang eksplisit dan tidak bergantung pada fallback trigger sebagai mekanisme utama restoration.
-
-Catatan:
-
-Authenticated E2E recovery verification masih menunggu APK/frontend siap.
+Penting: current FE implementation tidak mengubah Approved Contract menjadi authority baru. Sebaliknya, old capability-gap matrix tidak boleh lagi dipakai sebagai current-state claim.
 
 ---
 
-### 3.7 Contract Reconciliation — COMPLETED
+## 6. State
 
-Contract reconciliation dilakukan terhadap:
+Current DEV memiliki dedicated `public.sh_states` dan state-related runtime/recovery lineage.
 
-- Project / Conversation contract;
-- State Persistence contract;
-- Canonical Supabase Map;
-- migration-source disposition.
+State tetap dibedakan dari identity dan recovery.
 
-Hasil:
-
-1. State Persistence semantic boundary tetap valid.
-2. Recovery tetap merupakan recovery container, bukan State representation.
-3. Project/Conversation implementation DEV lebih maju daripada capability matrix contract lama.
-4. Drift tersebut dicatat sebagai working decision dan tidak digunakan untuk mengubah Canonical.
-5. Migration source reconstruction tetap intentionally deferred.
-
-Tidak ada Canonical mutation dalam pekerjaan ini.
+Status detail State verification harus mengikuti current State Persistence contract + current backend implementation + current FE consumer, bukan historical pre-implementation gap.
 
 ---
 
-### 3.8 Backend Fixes — COMPLETED
+## 7. Recovery ↔ Conversation Continuity
 
-Runtime backend yang sudah direkonsiliasi mencakup capability Project, Conversation, State, dan Recovery yang relevan dengan current DEV architecture.
+Backend recovery hierarchy telah direkonsiliasi terhadap Project → Conversation Thread → Message.
 
-Legacy Conversation runtime execute surface yang tidak lagi menjadi target architecture sudah dinonaktifkan dari client execution path tanpa harus menghapus historical function definition secara langsung.
+Recovery mempertahankan identity/thread/project/message references yang diperlukan dan tidak boleh diperlakukan sebagai clone creation atau identity replacement.
 
-Current principle:
+Authenticated E2E melalui current APK tetap merupakan verification item terpisah dari backend static verification.
+
+---
+
+## 8. Security Verification
+
+### Sudah dilakukan
+
+- identity / ownership boundary audit;
+- RLS posture audit;
+- privileged runtime execute surface audit;
+- FK integrity audit;
+- recovery hierarchy audit;
+- legacy runtime exposure audit;
+- Creator authority structure audit;
+- SELF / OTHER / SPOOF / UNAUTH boundary tests.
+
+### Masih terbuka
 
 ```text
-Current runtime contract
+runtime_validate_selected_transfer_scope()
         ↓
-Current backend RPC
+succession_rules semantics
         ↓
-Authenticated identity / ownership / authority checks
+runtime_execute_succession()
         ↓
-Persistent operation
+wrapper / authorization validation
 ```
 
-Backend belum dianggap final secara keseluruhan hanya karena workstream ini selesai; verification runtime masih menjadi gate.
+`runtime_execute_succession(uuid)` masih merupakan confirmed review item karena authenticated EXECUTE surface ditemukan pada wrapper tersebut dan perlu dipastikan isolation/authorization-nya secara penuh.
+
+Security Harness Step 7 **belum PASS final** sampai item ini ditutup.
 
 ---
 
-## 4. Authority / Creator / User Finding
+## 9. Frontend Current Position
 
-Audit identity dan authority menghasilkan temuan penting.
+Frontend tidak lagi tepat diklasifikasikan sebagai `PENDING` secara keseluruhan.
 
-Current DEV memiliki:
+Current `app/` memiliki implementation untuk:
 
-- `sh_ownership.role = OWNER` sebagai ownership relationship;
-- `private.authority_assignments` sebagai authority assignment layer;
-- authority `CREATOR` untuk satu account tertentu;
-- `private.governance_evaluator` yang memilih `CREATOR` jika assignment aktif, dan `ACCOUNT_OWNER` sebagai fallback;
-- `permission_matrix` yang memiliki actor taxonomy termasuk `CREATOR`, `ACCOUNT_OWNER`, `SH-000`, `ORDINARY_SH`, dan `SYSTEM_RUNTIME`.
+- Auth / Identity / Actor Context;
+- Project / Conversation management;
+- Conversation persistence/runtime bridge;
+- Journey surface;
+- Lifecycle/EOL surface;
+- Clone / Inheritance / Legacy / Recovery / Succession surfaces;
+- profile/navigation/core storage;
+- bounded local/offline behavior;
+- attachment/camera/gallery/file interaction.
 
-Penting:
+Namun kedalaman integration berbeda-beda.
+
+### Important boundary
 
 ```text
-OWNER ≠ CREATOR
+FE surface exists
+      ≠
+backend semantic integration complete
+      ≠
+security verified
+      ≠
+E2E verified
 ```
 
-Satu account dapat memiliki ownership relationship `OWNER` sekaligus authority `CREATOR`.
+Beberapa Journey/continuity surfaces masih memiliki local-store semantics dan tidak boleh diperlakukan otomatis sebagai authoritative backend Memory/Knowledge/Experience integration.
 
-`sh_instances.creator_ref` bukan source of truth authority Creator pada current model yang sudah diaudit.
-
-### 4.1 Current APK Observation
-
-Login menggunakan tiga account DEV menunjukkan bahwa UI/feature surface yang terlihat saat ini masih sama antar-account.
-
-Observation ini **belum** membuktikan bahwa backend authority enforcement gagal.
-
-Observation ini menunjukkan bahwa sebelum frontend integration final dilakukan, backend authority → capability surface harus dipastikan cukup jelas sehingga frontend mempunyai contract yang benar untuk diikuti.
+Conversation UI juga belum menjadi complete dynamic AI runtime; current send path masih memiliki static assistant response behavior.
 
 ---
 
-## 5. Verification Status
+## 10. Documentation Drift Status
 
-### Static / Security Baseline
+Dokumen current `docs/` harus dibaca bersama current implementation.
 
-Status:
+Drift yang sudah direkonsiliasi pada checkpoint ini:
 
-**CLEAR berdasarkan audit static/security yang sudah dilakukan.**
+1. Conversation contract lama memiliki capability matrix yang tertinggal dari current runtime/FE.
+2. Backend/Frontend status lama masih menyebut FE `PENDING`, padahal current FE sudah memiliki substantial integration.
+3. Supabase Map lama menyebut 26 public tables dan migration reconstruction belum tersedia; keduanya sudah stale terhadap current DEV checkpoint.
+4. Working inventory sekarang menjadi index reconciliation yang membedakan authority, current implementation, legacy, gap, open, dan deferred.
 
-Area yang sudah diperiksa antara lain:
-
-- identity / ownership boundary;
-- RLS posture;
-- privileged runtime function execute surface;
-- FK integrity;
-- recovery hierarchy references;
-- legacy runtime exposure;
-- authority assignment structure;
-- permission matrix structure.
-
-### Authenticated Adversarial Verification
-
-Status:
-
-**PENDING.**
-
-Belum ada authenticated runtime harness yang committed sebagai integration test suite di current `dev` repository.
-
-Verification yang masih diperlukan:
-
-```text
-Account A
-  → own resources      → ALLOW
-  → Account B resources → DENY
-
-Creator
-  → creator-authorized action → expected result
-
-Account Owner
-  → owner-authorized action   → expected result
-
-Unauthorized actor
-  → protected action          → DENY
-```
-
-Verification ini berbeda dari APK E2E.
+Tidak ada drift yang boleh diperbaiki dengan mengubah Canonical semantics secara implisit.
 
 ---
 
-## 6. Frontend Integration — PENDING
-
-Frontend belum dijadikan authority source.
-
-Target architecture:
+## 11. Current Gate
 
 ```text
-Supabase Backend
-      ↓
-Identity
-      ↓
-Authority
-      ↓
-Permission / Capability
-      ↓
-Runtime enforcement
-      ↓
-Frontend contract
-      ↓
-Flutter UI
+Documentation reconciliation
+        ↓
+Current BE + FE inventory
+        ↓
+Security / authenticated verification
+        ↓
+Domain-by-domain semantic reconciliation
+        ↓
+Confirmed gaps only
+        ↓
+Implementation
+        ↓
+E2E / regression
 ```
 
-Frontend integration baru dianggap siap setelah backend authority/capability model cukup stabil dan behavior penting sudah diverifikasi.
+Frontend dapat dianalisis paralel selama inventory/reconciliation, tetapi implementation tetap mengikuti backend authority dan confirmed dependency.
 
-Frontend tidak boleh membuat mapping baru seperti:
-
-```text
-OWNER = CREATOR
-```
-
-tanpa contract/backend evidence yang eksplisit.
+Tidak ada coding hanya untuk menutup status dokumen.
 
 ---
 
-## 7. Current Gate
-
-Posisi kerja saat dokumen ini dibuat:
+## 12. Current Summary
 
 ```text
-Backend foundation / reconciliation
-            ↓
-      mostly completed
-            ↓
-Authenticated runtime verification
-            ↓
-   authority/capability validation
-            ↓
-Conversation contract baru
-            ↓
-Frontend integration
+Identity / Actor Resolution        → CLOSED for current scope
+Migration reconstruction           → COMPLETED
+Project / Conversation FE          → CURRENT / PARTIAL
+Project / Conversation semantics   → VERIFICATION OPEN
+State                               → CURRENT foundation / verification by contract
+Recovery backend                   → COMPLETED / E2E verification separate
+Security Harness                   → PARTIAL / succession wrapper open
+Frontend integration overall       → PARTIAL, not globally pending
+SYSTEM_RUNTIME mechanism           → OPEN
+Dynamic AI runtime                 → OPEN
+Broader domain reconciliation      → NEXT
 ```
-
-Frontend bukan blocker yang harus langsung dikerjakan hanya karena UI tiga account terlihat sama.
-
-Backend authority/capability reconciliation dan authenticated verification tetap menjadi prerequisite sebelum frontend dijadikan target integration final.
-
----
-
-## 8. Dokumen Ini Bersifat Sementara
-
-Dokumen ini **bukan daftar langkah final proyek**.
-
-Tujuannya hanya menjaga checkpoint pekerjaan saat ini agar tidak hilang ketika pekerjaan berpindah antara Supabase/backend, verification, contract, dan frontend.
-
-Setelah:
-
-- backend authority/capability model selesai direkonsiliasi;
-- authenticated verification selesai;
-- Conversation contract baru disepakati;
-- frontend integration selesai;
-- seluruh dependency dan blocker ditutup;
-
-maka status ini harus direkonsiliasi kembali menjadi **final work sequence** yang dapat berjumlah 9 atau 10 langkah sesuai kondisi aktual saat itu.
-
----
-
-## 9. Current Summary
-
-```text
-1  ✅ Task RPC dependency
-2  ⏸️ Migration source reconstruction — intentionally deferred
-3  ⏸️ Old Conversation contract — intentionally superseded by future new contract
-4  ✅ Knowledge FK validation
-5  ✅ anon EXECUTE hardening
-6  ✅ Recovery ↔ Conversation continuity backend
-7  ✅ Contract reconciliation
-8  ✅ Backend fixes
-9  🟡 Verification — static/security baseline CLEAR,
-       authenticated adversarial runtime verification pending
-10 ⏳ Frontend integration
-```
-
-**Current working direction:** rapikan dan pastikan Backend / Supabase terlebih dahulu, kemudian Frontend menyesuaikan backend contract dan capability yang sudah authoritative.
