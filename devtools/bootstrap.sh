@@ -52,7 +52,7 @@ is_ubuntu() {
   [[ -r /etc/os-release ]] || return 1
   # shellcheck disable=SC1091
   . /etc/os-release
-  [[ "${ID:-}" == ubuntu || "${ID_LIKE:-}" == *debian* ]]
+  [[ "${ID:-}" == ubuntu || "${ID:-}" == debian || "${ID_LIKE:-}" == *debian* ]]
 }
 
 apt_install_missing() {
