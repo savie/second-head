@@ -2,7 +2,7 @@
 
 ## Status
 
-**FROZEN / LOCKED FOR DEV MIGRATION EXECUTION**
+**FROZEN / LOCKED — DEV MIGRATION EXECUTED / VERIFICATION CHECKPOINT OPEN**
 
 Dokumen ini adalah working design record untuk migration attachment pada domain Conversation → Message. Dokumen ini bukan Canonical dan tidak mengubah Approved Contract.
 
@@ -187,11 +187,11 @@ Clear remains non-destructive and must not invoke attachment deletion/detach sem
 
 ## 7. Frozen Recovery Integration
 
-Existing DEV Recovery already captures/restores Conversation Messages inside `recovery_snapshots.manifest`.
+Existing DEV Recovery captures/restores Conversation Messages inside `recovery_snapshots.manifest`.
 
-Migration integration extends the Recovery representation with attachment descriptor/reference data. Binary data is not embedded in the JSON manifest.
+The attachment migration integration is now **implemented in DEV** through persisted attachment descriptors/references. Binary data is not embedded in the JSON manifest.
 
-Recovery retention relationship:
+Recovery relationship:
 
 Table: `public.conversation_attachment_recovery_refs`
 
@@ -208,7 +208,7 @@ Constraints:
 - FK `attachment_id → conversation_attachments.attachment_id`.
 - Recovery reference is a retention dependency, not a replacement for snapshot evidence.
 
-Snapshot creation:
+Current snapshot/restore path:
 
 ```text
 Message with durable attachment
@@ -234,7 +234,7 @@ Missing durable object/resource must produce an explicit recovery gap; restore m
 
 Existing Recovery idempotency and trusted Account ownership boundaries remain intact.
 
-Recovery snapshot creation and restore functions will be updated only to integrate attachment evidence/reference; existing identity, State, ownership, and Conversation validation remains unchanged.
+Current implementation has reached backend relationship/reconstruction support. Authenticated Recovery E2E, missing-object behavior, and cleanup/retention verification remain open.
 
 ---
 
@@ -256,6 +256,8 @@ Attachment Resource without Message and without valid retention dependency
 Because Storage upload and PostgreSQL transaction are not atomic, implementation must provide a cleanup/reconciliation path for failed database persistence after successful object upload.
 
 No synchronous blind object deletion is attached to Message DELETE.
+
+Current PENDING / PERSISTED / FAILED lifecycle and stable attachment identity support the intended retry boundary. Full orphan cleanup/reconciliation behavior remains a verification gate.
 
 ---
 
@@ -292,6 +294,8 @@ Minimum verification cases:
 - Recovery create/restore → attachment dependency preserved/reconstructed or explicit gap;
 - Clone/Inheritance/Succession → no implicit attachment transfer.
 
+**Verification status:** implementation is present; authenticated semantic harness remains OPEN.
+
 ---
 
 ## 11. Pre-Migration Audit Result
@@ -310,22 +314,59 @@ Audited against current DEV definitions and privilege surface before SQL freeze:
 - Existing RLS on Conversation/Recovery remains unchanged; new attachment resources receive their own RLS.
 - Existing anon execution surface remains denied for the relevant Conversation/Recovery boundaries.
 
-No confirmed security blocker remains for migration execution at this frozen design level.
+This section records the **pre-migration audit evidence**. It is not a statement that all post-migration runtime verification is complete.
 
 ---
 
-## 12. Execution Gate
+## 12. Execution Result / Current DEV Checkpoint
 
-This design is now **FROZEN / LOCKED** for DEV migration execution.
+Migration design is **FROZEN / LOCKED** and the design has been executed in DEV.
 
-The next artifact is the SQL migration. SQL must implement this design exactly and must not silently introduce additional semantic scope.
+Applied migrations:
 
-After application to DEV:
+```text
+20260908113655_conversation_attachments
+20260908120543_revoke_conversation_attachment_truncate
+```
+
+Current implementation state:
+
+```text
+Attachment schema                 IMPLEMENTED
+Private Storage bucket            IMPLEMENTED
+RLS / privilege boundary          IMPLEMENTED
+Trusted attachment RPCs           IMPLEMENTED
+Message ↔ Attachment relationship IMPLEMENTED
+Recovery relationship             IMPLEMENTED
+FE attachment wiring              IMPLEMENTED
+```
+
+Remaining verification:
+
+```text
+Authenticated semantic harness   OPEN
+Upload/reload/retry E2E           OPEN
+Delete/cleanup/retention E2E      OPEN
+Recovery create/restore E2E       OPEN
+Real APK E2E                      OPEN
+```
+
+No additional schema migration is implied by these verification gaps.
+
+---
+
+## 13. Execution Gate
+
+The design remains **FROZEN / LOCKED** for the implemented DEV migration. SQL must continue to conform to this design and must not silently introduce additional semantic scope.
+
+Next verification gates:
 
 1. verify schema/constraints/indexes;
 2. verify bucket/privacy/storage policies;
 3. verify RPC definitions/privileges;
 4. verify Message delete and Conversation delete behavior;
-5. verify Recovery create/restore attachment handling;
-6. run security matrix;
-7. run FE integration only after backend verification passes.
+5. verify Clear produces no destructive attachment mutation once Clear semantics are locked;
+6. verify Recovery create/restore attachment handling;
+7. run security matrix;
+8. run FE integration verification;
+9. run authenticated APK E2E.
