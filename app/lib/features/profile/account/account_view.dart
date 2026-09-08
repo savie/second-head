@@ -141,6 +141,17 @@ class _AccountViewState extends State<AccountView> {
     return '${two(value.month)}-${two(value.day)}-${value.year}';
   }
 
+  String _actorLabel(String actor) {
+    switch (actor) {
+      case 'CREATOR':
+        return 'CREATOR';
+      case 'ACCOUNT_OWNER':
+        return 'ACCOUNT OWNER';
+      default:
+        return actor.replaceAll('_', ' ');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,7 +165,28 @@ class _AccountViewState extends State<AccountView> {
               children: [
                 Center(child: GestureDetector(onTap: _showPhotoOptions, child: const ShProfileMark(size: 112))),
                 const SizedBox(height: 10),
-                const Center(child: Text('Tap photo to change', style: TextStyle(fontSize: 11, color: shMuted))),
+                AnimatedBuilder(
+                  animation: AuthSession.identityContext,
+                  builder: (context, _) {
+                    final actor = AuthSession.identityContext.actorContext?.actor;
+                    if (actor == null || actor.isEmpty) return const SizedBox(height: 24);
+                    return Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: shPurple.withValues(alpha: .9), width: 1.2),
+                          gradient: const LinearGradient(colors: [shPurple, shElectric]),
+                          boxShadow: [BoxShadow(color: shElectric.withValues(alpha: .18), blurRadius: 16, spreadRadius: 1)],
+                        ),
+                        child: Text(
+                          _actorLabel(actor),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 22),
                 ValueListenableBuilder<String>(
                   valueListenable: profileName,
