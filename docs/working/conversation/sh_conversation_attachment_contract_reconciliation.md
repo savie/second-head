@@ -8,7 +8,7 @@ Dokumen ini adalah child working document dari:
 
 `docs/working/conversation/sh_conversation_inventory_reconciliation.md`
 
-Dokumen ini **bukan Canonical** dan **bukan Approved Contract**. Fungsinya merekonsiliasi model Message, attachment, local serialization, dan backend metadata sebelum implementation.
+Dokumen ini **bukan Canonical** dan **bukan Approved Contract**. Fungsinya merekonsiliasi model Message, attachment, local serialization, backend metadata, Recovery, deletion/retention, dan Clear semantics sebelum implementation.
 
 Authority tetap:
 
@@ -91,7 +91,7 @@ metadata
 ```text
 text
 assistant
- time
+time
 attachmentPath?
 runtimeRecordId?
 createdAt?
@@ -226,8 +226,6 @@ Belum ada approved attachment schema di current contract/backend.
 Karena `metadata` sudah menjadi part of Message contract, attachment descriptor **secara teknis dapat** ditempatkan di sana, tetapi itu adalah design decision yang harus dikunci sebelum implementation.
 
 Tidak ditemukan evidence current DEV yang mengharuskan pembuatan table Message baru untuk attachment.
-
-Tidak ditemukan evidence current DEV yang mengharuskan migration attachment khusus sebelum contract minimum ditetapkan.
 
 ---
 
@@ -422,30 +420,262 @@ Jangan menggunakan filename, local path, attachment_id dari client, atau UI stat
 
 ## 13. Recovery / Continuity Boundary
 
-Current local recovery collector dapat mengumpulkan file lokal, tetapi itu belum sama dengan backend attachment recovery/reconstruction.
+### 13.1 Current Recovery snapshot
 
-Dengan hybrid contract:
+Current `runtime_create_recovery_snapshot(p_sh_id)` membentuk manifest yang mencakup:
 
 ```text
-Backend attachment
-→ durable source of truth
-
-Local attachment
-→ cache / local representation
+identity_root
+ownership_root
+state
+projects
+conversation_threads
+memories
+conversations
+journey_events
+knowledge (PRIVATE)
+experiences
+legacy_records
+captured_at
 ```
 
-Recovery domain berikutnya wajib menentukan apakah recovery snapshot menyimpan:
+Jadi **Conversation Message memang merupakan bagian dari Recovery snapshot**.
 
-- attachment descriptor;
-- durable storage reference;
-- object copy atau re-fetch reference;
-- local cache bila tersedia.
+Namun snapshot saat ini menyimpan row Message, bukan attachment resource/storage object.
 
-Tidak boleh mengklaim recovery attachment selesai hanya karena local file masuk recovery payload.
+Tidak ditemukan field/struktur attachment identity atau storage reference pada manifest current.
+
+### 13.2 Current Recovery restore
+
+`runtime_restore_recovery_snapshot(p_snapshot_id)` memulihkan `conversation_threads` dan `conversations`, tetapi tidak melakukan operasi terhadap Storage dan tidak memiliki attachment reconstruction.
+
+Dengan demikian:
+
+```text
+Recovery Message       CURRENT
+Recovery Attachment    GAP
+Storage reconstruction GAP
+```
+
+Tidak boleh mengklaim attachment recovery selesai hanya karena local file ikut dikumpulkan oleh FE recovery collector.
+
+### 13.3 Recovery dependencies
+
+Current database dependency menunjukkan:
+
+```text
+recovery_events.snapshot_id
+        → recovery_snapshots.snapshot_id
+        ON DELETE RESTRICT
+
+portability_exports.snapshot_id
+        → recovery_snapshots.snapshot_id
+        ON DELETE RESTRICT
+
+recovery_snapshots.sh_id
+        → sh_instances.sh_id
+        ON DELETE RESTRICT
+
+recovery_snapshots.account_id
+        → accounts.account_id
+        ON DELETE RESTRICT
+```
+
+Artinya Recovery snapshot adalah historical persistence object dengan dependency yang memang harus dihormati. Snapshot tidak boleh diperlakukan sebagai cache sementara yang bebas dihapus.
+
+### 13.4 Recovery retention / cleanup
+
+Audit function current menemukan create/restore recovery, tetapi **tidak menemukan runtime cleanup/delete recovery snapshot**.
+
+Jadi lifecycle retention Recovery saat ini belum lengkap:
+
+```text
+Create Snapshot
+      ↓
+Persist
+      ↓
+Restore
+```
+
+belum menjadi lifecycle penuh:
+
+```text
+Create
+ ↓
+Use / Restore
+ ↓
+Retention decision
+ ↓
+Expire
+ ↓
+Cleanup / Delete
+```
+
+Ini adalah **Recovery lifecycle gap**, tetapi bukan alasan untuk mengubah Canonical.
+
+### 13.5 Attachment consequence
+
+Dengan hybrid attachment model, lifecycle harus dipisahkan:
+
+```text
+Message lifecycle
+      ≠
+Attachment Resource lifecycle
+      ≠
+Storage Object lifecycle
+      ≠
+Recovery Snapshot lifecycle
+```
+
+Jika Message dihapus tetapi snapshot masih mereferensikan attachment resource pada desain final, storage object tidak boleh diasumsikan aman untuk langsung dihapus.
+
+Sebaliknya, storage object yang sudah tidak memiliki Attachment Resource juga tidak boleh dibiarkan menjadi orphan tanpa cleanup policy.
 
 ---
 
-## 14. Reconciliation Result
+## 14. Delete / Clear Reconciliation
+
+### 14.1 Delete
+
+Current Message Delete dan Conversation Delete memang merupakan operasi delete pada backend.
+
+Current `conversations.thread_id` memiliki FK ke `conversation_threads.conversation_id` dengan `ON DELETE CASCADE`. `conversation_threads.sh_id` juga memiliki `ON DELETE CASCADE` ke `sh_instances`.
+
+Tidak ada current attachment resource/storage object yang ikut dibersihkan karena attachment persistence belum ada.
+
+Maka future attachment delete semantics harus **secara eksplisit** menentukan:
+
+```text
+Delete Message
+ ↓
+remove Message reference
+ ↓
+check Attachment references
+ ↓
+check Recovery / lifecycle references
+ ↓
+retention / cleanup decision
+ ↓
+possible Storage Object cleanup
+```
+
+Direct hard-delete Storage Object pada setiap Message Delete **belum disetujui**.
+
+### 14.2 Clear
+
+Approved Conversation contract sudah menetapkan:
+
+```text
+Clear ≠ Delete
+```
+
+Namun exact Clear semantics belum terkunci pada Canonical maupun Approved Contract.
+
+**OWNER PROPOSAL / OPEN:** Clear diperlakukan sebagai keadaan temporary pada presentation/session tertentu, bukan sebagai penghapusan data backend.
+
+Candidate behavior:
+
+```text
+CLEAR
+ ↓
+Conversation tidak ditampilkan pada current cleared view/session
+ ↓
+Message tetap ada di backend
+ ↓
+Attachment tetap ada
+ ↓
+Tidak ada destructive storage operation
+```
+
+Saat scope temporary tersebut berakhir atau user melakukan mekanisme restore/reopen sesuai final contract, Conversation dapat kembali direkonstruksi dari backend.
+
+Exact scope temporary masih OPEN:
+
+```text
+screen lifetime
+      atau
+app/session lifetime
+      atau
+explicit restore
+```
+
+Tidak boleh memilih salah satu sebagai rule final tanpa Owner lock.
+
+### 14.3 UX truthfulness requirement
+
+Jika Clear dipilih sebagai temporary presentation/session state, UI **tidak boleh menyatakan bahwa data telah terhapus**.
+
+Sebaliknya, semantics harus membedakan:
+
+```text
+Cleared from current view
+≠
+Deleted from backend
+```
+
+Ini menghindari kondisi user melihat layar kosong tetapi sistem diam-diam memperlakukan data sebagai deleted.
+
+---
+
+## 15. Cross-Domain Transfer Boundary
+
+Current audit Clone → Inheritance → Succession menunjukkan attachment **tidak otomatis ikut transfer**.
+
+```text
+Clone        → no Conversation/Attachment scope
+Inheritance  → no Conversation/Attachment scope
+Succession   → no Conversation/Attachment scope
+```
+
+Recovery berbeda: Conversation memang termasuk snapshot, sehingga attachment reconstruction menjadi dependency Recovery.
+
+Kesimpulan:
+
+> Attachment tidak boleh dianggap transferable hanya karena ia terhubung ke Message.
+
+Privacy/visibility dan transfer eligibility tetap merupakan concern terpisah.
+
+---
+
+## 16. Proposed Orphan Prevention Model
+
+Future implementation harus mampu membedakan setidaknya:
+
+```text
+Storage Object tanpa Attachment Resource
+→ ORPHAN OBJECT
+
+Attachment Resource tanpa Message reference
+→ belum otomatis orphan
+→ dapat tetap valid bila ada Recovery/lifecycle reference
+
+Attachment Resource tanpa Message dan tanpa lifecycle reference
+→ candidate cleanup
+```
+
+Karena Postgres transaction tidak dapat rollback object yang sudah berhasil di-upload ke Storage, upload flow tidak boleh bergantung pada satu database transaction saja untuk menjamin atomicity.
+
+Target flow perlu mengantisipasi failure window:
+
+```text
+upload object success
+        ↓
+descriptor insert failure
+        → orphan object risk
+
+or
+
+descriptor success
+        ↓
+Message reference failure
+        → orphan resource risk
+```
+
+Retry/idempotency/cleanup semantics harus ditetapkan sebelum migration final.
+
+---
+
+## 17. Reconciliation Result
 
 ### LOCKED
 
@@ -454,18 +684,22 @@ Tidak boleh mengklaim recovery attachment selesai hanya karena local file masuk 
 - Backend persistence menjadi source of truth untuk attachment yang berhasil dipersist.
 - Message tetap menjadi parent semantic object.
 - Existing Message storage tetap `public.conversations` pada current hierarchy.
+- Clear ≠ Delete adalah existing approved distinction.
 
 ### CONFIRMED GAP
 
 - GAP-C02: backend attachment persistence + Message reconstruction.
 - Renderer saat ini hanya memahami local path.
+- Recovery attachment persistence/reconstruction belum ada.
+- Recovery cleanup/retention runtime belum tersedia dalam current audited surface.
 
 ### NO GAP
 
 - Existing Message `metadata jsonb` tersedia.
 - Existing local `ConversationMessage` dapat serialize/deserialize local attachment path.
 - Existing local category directories sudah tersedia.
-- Tidak ada evidence yang mengharuskan table Message baru.
+- Current Recovery snapshot memang mencakup Conversation Messages.
+- Current Clone/Inheritance/Succession tidak otomatis memasukkan Conversation/Attachment.
 
 ### OPEN / OWNER LOCK NEEDED
 
@@ -473,15 +707,19 @@ Tidak boleh mengklaim recovery attachment selesai hanya karena local file masuk 
 - Storage backend mechanism dan bucket/object boundary.
 - Exact upload/persistence transaction boundary.
 - Exact attachment deletion semantics.
-- Final status taxonomy.
+- Exact status taxonomy.
+- Recovery attachment reference/reconstruction semantics.
+- Recovery snapshot retention/cleanup semantics.
+- Exact Clear temporary scope.
+- Apakah Clear memerlukan explicit restore action atau cukup kembali ke normal session/view boundary.
 
 ---
 
-## 15. Implementation Gate
+## 18. Implementation Gate
 
-**NO CODING YET** untuk attachment persistence.
+**NO CODING YET** untuk attachment persistence maupun Clear semantics.
 
-Implementation baru boleh dimulai setelah minimum contract berikut dikunci:
+Implementation attachment baru boleh dimulai setelah minimum contract berikut dikunci:
 
 ```text
 Message
@@ -506,11 +744,17 @@ Message reference
 FE reconstruction
         ↓
 local cache/rendering
+        ↓
+Recovery reference/reconstruction
+        ↓
+Delete/retention semantics
 ```
 
 Setelah itu urutan implementasi:
 
 ```text
+Contract lock
+ ↓
 Backend storage design
  ↓
 Backend schema/RPC
@@ -521,6 +765,10 @@ Message serialization/reconstruction
  ↓
 Local cache/filter reconciliation
  ↓
+Recovery integration
+ ↓
+Delete/retention integration
+ ↓
 Security verification
  ↓
 Conversation E2E
@@ -528,14 +776,16 @@ Conversation E2E
 APK build
 ```
 
+Clear tidak boleh diimplementasikan sebagai destructive backend delete hanya berdasarkan working proposal ini.
+
 ---
 
-## 16. Relation to Approved Contract
+## 19. Relation to Approved Contract
 
 Belum ada perubahan terhadap:
 
 `docs/contract/sh_project_conversation_message_contract.md`
 
-Attachment minimum di dokumen ini masih **PROPOSED** dan harus dipromosikan ke approved contract hanya setelah Owner mengunci bentuknya.
+Attachment minimum dan Clear temporary/session semantics di dokumen ini masih **PROPOSED / OPEN** dan harus dipromosikan ke approved contract hanya setelah Owner mengunci bentuknya.
 
 Tidak ada perubahan Canonical.
