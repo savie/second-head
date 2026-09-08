@@ -34,7 +34,8 @@ jobs:
           HOME: ${{ runner.temp }}/sh-home
         run: |
           test -f "$HOME/second-head/app/.dart_tool/package_config.json"
-          test -x "$HOME/.second-head/toolchain/flutter/bin/flutter"
+          command -v flutter
+          flutter --version >/dev/null
           test -x "$HOME/.second-head/android-sdk/platform-tools/adb"
           command -v supabase
           command -v psql
