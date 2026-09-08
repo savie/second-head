@@ -3,6 +3,9 @@ name: Frontend CI
 on:
   push:
     branches: [dev]
+    paths:
+      - 'app/**'
+      - '.github/workflows/frontend-ci.yml'
 
 jobs:
   flutter:
