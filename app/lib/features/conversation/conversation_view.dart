@@ -108,9 +108,32 @@ class ConversationViewState extends State<ConversationView> {
         }
       }
 
+      final cachedState = await StorageService.readConversationState();
+      final cachedMessages = <String, ConversationMessage>{};
+      if (cachedState?['messages'] is List) {
+        for (final raw in cachedState!['messages'] as List) {
+          if (raw is! Map) continue;
+          final cached = ConversationMessage.fromJson(
+            Map<String, dynamic>.from(raw),
+          );
+          final id = cached.runtimeRecordId;
+          if (id != null && id.isNotEmpty) cachedMessages[id] = cached;
+        }
+      }
+
+      final hydrated = <ConversationMessage>[];
+      for (final record in records) {
+        hydrated.add(
+          await _messageFromBackend(
+            record,
+            cached: cachedMessages[record.messageId],
+          ),
+        );
+      }
+
       _messages
         ..clear()
-        ..addAll(records.map(_messageFromBackend));
+        ..addAll(hydrated);
       if (summary != null) conversationTitle.value = summary.title;
       await _persistConversation();
 
@@ -150,11 +173,56 @@ class ConversationViewState extends State<ConversationView> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
   }
 
-  ConversationMessage _messageFromBackend(ConversationRecord record) {
+  Future<ConversationMessage> _messageFromBackend(
+    ConversationRecord record, {
+    ConversationMessage? cached,
+  }) async {
+    final cachedById = <String, ConversationAttachment>{
+      for (final attachment in cached?.attachments ?? const <ConversationAttachment>[])
+        attachment.attachmentId: attachment,
+    };
+
+    final attachments = <ConversationAttachment>[];
+    for (final attachment in record.attachments) {
+      final cachedAttachment = cachedById[attachment.attachmentId];
+      String? localPath = cachedAttachment?.localPath;
+      if (localPath != null && !await File(localPath).exists()) {
+        localPath = null;
+      }
+
+      if (localPath == null) {
+        try {
+          final bytes = await _runtime.downloadAttachment(attachment);
+          final stored = await StorageService.saveConversationFile(
+            bytes,
+            filename: attachment.filename,
+          );
+          localPath = stored.path;
+        } catch (_) {
+          // Durable backend attachment remains authoritative even when
+          // local reconstruction is temporarily unavailable.
+        }
+      }
+
+      attachments.add(attachment.copyWith(localPath: localPath));
+    }
+
+    // Preserve a failed attachment for same-session/restart retry when it
+    // exists only in the local cache and is not yet persisted backend-side.
+    for (final cachedAttachment in cachedById.values) {
+      if (cachedAttachment.isFailed &&
+          !attachments.any((a) => a.attachmentId == cachedAttachment.attachmentId)) {
+        attachments.add(cachedAttachment);
+      }
+    }
+
+    final firstPath = attachments.isNotEmpty ? attachments.first.localPath : null;
     return ConversationMessage(
       record.content,
       record.role == 'assistant',
       _formatTime(record.createdAt),
+      attachmentPath: firstPath,
+      attachments: attachments,
       runtimeRecordId: record.messageId,
       createdAt: record.createdAt,
     );
@@ -240,19 +308,14 @@ class ConversationViewState extends State<ConversationView> {
     final result = await FilePicker.platform.pickFiles(withData: true);
     if (result == null || result.files.isEmpty) return;
     final picked = result.files.single;
-    if (picked.bytes == null) return;
+    final bytes = picked.bytes;
+    if (bytes == null) return;
 
-    final stored = await StorageService.saveConversationFile(
-      picked.bytes!,
+    await _persistPickedAttachment(
+      bytes: bytes,
       filename: picked.name,
+      mimeType: picked.mimeType ?? _mimeTypeForFilename(picked.name),
     );
-    if (!mounted) return;
-    setState(() {
-      _messages.add(
-        ConversationMessage('', false, 'Now', attachmentPath: stored.path),
-      );
-    });
-    await _persistConversation();
   }
 
   Future<void> _pick(ImageSource source) async {
@@ -260,17 +323,153 @@ class ConversationViewState extends State<ConversationView> {
     final file = await _picker.pickImage(source: source, imageQuality: 88);
     if (file == null) return;
 
-    final stored = await StorageService.saveConversationImage(
-      await file.readAsBytes(),
-      extension: file.path.split('.').last,
+    final bytes = await file.readAsBytes();
+    final extension = file.path.split('.').last.toLowerCase();
+    await _persistPickedAttachment(
+      bytes: bytes,
+      filename: 'conversation_image.$extension',
+      mimeType: 'image/$extension',
     );
-    if (!mounted) return;
-    setState(() {
-      _messages.add(
-        ConversationMessage('', false, 'Now', attachmentPath: stored.path),
+  }
+
+  String _mimeTypeForFilename(String filename) {
+    final extension = filename.contains('.')
+        ? filename.split('.').last.toLowerCase()
+        : 'octet-stream';
+    const types = <String, String>{
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'webp': 'image/webp',
+      'heic': 'image/heic',
+      'heif': 'image/heif',
+      'pdf': 'application/pdf',
+      'txt': 'text/plain',
+      'json': 'application/json',
+      'csv': 'text/csv',
+      'mp3': 'audio/mpeg',
+      'wav': 'audio/wav',
+      'm4a': 'audio/mp4',
+      'mp4': 'video/mp4',
+      'mov': 'video/quicktime',
+      'webm': 'video/webm',
+    };
+    return types[extension] ?? 'application/octet-stream';
+  }
+
+  Future<void> _persistPickedAttachment({
+    required Uint8List bytes,
+    required String filename,
+    required String mimeType,
+  }) async {
+    final stored = await StorageService.saveConversationFile(
+      bytes,
+      filename: filename,
+    );
+
+    ConversationRecord messageRecord;
+    try {
+      messageRecord = await _runtime.recordUser('');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _messages.add(
+          ConversationMessage('', false, 'Now', attachmentPath: stored.path),
+        );
+      });
+      await _persistConversation();
+      return;
+    }
+
+    ConversationAttachment? attachment;
+    try {
+      attachment = await _runtime.createAttachment(
+        filename: filename,
+        mimeType: mimeType,
+        sizeBytes: bytes.length,
+        localPath: stored.path,
       );
-    });
-    await _persistConversation();
+      final persisted = await _runtime.uploadAndFinalizeAttachment(
+        attachment: attachment,
+        bytes: bytes,
+        messageId: messageRecord.messageId,
+      );
+      final message = ConversationMessage(
+        messageRecord.content,
+        false,
+        _formatTime(messageRecord.createdAt),
+        attachmentPath: stored.path,
+        attachments: [persisted],
+        runtimeRecordId: messageRecord.messageId,
+        createdAt: messageRecord.createdAt,
+      );
+      if (!mounted) return;
+      setState(() => _messages.add(message));
+      await _persistConversation();
+      _scrollToLatest();
+    } catch (_) {
+      final message = ConversationMessage(
+        messageRecord.content,
+        false,
+        _formatTime(messageRecord.createdAt),
+        attachmentPath: stored.path,
+        attachments: attachment == null
+            ? const []
+            : [attachment.copyWith(status: 'FAILED')],
+        runtimeRecordId: messageRecord.messageId,
+        createdAt: messageRecord.createdAt,
+      );
+      if (!mounted) return;
+      setState(() => _messages.add(message));
+      await _persistConversation();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Attachment upload failed'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _retryAttachment(int messageIndex) async {
+    if (messageIndex < 0 || messageIndex >= _messages.length) return;
+    final message = _messages[messageIndex];
+    final failedIndex = message.attachments.indexWhere((a) => a.isFailed);
+    if (failedIndex < 0) return;
+    final attachment = message.attachments[failedIndex];
+    final path = attachment.localPath;
+    if (path == null || !await File(path).exists()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Attachment source is no longer available')),
+        );
+      }
+      return;
+    }
+
+    try {
+      final persisted = await _runtime.uploadAndFinalizeAttachment(
+        attachment: attachment,
+        bytes: await File(path).readAsBytes(),
+        messageId: message.runtimeRecordId!,
+      );
+      if (!mounted) return;
+      setState(() {
+        message.attachments[failedIndex] = persisted;
+        message.attachmentPath = persisted.localPath;
+      });
+      await _persistConversation();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Attachment retry failed'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _showAttachments() {
@@ -405,9 +604,15 @@ class ConversationViewState extends State<ConversationView> {
   }
 
   Future<void> _messageActions(int index, {required bool assistant}) async {
+    final hasFailedAttachment = !assistant &&
+        index >= 0 &&
+        index < _messages.length &&
+        _messages[index].attachments.any((attachment) => attachment.isFailed);
     final actions = assistant
         ? const ['Copy', 'Regenerate', 'Delete']
-        : const ['Copy', 'Edit', 'Delete'];
+        : hasFailedAttachment
+            ? const ['Copy', 'Edit', 'Retry', 'Delete']
+            : const ['Copy', 'Edit', 'Delete'];
 
     final action = await showModalBottomSheet<String>(
       context: context,
@@ -430,7 +635,9 @@ class ConversationViewState extends State<ConversationView> {
                           ? Icons.edit_outlined
                           : action == 'Regenerate'
                               ? Icons.refresh_outlined
-                              : Icons.delete_outline,
+                              : action == 'Retry'
+                                  ? Icons.upload_outlined
+                                  : Icons.delete_outline,
                   label: action,
                   onTap: () => Navigator.pop(sheet, action),
                 ),
@@ -503,6 +710,11 @@ class ConversationViewState extends State<ConversationView> {
 
     if (action == 'Edit') {
       await _editMessage(index);
+      return;
+    }
+
+    if (action == 'Retry') {
+      await _retryAttachment(index);
     }
   }
 
@@ -857,6 +1069,7 @@ class ConversationMessage {
     this.assistant,
     this.time, {
     this.attachmentPath,
+    this.attachments = const [],
     this.runtimeRecordId,
     this.createdAt,
   });
@@ -864,7 +1077,8 @@ class ConversationMessage {
   String text;
   final bool assistant;
   final String time;
-  final String? attachmentPath;
+  String? attachmentPath;
+  final List<ConversationAttachment> attachments;
   final String? runtimeRecordId;
   final DateTime? createdAt;
 
@@ -873,6 +1087,7 @@ class ConversationMessage {
         'assistant': assistant,
         'time': time,
         'attachmentPath': attachmentPath,
+        'attachments': [for (final attachment in attachments) attachment.toJson()],
         'runtimeRecordId': runtimeRecordId,
         'createdAt': createdAt?.toIso8601String(),
       };
@@ -885,6 +1100,19 @@ class ConversationMessage {
         attachmentPath: json['attachmentPath'] is String
             ? json['attachmentPath'] as String
             : null,
+        attachments: json['attachments'] is List
+            ? (json['attachments'] as List)
+                .whereType<Map>()
+                .map(
+                  (row) => ConversationAttachment.fromMap(
+                    Map<String, dynamic>.from(row),
+                    localPath: row['local_path'] is String
+                        ? row['local_path'] as String
+                        : null,
+                  ),
+                )
+                .toList()
+            : const [],
         runtimeRecordId: json['runtimeRecordId'] is String
             ? json['runtimeRecordId'] as String
             : null,
