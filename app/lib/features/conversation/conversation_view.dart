@@ -316,7 +316,7 @@ class ConversationViewState extends State<ConversationView> {
     await _persistPickedAttachment(
       bytes: bytes,
       filename: picked.name,
-      mimeType: picked.mimeType ?? _mimeTypeForFilename(picked.name),
+      mimeType: _mimeTypeForFilename(picked.name),
     );
   }
 
