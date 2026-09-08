@@ -2,7 +2,7 @@
 
 **Project:** SECOND HEAD (SH)  
 **Version:** SH v1.0  
-**Status:** Canonical Addendum — Current Working Authority Boundary  
+**Status:** Canonical Addendum — Closed / Established Authority Boundary  
 **Bahasa:** Indonesia  
 **Scope:** Identity, Actor Classification, Authority Resolution, Runtime Context, Permission Policy, Enforcement  
 **Parent Authority:** `docs/canonical/SECOND_HEAD_SH_CORE_CANONICAL_v1.0_BILINGUAL.md`
@@ -234,11 +234,11 @@ SH-000 bukan Account kedua, bukan Primary SH kedua, bukan pengganti Creator, buk
 
 ### 6.4 Technical Boundary
 
-Semantics SH-000 sudah ditetapkan; bentuk teknis final untuk menyatakan atau me-resolve designation tersebut harus mengikuti backend contract dan trusted Supabase source of truth.
+Semantics SH-000 sudah ditetapkan; bentuk teknis untuk menyatakan atau me-resolve designation tersebut mengikuti backend contract dan trusted Supabase source of truth yang telah diverifikasi.
 
 Implementasi tidak boleh menjadikan `creator_ref`, UI state, reserved string pada client, atau client-supplied actor sebagai source of truth authority.
 
-Jika technical mapping memerlukan keputusan baru, keputusan tersebut harus ditetapkan dalam Technical Resolver Design sebelum implementation mengunci mekanismenya.
+Jika technical mapping baru diperlukan di masa depan, keputusan tersebut harus ditetapkan dalam Technical Resolver Design sebelum implementation mengunci mekanismenya.
 
 ---
 
@@ -293,7 +293,7 @@ SYSTEM_RUNTIME ≠ CREATOR
 RUNTIME ACCESS ≠ OWNERSHIP
 ```
 
-**Open implementation decision:** mekanisme teknis trusted runtime context yang menjadi source of truth masih harus ditetapkan. Implementation tidak boleh mengarang mekanisme tersebut.
+**Open implementation decision:** mekanisme teknis trusted runtime context yang menjadi source of truth masih harus ditetapkan. Ini adalah open technical boundary tersendiri dan bukan blocker terhadap semantic closure Actor Resolution.
 
 ---
 
@@ -465,40 +465,34 @@ Menebak actor
 
 ## 15. Current Implementation / Verification Position
 
-Status pekerjaan saat Addendum ini diselaraskan:
+### 15.1 Actor Resolution Status
 
-### Established
+**STATUS: CLOSED / VERIFIED**
 
-- Semantics actor/identity boundary telah ditetapkan.
-- Supabase DEV ditetapkan sebagai source of truth database/migration state.
-- Resolver model dan Resolved Actor/Identity Context contract telah ditetapkan sebagai dasar kerja.
-- Migration reconstruction pada DEV telah selesai dan tidak menjadi pekerjaan terbuka lagi.
+Scope Actor Resolution telah melalui inventory, contract ↔ implementation comparison, gap resolution, backend verification, contract verification, dan frontend representation.
 
-### Current Work Boundary
+Yang telah dibuktikan:
 
-Pekerjaan berada pada **5E — Implement + Verify**.
+- `public.resolve_identity()` tetap menjadi resolver identity Account/Primary SH berdasarkan trusted authenticated identity.
+- Creator Authority berasal dari trusted active authority assignment pada backend.
+- `public.resolve_actor_context()` menyediakan resolved context eksplisit yang mencakup Account, SH, ownership, actor, authority, dan SH designation.
+- `SH-000` dan `ORDINARY_SH` telah diverifikasi pada branch classification backend.
+- `ShIdentity` / `ResolvedActorContext` pada Flutter mengonsumsi hasil backend, bukan melakukan actor inference.
+- Actor context telah di-wire ke auth/session lifecycle.
+- CI Flutter/analyze/test/build berhasil pada implementation yang mengaktifkan actor context lifecycle.
+- User-visible Account surface telah menggunakan resolved actor/SH designation.
 
-Repository DEV saat ini memiliki infrastructure backend/auth dan identity yang relevan, tetapi keberadaan infrastructure tersebut tidak boleh dianggap sebagai bukti bahwa seluruh Actor Resolution contract sudah terimplementasi.
+### 15.2 SYSTEM_RUNTIME Status
 
-Verifikasi 5E harus membuktikan secara eksplisit:
+**STATUS: OPEN TECHNICAL DECISION**
 
-```text
-Contract field
-    ↕
-Actual backend implementation
-    ↕
-Trusted Supabase source of truth
-```
+Semantic boundary `SYSTEM_RUNTIME ≠ SH Identity` sudah established. Mekanisme teknis trusted runtime context tetap merupakan keputusan teknis tersendiri dan tidak boleh diarang.
 
-Terutama untuk:
+### 15.3 Scope Closure
 
-- actual backend actor resolver;
-- Creator Authority resolution;
-- `SH-000` / `ORDINARY_SH` classification;
-- trusted `SYSTEM_RUNTIME` boundary;
-- Resolved Actor / Identity Context exposure kepada consumer.
+Dengan status di atas, pekerjaan Actor Resolution Canonical Addendum dianggap **closed** untuk scope yang telah ditetapkan.
 
-Jika salah satu belum terbukti, 5E belum dianggap selesai.
+Dokumen ini tidak menjadi living inventory untuk seluruh SH Core. Temuan lintas-domain selanjutnya harus dicatat pada working/living reconciliation document terpisah.
 
 ---
 
@@ -512,23 +506,9 @@ Addendum ini adalah authority boundary dan contract guidance. Ia tidak mengizink
 - menjadikan `creator_ref` sebagai authority source;
 - menganggap `SH_ID` sebagai authority;
 - menganggap `dev_old` sebagai current source of truth;
-- membuka fase berikutnya sebelum blocker 5E selesai.
+- menganggap actor resolution yang telah closed sebagai alasan untuk melewati blocker pada domain SH Core lain.
 
-Urutan kerja tetap:
-
-```text
-5E Implement + Verify
-        ↓
-6 User-visible Representation
-        ↓
-7 Security Harness
-        ↓
-8 APK E2E
-        ↓
-9 Clone Integration
-```
-
-Step 6 dan setelahnya tidak dianggap unlocked hanya karena dokumen telah diperbarui; prerequisite implementation dan verification harus benar-benar terpenuhi.
+Urutan kerja lintas SH Core setelah Actor Resolution tidak ditentukan oleh dokumen ini. Domain berikutnya mengikuti Canonical, contract, dependency, dan hasil reconciliation masing-masing.
 
 ---
 
@@ -543,7 +523,7 @@ Addendum ini tidak:
 - menjadikan `SYSTEM_RUNTIME` sebagai SH identity;
 - menetapkan technical mechanism `SYSTEM_RUNTIME` yang belum diputuskan;
 - menggantikan permission policy dengan actor taxonomy;
-- menyatakan 5E selesai sebelum actual implementation diverifikasi.
+- menjadi inventory atau reconciliation document untuk seluruh SH Core.
 
 ---
 
@@ -567,4 +547,4 @@ Permission Policy
 Backend Enforcement
 ```
 
-Semantics sudah menjadi boundary kerja. Detail implementation hanya boleh mengikuti contract, source of truth, dan keputusan technical design yang telah dibuktikan/ditetapkan.
+Semantics Actor Resolution sudah menjadi boundary kerja yang **established dan verified**. Detail technical boundary yang memang masih OPEN, khususnya trusted `SYSTEM_RUNTIME`, harus diputuskan melalui proses technical design tersendiri dan tidak boleh diinferensikan dari implementation saat ini.
