@@ -49,7 +49,14 @@ jobs:
           command -v supabase >/dev/null 2>&1 || fail "supabase command missing"
           command -v psql >/dev/null 2>&1 || fail "psql command missing"
           test "$(git -C "$HOME/second-head" branch --show-current)" = "dev" || fail "repository is not on dev"
-          test -z "$(git -C "$HOME/second-head" status --porcelain)" || fail "repository working tree is dirty"
+          status="$(git -C "$HOME/second-head" status --porcelain)"
+          if [[ -n "$status" ]]; then
+            echo "BOOTSTRAP WORKTREE MUTATION DETECTED:" >&2
+            git -C "$HOME/second-head" status --short >&2
+            git -C "$HOME/second-head" diff --stat >&2
+            git -C "$HOME/second-head" diff >&2
+            fail "repository working tree is dirty"
+          fi
 
       - name: Run bootstrap again to verify idempotency
         env:
