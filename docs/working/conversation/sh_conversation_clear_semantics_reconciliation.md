@@ -48,15 +48,38 @@ Tidak ada perubahan Canonical melalui dokumen ini.
 
 ---
 
-## 2. Current Implementation / Backend Evidence
+## 2. Current Implementation / Backend + Frontend Evidence
 
 Current backend memiliki persistence Message di `public.conversations` dan runtime deletion untuk individual Message / Conversation.
 
 Recovery snapshot saat ini memasukkan `conversation_threads` dan `conversations`, dan restore juga mengembalikan keduanya.
 
-Tidak ditemukan runtime capability yang menjadikan Clear sebagai backend deletion atau cleanup operation.
+Backend **tidak memiliki runtime capability Clear terpisah** yang mempertahankan Message tetapi mengubah presentation/session state.
 
-Karena itu tidak boleh menganggap Clear sebagai Delete terselubung.
+Current frontend `ConversationView._clearConversation()` justru melakukan:
+
+```text
+Clear
+→ iterate Messages
+→ deleteMessage untuk setiap Message yang memiliki runtimeRecordId
+→ clear UI state
+→ persist local empty state
+```
+
+`runtimeRecordId` yang diteruskan ke bridge merupakan Message ID, walaupun parameter bridge saat ini bernama `conversationId`.
+
+Jadi current implementation secara faktual adalah:
+
+```text
+CURRENT FE BEHAVIOR
+Clear = destructive Message deletion + local empty-state persistence
+```
+
+Ini **bertentangan dengan approved semantic boundary `Clear ≠ Delete`**.
+
+**CONFIRMED IMPLEMENTATION SEMANTIC GAP.**
+
+Gap ini tidak boleh diselesaikan dengan menganggap behavior saat ini sebagai semantics yang baru; authority tetap berada pada Approved Contract dan Owner decision.
 
 ---
 
@@ -299,7 +322,8 @@ Clear hanya mengubah presentation/session state. Ia tidak mengubah ownership, ac
 
 ### CONFIRMED / EXISTING GAP
 
-- Final Clear behavior belum memiliki implementation semantics yang terverifikasi.
+- **Current FE Clear implementation masih destructive:** Clear memanggil delete Message untuk setiap Message yang memiliki runtimeRecordId.
+- Backend belum memiliki dedicated Clear operation/presentation-state capability.
 - Attachment persistence/reconstruction belum tersedia.
 - Attachment Recovery belum tersedia.
 - Attachment deletion/retention lifecycle belum tersedia.
