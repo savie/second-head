@@ -140,10 +140,16 @@ class ConversationAttachmentService {
     required String messageId,
   }) async {
     try {
-      await backendClient.storage.from(conversationAttachmentBucket).uploadBinary(
-        attachment.storageRef,
-        bytes,
-      );
+      // An upload can succeed server-side while the client receives a
+      // transport error. Always attempt finalize after an upload error so a
+      // retry can preserve the same attachment identity/storage_ref.
+      try {
+        await backendClient.storage.from(conversationAttachmentBucket).uploadBinary(
+          attachment.storageRef,
+          bytes,
+        );
+      } catch (_) {}
+
       final result = await backendClient.rpc(
         'runtime_finalize_conversation_attachment',
         params: {
