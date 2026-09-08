@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../core/backend/backend_client.dart';
 import '../../core/storage/storage_service.dart';
+import 'conversation_attachment_service.dart';
 
 class ConversationService {
   const ConversationService();
@@ -86,14 +87,24 @@ class ConversationService {
     final conversationId = await _ensureActiveConversation();
     final result = await backendClient.rpc('runtime_load_conversation_messages', params: {'p_conversation_id': conversationId, 'p_limit': limit.clamp(1, 200)});
     if (result is! List) return const [];
-    return result.whereType<Map>().map((row) => ConversationRecord.fromMap(Map<String, dynamic>.from(row))).toList();
+    final records = result.whereType<Map>().map((row) => ConversationRecord.fromMap(Map<String, dynamic>.from(row))).toList();
+    for (var i = 0; i < records.length; i++) {
+      final attachments = await const ConversationAttachmentService().loadForMessage(records[i].messageId);
+      records[i] = records[i].copyWith(attachments: attachments);
+    }
+    return records;
   }
 
   Future<List<ConversationRecord>> loadContext({int limit = 12}) async {
     final conversationId = await _ensureActiveConversation();
     final result = await backendClient.rpc('runtime_load_conversation_context_for_thread', params: {'p_conversation_id': conversationId, 'p_limit': limit.clamp(1, 12)});
     if (result is! List) return const [];
-    return result.whereType<Map>().map((row) => ConversationRecord.fromMap(Map<String, dynamic>.from(row))).toList();
+    final records = result.whereType<Map>().map((row) => ConversationRecord.fromMap(Map<String, dynamic>.from(row))).toList();
+    for (var i = 0; i < records.length; i++) {
+      final attachments = await const ConversationAttachmentService().loadForMessage(records[i].messageId);
+      records[i] = records[i].copyWith(attachments: attachments);
+    }
+    return records;
   }
 
   Future<ConversationRecord> record({required String role, required String content, Map<String, dynamic>? metadata}) async {
@@ -101,6 +112,30 @@ class ConversationService {
     final result = await backendClient.rpc('runtime_record_conversation_message', params: {'p_conversation_id': conversationId, 'p_role': role, 'p_content': content, 'p_metadata': metadata ?? const <String, dynamic>{}});
     if (result is! Map) throw StateError('Conversation runtime returned an invalid record.');
     return ConversationRecord.fromMap(Map<String, dynamic>.from(result));
+  }
+
+  Future<ConversationRecord> recordWithAttachments({
+    required String role,
+    required String content,
+    required List<PendingConversationAttachment> attachments,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final recordResult = await record(role: role, content: content, metadata: metadata);
+    final persisted = <ConversationAttachment>[];
+    for (final pending in attachments) {
+      final created = await const ConversationAttachmentService().create(
+        filename: pending.filename,
+        mimeType: pending.mimeType,
+        sizeBytes: pending.bytes.length,
+        localPath: pending.localPath,
+      );
+      persisted.add(await const ConversationAttachmentService().uploadAndFinalize(
+        attachment: created,
+        bytes: pending.bytes,
+        messageId: recordResult.messageId,
+      ));
+    }
+    return recordResult.copyWith(attachments: persisted);
   }
 
   Future<void> rename({required String conversationId, required String title}) async {
@@ -119,6 +154,14 @@ class ConversationService {
     await backendClient.rpc('runtime_delete_conversation_thread', params: {'p_conversation_id': conversationId});
     if (activeConversationId.value == conversationId) activeConversationId.value = null;
   }
+}
+
+class PendingConversationAttachment {
+  const PendingConversationAttachment({required this.filename, required this.mimeType, required this.bytes, this.localPath});
+  final String filename;
+  final String mimeType;
+  final Uint8List bytes;
+  final String? localPath;
 }
 
 class ConversationSummary {
@@ -156,24 +199,35 @@ class ProjectSummary {
     final name = row['name']?.toString();
     final created = DateTime.tryParse(row['created_at']?.toString() ?? '');
     final updated = DateTime.tryParse(row['updated_at']?.toString() ?? '');
-    if (id == null || name == null || created == null || updated == null) throw StateError('Project runtime returned an incomplete summary.');
+    if (id == null || name == null || created == null || updated == null) throw StateError('Conversation runtime returned an incomplete project summary.');
     return ProjectSummary(projectId: id, name: name, createdAt: created, updatedAt: updated);
   }
 }
 
 class ConversationRecord {
-  const ConversationRecord({required this.messageId, required this.threadId, required this.role, required this.content, required this.createdAt, required this.metadata});
+  const ConversationRecord({required this.messageId, required this.threadId, required this.role, required this.content, required this.createdAt, required this.metadata, this.attachments = const []});
   final String messageId;
   final String threadId;
   final String role;
   final String content;
   final DateTime createdAt;
   final Map<String, dynamic> metadata;
+  final List<ConversationAttachment> attachments;
   bool get isAssistant => role == 'assistant';
   String? get conversationTitle {
     final value = metadata['conversation_title'];
     return value is String && value.trim().isNotEmpty ? value.trim() : null;
   }
+
+  ConversationRecord copyWith({List<ConversationAttachment>? attachments}) => ConversationRecord(
+        messageId: messageId,
+        threadId: threadId,
+        role: role,
+        content: content,
+        createdAt: createdAt,
+        metadata: metadata,
+        attachments: attachments ?? this.attachments,
+      );
 
   factory ConversationRecord.fromMap(Map<String, dynamic> row) {
     final messageId = row['message_id']?.toString();
