@@ -200,6 +200,13 @@ PY
   need_cmd supabase
 }
 
+is_expected_workspace_artifact() {
+  case "$1" in
+    "?? app/.dart_tool/"|"?? app/pubspec.lock") return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 reconcile_repo() {
   if [[ -e "$REPO_DIR" && ! -d "$REPO_DIR/.git" ]]; then die "Repository path exists but is not a Git working tree: $REPO_DIR"; fi
   if [[ ! -d "$REPO_DIR/.git" ]]; then
@@ -207,13 +214,24 @@ reconcile_repo() {
     mkdir -p "$(dirname "$REPO_DIR")"
     git clone --branch "$BRANCH" "https://github.com/$REPO.git" "$REPO_DIR"
   fi
-  local origin branch status
+  local origin branch status unexpected line
   origin="$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null)" || die "Repository has no origin remote."
   [[ "$origin" == *"github.com/$REPO.git" ]] || die "Repository identity mismatch: origin=$origin"
   branch="$(git -C "$REPO_DIR" branch --show-current)"
   [[ "$branch" == "$BRANCH" ]] || die "Repository is on '$branch', expected '$BRANCH'. Refusing automatic branch switch."
   status="$(git -C "$REPO_DIR" status --porcelain)"
-  [[ -z "$status" ]] || die "Repository working tree is not clean. Refusing automatic overwrite/reconciliation."
+  unexpected=""
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    if ! is_expected_workspace_artifact "$line"; then
+      unexpected+="$line\n"
+    fi
+  done <<< "$status"
+  if [[ -n "$unexpected" ]]; then
+    printf '%b' "$unexpected" >&2
+    die "Repository working tree contains unexpected changes. Refusing automatic overwrite/reconciliation."
+  fi
+  [[ -z "$status" ]] || log "Ignoring expected Flutter workspace artifacts in repository: $(printf '%s' "$status" | tr '\n' ' ')"
   log "Repository ready: $(git -C "$REPO_DIR" rev-parse HEAD)"
 }
 
