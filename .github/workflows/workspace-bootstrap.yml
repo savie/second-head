@@ -33,12 +33,39 @@ jobs:
         env:
           HOME: ${{ runner.temp }}/sh-home
         run: |
-          test -x "$HOME/second-head/app/.dart_tool/package_config.json" || true
+          test -f "$HOME/second-head/app/.dart_tool/package_config.json"
           test -x "$HOME/.second-head/toolchain/flutter/bin/flutter"
           test -x "$HOME/.second-head/android-sdk/platform-tools/adb"
           command -v supabase
           command -v psql
-          git -C "$HOME/second-head" branch --show-current
           test "$(git -C "$HOME/second-head" branch --show-current)" = "dev"
           test -z "$(git -C "$HOME/second-head" status --porcelain)"
           test -f "$HOME/.second-head/env.sh"
+
+      - name: Run bootstrap again to verify idempotency
+        env:
+          HOME: ${{ runner.temp }}/sh-home
+        run: |
+          bash "$GITHUB_WORKSPACE/bootstrap-source/devtools/bootstrap.sh" \
+            --profile FULL \
+            --repo-dir "$HOME/second-head"
+          test "$(git -C "$HOME/second-head" branch --show-current)" = "dev"
+          test -z "$(git -C "$HOME/second-head" status --porcelain)"
+
+      - name: Verify dirty-worktree safety
+        env:
+          HOME: ${{ runner.temp }}/sh-home
+        run: |
+          printf '%s\n' 'bootstrap safety fixture' > "$HOME/second-head/BOOTSTRAP_SAFETY_MARKER"
+          git -C "$HOME/second-head" add BOOTSTRAP_SAFETY_MARKER
+          git -C "$HOME/second-head" -c user.name='bootstrap-test' -c user.email='bootstrap-test@example.invalid' commit -m 'test fixture: bootstrap safety' >/dev/null
+          printf '%s\n' 'uncommitted bootstrap safety fixture' >> "$HOME/second-head/BOOTSTRAP_SAFETY_MARKER"
+          set +e
+          bash "$GITHUB_WORKSPACE/bootstrap-source/devtools/bootstrap.sh" \
+            --profile FULL \
+            --repo-dir "$HOME/second-head"
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          grep -q '^uncommitted bootstrap safety fixture$' "$HOME/second-head/BOOTSTRAP_SAFETY_MARKER"
+          test "$(git -C "$HOME/second-head" branch --show-current)" = "dev"
