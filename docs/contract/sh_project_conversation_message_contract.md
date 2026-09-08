@@ -75,7 +75,7 @@ accounts
   └─ sh_instances
       ├─ projects
       └─ conversation_threads
-           └─ conversations
+           └── conversations
 ```
 
 Pada level application:
@@ -198,25 +198,41 @@ Capability yang perlu dipertahankan:
 - Record message;
 - Update message;
 - Delete individual message;
-- Clear behavior sesuai semantics yang telah ditetapkan dan hasil validasi final.
+- Clear sebagai non-destructive presentation/state behavior sesuai semantics contract.
 
 ### 6.1 Clear vs Delete
 
-Canonical membedakan Clear dan Delete.
+Approved semantic boundary:
+
+```text
+Clear ≠ Delete
+```
+
+Clear adalah **non-destructive** terhadap durable Conversation data:
 
 ```text
 Clear
-→ membersihkan isi chat / message dari tampilan atau state yang ditetapkan
 → Conversation tetap ada
-
-Delete Conversation
-→ menghapus Conversation
-→ child Messages mengikuti lifecycle deletion Conversation
+→ Message tidak dihapus
+→ Attachment tidak dihapus
+→ Recovery snapshot tidak dihapus
+→ tidak mengubah ownership
+→ tidak mengubah SH identity
 ```
 
-Behavior persistence/recovery untuk Clear masih harus divalidasi sebelum dianggap final sebagai implementation behavior baru.
+Clear boleh mengubah tampilan atau state presentation/session yang ditetapkan oleh design/implementation, tetapi detail scope dan persistence state tersebut bukan alasan untuk mengubah Clear menjadi operasi deletion.
 
-Contract ini tidak mengubah Canonical Clear semantics.
+Delete Conversation tetap merupakan destructive operation:
+
+```text
+Delete Conversation
+→ menghapus Conversation thread
+→ child Messages mengikuti lifecycle deletion
+```
+
+Current FE yang masih melakukan deletion individual Message ketika user memilih Clear adalah **implementation gap terhadap contract**, bukan semantics yang valid.
+
+Contract ini tidak mengubah Canonical; ia mengunci boundary `Clear ≠ Delete` untuk scope Project → Conversation → Message.
 
 ---
 
@@ -301,7 +317,7 @@ Boundary utama:
 - `more/side_menu.dart` menangani Sidebar/navigation, bukan seluruh management implementation.
 - Feature Journey, Lifecycle, Profile, Auth, About, dan Help & Support tetap berada pada boundary masing-masing.
 
-Contract ini tidak memaksa pemecahan `domain/data/presentation` apabila belum ada kebutuhan arsitektural yang nyata. Extraction model/service dilakukan hanya bila justified oleh boundary implementation.
+Contract ini tidak memaksa pemecahan `domain/data/presentation` apabila belum ada kebutuhan arsitektural yang nyata. Extraction model/service dilakukan hanya bila dibutuhkan untuk boundary yang lebih jelas.
 
 ---
 
@@ -407,6 +423,8 @@ UI tidak boleh menampilkan state sukses sebelum backend operation benar-benar be
 
 Empty state dan error state harus tersedia untuk list dan management surface sesuai kebutuhan flow.
 
+Clear tidak boleh menggunakan destructive Message Delete sebagai implementation shortcut.
+
 ---
 
 ## 14. Verification Contract
@@ -442,7 +460,7 @@ Minimum verification:
 - Record
 - Update
 - Delete individual message
-- Clear behavior setelah validasi
+- Clear: memastikan Message/Conversation tetap durable dan tidak terhapus
 
 ### Integration
 
@@ -492,7 +510,7 @@ Item berikut tetap terbuka:
 
 - authenticated adversarial verification untuk seluruh Project/Conversation/Message mutation;
 - final validation terhadap Delete Project transaction semantics;
-- final validation terhadap Clear behavior;
+- implementation correction untuk current FE Clear behavior;
 - dynamic AI conversation runtime/model integration;
 - full Sidebar responsibility reconciliation;
 - Google Login regression audit;
@@ -522,6 +540,8 @@ Regression Validation
 ```
 
 Tidak boleh membalik dependency dengan membuat UI mengasumsikan backend capability yang belum ada.
+
+Untuk Clear, implementation hanya boleh dilanjutkan setelah state/presentation design ditetapkan tanpa mengubah boundary `Clear ≠ Delete`.
 
 ---
 
