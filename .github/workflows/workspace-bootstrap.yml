@@ -36,6 +36,12 @@ jobs:
           set -u
           fail() { echo "BOOTSTRAP VERIFICATION FAILED: $1" >&2; exit 1; }
           test -f "$HOME/second-head/app/.dart_tool/package_config.json" || fail "Flutter package config missing"
+          test -f "$HOME/.second-head/env.sh" || fail "generated env.sh missing"
+          grep -q '^export ANDROID_SDK_ROOT=' "$HOME/.second-head/env.sh" || fail "ANDROID_SDK_ROOT missing from env.sh"
+          grep -q '^export ANDROID_HOME=' "$HOME/.second-head/env.sh" || fail "ANDROID_HOME missing from env.sh"
+          . "$HOME/.second-head/env.sh"
+          test -n "${ANDROID_SDK_ROOT:-}" || fail "ANDROID_SDK_ROOT is empty after sourcing env.sh"
+          test -d "$ANDROID_SDK_ROOT" || fail "ANDROID_SDK_ROOT does not exist: $ANDROID_SDK_ROOT"
           command -v flutter >/dev/null 2>&1 || fail "flutter command missing"
           flutter --version >/dev/null 2>&1 || fail "flutter execution failed"
           command -v adb >/dev/null 2>&1 || fail "adb command missing"
@@ -44,12 +50,6 @@ jobs:
           command -v psql >/dev/null 2>&1 || fail "psql command missing"
           test "$(git -C "$HOME/second-head" branch --show-current)" = "dev" || fail "repository is not on dev"
           test -z "$(git -C "$HOME/second-head" status --porcelain)" || fail "repository working tree is dirty"
-          test -f "$HOME/.second-head/env.sh" || fail "generated env.sh missing"
-          grep -q '^export ANDROID_SDK_ROOT=' "$HOME/.second-head/env.sh" || fail "ANDROID_SDK_ROOT missing from env.sh"
-          grep -q '^export ANDROID_HOME=' "$HOME/.second-head/env.sh" || fail "ANDROID_HOME missing from env.sh"
-          . "$HOME/.second-head/env.sh"
-          test -n "${ANDROID_SDK_ROOT:-}" || fail "ANDROID_SDK_ROOT is empty after sourcing env.sh"
-          test -d "$ANDROID_SDK_ROOT" || fail "ANDROID_SDK_ROOT does not exist: $ANDROID_SDK_ROOT"
 
       - name: Run bootstrap again to verify idempotency
         env:
