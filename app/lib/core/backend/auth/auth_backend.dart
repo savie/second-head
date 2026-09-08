@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../identity/sh_identity.dart';
 import 'auth_callback_handler.dart';
 
 class AuthBackend {
@@ -72,6 +73,19 @@ class AuthBackend {
 
   Future<dynamic> resolveIdentity() async {
     return Supabase.instance.client.rpc('resolve_identity');
+  }
+
+  Future<ResolvedActorContext?> resolveActorContext() async {
+    final response = await Supabase.instance.client.rpc('resolve_actor_context');
+    final rows = response as List<dynamic>;
+    if (rows.isEmpty) return null;
+
+    final row = rows.first;
+    if (row is! Map<String, dynamic>) {
+      throw const FormatException('Resolved actor context has an invalid shape.');
+    }
+
+    return ResolvedActorContext.fromMap(row);
   }
 
   Future<void> signOut() async {
