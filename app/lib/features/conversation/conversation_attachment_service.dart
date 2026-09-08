@@ -143,7 +143,6 @@ class ConversationAttachmentService {
       await backendClient.storage.from(conversationAttachmentBucket).uploadBinary(
         attachment.storageRef,
         bytes,
-        fileOptions: const FileOptions(upsert: false),
       );
       final result = await backendClient.rpc(
         'runtime_finalize_conversation_attachment',
@@ -189,6 +188,9 @@ class ConversationAttachmentService {
     if (!attachment.isPersisted) {
       throw StateError('Only persisted attachments can be downloaded.');
     }
-    return backendClient.storage.from(conversationAttachmentBucket).download(attachment.storageRef);
+    final bytes = await backendClient.storage
+        .from(conversationAttachmentBucket)
+        .download(attachment.storageRef);
+    return Uint8List.fromList(bytes);
   }
 }
