@@ -36,12 +36,14 @@ jobs:
           test -f "$HOME/second-head/app/.dart_tool/package_config.json"
           command -v flutter
           flutter --version >/dev/null
-          test -x "$HOME/.second-head/android-sdk/platform-tools/adb"
+          command -v adb
+          adb version >/dev/null
           command -v supabase
           command -v psql
           test "$(git -C "$HOME/second-head" branch --show-current)" = "dev"
           test -z "$(git -C "$HOME/second-head" status --porcelain)"
           test -f "$HOME/.second-head/env.sh"
+          grep -q 'ANDROID_SDK_ROOT' "$HOME/.second-head/env.sh"
 
       - name: Run bootstrap again to verify idempotency
         env:
