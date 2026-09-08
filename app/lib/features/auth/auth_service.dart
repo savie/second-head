@@ -130,24 +130,21 @@ class AuthService {
   }
 
   Future<void> resolveIdentity() async {
+    await resolveActorContext();
+  }
+
+  Future<void> resolveActorContext() async {
     if (_backend.currentSession == null) {
       clearProfileIdentity();
       identityContext.clear();
       throw const AuthBackendError('No authenticated session.');
     }
     try {
-      final result = await _backend.resolveIdentity();
-      if (result is! List || result.length != 1 || result.first is! Map) {
-        throw const AuthBackendError('Unable to resolve the authenticated SH identity.');
+      final context = await _backend.resolveActorContext();
+      if (context == null) {
+        throw const AuthBackendError('Unable to resolve the authenticated actor context.');
       }
-      final row = Map<String, dynamic>.from(result.first as Map);
-      final accountId = row['account_id']?.toString();
-      final shId = row['sh_id']?.toString();
-      final ownershipRole = row['ownership_role']?.toString();
-      if (accountId == null || shId == null || ownershipRole == null) {
-        throw const AuthBackendError('Authenticated identity is incomplete.');
-      }
-      identityContext.setIdentity(ShIdentity(accountId: accountId, shId: shId, ownershipRole: ownershipRole));
+      identityContext.setActorContext(context);
     } catch (error) {
       throw _toError(error);
     }
