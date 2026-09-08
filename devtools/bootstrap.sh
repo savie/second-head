@@ -78,7 +78,7 @@ write_env() {
 export PATH="$FLUTTER_ROOT/bin:\$PATH"
 export ANDROID_SDK_ROOT="$ANDROID_ROOT"
 export ANDROID_HOME="$ANDROID_ROOT"
-export PATH="\$ANDROID_ROOT/cmdline-tools/latest/bin:\$ANDROID_ROOT/platform-tools:\$ANDROID_ROOT/build-tools/current:\$PATH"
+export PATH="\$ANDROID_ROOT/cmdline-tools/latest/bin:\$ANDROID_ROOT/platform-tools:\$PATH"
 EOF2
 }
 
@@ -152,7 +152,11 @@ install_android_sdk() {
   export ANDROID_SDK_ROOT="$ANDROID_ROOT" ANDROID_HOME="$ANDROID_ROOT"
   export PATH="$ANDROID_ROOT/cmdline-tools/latest/bin:$ANDROID_ROOT/platform-tools:$PATH"
   log "Android SDK license acceptance is required for installation."
-  yes | sdkmanager --licenses >/dev/null || die "Android SDK license acceptance failed."
+  set +o pipefail
+  yes | sdkmanager --licenses >/dev/null
+  local licenses_status=${PIPESTATUS[1]}
+  set -o pipefail
+  [[ "$licenses_status" -eq 0 ]] || die "Android SDK license acceptance failed (sdkmanager exit=$licenses_status)."
   sdkmanager --install platform-tools >/dev/null
   local build_tools platform apksigner_path
   build_tools="$(sdkmanager --list | awk '/^  build-tools;[0-9]/{print $1}' | sort -V | tail -1)"
