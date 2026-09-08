@@ -13,92 +13,26 @@
 
 ## 1. Tujuan
 
-Dokumen ini menjadi living inventory untuk merekonsiliasi **seluruh evidence dokumentasi di `docs/` dan implementation Flutter/Dart aktual di `app/`** sebelum menarik kesimpulan baru atau melakukan implementation berikutnya.
+Dokumen ini adalah living inventory untuk merekonsiliasi evidence dokumentasi `docs/`, Supabase DEV, backend, dan frontend Flutter/Dart aktual di `app/` sebelum menarik kesimpulan atau masuk implementation berikutnya.
 
-Dokumen ini bukan pengganti Canonical, bukan pengganti Approved Contract, dan bukan daftar feature wish-list.
+Dokumen ini **bukan Canonical, bukan Approved Contract, dan bukan feature wish-list**.
 
-Tujuan reconciliation:
+Tujuan utama:
 
-1. mengetahui apa yang benar-benar ditetapkan oleh source authority;
-2. mengetahui apa yang benar-benar ada di Supabase DEV;
-3. mengetahui apa yang benar-benar ada di backend DEV;
-4. mengetahui apa yang benar-benar ada di frontend Flutter/Dart DEV;
-5. membedakan historical evidence dari current implementation;
-6. menemukan drift antar-dokumen dan antar-layer;
-7. memisahkan **VALIDATED / CURRENT IMPLEMENTATION / LEGACY / GAP / OPEN / DEFERRED**;
-8. memastikan dependency sebelum execution berikutnya.
+1. menetapkan source authority yang benar;
+2. mencatat kondisi aktual Supabase DEV dan current `dev`;
+3. membedakan current implementation dari historical evidence;
+4. menemukan documentation/contract drift;
+5. mengklasifikasikan VALIDATED / CURRENT IMPLEMENTATION / LEGACY / GAP / OPEN / DEFERRED;
+6. menjaga dependency dan execution gate.
 
-**Tidak ada coding pada tahap inventory/reconciliation kecuali user memberikan instruksi implementation setelah confirmed gap dan prerequisite dinyatakan.**
+**Tidak ada coding pada inventory/reconciliation kecuali user memberikan instruksi implementation setelah confirmed gap dan prerequisite dinyatakan.**
 
 ---
 
-## 2. Evidence Set yang Wajib Dibaca
+## 2. Evidence & Authority
 
-Reconciliation ini tidak boleh hanya berdasarkan Supabase.
-
-### 2.1 Dokumentasi current `dev`
-
-Folder `docs/` saat audit terdiri dari:
-
-```text
-docs/
-├── README.md
-├── canonical/
-│   ├── README.md
-│   ├── sh_actor_resolution_canonical_addendum_v1.0.md
-│   ├── sh_architecture_map.md
-│   ├── sh_canonical_map.md
-│   ├── sh_foundation_blueprint.md
-│   └── sh_supabase_map.md
-├── technology/
-│   ├── README.md
-│   └── sh_technology_boundaries.md
-├── architecture/
-│   ├── README.md
-│   └── sh_flutter_dart_architecture_and_implementation_working.md
-├── contract/
-│   ├── sh_backend_frontend_reconciliation_status.md
-│   ├── sh_project_conversation_message_contract.md
-│   └── sh_state_persistence_contract.md
-└── working/
-    └── sh_core_inventory_reconciliation.md
-```
-
-Seluruh dokumen current yang ditemukan di struktur tersebut menjadi evidence untuk reconciliation ini.
-
-Catatan penting: beberapa dokumen canonical map/README merujuk source Canonical atau dokumen historical yang tidak berada di tree `docs/` current. Referensi tersebut tidak boleh dianggap sebagai file current yang tersedia di repository hanya karena disebutkan di dalam dokumen.
-
-### 2.2 Current implementation
-
-Frontend current yang harus diperiksa adalah `app/`, bukan struktur `dev_old`.
-
-Evidence current yang telah diperiksa mencakup antara lain:
-
-- `app/lib/core/identity/sh_identity.dart`;
-- `app/lib/core/backend/auth/auth_backend.dart`;
-- `app/lib/features/auth/auth_service.dart`;
-- `app/lib/features/conversation/conversation_service.dart`;
-- `app/lib/features/conversation/conversation_runtime_bridge.dart`;
-- `app/lib/features/conversation/conversation_view.dart`;
-- `app/lib/features/project_conversation/project_conversation_management_view.dart`;
-- `app/lib/features/journey/*`;
-- `app/lib/features/lifecycle/*`;
-- core storage/recovery/profile/navigation surfaces;
-- current Flutter project structure dan CI/build evidence.
-
-Inventory `app/` harus diperlakukan sebagai **CURRENT IMPLEMENTATION evidence**, bukan otomatis sebagai contract authority.
-
-### 2.3 Supabase DEV
-
-Supabase DEV tetap authoritative untuk database/runtime persistence state dan harus direkonsiliasi terhadap repository migration artifacts, backend implementation, dan contract.
-
-### 2.4 `dev_old`
-
-`dev_old` hanya historical evidence: lineage, capability intent, historical implementation, bug/lesson, dan asal-usul semantics. Ia tidak menggantikan current DEV.
-
----
-
-## 3. Authority Hierarchy
+### 2.1 Authority hierarchy
 
 ```text
 OWNER / USER DECISION
@@ -114,597 +48,370 @@ CURRENT IMPLEMENTATION
 HISTORICAL / dev_old EVIDENCE
 ```
 
-Technology dan implementation tidak boleh mengambil alih SH semantics.
+Jika sumber berbeda: identifikasi konflik, jangan menggabungkan diam-diam, prioritaskan authority lebih tinggi, dan catat implementation sebagai state bila belum sesuai authority.
 
-Jika dua sumber berbeda:
+### 2.2 Current evidence set
 
-1. identifikasi konflik;
-2. jangan diam-diam menggabungkan definisi;
-3. authority lebih tinggi menang;
-4. current implementation dicatat sebagai implementation state bila belum sesuai authority;
-5. gap tidak boleh disamarkan sebagai keputusan baru.
+Current documentation yang relevan mencakup:
+
+```text
+docs/canonical/
+docs/technology/
+docs/architecture/
+docs/contract/
+docs/working/
+```
+
+Current implementation evidence mencakup `app/` Flutter/Dart, backend/runtime path, Supabase DEV schema/functions/RLS, migration artifacts, serta CI/build evidence.
+
+`dev_old` hanya historical evidence untuk lineage, capability intent, historical implementation, bug/lesson, dan asal semantics. Ia tidak menggantikan current DEV.
+
+### 2.3 Reconciliation method
+
+```text
+authority
+  ↓
+current docs / approved contract
+  ↓
+architecture + technology boundary
+  ↓
+Supabase DEV
+  ↓
+backend DEV
+  ↓
+frontend DEV
+  ↓
+dev_old evidence
+  ↓
+semantic + dependency reconciliation
+  ↓
+classification
+  ↓
+verification requirement
+```
+
+Analisis BE dan FE dilakukan **paralel** pada inventory. Execution implementation tetap **BE-first**.
 
 ---
 
-## 4. Classification
+## 3. Classification
 
 | Label | Makna |
 |---|---|
 | **CANONICAL / VALIDATED** | Didukung authority Canonical/current authoritative addendum. |
-| **APPROVED CONTRACT** | Working contract yang telah disetujui dan masih berlaku untuk scope-nya. |
-| **CURRENT IMPLEMENTATION** | Benar-benar ditemukan pada current DEV repository/app/backend. |
+| **APPROVED CONTRACT** | Contract yang disetujui dan berlaku untuk scope-nya. |
+| **CURRENT IMPLEMENTATION** | Terbukti ada pada current DEV repository/backend/frontend. |
 | **DERIVED / RECONSTRUCTED** | Hasil reconciliation/evidence, bukan authority baru. |
-| **LEGACY RESIDUE** | Historical/compatibility implementation yang belum menjadi target semantic baru. |
+| **LEGACY RESIDUE** | Historical/compatibility implementation. |
 | **BE-ONLY** | Authority/capability berada di backend/database/runtime. |
-| **FE-ONLY** | Presentation/navigation/interaction/local UI/device concern tanpa semantic authority SH. |
-| **BE ↔ FE** | Contract membutuhkan backend dan frontend consumer/representation. |
-| **GAP** | Kekurangan terbukti terhadap contract/authority/current dependency. |
-| **OPEN / UNRESOLVED** | Evidence belum cukup atau keputusan belum ditetapkan. |
-| **DEFERRED** | Sengaja belum dikerjakan/ditetapkan dan bukan otomatis blocker aktif. |
+| **FE-ONLY** | Presentation/navigation/interaction/local UI/device concern. |
+| **BE ↔ FE** | Membutuhkan backend dan frontend consumer/representation. |
+| **GAP** | Kekurangan terbukti terhadap authority/contract/dependency. |
+| **OPEN / UNRESOLVED** | Evidence/decision belum cukup. |
+| **DEFERRED** | Sengaja belum dikerjakan/ditetapkan dan bukan otomatis blocker. |
 | **PROPOSED / INTERPRETATION** | Usulan baru, bukan keputusan. |
 
-Keberadaan tabel, RPC, screen, atau folder tidak otomatis berarti capability tersebut selesai.
+Keberadaan tabel, RPC, screen, atau folder **tidak otomatis berarti capability selesai**.
 
 ---
 
-## 5. Reconciliation Method
+# 4. CURRENT RECONCILIATION CHECKPOINT
 
-Untuk setiap domain:
+## 4.1 Identity / Actor Resolution
 
-```text
-1. Canonical / authority
-        ↓
-2. Semua current docs yang relevan
-        ↓
-3. Approved contract
-        ↓
-4. Architecture / Technology Boundary
-        ↓
-5. Supabase DEV schema/data/constraints/RLS/functions
-        ↓
-6. Backend DEV implementation
-        ↓
-7. Frontend DEV implementation
-        ↓
-8. dev_old historical evidence
-        ↓
-9. Reconcile semantic + dependency
-        ↓
-10. VALIDATED / CURRENT / LEGACY / GAP / OPEN / DEFERRED
-        ↓
-11. Verification requirement
-```
-
-Analisis BE dan FE dilakukan **paralel** pada inventory. Implementation tetap **BE-first** ketika masuk execution.
-
----
-
-# 6. CROSS-DOCUMENT RECONCILIATION
-
-## 6.1 Canonical set
-
-Current canonical/reference set menetapkan antara lain:
+Canonical actor semantics tetap berlaku:
 
 - `1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH`;
-- Account_ID ≠ SH_ID;
-- Session_ID ≠ SH_ID;
+- `Account_ID ≠ SH_ID`;
 - Runtime ≠ SH Identity;
 - Model ≠ SH Identity;
-- Database ≠ SH Identity;
 - Creator Authority ≠ Private Data Access;
 - SH-000 Core Authority ≠ Private Data Access;
 - Runtime Access ≠ Ownership;
-- System Governance ≠ Omniscient Data Access;
-- Memory ≠ Knowledge;
-- Context ≠ Memory;
-- Experience ≠ Conversation;
-- Experience ≠ Journey;
-- DECOMMISSION ≠ Immediate Permanent Delete;
-- CLONE_SH ≠ SOURCE_SH;
-- CREATOR_SH is NON-CLONABLE;
-- INHERITANCE ≠ CLONE;
-- INHERITANCE ≠ Identity Transfer;
-- EVOLUTION ≠ Ownership Transfer;
-- Evolution / Migration / Recovery ≠ New SH Identity;
-- Core Evolution memerlukan Governance / Review;
-- Privacy / Visibility ≠ Transfer Eligibility.
+- System Governance ≠ Omniscient Data Access.
 
-Actor Resolution Addendum merupakan current authoritative addendum untuk actor/authority scope. Scope Actor Resolution sudah closed; `SYSTEM_RUNTIME` technical mechanism tetap open.
+Actor Resolution Addendum adalah authority current untuk actor/authority scope.
 
-## 6.2 Architecture / Technology
+Current DEV memiliki `resolve_actor_context()` dan FE `ResolvedActorContext` integration. Classification Creator / SH-000 dan Account Owner / ORDINARY_SH telah diverifikasi untuk scope current yang diuji.
 
-Architecture working reference menetapkan Flutter + Dart sebagai application foundation dan memisahkan Application, Runtime, Capability, Data, Storage, Platform, Provider, dan External Integration boundaries.
+**Status:** VALIDATED / CURRENT IMPLEMENTATION.  
+**Open:** technical mechanism untuk `SYSTEM_RUNTIME` masih OPEN; jangan disamakan dengan actor resolution.
 
-Technology Boundaries menetapkan Flutter, Dart, Supabase + PostgreSQL, GitHub Actions, provider-independent AI, adapter/connector boundary, MCP sebagai integration boundary, native/platform boundary, bounded offline, serta verification berlapis.
+## 4.2 Migration / Supabase reconstruction
 
-Ini adalah **direction/boundary**, bukan bukti bahwa seluruh architecture tersebut sudah implemented di `app/`.
+Migration source reconstruction telah selesai. Current DEV migration history berada pada **173 entries**, dengan migration terbaru pada checkpoint ini:
 
-## 6.3 State Contract
+`20260908032300_actor_resolution_context`
 
-State contract menetapkan dedicated `public.sh_states`, explicit `state_version`, authoritative `revision`, optimistic concurrency, authorized RPC path, recovery/migration semantics, dan larangan menggunakan `sh_instances.metadata` sebagai State authority.
+Jangan membuat migration historis baru, rename timestamp lama, mengubah isi migration historis, atau menggunakan `dev_old` sebagai source current.
 
-Current DEV telah memiliki `sh_states` dan State-related runtime/recovery lineage. Status implementation/verification harus dibaca dari current backend + app + Supabase, bukan dari bagian historical gap pada contract yang dibuat sebelum implementation.
+## 4.3 State
 
-## 6.4 Project / Conversation / Message Contract
+Approved State direction tetap menggunakan dedicated `public.sh_states`, explicit version/revision, authorized runtime path, optimistic concurrency, serta recovery/migration semantics. `sh_instances.metadata` bukan State authority.
 
-Approved contract lama menetapkan:
+Current DEV memiliki `sh_states` beserta lineage runtime/recovery.
+
+**Status:** CURRENT BACKEND IMPLEMENTATION; semantic/E2E verification tetap mengikuti contract dan verification layer yang relevan.
+
+## 4.4 Project / Conversation / Message
+
+Hierarchy current:
 
 ```text
+Account / SH
+    ↓
 Project
-  ↓
-Conversation
-  ↓
-Message
+    ↓
+Conversation Thread
+    ↓
+Conversation / Message persistence
 ```
 
-serta capability create/list/rename/delete/move/remove/delete message dan management surface.
-
-Namun dokumen contract tersebut secara eksplisit memiliki capability matrix yang sekarang **outdated terhadap current DEV** untuk beberapa operation.
-
-Current Flutter `ConversationService` sekarang memanggil capability untuk:
+Current backend/runtime path dan Flutter consumer sudah ada untuk:
 
 - list/create/rename/delete Project;
-- move/remove Conversation dari Project;
 - create/list/select/rename/delete Conversation;
+- move/remove Conversation dari Project;
 - load/record/update/delete Message;
-- load conversation context.
+- load Conversation Context.
 
-Karena current implementation sudah lebih maju daripada matrix contract lama, **contract lama tidak boleh dipakai sebagai bukti bahwa capability tersebut belum ada**. Sebaliknya, current implementation juga tidak otomatis mengubah contract menjadi authority.
+Current `ConversationService` memanggil runtime capability tersebut dan `ProjectConversationManagementView` menyediakan management surface.
 
-Disposition:
+Contract lama yang capability matrix-nya menyatakan sebagian operation masih gap telah direvisi/reconciled. Contract current sekarang menjadi reference untuk semantics, sedangkan implementation evidence dibaca dari current DEV.
 
-```text
-Old Contract capability matrix
-        ↓
-STALE / SUPERSEDED AS CURRENT IMPLEMENTATION INVENTORY
-        ↓
-Current DEV capability evidence
-        ↓
-New Conversation contract required before final semantic closure
-```
+**Status:** CURRENT IMPLEMENTATION / PARTIAL SEMANTIC CLOSURE.
 
-## 6.5 Backend / Frontend Reconciliation Status
+Catatan confirmed audit target: bridge update/delete message perlu tetap diaudit terhadap parameter contract karena terdapat indikasi adapter mismatch (`messageId` vs `conversationId`). Jangan coding sebelum gap ini dikonfirmasi.
 
-`sh_backend_frontend_reconciliation_status.md` masih menyatakan Frontend Integration `PENDING` dan beberapa backend capability sebagai gap.
+## 4.5 Memory / Knowledge / Experience / Journey
 
-Current Flutter source membuktikan bahwa frontend sudah mempunyai integration untuk capability Project/Conversation yang sebelumnya disebut gap.
-
-Maka status document tersebut **tidak boleh dibaca sebagai current implementation inventory**. Ia adalah checkpoint historical/working status yang belum direkonsiliasi setelah perkembangan FE/BE berikutnya.
-
-Disposition:
-
-- gunakan untuk lineage/status decision history;
-- jangan gunakan status `Frontend integration PENDING` sebagai klaim current app kosong;
-- jangan gunakan old capability-gap matrix sebagai klaim current RPC belum tersedia tanpa cross-check current backend.
-
----
-
-# 7. CURRENT FRONTEND INVENTORY
-
-## 7.1 Application Foundation
-
-Current `app/` menggunakan Flutter + Dart sesuai Technology Direction.
-
-Observed structure mencakup:
+Canonical distinctions tetap berlaku:
 
 ```text
-core/
-domain/
-capabilities/
-features/
-data/
-storage/
-platform/
-providers/
-presentation/
+Memory ≠ Knowledge
+Context ≠ Memory
+Experience ≠ Conversation
+Experience ≠ Journey
 ```
 
-Tetapi tidak seluruh folder architecture working sudah berisi implementation. Banyak capability folders masih `.gitkeep`.
+Current FE memiliki Journey surface dan interaction untuk Memory / Knowledge / Experience. Evidence source yang diperiksa menunjukkan sebagian semantics masih local/in-memory melalui `JourneyStore` dan belum dapat dianggap sebagai authorized backend integration hanya karena UI tersedia.
 
-**Kesimpulan:** Flutter foundation exists; architecture structure is partially scaffolded; capability implementation is selective, bukan complete A–I.
+**Status:** FE SURFACE EXISTS; backend/semantic integration OPEN.
 
-## 7.2 Identity / Auth
+## 4.6 Lifecycle / EOL / Clone / Inheritance / Legacy / Recovery / Succession
 
-Current FE memiliki:
+Current FE memiliki surface untuk Lifecycle, EOL, Clone, Inheritance, Legacy, Recovery, dan Succession. Kedalaman implementation berbeda antar-domain.
 
-- auth service;
-- backend auth boundary;
-- `ShIdentity`;
-- `ResolvedActorContext`;
-- actor context lifecycle;
-- Account/profile representation.
+Canonical boundaries tetap:
 
-Actor context dikonsumsi dari backend; FE tidak menjadi authority actor.
+- `DECOMMISSION ≠ Immediate Permanent Delete`;
+- `CLONE_SH ≠ SOURCE_SH`;
+- `CREATOR_SH` non-clonable;
+- `INHERITANCE ≠ CLONE`;
+- `INHERITANCE ≠ Identity Transfer`;
+- `EVOLUTION ≠ Ownership Transfer`;
+- Evolution / Migration / Recovery ≠ New SH Identity;
+- Privacy / Visibility ≠ Transfer Eligibility.
 
-**Status:** CURRENT IMPLEMENTATION + Actor Resolution integration verified untuk scope yang telah ditutup.
+**Status:** FE SURFACE / BACKEND DEPTH VARIES; semantic + E2E reconciliation OPEN.
 
-## 7.3 Conversation
+## 4.7 Recovery / Continuity
 
-Current FE memiliki real conversation implementation, bukan placeholder kosong:
+Current DEV memiliki recovery lineage dan integrasi conversation hierarchy. Recovery tidak boleh dianggap sebagai pembuatan identity baru.
 
-- conversation service;
-- runtime bridge;
-- conversation view;
-- project/conversation management view;
-- create/list/select/rename/delete;
-- project create/list/rename/delete;
-- move/remove conversation;
-- message load/record/update/delete;
-- search;
-- clear/delete/share/copy interaction;
-- local conversation persistence/fallback;
-- online/offline presentation.
+**Status:** CURRENT BACKEND LINEAGE; full cross-domain verification remains OPEN.
 
-`ConversationView` juga memiliki attachment entry untuk:
+## 4.8 Tools / Actions / External Integration
 
-- Camera;
-- Photos;
-- File.
+Architecture/technology boundaries tetap mendefinisikan capability, adapter/connector, MCP, native/platform, provider, dan external service boundaries.
 
-Namun jalur `_send()` masih menggunakan static assistant reply dan secara eksplisit menyatakan dynamic AI response akan terhubung kemudian.
-
-**Status:** CURRENT IMPLEMENTATION / PARTIAL — bukan empty scaffold dan bukan complete SH Runtime conversation.
-
-## 7.4 Project / Conversation Management
-
-Current `ProjectConversationManagementView` menyediakan:
-
-- search;
-- project list/create/rename/delete;
-- conversation list/create/rename/move/remove/delete;
-- empty states;
-- loading/refresh/error states;
-- confirmation untuk destructive actions.
-
-Ini berarti old contract's backend-gap matrix tidak lagi mencerminkan current app surface.
-
-**Status:** CURRENT IMPLEMENTATION; backend contract/semantic finalization dan verification tetap open.
-
-## 7.5 Memory / Knowledge / Experience / Journey
-
-Current FE memiliki Journey surface dan sub-surfaces untuk:
-
-```text
-Memory
-Knowledge
-Experience
-```
-
-serta Journey filters/cards/detail/editor/policy interaction.
-
-Namun evidence source code yang diperiksa menunjukkan sebagian surface tersebut masih menggunakan local/in-memory `JourneyStore` semantics dan tidak dapat otomatis dianggap sebagai authorized backend Memory/Knowledge/Experience integration.
-
-**Status:** FE SURFACE EXISTS; semantic/backend integration status OPEN.
-
-## 7.6 Lifecycle / EOL / Clone / Inheritance / Legacy / Recovery / Succession
-
-Current FE memiliki feature surfaces untuk:
-
-- Lifecycle;
-- EOL;
-- Clone;
-- Inheritance;
-- Legacy;
-- Recovery;
-- Succession.
-
-EOL mempunyai beberapa view/controller/service/state yang menunjukkan workflow yang lebih lengkap daripada placeholder sederhana.
-
-Sebaliknya, beberapa Clone/Inheritance/Legacy/Recovery/Succession entry surfaces masih sangat tipis dan tidak boleh dianggap sebagai complete execution integration hanya karena route/view exists.
-
-**Status:** CURRENT FE SURFACE / IMPLEMENTATION DEPTH VARIES; backend/semantic/E2E reconciliation OPEN.
-
-## 7.7 Local Storage / Offline
-
-Current conversation FE memiliki local persistence melalui `StorageService` dan fallback ketika backend conversation load gagal. Connectivity state juga direpresentasikan pada conversation UI.
-
-Ini **bukan bukti full offline architecture**.
-
-Yang terbukti:
-
-- bounded local conversation persistence exists;
-- connectivity detection exists;
-- fallback/local-only state exists.
-
-Yang belum otomatis terbukti:
-
-- queued mutations;
-- synchronization;
-- conflict policy;
-- authoritative reconciliation;
-- offline auth/session semantics;
-- full corruption/recovery model.
-
-**Status:** PARTIAL CURRENT IMPLEMENTATION; full offline target remains OPEN.
-
-## 7.8 Multimodal / File / Camera
-
-Current conversation UI memiliki file picker, image picker, camera/gallery actions, local attachment storage, preview, dan external file open.
-
-Ini membuktikan **FE interaction exists**, tetapi belum membuktikan seluruh Technology Boundary lifecycle:
-
-```text
-metadata → upload → processing → cancellation → retry → failure → permission → offline interruption
-```
-
-Current send path belum menjadi complete multimodal runtime/model pipeline.
-
-**Status:** FE IMPLEMENTED / runtime lifecycle OPEN.
-
-## 7.9 Tools / Actions / External Integration
-
-Current app tree memiliki integration/profile surfaces dan capability scaffolding. Architecture/technology docs mendefinisikan Tool/Action, Connector, MCP, dan external integration boundaries.
-
-Tidak boleh menyimpulkan generic Tool/Action bridge sudah complete hanya dari keberadaan representative integration code atau UI.
+Current app memiliki representative integration surfaces dan capability scaffolding, tetapi keberadaan integration code/UI tidak membuktikan generic Tool/Action bridge complete.
 
 **Status:** PARTIAL / OPEN.
 
 ---
 
-# 8. BACKEND ↔ FRONTEND RECONCILIATION MATRIX
+# 5. CURRENT FRONTEND INVENTORY
 
-| Domain | Backend / Supabase evidence | Frontend DEV evidence | Relationship | Current status |
-|---|---|---|---|---|
-| Identity / Actor | trusted identity + actor context resolver | auth lifecycle + `ResolvedActorContext` + account representation | BE → FE | **CLOSED for Actor scope** |
-| State | `sh_states` + State runtime/recovery lineage | storage/recovery support exists, dedicated State consumer must be distinguished | BE ↔ FE | **OPEN verification** |
-| Conversation | projects/threads/messages + runtime CRUD/context | real service/bridge/view/management | BE ↔ FE | **ACTIVE / reconciliation open** |
-| Memory | `memories` | Journey Memory surface exists | BE ↔ FE | **OPEN semantic integration** |
-| Knowledge | `knowledge` + FK validation | Journey Knowledge surface exists | BE ↔ FE | **OPEN semantic integration** |
-| Experience | `experiences` | Journey Experience surface exists | BE ↔ FE | **OPEN semantic integration** |
-| Journey | `journey_events` | Journey cards/detail/filter/editor | BE ↔ FE | **OPEN cross-domain** |
-| Lifecycle / EOL | lifecycle/terminal/transfer lineage | substantial EOL UI/controller/service | BE ↔ FE | **OPEN** |
-| Clone | clone agreements/clones | Clone surface | BE ↔ FE | **OPEN** |
-| Inheritance | authorization/events | Inheritance surface | BE ↔ FE | **OPEN** |
-| Succession | rules/events/runtime wrapper | Succession surface | BE ↔ FE | **OPEN / blocker** |
-| Recovery | snapshots/events + conversation continuity integration | recovery storage/view | BE ↔ FE | **OPEN E2E** |
-| Governance / Runtime | authority/policy/RLS/runtime boundaries | status/interaction surfaces | BE → FE | **OPEN** |
-| Multimodal | backend/provider capability boundary varies | file/image/camera interaction exists | BE ↔ FE | **PARTIAL** |
-| Offline | backend remains remote authority | bounded local fallback/connectivity exists | BE ↔ FE | **PARTIAL** |
-| Tools / Actions | representative runtime primitives | integration surfaces/scaffolding | BE ↔ FE | **OPEN generic bridge** |
-
----
-
-# 9. IMPORTANT CURRENT DRIFT / CONFLICT REGISTER
-
-## D1 — Contract lama vs current Project/Conversation implementation
-
-**Evidence:** old contract still lists Rename Project, Delete Project, Move Conversation, Remove from Project as backend gaps, sementara current Flutter `ConversationService` already invokes those RPCs.
-
-**Classification:** DOCUMENT DRIFT.
-
-**Disposition:** jangan coding untuk "menutup gap" yang sudah tidak terbukti. Cross-check current backend, lalu buat/reconcile contract Conversation baru sebelum semantic closure.
-
-## D2 — Backend/Frontend reconciliation status vs current Flutter
-
-Old status document says FE integration pending. Current Flutter already contains substantial Conversation/Project management integration and Actor Resolution integration.
-
-**Classification:** DOCUMENT DRIFT / STALE CHECKPOINT.
-
-## D3 — Architecture working document vs current implementation
-
-Architecture working document defines broad A–I slices and many future capabilities. Current app only implements selected slices; several capability folders remain scaffolds.
-
-**Classification:** PLAN ≠ CURRENT IMPLEMENTATION.
-
-## D4 — Supabase map vs current DEV
-
-`sh_supabase_map.md` lists 26 public tables and does not include later additions such as `projects`, `conversation_threads`, dan `sh_states`.
-
-**Classification:** CURRENT MAP DRIFT.
-
-Disposition: Canonical/reference map is not silently modified in this living-doc pass. Current DEV state remains primary implementation evidence.
-
-## D5 — Current docs reference source files not present in current `docs/`
-
-Some architecture/canonical references point to older Canonical/build-scope documents not present in current repository tree.
-
-**Classification:** DOCUMENTATION REFERENCE GAP.
-
-Disposition: do not invent or recreate those documents merely to satisfy references.
-
-## D6 — Conversation FE local fallback
-
-Conversation FE has local-only fallback and persistence when backend sync is unavailable.
-
-This is current implementation evidence, but it must not be interpreted as full offline authority.
-
-**Classification:** CURRENT IMPLEMENTATION / BOUNDED LOCAL FALLBACK.
-
-## D7 — Frontend semantic simulation / local Journey persistence
-
-Current Journey implementation includes local `JourneyStore` editing/persistence and a semantic hook/simulator path.
-
-It must not be promoted to backend-authoritative Memory/Knowledge/Experience semantics without reconciliation.
-
-**Classification:** CURRENT FE IMPLEMENTATION / SEMANTIC INTEGRATION OPEN.
-
----
-
-# 10. DOMAIN RECONCILIATION ORDER
-
-Working sequence remains dependency-oriented, tetapi **domain sequence bukan satu-satunya execution gate**.
+Current application adalah Flutter/Dart. Feature areas yang terbukti ada antara lain:
 
 ```text
-Identity
-   ↓
-State
-   ↓
-Conversation / Project / Message
-   ↓
-Memory
-   ↓
-Knowledge
-   ↓
-Experience
-   ↓
-Journey
-   ↓
-Lifecycle / EOL
-   ↓
-Clone
-   ↓
-Inheritance
-   ↓
-Succession
-   ↓
-Recovery
-   ↓
-Governance / Runtime
+auth/
+chat/
+conversation/
+home/
+journey/
+lifecycle/
+more/
+profile/
+project_conversation/
 ```
 
-State ditempatkan eksplisit setelah Identity karena State Contract sekarang merupakan domain locked yang telah memiliki dedicated storage/runtime lineage di DEV.
+### Identity / Auth
 
-Cross-domain verification dapat membuka dependency lebih awal/lintas sequence.
+`ShIdentity`, `ResolvedActorContext`, auth lifecycle, backend auth boundary, dan profile/account representation sudah terintegrasi untuk scope Actor Resolution yang diverifikasi.
+
+### Conversation
+
+Current surface bukan placeholder: conversation service/runtime bridge/view, project/conversation management, message operations, local persistence/fallback, search dan interaction tersedia.
+
+Namun `_send()` masih memiliki static assistant response; dynamic AI/runtime response belum menjadi complete path.
+
+**Status:** CURRENT IMPLEMENTATION / PARTIAL.
+
+### Journey
+
+Surface exists untuk Memory / Knowledge / Experience / Journey, tetapi backend semantic integration belum closed.
+
+### Lifecycle / EOL / Clone / Inheritance / Legacy / Recovery / Succession
+
+Surface exists dengan implementation depth yang berbeda. Route/view existence bukan bukti execution completeness.
+
+### Local / Offline
+
+Conversation memiliki bounded local persistence, connectivity state, dan fallback/local state. Belum terbukti full queued mutation, sync, conflict policy, authoritative reconciliation, offline auth semantics, atau complete corruption/recovery model.
+
+**Status:** PARTIAL CURRENT IMPLEMENTATION.
+
+### Multimodal / File / Camera
+
+FE memiliki picker/camera/gallery/file/preview/local attachment interaction. Belum terbukti complete metadata → upload → processing → cancellation → retry → failure → permission → offline lifecycle.
+
+**Status:** FE IMPLEMENTED / RUNTIME LIFECYCLE OPEN.
 
 ---
 
-# 11. CURRENT SECURITY / RUNTIME GATE
+# 6. BACKEND ↔ FRONTEND RECONCILIATION MATRIX
 
-Security Harness Step 7 **belum PASS penuh**.
+| Domain | Backend / Supabase | Frontend DEV | Relationship | Status |
+|---|---|---|---|---|
+| Identity / Actor | Resolver + trusted auth boundary | ResolvedActorContext consumer | BE ↔ FE | VALIDATED / CURRENT |
+| State | `sh_states` + runtime/recovery lineage | Current state/storage surfaces | BE ↔ FE | CURRENT / VERIFY |
+| Project | Runtime CRUD RPCs | Management UI + service | BE ↔ FE | CURRENT |
+| Conversation | Runtime CRUD/load/context/message RPCs | ConversationService + views | BE ↔ FE | CURRENT / SEMANTIC VERIFY |
+| Message | Load/record/update/delete runtime paths | Conversation UI/service | BE ↔ FE | CURRENT / ADAPTER AUDIT |
+| Memory | DEV table/runtime lineage | Journey surface | BE ↔ FE | OPEN |
+| Knowledge | DEV table/runtime lineage | Journey surface | BE ↔ FE | OPEN |
+| Experience | DEV table/runtime lineage | Journey surface | BE ↔ FE | OPEN |
+| Journey | `journey_events` | Journey UI/store | BE ↔ FE | OPEN |
+| Lifecycle / EOL | Backend lineage exists | Current lifecycle/EOL surfaces | BE ↔ FE | OPEN |
+| Clone | DEV schema/runtime lineage | Current surface | BE ↔ FE | OPEN |
+| Inheritance | DEV schema/runtime lineage | Current surface | BE ↔ FE | OPEN |
+| Succession | DEV schema/runtime lineage | Current surface | BE ↔ FE | SECURITY/SEMANTIC OPEN |
+| Recovery | Recovery events/integration | Current recovery surface | BE ↔ FE | OPEN |
+| Governance / Runtime | Boundary functions + runtime RPCs | Runtime-dependent consumers | BE ↔ FE | SECURITY VERIFICATION IN PROGRESS |
+| Tools / External | Google/task/external lineage | Representative UI/integration | BE ↔ FE | PARTIAL / OPEN |
 
-Yang sudah terbukti dari prior audit:
+---
 
-- runtime boundary tests SELF / OTHER / SPOOF / UNAUTH pass;
-- authenticated public runtime surface hampir seluruhnya memakai trusted identity helpers;
-- anonymous privileged execute surface sudah di-hardening;
-- unchecked succession primitives tidak langsung exposed;
-- `runtime_execute_succession(uuid)` tetap merupakan wrapper yang harus diaudit.
+# 7. DOCUMENT DRIFT REGISTER — UPDATED
 
-Exact next audit:
+Reconciliation document drift yang **sudah diperbaiki pada checkpoint ini**:
+
+| Document | Drift | Disposition |
+|---|---|---|
+| `docs/contract/sh_project_conversation_message_contract.md` | Capability matrix tidak lagi mencerminkan current Project/Conversation implementation | **REVISED / RECONCILED** |
+| `docs/contract/sh_backend_frontend_reconciliation_status.md` | FE integration masih berstatus `PENDING` walau current integration sudah ada | **REVISED / RECONCILED** |
+| `docs/canonical/sh_supabase_map.md` | Map belum mencerminkan Project/Conversation/SH State dan migration reconstruction current | **REFERENCE MAP REVISED; SEMANTIC CANONICAL UNCHANGED** |
+
+Dokumen di atas **tidak lagi diperlakukan sebagai stale pada poin-poin tersebut**.
+
+Masih perlu audit/reconciliation berikutnya bila current source menunjukkan drift baru. Jangan menganggap dokumen lain stale hanya berdasarkan umur; gunakan pola current source → evidence → classify → revise only what is justified.
+
+---
+
+# 8. SECURITY HARNESS / BACKEND GATE
+
+Security harness Step 7 **belum PASS final**.
+
+Yang sudah diverifikasi pada checkpoint sebelumnya:
+
+- runtime boundary SELF / OTHER / SPOOF / UNAUTH;
+- authenticated runtime surface inventory;
+- anon execute surface hardening;
+- unchecked primitive isolation;
+- sebagian besar public runtime functions menggunakan trusted identity boundary.
+
+Confirmed open target:
 
 ```text
 runtime_validate_selected_transfer_scope()
         ↓
-succession_rules data / ownership / authority semantics
+succession_rules semantics
         ↓
 runtime_execute_succession()
         ↓
-trusted identity / ownership / authority boundary
+wrapper / trusted identity / ownership boundary
         ↓
-Step 7 PASS or confirmed backend gap
+GAP atau NO-CODE-GAP determination
 ```
 
-Jangan melompat ke Step 7 closure hanya karena static/security baseline sudah clear.
+`runtime_execute_succession(uuid)` masih merupakan wrapper yang harus diaudit karena authenticated EXECUTE tersedia sementara penggunaan resolver trusted identity tidak terlihat langsung pada wrapper.
+
+Jangan menyatakan Step 7 PASS sebelum target di atas selesai diverifikasi.
 
 ---
 
-# 12. IMPLEMENTATION GATE
+# 9. CURRENT EXECUTION GATES
 
-Tidak ada implementation hanya berdasarkan item berikut:
-
-```text
-document says gap
-        ✗
-
-folder exists
-        ✗
-
-screen exists
-        ✗
-
-table exists
-        ✗
-
-historical implementation exists
-        ✗
-```
-
-Implementation baru boleh masuk execution apabila:
+Urutan kerja yang berlaku:
 
 ```text
-Authority / Contract
+Current source inventory
         ↓
-Current DEV evidence
+Evidence
         ↓
-Confirmed semantic / technical gap
+Classify
         ↓
-Dependency clear
+Revise only justified docs
         ↓
-Verification plan
+Verify SHA/content
         ↓
-User execution instruction
+BE security / semantic verification
+        ↓
+Confirmed gap inventory
+        ↓
+Implementation (BE-first)
+        ↓
+Backend verification
+        ↓
+Contract verification
+        ↓
+FE user-visible representation
+        ↓
+Security harness
+        ↓
+APK E2E / regression
+        ↓
+Clone integration
 ```
 
-Jika current implementation lebih maju daripada document, **reconcile document/status dulu**, bukan menambah implementation duplicate.
+### Hard gates
+
+1. Canonical tidak diubah tanpa instruksi eksplisit user.
+2. Historical `dev_old` tidak menjadi current source.
+3. Current UI tidak otomatis menjadi semantic authority.
+4. Tidak coding sebelum gap confirmed dan prerequisite jelas.
+5. Backend verification mendahului FE semantic completion ketika capability membutuhkan backend authority.
+6. Security failure/blocker menghentikan klaim completion domain terkait.
+7. `SYSTEM_RUNTIME` tetap open sampai technical mechanism diputuskan dan diverifikasi.
 
 ---
 
-# 13. CURRENT POSITION
+# 10. NEXT RECONCILIATION TARGET
 
-### Closed / Strongly Validated
+Setelah documentation drift pass ini, next target bukan mengulang dokumen yang sudah direvisi.
 
-- Actor Resolution semantic/implementation scope yang telah ditutup;
-- migration reconstruction disposition dan current migration baseline;
-- Knowledge FK validation;
-- broad runtime anon execute hardening;
-- Recovery ↔ Conversation backend hierarchy integration;
-- current Flutter Actor Context integration;
-- current Project/Conversation FE integration exists.
-
-### Current Implementation but Not Semantically Closed
-
-- Project/Conversation/Message runtime + management;
-- bounded local conversation persistence/fallback;
-- Journey UI/domain surfaces;
-- Lifecycle/EOL FE;
-- Clone/Inheritance/Succession/Recovery FE surfaces;
-- file/image/camera interaction;
-- profile/account representation;
-- current Flutter application architecture scaffold.
-
-### Open / Requires Reconciliation
-
-- new Conversation contract;
-- Conversation backend ↔ FE semantic closure;
-- Memory/Knowledge/Experience backend ↔ FE integration;
-- Journey cross-domain semantics;
-- Lifecycle/EOL backend ↔ FE;
-- Clone/Inheritance semantics and execution;
-- Succession wrapper security boundary;
-- Recovery authenticated E2E;
-- Governance/Runtime capability exposure;
-- generic Tool/Action authorization-execution bridge;
-- full multimodal lifecycle;
-- full offline/synchronization/conflict model;
-- `SYSTEM_RUNTIME` technical mechanism;
-- documentation drift/reference cleanup.
-
-### Deferred / Not Automatic Blocker
-
-- broad multi-provider portability;
-- full offline parity;
-- final local GGUF runtime implementation;
-- package/library choices not yet required by an active slice;
-- historical migration source reconstruction beyond the current development strategy.
-
----
-
-# 14. FINAL WORKING RULE
-
-SH sekarang harus diperlakukan sebagai **system reconciliation**, bukan sekadar daftar feature.
-
-Sebelum execution berikutnya:
+Prioritas berikut:
 
 ```text
-ALL CURRENT DOCS
-      ↓
-CURRENT APP / FE
-      ↓
-CURRENT BACKEND / SUPABASE
-      ↓
-HISTORICAL dev_old
-      ↓
-RECONCILIATION
-      ↓
-CONFIRMED GAP / OPEN / VALIDATED
-      ↓
-IMPLEMENTATION ONLY WHEN AUTHORIZED
+1. Security Harness Step 7 — succession wrapper / validation boundary
+2. Conversation adapter audit — update/delete message parameter contract
+3. Memory / Knowledge / Experience / Journey semantic BE ↔ FE reconciliation
+4. Lifecycle / EOL backend ↔ FE semantic reconciliation
+5. Clone / Inheritance / Recovery / Succession reconciliation
+6. Confirmed-gap implementation only
+7. APK E2E after backend + contract gates
 ```
 
-**Tidak ada silent promotion dari implementation menjadi authority.**
-
-**Tidak ada silent promotion dari document gap menjadi implementation gap.**
-
-**Tidak ada silent promotion dari historical capability menjadi current feature.**
-
-Dokumen ini adalah living reconciliation map dan harus diperbarui ketika evidence current berubah.
+**Current checkpoint conclusion:** documentation drift yang terbukti pada tiga dokumen di atas sudah direkonsiliasi. Living inventory sekarang harus dipakai sebagai index kerja terbaru, tetapi **belum menjadi declaration bahwa seluruh SH Core/domain implementation selesai**.
