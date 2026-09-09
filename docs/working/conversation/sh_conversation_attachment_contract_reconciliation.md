@@ -139,8 +139,10 @@ active attachment relationship removed
 cleanup queue
       ↓
 retention check
-      ↓
-Storage API cleanup jika tidak ada valid retention dependency
+      ├── Recovery ref ada → defer/retry
+      └── tidak ada ref + PERSISTED → Attachment Resource dihapus
+                                      ↓
+                              Storage API remove
 ```
 
 Conversation Delete mengikuti semantics yang sama setelah child Messages dihapus.
@@ -315,7 +317,7 @@ Current migration menerapkan:
 - cleanup queue tidak diekspos sebagai tabel langsung ke `anon`/`authenticated`;
 - cleanup worker memakai service-level Storage API access;
 - global orphan classification RPC hanya dapat dieksekusi oleh `service_role`;
-- reconciliation Edge Function hanya menerima JWT dengan `service_role` role.
+- reconciliation Edge Function metadata `verify_jwt=false`; authentication/authorization service-level diverifikasi di function body.
 
 Current source juga membatasi RPC execution sesuai trusted boundary dan mencabut PUBLIC/anon execution pada reconciliation internal.
 
@@ -350,6 +352,7 @@ Applied DEV migrations:
 20260909024233_conversation_attachment_cleanup
 20260909024649_conversation_attachment_orphan_reconciliation
 20260909024705_conversation_attachment_orphan_reconciliation_global
+20260909040729_conversation_attachment_maintenance_scheduler_reconciliation
 ```
 
 Repository migration sources are versioned under:
