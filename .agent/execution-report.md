@@ -7,7 +7,7 @@ inspect repository state
 docs/
 
 ## Operation
-INSPECT
+EDIT
 
 ## Status
-Inspection completed
+Edit applied: .agent/test_edit_target.txt
