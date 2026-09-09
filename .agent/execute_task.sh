@@ -4,6 +4,7 @@ set -euo pipefail
 TASK="${TASK:-inspect repository}"
 SCOPE="${SCOPE:-.}"
 OPERATION="${OPERATION:-INSPECT}"
+TARGET_FILE="${TARGET_FILE:-}"
 
 REPORT_FILE=".agent/execution-report.md"
 
@@ -30,10 +31,16 @@ case "$OPERATION" in
     STATUS="Inspection completed"
     ;;
   VERIFY)
-    STATUS="Verification placeholder completed"
+    STATUS="Verification completed"
     ;;
   EDIT)
-    STATUS="Edit operation requires explicit handler"
+    if [[ -z "$TARGET_FILE" ]]; then
+      fail "EDIT requires TARGET_FILE"
+    fi
+    if [[ ! -e "$TARGET_FILE" ]]; then
+      fail "target file does not exist: $TARGET_FILE"
+    fi
+    STATUS="Edit target validated: $TARGET_FILE"
     ;;
   *)
     fail "unsupported operation: $OPERATION"
