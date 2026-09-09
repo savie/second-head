@@ -2,7 +2,7 @@
 
 ## Status
 
-**FROZEN / LOCKED — DEV MIGRATION EXECUTED / CLEANUP BACKEND IMPLEMENTED / E2E VERIFICATION DEFERRED**
+**FROZEN / LOCKED — DEV MIGRATION EXECUTED / CLEANUP + ORPHAN RECONCILIATION BACKEND IMPLEMENTED / E2E VERIFICATION DEFERRED**
 
 Dokumen ini adalah working design record untuk migration attachment pada domain Conversation → Message. Dokumen ini bukan Canonical dan tidak mengubah Approved Contract.
 
@@ -117,7 +117,7 @@ Direct authenticated DELETE on the attachment resource is not granted.
 
 Storage object access is private and must be authorized against the Attachment Resource / trusted Account-SH boundary. Arbitrary storage path knowledge is not treated as authority.
 
-Physical Storage Object deletion is performed only through the Supabase Storage API by the backend cleanup worker; direct SQL deletion from `storage.objects` is not used.
+Physical Storage Object deletion is performed only through the Supabase Storage API by the backend cleanup/reconciliation workers; direct SQL deletion from `storage.objects` is not used.
 
 Unauthenticated/anon access is denied.
 
@@ -138,10 +138,12 @@ Cleanup reconciliation adds internal/backend worker boundaries:
 6. `runtime_claim_conversation_attachment_cleanup(limit)`
 7. `runtime_complete_conversation_attachment_cleanup(cleanup_id)`
 8. `runtime_fail_conversation_attachment_cleanup(cleanup_id, error)`
+9. `runtime_reconcile_conversation_attachment_storage_refs(text[])`
+10. `runtime_reconcile_conversation_attachment_storage_refs_internal(text[])` — service-role-only global classification.
 
 All user-facing attachment RPCs resolve/validate trusted Account/SH ownership at the backend boundary. Client-provided ownership values are not authority. Finalize validates target Message ownership and same Account/SH. Retry of the same logical attachment retains the same `attachment_id`.
 
-The cleanup queue is not directly exposed as a table to `anon` or `authenticated`; cleanup operations are mediated through SECURITY DEFINER RPCs and the authenticated backend worker.
+The cleanup queue is not directly exposed as a table to `anon` or `authenticated`; cleanup operations are mediated through SECURITY DEFINER RPCs and backend workers. The global reconciliation RPC is service-role-only.
 
 ---
 
@@ -224,6 +226,12 @@ Distinguish:
 Storage Object without Attachment Resource
 → orphan object
 
+Attachment Resource PENDING/FAILED + Storage Object exists
+→ retryable attachment resource; do not delete
+
+Attachment Resource PENDING/FAILED + Storage Object missing
+→ retryable upload; do not delete the resource
+
 Attachment Resource without active Message
 → may still be retained by Recovery
 
@@ -231,15 +239,17 @@ Attachment Resource without Message and without valid retention dependency
 → cleanup candidate
 ```
 
-Because Storage upload and PostgreSQL transaction are not atomic, implementation must provide a cleanup/reconciliation path for failed database persistence after successful object upload.
+Because Storage upload and PostgreSQL transaction are not atomic, implementation provides a cleanup/reconciliation path for failed database persistence after successful object upload.
 
 No synchronous blind object deletion is attached to Message DELETE or Clear.
 
-Current PENDING / PERSISTED / FAILED lifecycle and stable attachment identity support the intended retry boundary.
+Current PENDING / PERSISTED / FAILED lifecycle and stable attachment identity support the retry boundary.
 
-The implemented cleanup path handles the durable-retention case first: a persisted Attachment Resource whose Message relationship is removed is queued, checked for Recovery dependencies, removed from the Attachment Resource table only when safe, and its physical Storage Object is then removed through the Storage API. Storage deletion failures remain retryable in the cleanup queue.
+The durable cleanup path handles detached persisted resources through the cleanup queue, Recovery guard, and Storage API worker.
 
-PENDING/FAILED ambiguous upload reconciliation remains a separate orphan-reconciliation verification/work item and is not silently folded into durable Message deletion cleanup.
+The orphan reconciliation path scans the private attachment bucket, classifies each object against the authoritative Attachment Resource table, deletes only objects with no Attachment Resource, and reports PENDING/FAILED resources as retryable rather than destroying their stable identity.
+
+A PERSISTED Attachment Resource whose Storage Object is missing is surfaced as an integrity gap and is not silently deleted. This preserves the Recovery and durable-source-of-truth semantics for later explicit verification/recovery handling.
 
 ---
 
@@ -272,6 +282,9 @@ Minimum verification cases:
 - retry same logical attachment → same attachment identity;
 - failed persistence → not durable success;
 - Message DELETE → relationship removed and cleanup queued; object retained while Recovery dependency exists;
+- orphan Storage Object → service-only classification and Storage API removal;
+- PENDING/FAILED + object → retryable resource, not blind deletion;
+- PENDING/FAILED without object → retryable upload, not blind deletion;
 - Clear → no destructive attachment mutation;
 - Recovery create/restore → attachment dependency preserved/reconstructed or explicit gap;
 - Clone/Inheritance/Succession → no implicit attachment transfer.
@@ -290,13 +303,19 @@ Applied migrations:
 20260908113655_conversation_attachments
 20260908120543_revoke_conversation_attachment_truncate
 20260909024233_conversation_attachment_cleanup
+20260909024649_conversation_attachment_orphan_reconciliation
+20260909024705_conversation_attachment_orphan_reconciliation_global
 ```
 
-Repository migration source:
+Repository migration sources:
 
-`database/migrations/20260909120000_conversation_attachment_cleanup.sql`
+```text
+database/migrations/20260909024233_conversation_attachment_cleanup.sql
+database/migrations/20260909024649_conversation_attachment_orphan_reconciliation.sql
+database/migrations/20260909024705_conversation_attachment_orphan_reconciliation_global.sql
+```
 
-The repository migration source is the versioned source-of-truth for the applied DEV migration. The Supabase DEV migration history confirms the cleanup migration is applied as version `20260909024233` with name `conversation_attachment_cleanup`.
+Repository migration source and Supabase DEV migration history are now reconciled by exact migration version/name. No alternate schema artifact is treated as authoritative.
 
 Current implementation state:
 
@@ -309,6 +328,8 @@ Message ↔ Attachment relationship    IMPLEMENTED
 Recovery relationship                IMPLEMENTED
 Cleanup queue / retention guard      IMPLEMENTED
 Storage API cleanup worker           IMPLEMENTED
+Orphan classification RPC            IMPLEMENTED
+Service-only orphan reconciliation   IMPLEMENTED
 FE attachment wiring                 IMPLEMENTED
 ```
 
@@ -320,18 +341,16 @@ Upload/reload/retry E2E              DEFERRED
 Delete/cleanup/retention E2E         DEFERRED
 Recovery create/restore E2E          DEFERRED
 Real APK E2E                         DEFERRED
-
-PENDING/FAILED orphan reconciliation  NEXT BACKEND WORK
 ```
 
-No frontend implementation was changed for this cleanup backend work.
+No frontend implementation was changed for this backend work.
 
 ---
 
 ## 12. Execution Gate
 
-The design remains **FROZEN / LOCKED**. Cleanup implementation does not alter the approved Attachment semantic model or Clear semantics.
+The design remains **FROZEN / LOCKED**. Cleanup/reconciliation implementation does not alter the approved Attachment semantic model or Clear semantics.
 
-Backend source reconciliation is now aligned for the durable-retention cleanup path. Runtime/E2E execution is intentionally deferred per current scope.
+Backend source reconciliation is now aligned for both durable-retention cleanup and ambiguous-upload/orphan classification. Runtime/E2E execution is intentionally deferred per current scope.
 
-Next backend work after this checkpoint is the separate PENDING/FAILED orphan and ambiguous-upload reconciliation path. Authenticated E2E, Recovery E2E, and APK E2E remain later verification gates.
+Next work is execution verification, not another backend semantic/schema invention, unless E2E exposes a concrete source/runtime conflict.
