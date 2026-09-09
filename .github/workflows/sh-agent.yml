@@ -2,6 +2,11 @@ name: SH Agent
 
 on:
   workflow_dispatch:
+    inputs:
+      task:
+        description: "SH Agent task"
+        required: true
+        default: "inspect repository state"
 
 permissions:
   contents: write
@@ -19,9 +24,14 @@ jobs:
           git config user.name "second-head-agent"
           git config user.email "second-head-agent@users.noreply.github.com"
 
+      - name: Receive task
+        run: |
+          echo "Task: ${{ inputs.task }}"
+
       - name: Agent workspace ready
         run: |
           echo "SH Agent ready"
+          git status
 
       - name: Commit and push changes
         run: |
