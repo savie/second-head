@@ -2,7 +2,7 @@
 
 ## Status
 
-**RECONCILIATION ALIGNED — BACKEND SOURCE AUDIT COMPLETED / E2E REMAINS OPEN**
+**RECONCILIATION ALIGNED — DURABLE CLEANUP BACKEND IMPLEMENTED / E2E DEFERRED**
 
 Dokumen ini adalah working reconciliation record untuk domain Conversation → Message → Attachment.
 
@@ -136,7 +136,11 @@ Message removed
       ↓
 active attachment relationship removed
       ↓
-Storage cleanup jika tidak ada valid retention dependency
+cleanup queue
+      ↓
+retention check
+      ↓
+Storage API cleanup jika tidak ada valid retention dependency
 ```
 
 Conversation Delete mengikuti semantics yang sama setelah child Messages dihapus.
@@ -168,19 +172,19 @@ conversation_attachment_recovery_refs
 existing durable Attachment / Storage Object
 ```
 
-Snapshot source secara eksplisit memasukkan descriptor attachment yang persisted dan masih memiliki Message relationship; recovery refs juga dibuat untuk attachment tersebut. fileciteturn73file0L2-L2
+Snapshot source secara eksplisit memasukkan descriptor attachment yang persisted dan masih memiliki Message relationship; recovery refs juga dibuat untuk attachment tersebut.
 
-Restore/recovery path tersedia di current DEV migration history dan sudah direkonsiliasi ke Conversation hierarchy. Namun keberhasilan restore terhadap object yang tersedia/hilang belum dibuktikan melalui authenticated execution.
+Restore/recovery path tersedia di current DEV migration history dan sudah direkonsiliasi ke Conversation hierarchy. Keberhasilan restore terhadap object yang tersedia/hilang belum dieksekusi dan tetap menjadi E2E/verification gate.
 
 Binary object tidak di-embed ke JSON manifest; Recovery mempertahankan descriptor/reference yang diperlukan untuk reconstruction dan retention.
 
-**Status: BACKEND IMPLEMENTATION PRESENT / SOURCE RECONCILED / EXECUTION VERIFICATION OPEN.**
+**Status: BACKEND IMPLEMENTATION PRESENT / SOURCE RECONCILED / E2E DEFERRED.**
 
 ---
 
-## 5. Delete / Retention Reconciliation — BACKEND AUDIT
+## 5. Delete / Retention Reconciliation — BACKEND IMPLEMENTED
 
-Contract menetapkan bahwa Delete Message / Conversation menghapus active Attachment relationship, sementara physical Storage Object mengikuti retention rule dan tidak boleh blind-delete bila masih dibutuhkan Recovery. fileciteturn80file0L2-L2
+Contract menetapkan bahwa Delete Message / Conversation menghapus active Attachment relationship, sementara physical Storage Object mengikuti retention rule dan tidak boleh blind-delete bila masih dibutuhkan Recovery.
 
 Current backend source mengonfirmasi:
 
@@ -189,13 +193,27 @@ Current backend source mengonfirmasi:
 - Delete Conversation Thread memakai cascade ke child Messages;
 - `runtime_detach_conversation_attachment` juga hanya memutus relationship dengan mengosongkan `message_id`.
 
-Source untuk Delete Message / Conversation menunjukkan tidak ada physical Storage Object delete pada operasi tersebut; thread deletion cascade berasal dari FK `conversations.thread_id → conversation_threads.conversation_id ON DELETE CASCADE`. fileciteturn73file0L2-L2 fileciteturn78file1L50-L58
+Backend cleanup sekarang sudah ditambahkan:
 
-**Important finding:** current DEV source belum menunjukkan cleanup worker/RPC/path yang menghapus Storage Object atau menghapus Attachment Resource ketika sudah tidak memiliki active Message maupun valid Recovery dependency.
+```text
+Message relationship → NULL
+        ↓
+AFTER UPDATE trigger
+        ↓
+conversation_attachment_cleanup_queue
+        ↓
+retention check
+        ├── Recovery ref ada → defer/retry
+        └── tidak ada ref + PERSISTED → Attachment Resource dihapus
+                                      ↓
+                              Storage API remove
+```
 
-Jadi item cleanup **bukan sekadar verification-open**; pada source saat ini cleanup mechanism belum teridentifikasi/terimplementasi.
+Physical Storage Object **tidak** dihapus melalui SQL `DELETE FROM storage.objects`. Worker `runtime-conversation-attachment-cleanup` memakai Supabase Storage API, sesuai Storage boundary platform.
 
-Relationship removal sendiri dapat dinyatakan **SOURCE-VERIFIED**. Physical retention/cleanup tetap **OPEN BACKEND GAP**.
+Jika Storage API gagal, queue tetap retryable (`FAILED` → `available_at` berikutnya). Jika attachment sudah tidak ada, queue tetap dapat memproses Storage Object berdasarkan retained `storage_ref`.
+
+**Status: DURABLE RETENTION / ATTACHMENT RESOURCE CLEANUP BACKEND IMPLEMENTED.**
 
 ---
 
@@ -222,15 +240,16 @@ Yang sudah dapat direkonsiliasi dari source:
 - failed upload dapat direpresentasikan sebagai `FAILED`;
 - retry logical attachment mempertahankan `attachment_id`;
 - persisted attachment memakai stable `storage_ref`;
-- Recovery refs mencegah Attachment Resource yang masih direferensikan snapshot dihapus secara sembarang karena FK `ON DELETE RESTRICT`. fileciteturn73file0L2-L2
+- Recovery refs mencegah Attachment Resource yang masih direferensikan snapshot dihapus secara sembarang karena FK `ON DELETE RESTRICT`;
+- durable detached `PERSISTED` attachment sekarang memiliki authoritative cleanup queue + Storage API worker.
 
-Yang belum tersedia/terbukti:
+Yang **belum selesai** dan menjadi backend work berikutnya:
 
-- authoritative cleanup path untuk orphan Storage Object;
-- cleanup path untuk Attachment Resource yang sudah tidak memiliki Message maupun Recovery dependency;
-- runtime reconciliation untuk ambiguous upload failure window.
+- authoritative reconciliation untuk orphan Storage Object yang **tidak lagi memiliki Attachment Resource** akibat ambiguous upload/database failure;
+- reconciliation khusus PENDING/FAILED upload state yang tidak pernah memperoleh active Message relationship;
+- runtime verification untuk failure window tersebut.
 
-**Status: RESOURCE STATE / RETRY IMPLEMENTED / ORPHAN CLEANUP BACKEND GAP.**
+**Status: DURABLE RETENTION CLEANUP IMPLEMENTED / AMBIGUOUS-UPLOAD ORPHAN RECONCILIATION REMAINS NEXT BACKEND WORK.**
 
 ---
 
@@ -276,11 +295,13 @@ Current migration menerapkan:
 - trusted RPC boundary;
 - create/finalize/fail/load/detach tidak menerima Account/SH sebagai client authority;
 - Storage read hanya untuk persisted attachment milik current account/SH;
-- Storage write hanya untuk PENDING/FAILED attachment milik current account/SH.
+- Storage write hanya untuk PENDING/FAILED attachment milik current account/SH;
+- cleanup queue tidak diekspos sebagai tabel langsung ke `anon`/`authenticated`;
+- cleanup worker memakai service-level Storage API access, sementara identity/queue mutation tetap melewati trusted backend RPC.
 
-Current source juga membatasi RPC execution ke `authenticated` / `service_role` dan mencabut PUBLIC/anon execution. fileciteturn73file0L2-L2
+Current source juga membatasi RPC execution ke `authenticated` / `service_role` dan mencabut PUBLIC/anon execution.
 
-**Status: SOURCE-VERIFIED DESIGN/IMPLEMENTATION / AUTHENTICATED RUNTIME ISOLATION TEST OPEN.**
+**Status: SOURCE-VERIFIED DESIGN/IMPLEMENTATION / AUTHENTICATED RUNTIME TEST DEFERRED.**
 
 ---
 
@@ -293,28 +314,26 @@ Current `dev` source menunjukkan backend dan frontend attachment path sudah wire
 ```text
 public.conversation_attachments
 public.conversation_attachment_recovery_refs
+public.conversation_attachment_cleanup_queue
 private bucket: second-head-conversation
 trusted create/finalize/fail/load/detach RPC boundary
+cleanup claim/complete/fail RPC boundary
+authenticated Edge Function: runtime-conversation-attachment-cleanup
 ```
 
-Migration yang sudah applied di DEV:
+Applied DEV migrations:
 
 ```text
 20260908113655_conversation_attachments
 20260908120543_revoke_conversation_attachment_truncate
+20260909024233_conversation_attachment_cleanup
 ```
 
-Backend contract checkpoint:
+Repository migration source for the cleanup change:
 
-```text
-create(filename, mime_type, size_bytes)
-finalize(attachment_id, message_id)
-fail(attachment_id)
-load(message_id)
-detach(attachment_id)
-```
+`database/migrations/20260909120000_conversation_attachment_cleanup.sql`
 
-`runtime_finalize_conversation_attachment` menggunakan stable `attachment_id` + `message_id`; storage reference tidak dikirim ulang sebagai finalize authority. fileciteturn73file0L2-L2
+The cleanup migration source is versioned in GitHub and the corresponding migration is confirmed in Supabase DEV migration history. The repository source and applied DEV migration are treated as the same migration artifact; no separate ad-hoc schema variant was created.
 
 ### Frontend checkpoint
 
@@ -342,11 +361,9 @@ Current FE implementation yang terkonfirmasi di source:
 - failed attachment yang belum persisted dapat dipertahankan di local state untuk retry;
 - attachment descriptor diserialisasi ke local conversation state.
 
-Source checkpoint juga menunjukkan upload transport error tetap mencoba finalize agar retry dapat mempertahankan identity/storage reference yang sama.
-
 **Status: IMPLEMENTED / BACKEND + FE WIRED.**
 
-Implementation presence bukan E2E PASS. Verification tetap mencakup upload, reload, retry, isolation, delete/cleanup, recovery, dan APK behavior.
+Implementation presence bukan E2E PASS. E2E tetap sengaja ditunda sesuai scope sesi.
 
 ---
 
@@ -361,26 +378,25 @@ Design authority:
 Execution checkpoint saat ini:
 
 ```text
-Migration/schema          IMPLEMENTED
-Private storage boundary  IMPLEMENTED
-RPC boundary              IMPLEMENTED
-Recovery relationship     IMPLEMENTED
-FE integration            IMPLEMENTED
-Delete relationship       SOURCE-VERIFIED
-Security boundary         SOURCE-VERIFIED
-Cleanup mechanism         OPEN BACKEND GAP
-Semantic execution        OPEN
-Authenticated E2E         OPEN
-APK E2E                    OPEN
+Migration/schema                 IMPLEMENTED
+Private storage boundary        IMPLEMENTED
+RPC boundary                    IMPLEMENTED
+Recovery relationship            IMPLEMENTED
+FE integration                   IMPLEMENTED
+Delete relationship              SOURCE-VERIFIED
+Durable cleanup mechanism        IMPLEMENTED
+Ambiguous-upload orphan cleanup NEXT BACKEND WORK
+Authenticated E2E                DEFERRED
+APK E2E                          DEFERRED
 ```
 
-Tidak ada migration/schema alternatif yang boleh dibuat tanpa conflict evidence atau perubahan authority.
+Tidak ada migration/schema alternatif yang dibuat.
 
 ---
 
 ## 11. Verification / Closure Queue
 
-### Bisa ditutup dari source audit
+### Bisa ditutup dari source audit / implementation reconciliation
 
 1. Attachment schema / durable identity.
 2. Private storage boundary.
@@ -391,24 +407,27 @@ Tidak ada migration/schema alternatif yang boleh dibuat tanpa conflict evidence 
 7. Clear → tidak ada backend Clear mutation path; Clear tetap non-destructive sesuai locked semantics.
 8. Recovery snapshot capture → persisted attachment descriptor + recovery reference path.
 9. Cross-domain transfer exclusion.
+10. Durable detached attachment cleanup queue.
+11. Recovery-aware retention guard.
+12. Storage API cleanup worker path.
+13. Repository migration ↔ Supabase DEV migration history reconciliation.
 
-### Masih membutuhkan execution / runtime verification
+### Masih membutuhkan execution / runtime verification — sengaja ditunda
 
-10. authenticated upload → persisted;
-11. reload/reopen → attachment reconstructed;
-12. private storage download dengan identity yang benar;
-13. failed/ambiguous upload → retry memakai attachment identity yang sama;
-14. wrong Account/SH access denied;
-15. recovery restore terhadap object/resource yang tersedia;
-16. missing object/resource → explicit recovery gap;
-17. real APK E2E.
+14. authenticated upload → persisted;
+15. reload/reopen → attachment reconstructed;
+16. private storage download dengan identity yang benar;
+17. failed/ambiguous upload → retry memakai attachment identity yang sama;
+18. wrong Account/SH access denied;
+19. recovery restore terhadap object/resource yang tersedia;
+20. missing object/resource → explicit recovery gap;
+21. real APK E2E.
 
-### Backend gap yang nyata, bukan sekadar test
+### Backend work berikutnya
 
-18. Storage Object cleanup / retention reconciler setelah active Message relationship hilang dan tidak ada valid Recovery dependency.
-19. Attachment Resource cleanup setelah tidak ada active Message dan tidak ada valid Recovery dependency.
-20. Authoritative orphan/ambiguous upload reconciliation path.
+22. Authoritative orphan/ambiguous-upload reconciliation untuk Storage Object yang sudah kehilangan Attachment Resource.
+23. PENDING/FAILED cleanup/reconciliation semantics untuk upload failure window.
 
-**Overall attachment status: CONTRACT PASS / BACKEND SOURCE AUDIT ALIGNED / E2E + CLEANUP GAP OPEN.**
+**Overall attachment status: CONTRACT PASS / BACKEND DURABLE CLEANUP IMPLEMENTED / ORPHAN RECONCILIATION NEXT / E2E DEFERRED.**
 
-No FE implementation was changed by this reconciliation update.
+No FE implementation was changed by this cleanup backend update.
