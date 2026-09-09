@@ -540,13 +540,15 @@ STOP / FAILURE SAFETY TEST
 SH WORKSPACE READY
 ```
 
-Implementation wajib mengikuti SAFE EDIT RULE:
+Implementation wajib menjaga EDIT INTEGRITY:
 
-- jangan overwrite file berdasarkan fetch yang truncated;
-- repository HEAD adalah source of truth;
-- gunakan patch/diff/Git-native partial edit untuk file besar;
-- update_file hanya bila full current content tersedia;
-- setelah edit verify diff dan file integrity;
-- jika safe edit tidak tersedia, STOP sebelum write.
+- current repository state adalah source of truth;
+- gunakan mekanisme edit yang paling sesuai dengan kondisi file dan capability workspace;
+- mekanisme dapat berupa patch/diff, Git-native edit, structured update, full-file replacement, atau mekanisme repository-native lain yang equivalent;
+- jangan melakukan edit yang berisiko menghilangkan atau mereconstruct content yang tidak tersedia secara utuh;
+- setelah edit wajib verify diff dan file integrity terhadap expected change;
+- jika integrity edit tidak dapat dipastikan, STOP sebelum write.
+
+Tujuan rule ini adalah menjaga source integrity, bukan mengunci tool atau mekanisme edit tertentu.
 
 Tidak ada perubahan Canonical pada design lock ini.
