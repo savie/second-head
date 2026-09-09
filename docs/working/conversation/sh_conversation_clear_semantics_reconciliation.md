@@ -2,7 +2,7 @@
 
 ## Status
 
-**WORKING / DOMAIN RECONCILIATION — OWNER DECISION LOCKED / IMPLEMENTATION GAP**
+**WORKING / DOMAIN RECONCILIATION — SEMANTICS LOCKED / FE IMPLEMENTATION DEFERRED**
 
 Dokumen ini adalah child working document untuk scope Project → Conversation → Message.
 
@@ -44,7 +44,7 @@ CLEAR
 
 Semantics ini menyelesaikan ambiguity sebelumnya antara Clear dan Delete. `Clear ≠ Delete` tetap berlaku.
 
-Dokumen ini tidak mengubah Canonical secara sepihak. Approved Contract tetap menjadi authority contract; working document ini merekam Owner Decision dan implementation gap yang harus diturunkan ke contract/design yang relevan.
+Dokumen ini tidak mengubah Canonical secara sepihak. Approved Contract tetap menjadi authority contract; working document ini merekam Owner Decision dan implementation status yang harus diturunkan ke contract/design yang relevan.
 
 ---
 
@@ -69,9 +69,9 @@ CURRENT FE BEHAVIOR
 Clear = destructive Message deletion + local empty-state persistence
 ```
 
-Ini **bertentangan dengan locked Clear semantics**.
+Ini **belum sesuai dengan locked Clear semantics**.
 
-**CONFIRMED IMPLEMENTATION SEMANTIC GAP.**
+**CONFIRMED FE IMPLEMENTATION GAP — DEFERRED.**
 
 Current backend juga belum memiliki dedicated Clear operation karena locked semantics tidak membutuhkan destructive backend mutation.
 
@@ -206,7 +206,7 @@ Tidak ada snapshot baru yang diperlukan hanya karena Clear, kecuali contract Rec
 
 Missing attachment dependency tetap harus dilaporkan sebagai recovery gap dan tidak boleh dianggap silently restored.
 
-**Status: IMPLEMENTATION SUPPORT PRESENT / CLEAR SEMANTIC VERIFICATION OPEN.**
+**Status: IMPLEMENTATION SUPPORT PRESENT / RECOVERY VERIFICATION DEFERRED WITH RELATED E2E.**
 
 ---
 
@@ -257,14 +257,19 @@ Clear tidak mengubah ownership, access rights, identity resolution, atau backend
 - Clear state tidak dipersist sebagai backend durable state.
 - Data kembali visible setelah application session scope berakhir.
 
-### CONFIRMED / EXISTING IMPLEMENTATION GAP
+### CONFIRMED — FE IMPLEMENTATION DEFERRED
 
 - **Current FE Clear implementation masih destructive:** Clear memanggil delete Message untuk setiap Message yang memiliki `runtimeRecordId`.
-- Current backend belum memiliki dedicated Clear capability; locked semantics tidak memerlukan destructive backend Clear RPC.
-- Local empty-state persistence saat ini harus direkonsiliasi agar tidak menyatakan durable deletion.
-- Attachment backend persistence/reconstruction sudah implemented; semantic/authenticated E2E masih open.
-- Attachment Recovery relationship sudah implemented; authenticated recovery/E2E masih open.
-- Attachment deletion/retention runtime dan cleanup semantics masih memerlukan verification.
+- Local empty-state persistence saat ini masih perlu direkonsiliasi agar tidak menyatakan durable deletion.
+- Backend tidak memerlukan dedicated Clear RPC untuk locked semantics ini.
+- **No source implementation change applied:** scope FE implementation belum dikerjakan pada checkpoint ini.
+- Repair berikutnya harus mengikuti locked semantics dan tidak boleh menggunakan deletion sebagai workaround.
+
+### RELATED VERIFICATION — DEFERRED
+
+- Attachment persistence/reconstruction semantic verification masih deferred sesuai attachment scope.
+- Attachment Recovery authenticated/E2E verification masih deferred.
+- Attachment deletion/retention runtime verification masih deferred.
 
 ### NO LONGER OPEN OWNER DECISIONS
 
@@ -278,9 +283,9 @@ Clear tidak mengubah ownership, access rights, identity resolution, atau backend
 
 ## 11. Implementation Gate
 
-**SEMANTICS LOCKED — IMPLEMENTATION MAY PROCEED.**
+**SEMANTICS LOCKED — FE IMPLEMENTATION DEFERRED.**
 
-Required sequence:
+Required future sequence:
 
 ```text
 Locked Owner Decision
@@ -297,6 +302,8 @@ E2E verification
 ```
 
 Implementation must not use hard-delete, soft-delete, attachment deletion, or Recovery mutation as a workaround for Clear.
+
+Until the FE implementation is changed and verified, Clear remains **DEFERRED**, not an open semantic/architecture decision.
 
 ---
 
