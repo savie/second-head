@@ -7,6 +7,10 @@ on:
         description: "SH Agent task"
         required: true
         default: "inspect repository state"
+      scope:
+        description: "Allowed change scope"
+        required: false
+        default: "docs/working"
 
 permissions:
   contents: write
@@ -18,6 +22,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Verify branch
+        run: |
+          test "$(git branch --show-current)" = "dev"
 
       - name: Configure git identity
         run: |
@@ -27,14 +37,20 @@ jobs:
       - name: Receive task
         run: |
           echo "Task: ${{ inputs.task }}"
+          echo "Scope: ${{ inputs.scope }}"
+
+      - name: Agent workspace inspection
+        run: |
+          git status
+          git diff --stat
 
       - name: Agent workspace ready
         run: |
           echo "SH Agent ready"
-          git status
 
       - name: Commit and push changes
         run: |
           git add .
-          git commit -m "SH agent update" || true
-          git push
+          git diff --cached --quiet && exit 0
+          git commit -m "SH agent update"
+          git push origin dev
