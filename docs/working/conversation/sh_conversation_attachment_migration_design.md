@@ -2,7 +2,7 @@
 
 ## Status
 
-**FROZEN / LOCKED — DEV MIGRATION EXECUTED / VERIFICATION CHECKPOINT OPEN**
+**FROZEN / LOCKED — DEV MIGRATION EXECUTED / CLEANUP BACKEND IMPLEMENTED / E2E VERIFICATION DEFERRED**
 
 Dokumen ini adalah working design record untuk migration attachment pada domain Conversation → Message. Dokumen ini bukan Canonical dan tidak mengubah Approved Contract.
 
@@ -117,7 +117,7 @@ Direct authenticated DELETE on the attachment resource is not granted.
 
 Storage object access is private and must be authorized against the Attachment Resource / trusted Account-SH boundary. Arbitrary storage path knowledge is not treated as authority.
 
-Service-role/internal cleanup may operate on privileged attachment/storage records and objects.
+Physical Storage Object deletion is performed only through the Supabase Storage API by the backend cleanup worker; direct SQL deletion from `storage.objects` is not used.
 
 Unauthenticated/anon access is denied.
 
@@ -125,17 +125,23 @@ Unauthenticated/anon access is denied.
 
 ## 5. Frozen RPC Boundary
 
-The migration introduces authorized backend boundaries for:
+The attachment migration introduces authorized backend boundaries for:
 
 1. `runtime_create_conversation_attachment(filename, mime_type, size_bytes)`
-2. `runtime_finalize_conversation_attachment(attachment_id, message_id, storage_ref)`
+2. `runtime_finalize_conversation_attachment(attachment_id, message_id)`
 3. `runtime_fail_conversation_attachment(attachment_id)`
 4. `runtime_load_conversation_attachments(message_id)`
 5. `runtime_detach_conversation_attachment(attachment_id)`
 
-All resolve/validate trusted Account/SH ownership at the backend boundary. Client-provided ownership values are not authority. Finalize validates target Message ownership and same Account/SH. Retry of the same logical attachment retains the same `attachment_id`.
+Cleanup reconciliation adds internal/backend worker boundaries:
 
-Physical cleanup is service-role/internal and is not exposed as an authenticated arbitrary-delete RPC.
+6. `runtime_claim_conversation_attachment_cleanup(limit)`
+7. `runtime_complete_conversation_attachment_cleanup(cleanup_id)`
+8. `runtime_fail_conversation_attachment_cleanup(cleanup_id, error)`
+
+All user-facing attachment RPCs resolve/validate trusted Account/SH ownership at the backend boundary. Client-provided ownership values are not authority. Finalize validates target Message ownership and same Account/SH. Retry of the same logical attachment retains the same `attachment_id`.
+
+The cleanup queue is not directly exposed as a table to `anon` or `authenticated`; cleanup operations are mediated through SECURITY DEFINER RPCs and the authenticated backend worker.
 
 ---
 
@@ -150,12 +156,18 @@ Delete Message / Conversation
         ↓
 active attachment relationship removed
         ↓
-Storage Object NOT blindly deleted
+cleanup queue entry created
+        ↓
+Attachment Resource removed only after retention checks
+        ↓
+Storage Object removed through Supabase Storage API
 ```
 
 The FK uses `ON DELETE SET NULL`, so existing Message/Thread deletion remains compatible without destructive trigger behavior.
 
 Storage cleanup occurs only when no valid active Message or Recovery retention dependency remains.
+
+The cleanup queue is asynchronous. If a valid Recovery dependency exists, cleanup is deferred and retried later; it is not treated as permission to delete the retained Attachment Resource or Storage Object.
 
 Locked Clear semantics are:
 
@@ -200,7 +212,7 @@ Restore only succeeds for the attachment dependency when the durable resource, S
 
 Existing Recovery idempotency and trusted Account ownership boundaries remain intact.
 
-Authenticated Recovery E2E, missing-object behavior, and cleanup/retention verification remain open.
+Authenticated Recovery E2E, missing-object behavior, and cleanup/retention E2E remain deferred verification work.
 
 ---
 
@@ -223,7 +235,11 @@ Because Storage upload and PostgreSQL transaction are not atomic, implementation
 
 No synchronous blind object deletion is attached to Message DELETE or Clear.
 
-Current PENDING / PERSISTED / FAILED lifecycle and stable attachment identity support the intended retry boundary. Full orphan cleanup/reconciliation behavior remains a verification gate.
+Current PENDING / PERSISTED / FAILED lifecycle and stable attachment identity support the intended retry boundary.
+
+The implemented cleanup path handles the durable-retention case first: a persisted Attachment Resource whose Message relationship is removed is queued, checked for Recovery dependencies, removed from the Attachment Resource table only when safe, and its physical Storage Object is then removed through the Storage API. Storage deletion failures remain retryable in the cleanup queue.
+
+PENDING/FAILED ambiguous upload reconciliation remains a separate orphan-reconciliation verification/work item and is not silently folded into durable Message deletion cleanup.
 
 ---
 
@@ -255,12 +271,12 @@ Minimum verification cases:
 - duplicate finalize → idempotent/safe;
 - retry same logical attachment → same attachment identity;
 - failed persistence → not durable success;
-- Message DELETE → relationship removed, object retained when Recovery dependency exists;
+- Message DELETE → relationship removed and cleanup queued; object retained while Recovery dependency exists;
 - Clear → no destructive attachment mutation;
 - Recovery create/restore → attachment dependency preserved/reconstructed or explicit gap;
 - Clone/Inheritance/Succession → no implicit attachment transfer.
 
-**Verification status:** implementation is present; authenticated semantic harness remains OPEN.
+**Verification status:** implementation is present; authenticated semantic/E2E harness remains deferred.
 
 ---
 
@@ -273,48 +289,49 @@ Applied migrations:
 ```text
 20260908113655_conversation_attachments
 20260908120543_revoke_conversation_attachment_truncate
+20260909024233_conversation_attachment_cleanup
 ```
+
+Repository migration source:
+
+`database/migrations/20260909120000_conversation_attachment_cleanup.sql`
+
+The repository migration source is the versioned source-of-truth for the applied DEV migration. The Supabase DEV migration history confirms the cleanup migration is applied as version `20260909024233` with name `conversation_attachment_cleanup`.
 
 Current implementation state:
 
 ```text
-Attachment schema                 IMPLEMENTED
-Private Storage bucket            IMPLEMENTED
-RLS / privilege boundary          IMPLEMENTED
-Trusted attachment RPCs           IMPLEMENTED
-Message ↔ Attachment relationship IMPLEMENTED
-Recovery relationship             IMPLEMENTED
-FE attachment wiring              IMPLEMENTED
+Attachment schema                    IMPLEMENTED
+Private Storage bucket               IMPLEMENTED
+RLS / privilege boundary             IMPLEMENTED
+Trusted attachment RPCs              IMPLEMENTED
+Message ↔ Attachment relationship    IMPLEMENTED
+Recovery relationship                IMPLEMENTED
+Cleanup queue / retention guard      IMPLEMENTED
+Storage API cleanup worker           IMPLEMENTED
+FE attachment wiring                 IMPLEMENTED
 ```
 
-Remaining verification:
+Remaining verification/deferred work:
 
 ```text
-Authenticated semantic harness   OPEN
-Upload/reload/retry E2E           OPEN
-Delete/cleanup/retention E2E      OPEN
-Recovery create/restore E2E       OPEN
-Real APK E2E                      OPEN
+Authenticated semantic harness      DEFERRED
+Upload/reload/retry E2E              DEFERRED
+Delete/cleanup/retention E2E         DEFERRED
+Recovery create/restore E2E          DEFERRED
+Real APK E2E                         DEFERRED
+
+PENDING/FAILED orphan reconciliation  NEXT BACKEND WORK
 ```
 
-No additional schema migration is implied by these verification gaps.
+No frontend implementation was changed for this cleanup backend work.
 
 ---
 
 ## 12. Execution Gate
 
-The design remains **FROZEN / LOCKED** for the implemented DEV migration.
+The design remains **FROZEN / LOCKED**. Cleanup implementation does not alter the approved Attachment semantic model or Clear semantics.
 
-Clear semantics are now locked separately as an application-session presentation state. Attachment implementation must preserve that boundary and must not introduce destructive Clear behavior.
+Backend source reconciliation is now aligned for the durable-retention cleanup path. Runtime/E2E execution is intentionally deferred per current scope.
 
-Next verification gates:
-
-1. verify schema/constraints/indexes;
-2. verify bucket/privacy/storage policies;
-3. verify RPC definitions/privileges;
-4. verify Message delete and Conversation delete behavior;
-5. verify Clear produces no destructive attachment mutation;
-6. verify Recovery create/restore attachment handling;
-7. run security matrix;
-8. run FE integration verification;
-9. run authenticated APK E2E.
+Next backend work after this checkpoint is the separate PENDING/FAILED orphan and ambiguous-upload reconciliation path. Authenticated E2E, Recovery E2E, and APK E2E remain later verification gates.
