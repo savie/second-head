@@ -33,9 +33,20 @@ jobs:
           test "$(git branch --show-current)" = "dev"
 
       - name: Receive task
+        env:
+          SH_TASK: ${{ inputs.task }}
+          SH_SCOPE: ${{ inputs.scope }}
         run: |
-          echo "Task: ${{ inputs.task }}"
-          echo "Scope: ${{ inputs.scope }}"
+          echo "Task: $SH_TASK"
+          echo "Scope: $SH_SCOPE"
+
+      - name: Run SH executor
+        env:
+          SH_TASK: ${{ inputs.task }}
+          SH_SCOPE: ${{ inputs.scope }}
+        run: |
+          chmod +x .agent/execute_task.sh
+          .agent/execute_task.sh
 
       - name: Agent workspace check
         run: |
