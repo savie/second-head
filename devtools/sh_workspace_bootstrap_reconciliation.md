@@ -540,17 +540,22 @@ STOP / FAILURE SAFETY TEST
 SH WORKSPACE READY
 ```
 
-Implementation wajib menjaga EDIT INTEGRITY:
+EDIT INTEGRITY
 
-- `current repository state` adalah source of truth sebelum edit;
-- gunakan mekanisme edit yang paling sesuai dengan kondisi file, expected change, dan capability workspace;
-- tidak ada satu mekanisme edit yang diwajibkan atau dijadikan default;
-- perubahan dapat dilakukan melalui patch/diff, Git-native edit, structured update, full-file replacement, atau mekanisme repository-native lain yang equivalent;
-- mekanisme yang dipilih harus memungkinkan perubahan diterapkan tanpa menghilangkan, mereconstruct, atau mengubah content di luar expected change;
-- jika suatu mekanisme tidak dapat memenuhi kebutuhan edit atau integrity hasilnya tidak dapat diverifikasi, gunakan mekanisme lain yang lebih sesuai atau STOP sebelum write;
-- setelah edit, verify hasil terhadap `current repository state` dan `expected change`, termasuk memastikan tidak terjadi unintended content loss atau modification;
-- jika integrity hasil edit tidak dapat dipastikan, STOP dan jangan melanjutkan perubahan.
+Implementation wajib menjaga hasil perubahan, bukan mengunci mekanisme edit tertentu.
 
-Tujuan rule ini adalah menjaga source integrity dan correctness of change, bukan mengunci tool, mekanisme, atau workflow tertentu.
+- "current repository state" adalah source of truth sebelum edit;
+- semua mekanisme edit diperbolehkan, termasuk patch/diff, Git-native edit, structured update, full-file replacement, scripting, automated transformation, atau mekanisme repository-native lain;
+- mekanisme edit boleh dipilih berdasarkan kondisi file, ukuran file, jenis perubahan, dan capability workspace;
+- tidak ada mekanisme edit yang secara default dianggap wajib atau paling benar;
+- mekanisme apa pun yang digunakan tidak boleh mengubah, menghilangkan, mereconstruct, atau merusak content di luar expected change;
+- setelah edit, hasil wajib diverifikasi terhadap "current repository state" dan "expected change";
+- diff harus menunjukkan tepat perubahan yang dimaksud, dan file integrity harus tetap valid;
+- jika hasil aktual berbeda dari expected change, terdapat unintended change/content loss, atau integrity tidak dapat diverifikasi, jangan commit dan STOP untuk memperbaiki atau memilih mekanisme lain;
+- keberhasilan ditentukan oleh correctness dan integrity hasil akhir, bukan oleh metode yang digunakan untuk menghasilkan perubahan tersebut.
+
+Prinsip utama:
+
+«Any edit method is allowed. The only requirement is that the resulting repository state is correct, complete, and contains exactly the intended change.»
 
 Tidak ada perubahan Canonical pada design lock ini.
