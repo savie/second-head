@@ -8,9 +8,9 @@ on:
         required: true
         default: "inspect repository state"
       scope:
-        description: "Allowed change scope"
-        required: false
-        default: "docs/working"
+        description: "Allowed scope"
+        required: true
+        default: "docs/"
 
 permissions:
   contents: write
@@ -22,35 +22,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: dev
-
-      - name: Verify branch
-        run: |
-          test "$(git branch --show-current)" = "dev"
 
       - name: Configure git identity
         run: |
           git config user.name "second-head-agent"
           git config user.email "second-head-agent@users.noreply.github.com"
 
+      - name: Validate branch
+        run: |
+          test "$(git branch --show-current)" = "dev"
+
       - name: Receive task
         run: |
           echo "Task: ${{ inputs.task }}"
           echo "Scope: ${{ inputs.scope }}"
 
-      - name: Agent workspace inspection
+      - name: Agent workspace check
         run: |
           git status
           git diff --stat
 
-      - name: Agent workspace ready
-        run: |
-          echo "SH Agent ready"
-
       - name: Commit and push changes
         run: |
           git add .
-          git diff --cached --quiet && exit 0
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
           git commit -m "SH agent update"
           git push origin dev
