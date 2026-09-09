@@ -539,7 +539,7 @@ class ConversationViewState extends State<ConversationView> {
         final id = message.runtimeRecordId;
         if (id != null) {
           await _runtime.deleteMessage(
-            conversationId: id,
+            messageId: id,
             createdAt: message.createdAt ?? DateTime.now(),
             role: message.assistant ? 'assistant' : 'user',
             content: message.text,
@@ -666,7 +666,7 @@ class ConversationViewState extends State<ConversationView> {
       try {
         if (message.runtimeRecordId != null) {
           await _runtime.deleteMessage(
-            conversationId: message.runtimeRecordId!,
+            messageId: message.runtimeRecordId!,
             createdAt: message.createdAt ?? DateTime.now(),
             role: message.assistant ? 'assistant' : 'user',
             content: message.text,
@@ -690,7 +690,7 @@ class ConversationViewState extends State<ConversationView> {
       try {
         if (message.runtimeRecordId != null) {
           await _runtime.updateMessage(
-            conversationId: message.runtimeRecordId!,
+            messageId: message.runtimeRecordId!,
             createdAt: message.createdAt ?? DateTime.now(),
             role: 'assistant',
             oldContent: message.text,
@@ -738,7 +738,7 @@ class ConversationViewState extends State<ConversationView> {
     try {
       if (message.runtimeRecordId != null) {
         await _runtime.updateMessage(
-          conversationId: message.runtimeRecordId!,
+          messageId: message.runtimeRecordId!,
           createdAt: message.createdAt ?? DateTime.now(),
           role: message.assistant ? 'assistant' : 'user',
           oldContent: message.text,
@@ -773,7 +773,7 @@ class ConversationViewState extends State<ConversationView> {
         final message = _messages[index];
         if (message.runtimeRecordId != null) {
           await _runtime.deleteMessage(
-            conversationId: message.runtimeRecordId!,
+            messageId: message.runtimeRecordId!,
             createdAt: message.createdAt ?? DateTime.now(),
             role: message.assistant ? 'assistant' : 'user',
             content: message.text,
