@@ -174,15 +174,15 @@ runtime_delete_conversation_message_v2(p_message_id uuid)
 
 ### Bridge
 
-`ConversationRuntimeBridge` masih memakai nama parameter `conversationId` pada method update/delete, walaupun value yang diteruskan adalah Message ID.
+`ConversationRuntimeBridge.updateMessage()` dan `deleteMessage()` sekarang memakai nama parameter `messageId`, selaras dengan value yang memang diteruskan sebagai Message ID. Named call sites di `ConversationView` juga sudah menggunakan `messageId`.
 
 ### Classification
 
-**CONFIRMED ADAPTER CONTRACT / NAMING GAP**
+**PASS / ADAPTER CONTRACT ALIGNED**
 
-Ini bukan bukti backend menerima Conversation ID. Semantics caller saat ini benar; nama parameter bridge misleading.
+Semantics caller dan backend tetap tidak berubah. Perubahan hanya memperjelas naming pada FE adapter boundary agar Conversation ID tidak tertukar dengan Message ID.
 
-Expected minimal fix:
+Fix yang diterapkan:
 
 ```text
 Bridge updateMessage(messageId: ...)
@@ -193,7 +193,7 @@ Service p_message_id
 Backend Message ID
 ```
 
-Tidak ada migration requirement berdasarkan evidence saat ini.
+Tidak ada migration requirement dan tidak ada perubahan backend/schema.
 
 ---
 
@@ -667,14 +667,14 @@ Belum ada keputusan untuk memperluas role taxonomy.
 ### GAP-C01 — Bridge Message ID Naming
 
 ```text
-Status: CONFIRMED OPEN
+Status: RESOLVED
 Layer: FE adapter
 Severity: maintainability / contract clarity
 ```
 
-Caller sudah membawa Message ID melalui `runtimeRecordId`, tetapi bridge menamainya `conversationId`.
+Caller sudah membawa Message ID melalui `runtimeRecordId`. Bridge parameter update/delete sekarang juga dinamai `messageId`, dan seluruh named call sites di `ConversationView` sudah aligned.
 
-Minimal fix tetap: align bridge parameter naming dengan Message ID semantics. Tidak ada migration requirement.
+Perbaikan ini hanya menyelaraskan adapter naming dengan existing Message ID contract. Tidak ada migration requirement dan tidak ada perubahan backend/schema.
 
 ### GAP-C02 — Attachment Backend Persistence / Reconstruction
 
@@ -741,6 +741,8 @@ Current sequence:
         ↓ REQUIRED
 9. Final Conversation domain consolidation
 ```
+
+Message ID bridge naming reconciliation is no longer in the execution queue; it is resolved.
 
 Other open audit queue remains:
 
@@ -860,7 +862,7 @@ Attachment Contract                   PASS / LOCKED
 Backend Message RPC                   PASS
 ConversationService                   PASS
 Caller Message ID                     PASS
-Bridge Message ID naming              CONFIRMED OPEN GAP
+Bridge Message ID naming              RESOLVED
 Attachment backend schema             IMPLEMENTED
 Attachment private storage            IMPLEMENTED
 Attachment RPC boundary               IMPLEMENTED
@@ -881,4 +883,4 @@ Clone dependency check                REQUIRED BEFORE E2E
 
 **Overall Conversation status: AUDIT IN PROGRESS / ATTACHMENT IMPLEMENTATION RECONCILED / NOT FINAL E2E READY.**
 
-The old attachment persistence/reconstruction gap is no longer the current implementation state. The remaining blocker is verification through the defined BE → FE → Clone dependency → Security → E2E → Recovery gates.
+The old attachment persistence/reconstruction gap is no longer the current implementation state. The Message ID bridge naming gap is resolved. The remaining blocker is verification through the defined BE → FE → Clone dependency → Security → E2E → Recovery gates.
