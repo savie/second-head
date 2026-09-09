@@ -2,7 +2,7 @@
 
 ## Status
 
-**RECONCILIATION ALIGNED — CURRENT IMPLEMENTATION CHECKPOINT RECORDED**
+**RECONCILIATION ALIGNED — BACKEND SOURCE AUDIT COMPLETED / E2E REMAINS OPEN**
 
 Dokumen ini adalah working reconciliation record untuk domain Conversation → Message → Attachment.
 
@@ -168,15 +168,38 @@ conversation_attachment_recovery_refs
 existing durable Attachment / Storage Object
 ```
 
-Restore hanya mereconnect attachment relationship jika durable attachment resource, Storage Object, dan target Message dependency tersedia. Missing dependency dihitung sebagai recovery gap dan tidak boleh diklaim sebagai successful attachment recovery.
+Snapshot source secara eksplisit memasukkan descriptor attachment yang persisted dan masih memiliki Message relationship; recovery refs juga dibuat untuk attachment tersebut. fileciteturn73file0L2-L2
+
+Restore/recovery path tersedia di current DEV migration history dan sudah direkonsiliasi ke Conversation hierarchy. Namun keberhasilan restore terhadap object yang tersedia/hilang belum dibuktikan melalui authenticated execution.
 
 Binary object tidak di-embed ke JSON manifest; Recovery mempertahankan descriptor/reference yang diperlukan untuk reconstruction dan retention.
 
-**Status: BACKEND IMPLEMENTATION PRESENT / SEMANTIC + E2E VERIFICATION OPEN.**
+**Status: BACKEND IMPLEMENTATION PRESENT / SOURCE RECONCILED / EXECUTION VERIFICATION OPEN.**
 
 ---
 
-## 5. Orphan Reconciliation
+## 5. Delete / Retention Reconciliation — BACKEND AUDIT
+
+Contract menetapkan bahwa Delete Message / Conversation menghapus active Attachment relationship, sementara physical Storage Object mengikuti retention rule dan tidak boleh blind-delete bila masih dibutuhkan Recovery. fileciteturn80file0L2-L2
+
+Current backend source mengonfirmasi:
+
+- `conversation_attachments.message_id` memakai `ON DELETE SET NULL` terhadap Message;
+- Delete Message menghapus row pada `public.conversations`, sehingga relationship attachment menjadi `NULL`;
+- Delete Conversation Thread memakai cascade ke child Messages;
+- `runtime_detach_conversation_attachment` juga hanya memutus relationship dengan mengosongkan `message_id`.
+
+Source untuk Delete Message / Conversation menunjukkan tidak ada physical Storage Object delete pada operasi tersebut; thread deletion cascade berasal dari FK `conversations.thread_id → conversation_threads.conversation_id ON DELETE CASCADE`. fileciteturn73file0L2-L2 fileciteturn78file1L50-L58
+
+**Important finding:** current DEV source belum menunjukkan cleanup worker/RPC/path yang menghapus Storage Object atau menghapus Attachment Resource ketika sudah tidak memiliki active Message maupun valid Recovery dependency.
+
+Jadi item cleanup **bukan sekadar verification-open**; pada source saat ini cleanup mechanism belum teridentifikasi/terimplementasi.
+
+Relationship removal sendiri dapat dinyatakan **SOURCE-VERIFIED**. Physical retention/cleanup tetap **OPEN BACKEND GAP**.
+
+---
+
+## 6. Orphan Reconciliation
 
 Dibedakan:
 
@@ -192,22 +215,26 @@ Attachment Resource tanpa Message dan tanpa dependency sah
 → candidate cleanup
 ```
 
-Karena Storage upload dan PostgreSQL transaction tidak atomic, implementation harus menangani failure window antara object upload, descriptor persistence, dan Message association.
+Current implementation menyediakan PENDING / PERSISTED / FAILED resource lifecycle dan mempertahankan attachment identity untuk retry.
 
-Current implementation menyediakan PENDING / PERSISTED / FAILED resource lifecycle dan mempertahankan attachment identity untuk retry. Yang belum boleh dianggap PASS tanpa verification adalah full cleanup/reconciliation behavior untuk orphan object/resource dan ambiguous failure windows.
+Yang sudah dapat direkonsiliasi dari source:
 
-Required outcome:
+- failed upload dapat direpresentasikan sebagai `FAILED`;
+- retry logical attachment mempertahankan `attachment_id`;
+- persisted attachment memakai stable `storage_ref`;
+- Recovery refs mencegah Attachment Resource yang masih direferensikan snapshot dihapus secara sembarang karena FK `ON DELETE RESTRICT`. fileciteturn73file0L2-L2
 
-- failed upload tidak menjadi durable success;
-- database failure setelah upload mempunyai cleanup path;
-- retry idempotent terhadap logical attachment;
-- orphan object/resource dapat direkonsiliasi dan dibersihkan secara aman.
+Yang belum tersedia/terbukti:
 
-**Status: IMPLEMENTATION PRESENT / CLEANUP VERIFICATION OPEN.**
+- authoritative cleanup path untuk orphan Storage Object;
+- cleanup path untuk Attachment Resource yang sudah tidak memiliki Message maupun Recovery dependency;
+- runtime reconciliation untuk ambiguous upload failure window.
+
+**Status: RESOURCE STATE / RETRY IMPLEMENTED / ORPHAN CLEANUP BACKEND GAP.**
 
 ---
 
-## 6. Cross-Domain Reconciliation
+## 7. Cross-Domain Reconciliation
 
 Hasil audit saat ini:
 
@@ -228,7 +255,7 @@ Jika future domain membutuhkan transfer attachment, itu harus mendapat contract/
 
 ---
 
-## 7. Security Reconciliation
+## 8. Security Reconciliation
 
 Attachment harus mengikuti trusted Account / SH / Conversation / Message boundary.
 
@@ -241,15 +268,23 @@ Spoofed storage_ref         DENY
 Unauthenticated             DENY
 ```
 
-Filename, local path, UI state, storage reference, atau attachment ID saja bukan authority source.
+Current migration menerapkan:
 
-Current migration menerapkan private Storage bucket dan trusted attachment RPC boundary. Full authenticated semantic harness tetap harus dijalankan untuk membuktikan isolation aktual.
+- private Storage bucket;
+- RLS pada `conversation_attachments`;
+- owner/account + active SH checks;
+- trusted RPC boundary;
+- create/finalize/fail/load/detach tidak menerima Account/SH sebagai client authority;
+- Storage read hanya untuk persisted attachment milik current account/SH;
+- Storage write hanya untuk PENDING/FAILED attachment milik current account/SH.
 
-**Status: DESIGN/IMPLEMENTATION PRESENT / SEMANTIC VERIFICATION OPEN.**
+Current source juga membatasi RPC execution ke `authenticated` / `service_role` dan mencabut PUBLIC/anon execution. fileciteturn73file0L2-L2
+
+**Status: SOURCE-VERIFIED DESIGN/IMPLEMENTATION / AUTHENTICATED RUNTIME ISOLATION TEST OPEN.**
 
 ---
 
-## 8. Current Implementation Reconciliation
+## 9. Current Implementation Reconciliation
 
 Current `dev` source menunjukkan backend dan frontend attachment path sudah wired.
 
@@ -279,7 +314,7 @@ load(message_id)
 detach(attachment_id)
 ```
 
-`runtime_finalize_conversation_attachment` menggunakan stable `attachment_id` + `message_id`; storage reference tidak dikirim ulang sebagai finalize authority.
+`runtime_finalize_conversation_attachment` menggunakan stable `attachment_id` + `message_id`; storage reference tidak dikirim ulang sebagai finalize authority. fileciteturn73file0L2-L2
 
 ### Frontend checkpoint
 
@@ -315,7 +350,7 @@ Implementation presence bukan E2E PASS. Verification tetap mencakup upload, relo
 
 ---
 
-## 9. Migration Design Gate
+## 10. Migration Design Gate
 
 Attachment migration/design **sudah frozen/locked dan sudah dieksekusi di DEV**.
 
@@ -331,27 +366,49 @@ Private storage boundary  IMPLEMENTED
 RPC boundary              IMPLEMENTED
 Recovery relationship     IMPLEMENTED
 FE integration            IMPLEMENTED
-Semantic verification     OPEN
+Delete relationship       SOURCE-VERIFIED
+Security boundary         SOURCE-VERIFIED
+Cleanup mechanism         OPEN BACKEND GAP
+Semantic execution        OPEN
 Authenticated E2E         OPEN
+APK E2E                    OPEN
 ```
 
 Tidak ada migration/schema alternatif yang boleh dibuat tanpa conflict evidence atau perubahan authority.
 
 ---
 
-## 10. Verification Queue
+## 11. Verification / Closure Queue
 
-Remaining verification:
+### Bisa ditutup dari source audit
 
-1. authenticated upload → persisted;
-2. reload/reopen → attachment reconstructed;
-3. private storage download dengan identity yang benar;
-4. failed/ambiguous upload → retry memakai attachment identity yang sama;
-5. wrong Account/SH access denied;
-6. Message Delete / Conversation Delete → active relationship removal dan cleanup/retention behavior;
-7. Clear → tidak ada destructive attachment mutation;
-8. recovery snapshot → restore relationship/object dependency;
-9. missing object/resource → explicit recovery gap;
-10. real APK E2E.
+1. Attachment schema / durable identity.
+2. Private storage boundary.
+3. Trusted RPC boundary.
+4. Message ↔ Attachment relationship.
+5. Delete Message → active relationship removal.
+6. Delete Conversation → child Message removal / attachment relationship removal.
+7. Clear → tidak ada backend Clear mutation path; Clear tetap non-destructive sesuai locked semantics.
+8. Recovery snapshot capture → persisted attachment descriptor + recovery reference path.
+9. Cross-domain transfer exclusion.
 
-**Overall attachment status: IMPLEMENTATION CHECKPOINT ALIGNED / CONTRACT PASS / VERIFICATION OPEN.**
+### Masih membutuhkan execution / runtime verification
+
+10. authenticated upload → persisted;
+11. reload/reopen → attachment reconstructed;
+12. private storage download dengan identity yang benar;
+13. failed/ambiguous upload → retry memakai attachment identity yang sama;
+14. wrong Account/SH access denied;
+15. recovery restore terhadap object/resource yang tersedia;
+16. missing object/resource → explicit recovery gap;
+17. real APK E2E.
+
+### Backend gap yang nyata, bukan sekadar test
+
+18. Storage Object cleanup / retention reconciler setelah active Message relationship hilang dan tidak ada valid Recovery dependency.
+19. Attachment Resource cleanup setelah tidak ada active Message dan tidak ada valid Recovery dependency.
+20. Authoritative orphan/ambiguous upload reconciliation path.
+
+**Overall attachment status: CONTRACT PASS / BACKEND SOURCE AUDIT ALIGNED / E2E + CLEANUP GAP OPEN.**
+
+No FE implementation was changed by this reconciliation update.
