@@ -5,6 +5,8 @@ TASK="${TASK:-inspect repository}"
 SCOPE="${SCOPE:-.}"
 OPERATION="${OPERATION:-INSPECT}"
 TARGET_FILE="${TARGET_FILE:-}"
+OLD_TEXT="${OLD_TEXT:-}"
+NEW_TEXT="${NEW_TEXT:-}"
 
 REPORT_FILE=".agent/execution-report.md"
 
@@ -37,10 +39,16 @@ case "$OPERATION" in
     if [[ -z "$TARGET_FILE" ]]; then
       fail "EDIT requires TARGET_FILE"
     fi
+    if [[ -z "$OLD_TEXT" ]]; then
+      fail "EDIT requires OLD_TEXT"
+    fi
     if [[ ! -e "$TARGET_FILE" ]]; then
       fail "target file does not exist: $TARGET_FILE"
     fi
-    STATUS="Edit target validated: $TARGET_FILE"
+
+    export TARGET_FILE OLD_TEXT NEW_TEXT
+    bash .agent/operations/edit_apply.sh
+    STATUS="Edit applied: $TARGET_FILE"
     ;;
   *)
     fail "unsupported operation: $OPERATION"
