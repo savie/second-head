@@ -2,17 +2,101 @@
 
 ## Status
 
-**IMPLEMENTATION ALIGNED / SEMANTIC E2E STILL OPEN / RECOVERY E2E BLOCKED BY TEST FIXTURE**
+**DECISION RESOLVED / IMPLEMENTATION ALIGNED / SEMANTIC ROUND-TRIP VERIFICATION OPEN / RECOVERY E2E BLOCKED BY TEST FIXTURE**
 
 Dokumen ini adalah child working audit untuk `ConversationMessage` ↔ `ConversationRecord` ↔ local conversation state.
 
-Bukan Canonical dan bukan Approved Contract.
+Dokumen ini **bukan Canonical** dan **bukan Approved Contract**. Dokumen ini merekam keputusan yang sudah dibuat, reconciliation implementation, serta verification yang masih tersisa.
+
+Authority tetap:
+
+```text
+Owner / User Decision
+        ↓
+Canonical
+        ↓
+Approved Contract
+        ↓
+Architecture / Design
+        ↓
+Current Implementation
+        ↓
+Historical / dev_old evidence
+```
 
 ---
 
-## 1. Audit Scope
+## 1. Decision — Local Message Projection
 
-Flow yang diverifikasi pada current `dev`:
+### 1.1 User decision
+
+Keputusan yang sudah dibuat untuk Message Serialization adalah:
+
+> **Local Conversation state menggunakan full durable Message projection.**
+
+Artinya local state tidak diperlakukan hanya sebagai UI/cache projection yang boleh kehilangan semantic Message fields.
+
+Local snapshot harus mempertahankan informasi yang diperlukan untuk merekonstruksi Message secara bermakna, minimal:
+
+```text
+messageId
+threadId
+role
+content
+createdAt
+metadata
+attachments
+```
+
+Keputusan ini **sudah disepakati sebelumnya oleh Owner/User** dan sekarang dirapikan secara eksplisit di working documentation. Ini bukan keputusan baru yang dibuat oleh audit ini.
+
+### 1.2 Boundary keputusan
+
+Keputusan ini **tidak berarti**:
+
+```text
+local = source of truth
+local = backend replacement
+local dapat override backend secara otomatis
+local/backend conflict resolution sudah diputuskan
+full offline sync sudah tersedia
+```
+
+Boundary yang benar:
+
+```text
+BACKEND
+  = authoritative persistence
+
+LOCAL
+  = durable semantic projection
+
+LOCAL ↔ BACKEND
+  = synchronization/reconciliation concern terpisah
+```
+
+Strategi local-newer/backend-newer, queue/retry, conflict resolution, dan deletion synchronization **tetap berada pada workstream Local ↔ Backend Persistence dan belum diputuskan/ditutup oleh keputusan serialization ini**.
+
+### 1.3 Rationale
+
+Full durable Message projection dipilih karena Message dalam SH bukan sekadar teks yang ditampilkan UI. Identity, hierarchy, role, timestamp, metadata, dan attachment relationship dapat dibutuhkan untuk reconstruction, fallback, dan recovery.
+
+Pendekatan ini mengurangi risiko semantic information loss ketika backend sementara tidak tersedia atau ketika local state digunakan untuk reconstruction.
+
+Trade-off yang diterima:
+
+- local snapshot lebih kaya dan lebih kompleks;
+- backward compatibility local JSON perlu dijaga;
+- durable/local-only fields harus dibedakan dengan jelas;
+- synchronization dan conflict semantics menjadi concern lanjutan yang harus direkonsiliasi secara eksplisit.
+
+Keputusan ini tidak mengubah backend Message contract atau Recovery contract.
+
+---
+
+## 2. Audit Scope
+
+Flow yang direkonsiliasi pada current `dev`:
 
 ```text
 backend Message
@@ -21,7 +105,7 @@ ConversationRecord.fromMap()
    ↓
 ConversationView._messageFromBackend()
    ↓
-conversationMessage
+ConversationMessage
    ↓
 conversationMessage.toJson()
    ↓
@@ -32,7 +116,7 @@ StorageService.readConversationState()
 conversationMessage.fromJson()
 ```
 
-Attachment flow juga diverifikasi:
+Attachment flow:
 
 ```text
 ConversationRecord.attachments
@@ -46,23 +130,23 @@ conversationAttachment.fromMap()
 
 ---
 
-## 2. Findings
+## 3. Findings
 
-### 2.1 Message identity — PASS
+### 3.1 Message identity — PASS
 
-`ConversationRecord.messageId` dipetakan ke `ConversationMessage.runtimeRecordId` dan diserialisasi kembali. Local hydration menggunakan `runtimeRecordId` sebagai key cache sehingga identity Message tetap menjadi anchor reconstruction.
+`ConversationRecord.messageId` dipetakan ke `ConversationMessage.runtimeRecordId` dan dipertahankan pada local serialization. Local hydration menggunakan identity tersebut sebagai anchor reconstruction.
 
-### 2.2 Content — PASS
+### 3.2 Content — PASS
 
-`ConversationRecord.content` dipetakan ke `ConversationMessage.text` dan diserialisasi sebagai `text`. Tidak ditemukan transformasi yang mengubah content pada serialization boundary.
+`ConversationRecord.content` dipetakan ke `ConversationMessage.text` dan diserialisasi sebagai `text` tanpa transformasi semantic pada serialization boundary.
 
-### 2.3 Timestamp — PASS WITH PRESENTATION DERIVATION
+### 3.3 Timestamp — PASS WITH PRESENTATION DERIVATION
 
-Authoritative `createdAt` disimpan sebagai ISO-8601 melalui `createdAt`. Field `time` adalah display projection (`HH:mm`) dan bukan authoritative timestamp.
+Authoritative `createdAt` dipertahankan sebagai ISO-8601 melalui `createdAt`. Field `time` adalah display projection (`HH:mm`) dan bukan authoritative timestamp.
 
-### 2.4 Attachment descriptors — PASS
+### 3.4 Attachment descriptors — PASS
 
-`ConversationAttachment.toJson()` menyimpan descriptor backend yang diperlukan, termasuk:
+Attachment descriptor mempertahankan field backend yang diperlukan, termasuk:
 
 ```text
 attachment_id
@@ -80,21 +164,21 @@ persisted_at
 local_path
 ```
 
-`fromMap()` membaca kembali descriptor tersebut. `local_path` diperlakukan sebagai local-only reference dan backend durable attachment tetap authoritative saat reconstruction.
+`local_path` tetap local-only reference. Durable attachment resource/storage tetap authoritative untuk reconstruction.
 
-### 2.5 Attachment ordering / duplicate hydration — PASS AT CODE LEVEL
+### 3.5 Attachment ordering / duplicate hydration — PASS AT CODE LEVEL
 
-Backend attachments di-load per Message. Hydration mencocokkan cached attachment berdasarkan `attachmentId`. Failed cached attachments hanya ditambahkan bila ID tersebut belum ada pada backend result. Tidak ditemukan duplicate append untuk ID yang sama pada path tersebut.
+Backend attachments di-load per Message. Hydration mencocokkan cached attachment berdasarkan `attachmentId`; failed cached attachments hanya dipertahankan bila ID tersebut belum hadir pada backend result. Tidak ditemukan duplicate append untuk ID yang sama pada path tersebut.
 
-Backend Message load juga menggunakan deterministic ordering `created_at ASC, message_id ASC`.
+Backend Message load menggunakan deterministic ordering `created_at ASC, message_id ASC`.
 
-### 2.6 Failed attachment persistence — PASS AT CODE LEVEL
+### 3.6 Failed attachment persistence — PASS AT CODE LEVEL
 
-Failed attachment descriptor dapat tetap berada di local state dan dipertahankan saat backend reload bila belum ada sebagai persisted backend attachment. Retry memakai attachment identity yang sama.
+Failed attachment descriptor dapat tetap berada di local state ketika belum menjadi persisted backend attachment. Retry mempertahankan attachment identity yang sama.
 
-### 2.7 Metadata — RESOLVED
+### 3.7 Metadata — RESOLVED
 
-`ConversationRecord.metadata` sekarang diproyeksikan ke `ConversationMessage.metadata` dan disimpan pada local JSON.
+`ConversationRecord.metadata` diproyeksikan ke `ConversationMessage.metadata` dan disimpan pada local JSON.
 
 ```text
 backend metadata
@@ -108,11 +192,11 @@ local JSON
 ConversationMessage.fromJson()
 ```
 
-Metadata tidak lagi hilang pada local fallback.
+Dengan demikian metadata tidak lagi hilang pada local fallback.
 
-### 2.8 Role — RESOLVED FOR LOCAL FIDELITY
+### 3.8 Role — RESOLVED FOR LOCAL FIDELITY
 
-Backend role contract menerima:
+Backend role set saat ini:
 
 ```text
 user
@@ -120,184 +204,140 @@ assistant
 system
 ```
 
-`ConversationMessage` sekarang mempertahankan exact `role` selain boolean `assistant` untuk compatibility UI.
+`ConversationMessage` mempertahankan exact `role` selain boolean `assistant` sebagai compatibility/UI projection.
 
-`_messageFromBackend()` membawa `record.role` secara langsung. `fromJson()` juga memulihkan role. Untuk legacy local records yang belum memiliki field `role`, constructor melakukan fallback berdasarkan `assistant` (`assistant` → `assistant`, selain itu → `user`).
+`_messageFromBackend()` membawa `record.role` secara langsung. `fromJson()` memulihkan role. Legacy local records yang belum memiliki `role` menggunakan fallback berdasarkan `assistant` (`assistant` → `assistant`, selain itu → `user`).
 
-Dengan demikian role `system` tidak lagi dipaksa menjadi non-assistant pada local serialization apabila role tersebut masuk melalui backend projection.
+Role `system` yang datang dari backend projection tidak lagi hilang hanya karena compatibility boolean `assistant`.
 
-### 2.9 Thread ID — RESOLVED FOR RECOVERY-ALIGNED LOCAL FIDELITY
+### 3.9 Thread ID — RESOLVED FOR RECOVERY-ALIGNED LOCAL FIDELITY
 
-`ConversationRecord.threadId` sekarang dipertahankan pada `ConversationMessage.threadId` dan diserialisasi ke local JSON.
-
-Ini menghilangkan kehilangan hierarchy reference pada local snapshot dan menyelaraskan projection lokal dengan recovery model yang mempertahankan Conversation/Thread relationship.
+`ConversationRecord.threadId` dipertahankan pada `ConversationMessage.threadId` dan local JSON sehingga hierarchy reference tidak hilang pada local snapshot.
 
 ---
 
-## 3. Storage Semantics
+## 4. Storage Semantics
 
-`StorageService.saveConversationState()` menyimpan satu JSON document berisi title, messages, dan `savedAt`, menggunakan `writeAsString(..., flush: true)`.
+`StorageService.saveConversationState()` menyimpan local snapshot yang berisi title, messages, dan `savedAt`, menggunakan durable local file write.
 
 `readConversationState()` melakukan JSON decode dan mengembalikan null bila file tidak ada atau decode gagal.
 
-Ini memberikan durable local snapshot behavior, tetapi bukan transactional local/backend synchronization. Crash-consistency dan conflict resolution tetap berada di queue audit Local ↔ Backend Persistence.
+Ini memberikan durable local snapshot behavior, tetapi **bukan** transactional local/backend synchronization. Crash consistency, retry/queue, conflict resolution, dan synchronization tetap merupakan workstream terpisah.
 
 ---
 
-## 4. Decision Boundary — RESOLVED
+## 5. Semantic Field Boundary
 
-Decision yang digunakan untuk implementation ini:
-
-```text
-A. full durable Message projection
-```
-
-Local `ConversationMessage` diperlakukan sebagai recovery-aligned durable projection, bukan sekadar UI/cache projection yang boleh kehilangan semantic Message fields.
-
-Minimum semantic fields yang dipertahankan lokal:
+Field yang diperlakukan sebagai semantic/durable Message projection:
 
 ```text
-metadata
-role
-threadId
 messageId
-createdAt
+threadId
+role
 content
+createdAt
+metadata
 attachments
 ```
 
-Field berikut tetap bersifat presentation/local:
+Field yang tetap merupakan presentation/local concern:
 
 ```text
 time           = display projection
-attachmentPath = local filesystem reference
-assistant      = UI compatibility projection derived from role at backend hydration
+attachmentPath = local filesystem/cache reference
+assistant      = compatibility/UI projection derived from role
 ```
 
-Decision ini tidak mengubah backend Message contract atau Recovery contract.
+Khusus attachment:
+
+```text
+local JSON
+  = attachment descriptor/reference
+
+private durable Storage
+  = attachment object
+
+backend attachment resource
+  = durable attachment identity/state
+```
+
+Serialization tidak memasukkan binary attachment object ke dalam Message JSON.
 
 ---
 
-## 5. Implementation Result
+## 6. Verification Boundary
 
-Implementation change dieksekusi pada current `dev`.
+Decision dan implementation serialization sudah resolved/aligned. Yang masih terbuka adalah pembuktian runtime/round-trip.
 
-Perubahan minimal:
-
-- `ConversationMessage` menambahkan `role`, `threadId`, dan `metadata`.
-- `ConversationMessage.toJson()/fromJson()` mempertahankan ketiga field tersebut.
-- `_messageFromBackend()` membawa exact role, thread ID, dan metadata dari `ConversationRecord`.
-- attachment message construction juga mempertahankan semantic fields dari backend record.
-- constructor legacy tetap backward-compatible dengan fallback role berdasarkan `assistant`.
-- tidak ada backend/schema/migration change.
-
-Commit:
+Required verification:
 
 ```text
-4dafcf7109c85f33a7e039202f433aabd4802365
-fix(conversation): preserve message semantics in local serialization
-```
-
-Verification:
-
-- GitHub commit diff diperiksa.
-- Diff hanya menyentuh `app/lib/features/conversation/conversation_view.dart`.
-- Tidak ada full-file reconstruction dari truncated output.
-- Tidak ada perubahan Canonical atau Approved Contract.
-
----
-
-## 6. Recovery Semantic Verification
-
-### 6.1 Source / live verification — COMPLETE
-
-Recovery implementation pada current `dev` dan live DEV diverifikasi.
-
-Snapshot backend mencakup `conversation_threads`, `conversations`, dan persisted `conversation_attachments`. Restore memvalidasi identity, ownership, State version, Message/Thread dependencies, attachment resource, Storage object, dan attachment relationship. Recovery juga menghitung missing dependencies dan menghasilkan `GAP_UNRESOLVED` bila dependency tetap hilang.
-
-Attachment recovery refs juga tersedia untuk mempertahankan relationship snapshot → attachment.
-
-### 6.2 Runtime E2E test — BLOCKED BY TEST FIXTURE
-
-Live DEV saat audit memiliki:
-
-```text
-recovery_snapshots                         0
-recovery_events                            0
-conversation_attachments                   0
-conversation_attachment_recovery_refs      0
-```
-
-Karena tidak ada fixture Conversation/Attachment/Snapshot yang dapat dipakai, authenticated snapshot → restore belum dapat dijalankan tanpa membuat test data baru.
-
-Tidak ada destructive test atau synthetic production-like data yang dibuat selama audit ini.
-
-### 6.3 Required semantic test matrix
-
-Test berikut tetap required sebelum Recovery Conversation dinaikkan menjadi PASS:
-
-```text
-T1  create FULL recovery snapshot with Message + Thread
-T2  restore intact snapshot → RECOVERED
-T3  restore same snapshot twice → idempotent existing recovery event
-T4  remove/missing Message dependency → GAP_UNRESOLVED
-T5  missing persisted attachment resource → GAP_UNRESOLVED
-T6  missing Storage object → GAP_UNRESOLVED
-T7  attachment resource + Message + Storage object present → relationship restored
-T8  attachment relationship conflict → gap detected, no false recovery
-T9  unauthorized / wrong-account snapshot → RECOVERY_REJECTED
-```
-
-Test harus menggunakan authenticated identity dan fixture yang isolated/controlled; test tidak boleh mengubah atau menghapus production user data.
-
-### 6.4 Verification classification
-
-```text
-Recovery implementation              VERIFIED
-Recovery source contract              VERIFIED
-Live DEV function presence             VERIFIED
-Live DEV fixture availability          BLOCKED — no fixtures
-Authenticated E2E                      OPEN
-Destructive dependency-loss tests      OPEN
-```
-
----
-
-## 7. Remaining Verification
-
-Serialization model decision dan implementation sudah resolved. Yang masih terbuka adalah verification, bukan model-contract decision.
-
-Required next verification:
-
-```text
-1. round-trip test metadata/role/threadId/messageId/createdAt
+1. round-trip metadata/role/threadId/messageId/createdAt/content
 2. legacy local JSON fallback compatibility
-3. attachment round-trip bersama semantic fields
-4. local fallback reconstruction with backend unavailable
-5. recovery authenticated E2E menggunakan isolated fixture
+3. attachment descriptor round-trip bersama Message semantic fields
+4. local fallback reconstruction ketika backend unavailable
 ```
 
-Tidak boleh menganggap Recovery E2E PASS sebelum fixture tersedia dan matrix dijalankan.
+Verification ini harus membuktikan bahwa local projection setelah:
+
+```text
+serialize → persist → read → deserialize
+```
+
+tetap mempertahankan semantic fields yang ditetapkan di Section 1.
+
+**Tidak boleh mengubah decision Opsi B hanya karena verification belum dijalankan.** Verification menentukan apakah implementation memenuhi decision tersebut, bukan membuka kembali keputusan yang sudah dibuat.
+
+---
+
+## 7. Recovery Relation
+
+Recovery implementation pada current `dev` dan live DEV sudah diverifikasi pada source/runtime level.
+
+Snapshot backend mencakup Conversation/Thread/Message dan persisted attachment relationship. Restore memvalidasi identity, ownership, State version, Message/Thread dependencies, attachment resource, Storage object, dan relationship. Missing dependencies menghasilkan recovery gap dan tidak dianggap silently restored.
+
+### Recovery E2E
+
+Authenticated snapshot → restore belum dijalankan karena audit sebelumnya menemukan tidak tersedia fixture Conversation/Attachment/Snapshot yang terisolasi.
+
+Required recovery verification tetap berada di gate Recovery, bukan menjadi alasan untuk mengubah Message Serialization decision.
 
 ---
 
 ## 8. Classification
 
 ```text
-Message ID                  PASS
-Content                     PASS
-CreatedAt                   PASS
-Attachment descriptor       PASS
-Attachment duplicate guard  PASS at code level
-Failed attachment retry    PASS at code level
-Metadata                    RESOLVED
-Role fidelity               RESOLVED
-Thread ID                   RESOLVED
-Storage snapshot            PRESENT
-Local/backend sync          OPEN
-Serialization E2E           OPEN
-Recovery implementation     VERIFIED
-Recovery E2E                BLOCKED BY TEST FIXTURE
+Message identity             PASS
+Content                      PASS
+CreatedAt                    PASS
+Attachment descriptor        PASS
+Attachment duplicate guard   PASS at code level
+Failed attachment retry      PASS at code level
+Metadata                     RESOLVED
+Role fidelity                RESOLVED
+Thread ID                    RESOLVED
+Local projection decision    RESOLVED — FULL DURABLE MESSAGE PROJECTION
+Storage snapshot             PRESENT
+Semantic round-trip          VERIFICATION OPEN
+Local/backend synchronization OPEN — SEPARATE WORKSTREAM
+Recovery implementation      VERIFIED
+Recovery E2E                  BLOCKED — TEST FIXTURE
 ```
 
-**Overall: LOCAL SERIALIZATION ALIGNED WITH RECOVERY-STYLE FULL MESSAGE PROJECTION / SERIALIZATION E2E OPEN / RECOVERY E2E BLOCKED BY TEST FIXTURE.**
+**Overall:**
+
+> **Message Serialization decision is RESOLVED as full durable Message projection. Current implementation is aligned. Remaining work is verification only; Local ↔ Backend synchronization and Recovery E2E remain separate gates.**
+
+---
+
+## 9. Change Control
+
+Dokumen ini hanya merapikan dan mengangkat keputusan yang sudah dibuat sebelumnya ke working documentation.
+
+Tidak ada perubahan pada:
+
+- Canonical;
+- Approved Contract;
+- backend schema;
+- migration;
+- runtime semantics.
