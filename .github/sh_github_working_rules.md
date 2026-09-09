@@ -4,290 +4,307 @@
 **Primary Development Branch:** `dev`  
 **Historical Reference Branch:** `dev_old`
 
-## 1. Branch Authority
-
-- `dev` adalah branch utama untuk active development.
-- `dev_old` adalah historical/reference source.
-- Jangan membuat branch baru kecuali memang diperlukan dan sudah disepakati.
-- Jangan menganggap `dev_old` sebagai baseline implementation. Gunakan sebagai reference/evidence.
-
-## 2. Default Working Mode
-
-Semua pekerjaan repository dilakukan langsung pada `dev`.
-
-Sebelum mengubah repository:
-
-1. Audit state `dev`.
-2. Identifikasi commit/changes terakhir.
-3. Periksa struktur dan file yang relevan.
-4. Cocokkan dengan Canonical dan dokumen authority yang relevan.
-5. Tentukan scope pekerjaan.
-6. Baru lakukan perubahan.
-
-Jangan langsung melakukan implementation hanya berdasarkan asumsi dari sesi sebelumnya.
-
-## 3. Source Authority
+## 1. Authority
 
 Urutan authority:
 
-1. Canonical SH.
-2. Approved Build Scope.
-3. Implementation Contract.
-4. Implementation Guide.
-5. Execution Strategy.
-6. Technology Boundaries.
-7. Working architecture/planning documents.
-8. `dev` implementation.
-9. `dev_old` historical/reference evidence.
-10. Brainstorming atau percakapan lama.
+1. **Explicit Owner/User Decision**
+2. Canonical SH
+3. Approved Build Scope
+4. Implementation Contract
+5. Implementation Guide
+6. Execution Strategy
+7. Technology Boundaries
+8. Working Architecture / Planning Documents
+9. `dev` implementation
+10. `dev_old` historical/reference evidence
+11. Brainstorming / conversation history
 
-Jika terdapat konflik:
-- jangan diam-diam menggabungkan;
-- identifikasi konflik;
-- prioritaskan authority yang lebih tinggi;
-- tandai gap bila belum dapat diputuskan.
+Keputusan Owner/User adalah authority tertinggi. Jangan mengubah Canonical atau semantics SH tanpa keputusan eksplisit.
+
+Jika terdapat konflik, identifikasi konflik, prioritaskan authority yang lebih tinggi, dan tandai gap bila belum dapat diputuskan.
+
+---
+
+## 2. Branch Authority
+
+- `dev` adalah branch utama active development.
+- `dev_old` adalah historical/reference source.
+- Jangan membuat branch baru kecuali diperlukan dan disepakati.
+- `dev_old` bukan baseline implementation.
+- Semua pekerjaan repository dilakukan pada `dev`.
+
+---
+
+## 3. Default Working Mode
+
+Sebelum implementation:
+
+1. Audit current `dev` state.
+2. Periksa commit dan perubahan terakhir.
+3. Periksa struktur dan source yang relevan.
+4. Cocokkan dengan authority dan dokumentasi terkait.
+5. Tentukan scope, dependency, blocker, dan expected result.
+6. Baru execute.
+
+Jangan menganggap konteks percakapan sebelumnya sebagai repository state aktual.
+
+---
 
 ## 4. Canonical Protection
 
 - Jangan mengubah Canonical tanpa instruksi eksplisit.
-- Jangan mengubah semantics SH hanya karena kebutuhan implementation.
+- Jangan mengubah semantics SH hanya untuk menyesuaikan implementation.
 - Technology, framework, provider, database, runtime, MCP, dan platform bukan authority SH.
-- Implementation harus mengikuti boundary, bukan mendefinisikan boundary.
+- Implementation mengikuti boundary SH.
 
-## 5. Commit Discipline
+---
 
-Commit harus merepresentasikan logical unit of work dan menggunakan nama yang meaningful.
+## 5. Scope Control
 
-Contoh:
+Jangan memperluas scope secara diam-diam.
 
-- `feat(app): establish Flutter and Dart application foundation`
-- `feat(conversation): implement conversation runtime path`
-- `fix(runtime): resolve runtime session handling`
-- `refactor(storage): isolate local storage boundary`
-- `docs(architecture): update implementation architecture`
-- `chore(repo): reorganize repository structure`
-- `test(runtime): add runtime contract verification`
+Temuan di luar scope diklasifikasikan sebagai:
 
-Hindari nama seperti `fix update test changes final final2 again misc`.
+`BLOCKER / GAP / DEFERRED / FOLLOW-UP / OUT OF SCOPE`
 
-Commit granular selama pengerjaan diperbolehkan. Setelah logical unit selesai dan verified, commit dapat di-squash menjadi satu commit yang bermakna.
+Pekerjaan hanya diperluas setelah impact dan relevansinya jelas.
 
-## 6. Squash Policy
+---
 
-Squash digunakan untuk menjaga history `dev` tetap readable, terutama ketika satu pekerjaan menghasilkan debugging/intermediate commits yang sebenarnya merupakan satu logical change.
+## 6. Implementation Rule
 
-Tidak perlu squash setiap commit.
+Tidak ada kewajiban terhadap metode, tooling, atau bentuk edit tertentu.
 
-Target history:
+Yang penting hasil akhir:
 
-```
-A B C
-X — Repository + Documentation Structure
-Y — Flutter + Dart Foundation
-Z — Next Logical Development
-```
+- sesuai scope dan expected result;
+- sesuai authority, contract, dan boundary;
+- tidak merusak bagian di luar scope;
+- tidak meninggalkan perubahan yang tidak disengaja;
+- dapat diverifikasi.
 
-bukan kumpulan commit intermediate yang tidak bermakna.
+---
 
-## 7. Commit Safety
+## 7. Repository Structure
 
-Sebelum squash atau history rewrite:
+Struktur repository yang telah ditetapkan harus dipertahankan.
 
-- pastikan target commit jelas;
-- pastikan repository state benar;
-- pastikan hasil akhir tidak berubah;
-- jangan menghapus perubahan yang belum diverifikasi;
-- setelah rewrite, verify branch HEAD dan repository tree.
+- Jangan membuat folder baru tanpa kebutuhan architectural/capability yang jelas.
+- Folder architectural placeholder boleh tetap kosong.
+- Major folder harus memiliki `README.md` atau notes bila diperlukan untuk menjelaskan purpose, boundary, responsibility, dan exclusion.
+- Jangan menyalin struktur `dev_old` secara otomatis.
 
-History rewrite hanya dilakukan pada branch yang memang kita kontrol.
+---
 
-## 8. Implementation Rule
+## 8. Documentation Rule
 
-Jangan mencampur pekerjaan berbeda dalam satu logical commit jika dapat dihindari.
-
-Contoh:
-
-- `X = Repository + Documentation Structure`
-- `Y = Flutter + Dart Foundation`
-
-Satu commit boleh mencakup beberapa file/folder apabila semuanya merupakan satu logical change.
-
-## 9. Repository Structure
-
-Struktur folder yang sudah ditetapkan harus dipertahankan.
-
-- Jangan membuat folder baru hanya karena folder tersebut belum berisi file.
-- Folder yang sudah disediakan boleh tetap kosong sebagai architectural placeholder.
-- Buat folder baru hanya apabila ada concern/capability baru yang belum memiliki boundary folder yang sesuai.
-- Setiap major folder harus memiliki `README.md` atau notes yang menjelaskan tujuan, artefak, boundary/responsibility, dan exclusion bila diperlukan.
-- Jangan membuat struktur mengikuti `dev_old` secara otomatis.
-
-## 10. Documentation Rule
-
-Dokumentasi ditempatkan berdasarkan concern.
-
-Struktur docs saat ini:
-
-```
-docs/
-├── README.md
-├── canonical/
-│   ├── README.md
-│   ├── sh_canonical_map.md
-│   ├── sh_architecture_map.md
-│   ├── sh_supabase_map.md
-│   └── sh_foundation_blueprint.md
-├── technology/
-│   ├── README.md
-│   └── sh_technology_boundaries.md
-└── architecture/
-    ├── README.md
-    └── sh_flutter_dart_architecture_and_implementation_working.md
-```
-
-Dokumen non-Canonical tidak boleh diberi kesan sebagai Canonical.
+Dokumentasi ditempatkan berdasarkan concern dan authority.
 
 Sebelum membuat dokumen baru, tentukan:
+
 - Purpose
 - Authority
 - Status
 - Destination
-- Relationship to existing documents
+- Relationship dengan dokumen existing
 
-Isi dokumentasi menggunakan Bahasa Indonesia kecuali Canonical. Penamaan file menggunakan convention repository yang konsisten.
+Dokumen non-Canonical tidak boleh diberi kesan sebagai Canonical.
 
-## 11. Technology Rule
+Dokumentasi menggunakan Bahasa Indonesia kecuali Canonical. Penamaan mengikuti convention repository.
+
+---
+
+## 9. Technology Rule
 
 Technology direction harus dibedakan dari implementation evidence.
 
-Untuk SH saat ini:
+Untuk SH:
 
-```
 Flutter + Dart
     ↓
 Technology Direction
-```
 
 sedangkan:
 
-```
 Expo + bare React Native
     ↓
 dev_old historical implementation evidence
-```
 
-Jangan menyatakan Flutter sudah implemented hanya karena architecture atau technology boundary sudah ditetapkan.
+Technology direction tidak membuktikan implementation telah selesai.
 
-## 12. Verification Rule
+---
 
-Setiap pekerjaan implementation diverifikasi sesuai scope:
+## 10. Change Integrity
 
-```
-Changed
-  ↓
-Build / Type Check
-  ↓
-Relevant Tests
-  ↓
-Integration / Runtime Verification
-  ↓
-Final State Check
-  ↓
-Commit
-```
+Final repository state harus sesuai dengan intended change.
 
-Jika verification belum dilakukan, jangan menyebutnya verified.
+Sebelum commit pastikan:
 
-Bedakan:
-- Designed;
-- Implemented;
-- Integrated;
-- Tested;
-- Runtime Verified;
-- Device Verified;
-- E2E Verified.
+- tidak ada perubahan di luar scope;
+- tidak ada content loss;
+- tidak ada accidental deletion, rename, atau move;
+- file dan repository tetap valid;
+- hasil sesuai expected result.
 
-## 13. Session Continuity Rule
+Jika hasil tidak sesuai, jangan commit.
 
-Jika memulai sesi baru, jangan langsung melanjutkan implementation berdasarkan ingatan percakapan.
+---
 
-Mulai dengan:
+## 11. Verification Rule
 
-1. Check current branch.
-2. Check current HEAD.
-3. Check recent commits.
-4. Check working tree.
-5. Check repository structure.
-6. Read relevant source documents.
-7. Identify current milestone.
-8. Identify blockers/unfinished work.
-9. Continue only after state is reconciled.
+Verification disesuaikan dengan jenis dan scope perubahan.
 
-Jika konteks sesi dan repository berbeda, repository state menjadi evidence aktual.
+Pastikan perubahan yang dinyatakan selesai benar-benar sesuai authority, contract, semantics, expected result, dan tidak merusak existing behavior di luar scope.
 
-## 14. Work Handoff
+Bedakan status:
 
-Setiap logical milestone sebaiknya meninggalkan state yang dapat dilanjutkan tanpa konteks percakapan sebelumnya.
+- Designed
+- Implemented
+- Integrated
+- Tested
+- Runtime Verified
+- Device Verified
+- E2E Verified
 
-Minimal jelas:
-- Current state
+Jangan menyatakan status lebih tinggi daripada evidence yang tersedia.
+
+---
+
+## 12. Runtime / Backend State
+
+Repository source, migration, database state, dan runtime behavior adalah evidence yang berbeda.
+
+Keberadaan source atau dokumentasi tidak otomatis berarti sesuatu telah applied, integrated, tested, atau verified.
+
+Status harus berdasarkan evidence aktual.
+
+---
+
+## 13. Commit Discipline
+
+Commit harus merepresentasikan logical unit of work dan menggunakan nama meaningful.
+
+Contoh:
+
+- `feat(conversation): implement conversation runtime path`
+- `fix(runtime): resolve runtime session handling`
+- `refactor(storage): isolate local storage boundary`
+- `docs(architecture): update implementation architecture`
+- `test(runtime): add runtime contract verification`
+
+Commit granular diperbolehkan selama pengerjaan. Setelah logical unit selesai dan verified, intermediate commits dapat di-squash.
+
+---
+
+## 14. Commit Safety
+
+Sebelum commit atau history rewrite:
+
+- target dan scope harus jelas;
+- final result harus terverifikasi;
+- tidak boleh ada perubahan yang tidak disengaja;
+- repository state harus konsisten;
+- history rewrite tidak boleh menghilangkan perubahan yang belum diverifikasi.
+
+History rewrite hanya pada branch yang dikontrol.
+
+---
+
+## 15. Migration / Durable State
+
+Perubahan durable seperti database migration, schema, RLS, privilege, RPC, storage, atau data harus:
+
+- sesuai authority dan scope;
+- mempertimbangkan dependency dan impact;
+- diverifikasi terhadap actual state bila termasuk dalam scope.
+
+Migration file saja bukan bukti bahwa perubahan durable telah applied atau verified.
+
+---
+
+## 16. Blocker
+
+Jika prerequisite atau verification yang diperlukan belum tersedia:
+
+- jangan menganggap pekerjaan selesai;
+- jangan mengubah contract atau semantics untuk melewati blocker;
+- tandai `BLOCKER` atau `DEFERRED`;
+- jelaskan penyebab, impact, prerequisite, dan solusi/next action.
+
+Pekerjaan independen yang aman tetap dapat dilanjutkan.
+
+---
+
+## 17. Session Continuity & Handoff
+
+Pada sesi baru, reconcile:
+
+- current branch;
+- current HEAD;
+- recent commits;
+- repository state dan structure;
+- relevant authority/documentation;
+- current milestone;
+- completed, remaining, dan blockers.
+
+Setiap logical milestone harus meninggalkan state yang dapat dilanjutkan tanpa konteks percakapan, minimal dengan:
+
+- Current State
 - Completed
 - Remaining
-- Known blockers
-- Relevant documents
-- Relevant commit
-- Next intended work
+- Known Blockers
+- Relevant Documents
+- Relevant Commit
+- Next Intended Work
 
-Jika diperlukan, tambahkan informasi tersebut ke working documentation yang relevan.
+---
 
-## 15. No Silent Scope Expansion
-
-Jangan memperluas scope hanya karena menemukan sesuatu yang menarik.
-
-Klasifikasikan temuan baru sebagai:
-
-```
-BLOCKER
-GAP
-DEFERRED
-FOLLOW-UP
-OUT OF SCOPE
-```
-
-Baru lanjut setelah impact-nya jelas.
-
-## 16. Destructive Operations
-
-Untuk operasi yang dapat mengubah history atau menghapus data:
-
-```
-AUDIT
-  ↓
-CONFIRM TARGET
-  ↓
-EXECUTE
-  ↓
-VERIFY
-```
-
-Jangan melakukan force push, branch deletion, mass file deletion, history rewrite, atau destructive migration berdasarkan asumsi.
-
-## 17. Definition of Done
+## 18. Definition of Done
 
 Pekerjaan dianggap selesai apabila:
 
-- scope jelas;
-- implementation selesai;
+- scope dan expected result jelas;
+- implementation menghasilkan result yang diperlukan;
 - relevant verification selesai;
-- repository state konsisten;
+- repository/runtime state konsisten dengan result;
 - documentation diperbarui bila diperlukan;
-- commit memiliki nama meaningful;
-- tidak meninggalkan perubahan yang tidak disengaja;
-- status berikutnya jelas.
+- commit meaningful;
+- tidak ada unintended changes;
+- remaining work atau next state jelas.
 
-## 18. Default Session Instruction
+---
 
-Jika dokumen ini digunakan sebagai context pada sesi baru:
+## 19. Language / Working Style
 
-**Audit current `dev` state first. Reconcile against SH authority and relevant documentation. Do not assume previous conversation state is current. Do not modify Canonical without explicit instruction. Work directly on `dev`. Keep changes scoped and structurally consistent. Use meaningful logical commits and periodically squash intermediate commits when a logical unit is complete and verified. Verify repository state after every significant operation.**
+Bahasa kerja:
 
+Indonesia.
+
+Gaya:
+
+- natural
+- langsung
+- kritis
+- presisi
+- systemic reasoning
+- tidak bertele-tele
+- bahasa manusia
+
+Jangan sekadar bilang "sudah aman".
+
+Tunjukkan:
+
+- apa yang diverifikasi;
+- source-nya;
+- state aktual;
+- gap;
+- blocker;
+- consequence;
+- next action.
+
+---
+
+## Default Session Instruction
+
+Audit current `dev` state first. Reconcile against explicit Owner/User decisions, SH authority, and relevant documentation. Do not assume previous conversation state is current. Do not modify Canonical without explicit instruction. Keep scope controlled and repository structure consistent. Use any appropriate implementation method; judge completion by the correctness of the final result and available verification evidence. Do not silently change semantics, expand scope, or bypass blockers. Keep `dev` consistent and continuation-ready.
