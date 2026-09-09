@@ -25,6 +25,9 @@ Historical / dev_old evidence
 Approved attachment contract:
 `docs/contract/sh_conversation_attachment_contract.md`
 
+Clear semantics working authority:
+`docs/working/conversation/sh_conversation_clear_semantics_reconciliation.md`
+
 ---
 
 ## 1. Frozen Semantic Model
@@ -125,47 +128,20 @@ Unauthenticated/anon access is denied.
 The migration introduces authorized backend boundaries for:
 
 1. `runtime_create_conversation_attachment(filename, mime_type, size_bytes)`
-   - resolves Account/SH from trusted identity;
-   - creates `PENDING` resource;
-   - does not trust client Account/SH ownership input.
-
 2. `runtime_finalize_conversation_attachment(attachment_id, message_id, storage_ref)`
-   - requires trusted authenticated identity;
-   - validates attachment ownership;
-   - validates target Message ownership and same Account/SH;
-   - validates pending/idempotent transition;
-   - associates Message and marks `PERSISTED`.
-
 3. `runtime_fail_conversation_attachment(attachment_id)`
-   - trusted owner boundary;
-   - transitions unfinished attachment to `FAILED`.
-
 4. `runtime_load_conversation_attachments(message_id)`
-   - trusted Message/Account/SH boundary;
-   - returns durable descriptors for reconstruction.
-
 5. `runtime_detach_conversation_attachment(attachment_id)`
-   - removes active Message relationship by setting `message_id = NULL`;
-   - does not physically delete Storage Object.
+
+All resolve/validate trusted Account/SH ownership at the backend boundary. Client-provided ownership values are not authority. Finalize validates target Message ownership and same Account/SH. Retry of the same logical attachment retains the same `attachment_id`.
 
 Physical cleanup is service-role/internal and is not exposed as an authenticated arbitrary-delete RPC.
 
-Retry of the same logical attachment retains the same `attachment_id`.
-
 ---
 
-## 6. Frozen Delete Semantics
+## 6. Frozen Delete and Clear Semantics
 
-Existing DEV Message delete function:
-`runtime_delete_conversation_message_v2(uuid)`
-
-Existing DEV Thread delete function:
-`runtime_delete_conversation_thread(uuid)`
-
-Existing DEV service-only Conversation delete function:
-`runtime_delete_conversation(uuid)`
-
-These functions remain trusted Account/SH boundaries as currently implemented.
+Existing DEV Message/Conversation deletion functions remain trusted Account/SH boundaries as currently implemented.
 
 Attachment rule:
 
@@ -177,11 +153,24 @@ active attachment relationship removed
 Storage Object NOT blindly deleted
 ```
 
-The FK uses `ON DELETE SET NULL`, so existing Message/Thread deletion remains compatible without requiring destructive trigger behavior.
+The FK uses `ON DELETE SET NULL`, so existing Message/Thread deletion remains compatible without destructive trigger behavior.
 
 Storage cleanup occurs only when no valid active Message or Recovery retention dependency remains.
 
-Clear remains non-destructive and must not invoke attachment deletion/detach semantics.
+Locked Clear semantics are:
+
+```text
+Clear
+→ temporary presentation/session state
+→ application session lifetime
+→ no Message mutation
+→ no Attachment deletion/detach
+→ no Storage Object cleanup
+→ no Recovery mutation
+→ no backend durable Clear state
+```
+
+Clear therefore remains completely outside the destructive attachment lifecycle.
 
 ---
 
@@ -189,24 +178,11 @@ Clear remains non-destructive and must not invoke attachment deletion/detach sem
 
 Existing DEV Recovery captures/restores Conversation Messages inside `recovery_snapshots.manifest`.
 
-The attachment migration integration is now **implemented in DEV** through persisted attachment descriptors/references. Binary data is not embedded in the JSON manifest.
+The attachment migration integration is implemented in DEV through persisted attachment descriptors/references. Binary data is not embedded in the JSON manifest.
 
 Recovery relationship:
 
-Table: `public.conversation_attachment_recovery_refs`
-
-Columns:
-
-- `snapshot_id uuid NOT NULL`.
-- `attachment_id uuid NOT NULL`.
-- `created_at timestamptz NOT NULL`.
-
-Constraints:
-
-- composite primary/unique relationship `(snapshot_id, attachment_id)`.
-- FK `snapshot_id → recovery_snapshots.snapshot_id`.
-- FK `attachment_id → conversation_attachments.attachment_id`.
-- Recovery reference is a retention dependency, not a replacement for snapshot evidence.
+`public.conversation_attachment_recovery_refs`
 
 Current snapshot/restore path:
 
@@ -216,25 +192,15 @@ Message with durable attachment
 Recovery manifest captures attachment descriptor/reference
         ↓
 Recovery reference retained
+        ↓
+Restore reconnects existing durable Attachment/Storage Object
 ```
 
-Restore:
-
-```text
-Snapshot
-   ↓
-Message
-   ↓
-Attachment reference
-   ↓
-existing durable Attachment/Storage Object
-```
-
-Missing durable object/resource must produce an explicit recovery gap; restore must not claim attachment recovery when the object cannot be reconstructed.
+Restore only succeeds for the attachment dependency when the durable resource, Storage Object, and target Message dependency are available. Missing dependency must surface as an explicit recovery gap.
 
 Existing Recovery idempotency and trusted Account ownership boundaries remain intact.
 
-Current implementation has reached backend relationship/reconstruction support. Authenticated Recovery E2E, missing-object behavior, and cleanup/retention verification remain open.
+Authenticated Recovery E2E, missing-object behavior, and cleanup/retention verification remain open.
 
 ---
 
@@ -255,7 +221,7 @@ Attachment Resource without Message and without valid retention dependency
 
 Because Storage upload and PostgreSQL transaction are not atomic, implementation must provide a cleanup/reconciliation path for failed database persistence after successful object upload.
 
-No synchronous blind object deletion is attached to Message DELETE.
+No synchronous blind object deletion is attached to Message DELETE or Clear.
 
 Current PENDING / PERSISTED / FAILED lifecycle and stable attachment identity support the intended retry boundary. Full orphan cleanup/reconciliation behavior remains a verification gate.
 
@@ -298,27 +264,7 @@ Minimum verification cases:
 
 ---
 
-## 11. Pre-Migration Audit Result
-
-Audited against current DEV definitions and privilege surface before SQL freeze:
-
-- `runtime_create_conversation` — trusted identity and project ownership boundary preserved.
-- `runtime_record_conversation_message` — trusted Account/SH/Thread boundary preserved; existing non-empty content rule preserved.
-- `runtime_load_conversation_messages` — trusted Thread + Account/SH boundary preserved.
-- `runtime_load_conversation_context_for_thread` — trusted Thread + Account/SH boundary preserved.
-- `runtime_delete_conversation_message_v2` — authenticated trusted Account/SH delete boundary preserved.
-- `runtime_delete_conversation_thread` — authenticated trusted Account/SH delete boundary preserved.
-- `runtime_delete_conversation` — service-role-only boundary preserved.
-- `runtime_create_recovery_snapshot` — authenticated, current-account-owned active SH validation preserved; Conversation remains in manifest.
-- `runtime_restore_recovery_snapshot` — authenticated, current-account snapshot/SH validation and existing Recovery idempotency preserved; attachment reconstruction is additive and must surface missing attachment as a recovery gap.
-- Existing RLS on Conversation/Recovery remains unchanged; new attachment resources receive their own RLS.
-- Existing anon execution surface remains denied for the relevant Conversation/Recovery boundaries.
-
-This section records the **pre-migration audit evidence**. It is not a statement that all post-migration runtime verification is complete.
-
----
-
-## 12. Execution Result / Current DEV Checkpoint
+## 11. Execution Result / Current DEV Checkpoint
 
 Migration design is **FROZEN / LOCKED** and the design has been executed in DEV.
 
@@ -355,9 +301,11 @@ No additional schema migration is implied by these verification gaps.
 
 ---
 
-## 13. Execution Gate
+## 12. Execution Gate
 
-The design remains **FROZEN / LOCKED** for the implemented DEV migration. SQL must continue to conform to this design and must not silently introduce additional semantic scope.
+The design remains **FROZEN / LOCKED** for the implemented DEV migration.
+
+Clear semantics are now locked separately as an application-session presentation state. Attachment implementation must preserve that boundary and must not introduce destructive Clear behavior.
 
 Next verification gates:
 
@@ -365,7 +313,7 @@ Next verification gates:
 2. verify bucket/privacy/storage policies;
 3. verify RPC definitions/privileges;
 4. verify Message delete and Conversation delete behavior;
-5. verify Clear produces no destructive attachment mutation once Clear semantics are locked;
+5. verify Clear produces no destructive attachment mutation;
 6. verify Recovery create/restore attachment handling;
 7. run security matrix;
 8. run FE integration verification;
