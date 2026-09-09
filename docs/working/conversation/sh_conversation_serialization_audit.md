@@ -2,7 +2,7 @@
 
 ## Status
 
-**AUDIT COMPLETE / IMPLEMENTATION CHANGE BLOCKED BY MODEL-CONTRACT DECISION**
+**IMPLEMENTATION ALIGNED / SEMANTIC E2E STILL OPEN / RECOVERY E2E BLOCKED BY TEST FIXTURE**
 
 Dokumen ini adalah child working audit untuk `ConversationMessage` ↔ `ConversationRecord` ↔ local conversation state.
 
@@ -92,34 +92,25 @@ Backend Message load juga menggunakan deterministic ordering `created_at ASC, me
 
 Failed attachment descriptor dapat tetap berada di local state dan dipertahankan saat backend reload bila belum ada sebagai persisted backend attachment. Retry memakai attachment identity yang sama.
 
-### 2.7 Metadata — GAP CONFIRMED
+### 2.7 Metadata — RESOLVED
 
-`ConversationRecord` memiliki:
-
-```text
-metadata
-```
-
-Namun `ConversationMessage` tidak memiliki field `metadata`, dan `ConversationMessage.toJson()/fromJson()` tidak menyimpan atau memulihkan metadata.
-
-Akibatnya:
+`ConversationRecord.metadata` sekarang diproyeksikan ke `ConversationMessage.metadata` dan disimpan pada local JSON.
 
 ```text
 backend metadata
    ↓
 ConversationRecord.metadata
    ↓
-ConversationMessage
-   X  metadata tidak dibawa
+ConversationMessage.metadata
    ↓
 local JSON
+   ↓
+ConversationMessage.fromJson()
 ```
 
-Pada successful backend reload, metadata dapat diperoleh lagi dari backend. Pada local fallback, metadata tidak tersedia.
+Metadata tidak lagi hilang pada local fallback.
 
-Ini adalah **serialization loss pada local projection**, bukan backend persistence loss.
-
-### 2.8 Role — GAP CONFIRMED FOR FULL ROLE FIDELITY
+### 2.8 Role — RESOLVED FOR LOCAL FIDELITY
 
 Backend role contract menerima:
 
@@ -129,29 +120,17 @@ assistant
 system
 ```
 
-`ConversationMessage` hanya menyimpan boolean:
+`ConversationMessage` sekarang mempertahankan exact `role` selain boolean `assistant` untuk compatibility UI.
 
-```text
-assistant
-```
+`_messageFromBackend()` membawa `record.role` secara langsung. `fromJson()` juga memulihkan role. Untuk legacy local records yang belum memiliki field `role`, constructor melakukan fallback berdasarkan `assistant` (`assistant` → `assistant`, selain itu → `user`).
 
-`_messageFromBackend()` melakukan:
+Dengan demikian role `system` tidak lagi dipaksa menjadi non-assistant pada local serialization apabila role tersebut masuk melalui backend projection.
 
-```text
-record.role == 'assistant'
-```
+### 2.9 Thread ID — RESOLVED FOR RECOVERY-ALIGNED LOCAL FIDELITY
 
-Akibatnya role `system` tidak dapat dibedakan dari non-assistant role pada local representation.
+`ConversationRecord.threadId` sekarang dipertahankan pada `ConversationMessage.threadId` dan diserialisasi ke local JSON.
 
-Ini adalah **role-fidelity loss pada local projection** bila system Message masuk ke Conversation UI/cache.
-
-Belum ada evidence bahwa `system` Message memang masuk ke user-visible ConversationView. Karena itu belum boleh langsung mengubah model tanpa reconciliation terhadap role semantics.
-
-### 2.9 Thread ID — NOT REQUIRED FOR CURRENT UI PROJECTION
-
-`ConversationRecord.threadId` tidak disimpan pada `ConversationMessage` local cache. Current local cache diikat ke active conversation dan Message ID, sementara thread identity tetap tersedia pada backend record.
-
-Tidak ada evidence bahwa local UI membutuhkan `threadId` sebagai independent mutable state. Tidak diklasifikasikan sebagai confirmed bug pada audit ini.
+Ini menghilangkan kehilangan hierarchy reference pada local snapshot dan menyelaraskan projection lokal dengan recovery model yang mempertahankan Conversation/Thread relationship.
 
 ---
 
@@ -165,50 +144,66 @@ Ini memberikan durable local snapshot behavior, tetapi bukan transactional local
 
 ---
 
-## 4. Decision Boundary
+## 4. Decision Boundary — RESOLVED
 
-Temuan metadata dan full-role fidelity tidak boleh langsung diubah sebagai refactor arbitrer karena perlu dipastikan apakah `ConversationMessage` dimaksudkan sebagai:
+Decision yang digunakan untuk implementation ini:
 
 ```text
 A. full durable Message projection
 ```
 
-atau:
+Local `ConversationMessage` diperlakukan sebagai recovery-aligned durable projection, bukan sekadar UI/cache projection yang boleh kehilangan semantic Message fields.
 
-```text
-B. UI/cache projection yang hanya menyimpan state yang dibutuhkan UI
-```
-
-Current implementation evidence lebih dekat ke **B**, karena backend `ConversationRecord` tetap menjadi source untuk successful reload dan local `ConversationMessage` memiliki display-derived `time` serta local-only `attachmentPath`.
-
-Namun local fallback membuat B memiliki semantic consequence: data yang tidak diproyeksikan hilang saat backend unavailable.
-
----
-
-## 5. Required Resolution
-
-Sebelum implementation change, owner/contract decision perlu menetapkan salah satu:
-
-### Option A — Preserve full Message semantics locally
-
-Tambahkan representasi yang diperlukan untuk mempertahankan:
+Minimum semantic fields yang dipertahankan lokal:
 
 ```text
 metadata
 role
+threadId
 messageId
 createdAt
 content
 attachments
 ```
 
-sehingga local snapshot dapat mereconstruct semantic Message secara penuh.
+Field berikut tetap bersifat presentation/local:
 
-### Option B — Keep UI projection intentionally lossy
+```text
+time           = display projection
+attachmentPath = local filesystem reference
+assistant      = UI compatibility projection derived from role at backend hydration
+```
 
-Tetapkan secara eksplisit bahwa local conversation state hanya merupakan UI/cache projection, bukan semantic Message snapshot. Dalam model ini metadata dan system-role loss pada local fallback diterima, sementara backend tetap authoritative.
+Decision ini tidak mengubah backend Message contract atau Recovery contract.
 
-**Current audit tidak memilih A atau B secara sepihak.**
+---
+
+## 5. Implementation Result
+
+Implementation change dieksekusi pada current `dev`.
+
+Perubahan minimal:
+
+- `ConversationMessage` menambahkan `role`, `threadId`, dan `metadata`.
+- `ConversationMessage.toJson()/fromJson()` mempertahankan ketiga field tersebut.
+- `_messageFromBackend()` membawa exact role, thread ID, dan metadata dari `ConversationRecord`.
+- attachment message construction juga mempertahankan semantic fields dari backend record.
+- constructor legacy tetap backward-compatible dengan fallback role berdasarkan `assistant`.
+- tidak ada backend/schema/migration change.
+
+Commit:
+
+```text
+4dafcf7109c85f33a7e039202f433aabd4802365
+fix(conversation): preserve message semantics in local serialization
+```
+
+Verification:
+
+- GitHub commit diff diperiksa.
+- Diff hanya menyentuh `app/lib/features/conversation/conversation_view.dart`.
+- Tidak ada full-file reconstruction dari truncated output.
+- Tidak ada perubahan Canonical atau Approved Contract.
 
 ---
 
@@ -268,24 +263,21 @@ Destructive dependency-loss tests      OPEN
 
 ---
 
-## 7. Execution Result
+## 7. Remaining Verification
 
-Tidak ada source mutation dilakukan untuk metadata/role pada audit ini.
+Serialization model decision dan implementation sudah resolved. Yang masih terbuka adalah verification, bukan model-contract decision.
 
-Alasan: metadata loss terkonfirmasi, tetapi perubahan model `ConversationMessage` dapat mengubah boundary antara durable Message model dan UI projection; role `system` juga belum terbukti sebagai user-visible state.
+Required next verification:
 
-Yang sudah dieksekusi:
+```text
+1. round-trip test metadata/role/threadId/messageId/createdAt
+2. legacy local JSON fallback compatibility
+3. attachment round-trip bersama semantic fields
+4. local fallback reconstruction with backend unavailable
+5. recovery authenticated E2E menggunakan isolated fixture
+```
 
-- current `dev` source audit;
-- attachment serialization verification;
-- metadata/role loss identification;
-- explicit decision boundary documentation;
-- recovery implementation/source verification;
-- live DEV function/schema verification;
-- live DEV fixture availability check;
-- semantic recovery test matrix definition.
-
-Tidak ada Canonical atau Approved Contract yang diubah.
+Tidak boleh menganggap Recovery E2E PASS sebelum fixture tersedia dan matrix dijalankan.
 
 ---
 
@@ -298,14 +290,14 @@ CreatedAt                   PASS
 Attachment descriptor       PASS
 Attachment duplicate guard  PASS at code level
 Failed attachment retry    PASS at code level
-Metadata                    GAP — local projection loss
-Role fidelity               GAP — system role not preserved locally
-Thread ID                   ACCEPTED omission for current projection
+Metadata                    RESOLVED
+Role fidelity               RESOLVED
+Thread ID                   RESOLVED
 Storage snapshot            PRESENT
 Local/backend sync          OPEN
-E2E serialization           OPEN
+Serialization E2E           OPEN
 Recovery implementation     VERIFIED
 Recovery E2E                BLOCKED BY TEST FIXTURE
 ```
 
-**Overall: SERIALIZATION IMPLEMENTATION PARTIALLY ALIGNED / METADATA + ROLE FIDELITY DECISION BLOCKER / RECOVERY E2E BLOCKED BY FIXTURE.**
+**Overall: LOCAL SERIALIZATION ALIGNED WITH RECOVERY-STYLE FULL MESSAGE PROJECTION / SERIALIZATION E2E OPEN / RECOVERY E2E BLOCKED BY TEST FIXTURE.**
