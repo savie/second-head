@@ -21,15 +21,15 @@ ConversationRecord.fromMap()
    ↓
 ConversationView._messageFromBackend()
    ↓
-ConversationMessage
+conversationMessage
    ↓
-ConversationMessage.toJson()
+conversationMessage.toJson()
    ↓
 StorageService.saveConversationState()
    ↓
 StorageService.readConversationState()
    ↓
-ConversationMessage.fromJson()
+conversationMessage.fromJson()
 ```
 
 Attachment flow juga diverifikasi:
@@ -37,11 +37,11 @@ Attachment flow juga diverifikasi:
 ```text
 ConversationRecord.attachments
    ↓
-ConversationMessage.attachments
+conversationMessage.attachments
    ↓
-ConversationAttachment.toJson()
+conversationAttachment.toJson()
    ↓
-ConversationAttachment.fromMap()
+conversationAttachment.fromMap()
 ```
 
 ---
@@ -212,7 +212,63 @@ Tetapkan secara eksplisit bahwa local conversation state hanya merupakan UI/cach
 
 ---
 
-## 6. Execution Result
+## 6. Recovery Semantic Verification
+
+### 6.1 Source / live verification — COMPLETE
+
+Recovery implementation pada current `dev` dan live DEV diverifikasi.
+
+Snapshot backend mencakup `conversation_threads`, `conversations`, dan persisted `conversation_attachments`. Restore memvalidasi identity, ownership, State version, Message/Thread dependencies, attachment resource, Storage object, dan attachment relationship. Recovery juga menghitung missing dependencies dan menghasilkan `GAP_UNRESOLVED` bila dependency tetap hilang.
+
+Attachment recovery refs juga tersedia untuk mempertahankan relationship snapshot → attachment.
+
+### 6.2 Runtime E2E test — BLOCKED BY TEST FIXTURE
+
+Live DEV saat audit memiliki:
+
+```text
+recovery_snapshots                         0
+recovery_events                            0
+conversation_attachments                   0
+conversation_attachment_recovery_refs      0
+```
+
+Karena tidak ada fixture Conversation/Attachment/Snapshot yang dapat dipakai, authenticated snapshot → restore belum dapat dijalankan tanpa membuat test data baru.
+
+Tidak ada destructive test atau synthetic production-like data yang dibuat selama audit ini.
+
+### 6.3 Required semantic test matrix
+
+Test berikut tetap required sebelum Recovery Conversation dinaikkan menjadi PASS:
+
+```text
+T1  create FULL recovery snapshot with Message + Thread
+T2  restore intact snapshot → RECOVERED
+T3  restore same snapshot twice → idempotent existing recovery event
+T4  remove/missing Message dependency → GAP_UNRESOLVED
+T5  missing persisted attachment resource → GAP_UNRESOLVED
+T6  missing Storage object → GAP_UNRESOLVED
+T7  attachment resource + Message + Storage object present → relationship restored
+T8  attachment relationship conflict → gap detected, no false recovery
+T9  unauthorized / wrong-account snapshot → RECOVERY_REJECTED
+```
+
+Test harus menggunakan authenticated identity dan fixture yang isolated/controlled; test tidak boleh mengubah atau menghapus production user data.
+
+### 6.4 Verification classification
+
+```text
+Recovery implementation              VERIFIED
+Recovery source contract              VERIFIED
+Live DEV function presence             VERIFIED
+Live DEV fixture availability          BLOCKED — no fixtures
+Authenticated E2E                      OPEN
+Destructive dependency-loss tests      OPEN
+```
+
+---
+
+## 7. Execution Result
 
 Tidak ada source mutation dilakukan untuk metadata/role pada audit ini.
 
@@ -223,13 +279,17 @@ Yang sudah dieksekusi:
 - current `dev` source audit;
 - attachment serialization verification;
 - metadata/role loss identification;
-- explicit decision boundary documentation.
+- explicit decision boundary documentation;
+- recovery implementation/source verification;
+- live DEV function/schema verification;
+- live DEV fixture availability check;
+- semantic recovery test matrix definition.
 
 Tidak ada Canonical atau Approved Contract yang diubah.
 
 ---
 
-## 7. Classification
+## 8. Classification
 
 ```text
 Message ID                  PASS
@@ -244,6 +304,8 @@ Thread ID                   ACCEPTED omission for current projection
 Storage snapshot            PRESENT
 Local/backend sync          OPEN
 E2E serialization           OPEN
+Recovery implementation     VERIFIED
+Recovery E2E                BLOCKED BY TEST FIXTURE
 ```
 
-**Overall: SERIALIZATION IMPLEMENTATION PARTIALLY ALIGNED / METADATA + ROLE FIDELITY DECISION BLOCKER / E2E OPEN.**
+**Overall: SERIALIZATION IMPLEMENTATION PARTIALLY ALIGNED / METADATA + ROLE FIDELITY DECISION BLOCKER / RECOVERY E2E BLOCKED BY FIXTURE.**
