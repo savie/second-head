@@ -1,10 +1,10 @@
 # SH Agent Execution Report
 
 ## Task
-inspect repository
+inspect repository state
 
 ## Scope
-.
+docs/
 
 ## Operation
 INSPECT
