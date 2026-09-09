@@ -540,20 +540,6 @@ STOP / FAILURE SAFETY TEST
 SH WORKSPACE READY
 ```
 
-EDIT INTEGRITY
-
-Implementation wajib menjaga hasil perubahan, bukan mengunci mekanisme edit tertentu.
-
-- "current repository state" adalah source of truth sebelum edit;
-- semua mekanisme edit diperbolehkan, termasuk patch/diff, Git-native edit, structured update, full-file replacement, scripting, automated transformation, atau mekanisme repository-native lain;
-- mekanisme edit boleh dipilih berdasarkan kondisi file, ukuran file, jenis perubahan, dan capability workspace;
-- tidak ada mekanisme edit yang secara default dianggap wajib atau paling benar;
-- mekanisme apa pun yang digunakan tidak boleh mengubah, menghilangkan, mereconstruct, atau merusak content di luar expected change;
-- setelah edit, hasil wajib diverifikasi terhadap "current repository state" dan "expected change";
-- diff harus menunjukkan tepat perubahan yang dimaksud, dan file integrity harus tetap valid;
-- jika hasil aktual berbeda dari expected change, terdapat unintended change/content loss, atau integrity tidak dapat diverifikasi, jangan commit dan STOP untuk memperbaiki atau memilih mekanisme lain;
-- keberhasilan ditentukan oleh correctness dan integrity hasil akhir, bukan oleh metode yang digunakan untuk menghasilkan perubahan tersebut.
-
 Prinsip utama:
 
 «Any edit method is allowed. The only requirement is that the resulting repository state is correct, complete, and contains exactly the intended change.»
