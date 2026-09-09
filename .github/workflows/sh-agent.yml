@@ -11,6 +11,22 @@ on:
         description: "Allowed scope"
         required: true
         default: "docs/"
+      operation:
+        description: "Operation"
+        required: true
+        default: "INSPECT"
+      target_file:
+        description: "Target file for EDIT"
+        required: false
+        default: ""
+      old_text:
+        description: "Text to replace"
+        required: false
+        default: ""
+      new_text:
+        description: "Replacement text"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -32,18 +48,14 @@ jobs:
         run: |
           test "$(git branch --show-current)" = "dev"
 
-      - name: Receive task
-        env:
-          SH_TASK: ${{ inputs.task }}
-          SH_SCOPE: ${{ inputs.scope }}
-        run: |
-          echo "Task: $SH_TASK"
-          echo "Scope: $SH_SCOPE"
-
       - name: Run SH executor
         env:
-          SH_TASK: ${{ inputs.task }}
-          SH_SCOPE: ${{ inputs.scope }}
+          TASK: ${{ inputs.task }}
+          SCOPE: ${{ inputs.scope }}
+          OPERATION: ${{ inputs.operation }}
+          TARGET_FILE: ${{ inputs.target_file }}
+          OLD_TEXT: ${{ inputs.old_text }}
+          NEW_TEXT: ${{ inputs.new_text }}
         run: |
           chmod +x .agent/execute_task.sh
           .agent/execute_task.sh
