@@ -2,7 +2,7 @@
 
 ## Status
 
-**WORKING / DOMAIN RECONCILIATION — OWNER PROPOSAL**
+**WORKING / DOMAIN RECONCILIATION — OWNER DECISION LOCKED / IMPLEMENTATION GAP**
 
 Dokumen ini adalah child working document untuk scope Project → Conversation → Message.
 
@@ -26,37 +26,33 @@ Historical / dev_old evidence
 
 ---
 
-## 1. Current Authority
+## 1. Locked Owner Decision
 
-Approved Conversation contract saat ini menetapkan:
+Clear sekarang dikunci sebagai **temporary presentation/session state** dengan scope **application session lifetime**.
 
 ```text
-Clear ≠ Delete
-
-Clear
-→ membersihkan isi chat / message dari tampilan atau state yang ditetapkan
-→ Conversation tetap ada
-
-Delete Conversation
-→ menghapus Conversation
-→ child Messages mengikuti lifecycle deletion
+CLEAR
+→ temporary
+→ berlaku selama application session
+→ tidak menghapus Message dari Supabase
+→ tidak menghapus Conversation
+→ tidak menghapus Attachment
+→ tidak mengubah Recovery snapshot
+→ tidak memiliki Restore action terpisah
+→ setelah application session berakhir, Clear state berakhir
 ```
 
-Contract juga menyatakan persistence/recovery behavior Clear masih perlu divalidasi.
+Semantics ini menyelesaikan ambiguity sebelumnya antara Clear dan Delete. `Clear ≠ Delete` tetap berlaku.
 
-Tidak ada perubahan Canonical melalui dokumen ini.
+Dokumen ini tidak mengubah Canonical secara sepihak. Approved Contract tetap menjadi authority contract; working document ini merekam Owner Decision dan implementation gap yang harus diturunkan ke contract/design yang relevan.
 
 ---
 
-## 2. Current Implementation / Backend + Frontend Evidence
+## 2. Current Implementation Evidence
 
 Current backend memiliki persistence Message di `public.conversations` dan runtime deletion untuk individual Message / Conversation.
 
-Recovery snapshot saat ini memasukkan `conversation_threads` dan `conversations`, dan restore juga mengembalikan keduanya.
-
-Backend **tidak memiliki runtime capability Clear terpisah** yang mempertahankan Message tetapi mengubah presentation/session state.
-
-Current frontend `ConversationView._clearConversation()` justru melakukan:
+Current frontend `ConversationView._clearConversation()` masih melakukan:
 
 ```text
 Clear
@@ -66,153 +62,111 @@ Clear
 → persist local empty state
 ```
 
-`runtimeRecordId` yang diteruskan ke bridge merupakan Message ID, walaupun parameter bridge saat ini bernama `conversationId`.
-
-Jadi current implementation secara faktual adalah:
+Jadi current implementation secara faktual masih:
 
 ```text
 CURRENT FE BEHAVIOR
 Clear = destructive Message deletion + local empty-state persistence
 ```
 
-Ini **bertentangan dengan approved semantic boundary `Clear ≠ Delete`**.
+Ini **bertentangan dengan locked Clear semantics**.
 
 **CONFIRMED IMPLEMENTATION SEMANTIC GAP.**
 
-Gap ini tidak boleh diselesaikan dengan menganggap behavior saat ini sebagai semantics yang baru; authority tetap berada pada Approved Contract dan Owner decision.
+Current backend juga belum memiliki dedicated Clear operation karena locked semantics tidak membutuhkan destructive backend mutation.
 
 ---
 
-## 3. Owner Proposal — Temporary Clear
+## 3. Locked Clear Semantics
 
-Owner mengusulkan semantics:
-
-```text
-CLEAR
-→ temporary
-→ berlaku pada session / presentation context tertentu
-→ tidak menghapus Message dari Supabase
-→ tidak menghapus Conversation
-→ tidak menghapus Attachment
-→ setelah scope temporary berakhir, data dapat ditampilkan kembali
-```
-
-**STATUS: OWNER PROPOSAL — NOT LOCKED**
-
-Alasan utama:
+### 3.1 Scope
 
 ```text
-UI terlihat kosong
-        tetapi
-backend masih menyimpan Message
+Application session lifetime
 ```
 
-Dengan semantics temporary, kondisi tersebut bukan contradiction. UI sedang berada dalam state Clear; data durable tetap ada.
+Clear state bukan screen-only state dan bukan indefinite persistent state.
+
+Saat application session berakhir, Clear state tidak dipertahankan sebagai durable user state. Conversation dan Messages tetap durable.
+
+### 3.2 Persistence
+
+Clear state **tidak dipersist ke backend**.
+
+```text
+Clear
+ ↓
+application-session presentation state
+ ↓
+no Message mutation
+ ↓
+no Attachment mutation
+ ↓
+no Recovery mutation
+```
+
+Tidak ada requirement untuk membuat `clear` column, soft-delete flag, atau backend Clear RPC sebagai bagian dari semantics ini.
+
+### 3.3 Restore
+
+Tidak ada explicit `Restore` action sebagai lifecycle operation.
+
+Data menjadi visible kembali ketika application session scope Clear berakhir sesuai lifecycle aplikasi.
 
 ---
 
 ## 4. What Clear Must NOT Mean
 
-Dalam proposal ini Clear bukan:
+Clear bukan:
 
 - hard delete Message;
 - soft delete Message;
 - delete Conversation;
 - attachment deletion;
+- attachment detach;
+- Storage Object cleanup;
 - Recovery deletion;
 - retention operation;
 - transfer operation;
 - perubahan ownership;
-- perubahan SH identity.
+- perubahan SH identity;
+- authorization bypass.
 
-Clear juga tidak boleh menjadi authorization bypass atau cara untuk mengakses kembali data yang seharusnya tidak visible menurut boundary lain.
-
----
-
-## 5. Temporary Scope — OPEN OWNER DECISION
-
-Belum ditentukan scope temporary yang final.
-
-Candidate:
-
-```text
-A. Screen / surface lifetime
-   Clear berlaku sampai surface ditutup.
-
-B. Application session lifetime
-   Clear berlaku sampai application session berakhir.
-
-C. Explicit restore
-   Clear tetap berlaku sampai user memilih restore/reload.
-```
-
-Tidak ada satu pun candidate di atas yang boleh dianggap final tanpa Owner lock.
+Clear hanya mengubah presentation/session state.
 
 ---
 
-## 6. Persistence of Clear State — OPEN
+## 5. UX Semantic Requirement
 
-Ada dua model utama:
+UI harus memperlakukan state Clear sebagai berbeda dari empty conversation yang memang tidak memiliki Message durable.
 
-### Model 1 — In-memory only
-
-```text
-Clear
- ↓
-local runtime state
- ↓
-screen/session berubah
-```
-
-Tidak menulis Clear state ke backend.
-
-### Model 2 — Local session persistence
-
-```text
-Clear
- ↓
-local session/application state
- ↓
-restore UI state saat app tetap dalam scope yang sama
-```
-
-Keduanya tetap berbeda dari backend Message mutation.
-
-Belum ada keputusan final.
-
----
-
-## 7. UX Semantic Requirement
-
-Jika Clear temporary disetujui, UI harus membedakan:
+Secara semantic:
 
 ```text
 No messages exist
+        ≠
+Messages exist but are temporarily cleared for this application session
 ```
 
-dari:
+UI tidak boleh menghasilkan false implication bahwa Message telah dihapus.
 
-```text
-Messages exist but are temporarily cleared from this presentation/session
-```
-
-UI tidak harus selalu menampilkan detail internal, tetapi behavior tidak boleh membuat user percaya bahwa data telah dihapus jika sebenarnya masih durable.
+Tidak ada requirement untuk mengekspos detail internal implementation kepada user selama behavior tetap konsisten dengan semantics tersebut.
 
 ---
 
-## 8. Attachment Consequence
+## 6. Attachment Consequence
 
-Approved attachment contract dan current DEV implementation sama-sama menegaskan bahwa attachment durable memiliki resource/storage boundary sendiri:
+Approved attachment contract menetapkan durable attachment sebagai resource terpisah dari local cache:
 
 ```text
 Local attachment
-→ cache / UX
+→ UX / cache
 
 Backend attachment
 → durable source of truth
 ```
 
-Current DEV sudah memiliki:
+Current DEV memiliki:
 
 ```text
 public.conversation_attachments
@@ -220,81 +174,55 @@ public.conversation_attachment_recovery_refs
 private bucket: second-head-conversation
 ```
 
-Maka temporary Clear harus berperilaku:
+Locked Clear behavior:
 
 ```text
 Clear
  ↓
 Message tetap durable
  ↓
-Attachment reference tetap durable
+Attachment relationship tetap durable
  ↓
-Storage Object tetap mengikuti lifecycle attachment
+Storage Object tidak disentuh
  ↓
 Recovery state tidak dihapus
 ```
 
-Jadi:
-
-**Clear tidak boleh menjadi trigger attachment deletion, detach, atau storage cleanup.**
+**Clear tidak boleh memanggil attachment deletion, detach, atau storage cleanup.**
 
 ---
 
-## 9. Recovery Consequence
+## 7. Recovery Consequence
 
-Current Recovery backend **sudah memiliki attachment relationship support** melalui persisted attachment descriptors dan `conversation_attachment_recovery_refs`. Restore dapat mereconnect relationship hanya jika durable attachment resource, storage object, dan target Message dependency tersedia.
-
-Jika Clear hanya temporary:
+Recovery snapshot tidak berubah hanya karena Clear dilakukan.
 
 ```text
 Clear
  ↓
-Recovery snapshot tetap tidak berubah
+Recovery snapshot tetap historical/durable
 ```
 
-Recovery tidak perlu membuat snapshot baru hanya karena user melakukan Clear, kecuali contract Recovery berikutnya secara eksplisit menentukan demikian.
+Tidak ada snapshot baru yang diperlukan hanya karena Clear, kecuali contract Recovery lain di masa depan secara eksplisit menetapkan behavior berbeda.
 
 Missing attachment dependency tetap harus dilaporkan sebagai recovery gap dan tidak boleh dianggap silently restored.
 
-**Status: IMPLEMENTATION PRESENT / SEMANTIC VERIFICATION OPEN.**
+**Status: IMPLEMENTATION SUPPORT PRESENT / CLEAR SEMANTIC VERIFICATION OPEN.**
 
 ---
 
-## 10. Delete vs Clear Matrix
+## 8. Delete vs Clear Matrix
 
 | Operation | Conversation | Message | Attachment | Recovery snapshot |
 |---|---|---|---|---|
-| Clear candidate | tetap | tetap durable, tidak ditampilkan sementara | tetap | tetap |
-| Delete Message | tetap | dihapus | active relationship dihapus; Storage Object mengikuti retention dependency | snapshot existing tetap historical |
-| Delete Conversation | dihapus | child ikut deletion | active relationships dihapus; Storage Object tidak blind-delete bila masih diperlukan Recovery | existing snapshot tetap historical |
+| Clear | tetap | tetap durable, presentation temporarily cleared | tetap | tetap |
+| Delete Message | tetap | dihapus | active relationship mengikuti delete semantics | existing snapshot tetap historical |
+| Delete Conversation | dihapus | child mengikuti lifecycle deletion | active relationships mengikuti delete semantics; Storage Object tidak blind-delete bila masih dibutuhkan Recovery | existing snapshot tetap historical |
 
-Matrix ini adalah reconciliation model. Detail attachment cleanup/retention runtime tetap merupakan verification gap, bukan alasan untuk menjadikan Clear destructive.
-
----
-
-## 11. Important Recovery Insight
-
-Recovery snapshot memiliki dependency `RESTRICT` dengan `recovery_events` dan `portability_exports`.
-
-Karena itu snapshot tidak boleh dianggap temporary UI cache.
-
-Dengan demikian ada empat lifecycle berbeda:
-
-```text
-Message lifecycle
-        ≠
-Attachment Resource lifecycle
-        ≠
-Storage Object lifecycle
-        ≠
-Recovery Snapshot lifecycle
-```
-
-Clear berada di luar lifecycle destructive tersebut dalam Owner Proposal ini.
+Clear dan Delete tidak boleh diimplementasikan melalui shared destructive mutation path.
 
 ---
 
-## 12. Security Boundary
+## 9. Security Boundary
 
 Clear state tidak boleh menjadi source of authorization.
 
@@ -308,70 +236,71 @@ Message authorization
 Clear presentation state
 ```
 
-Clear hanya mengubah presentation/session state. Ia tidak mengubah ownership, access rights, atau backend identity resolution.
+Clear tidak mengubah ownership, access rights, identity resolution, atau backend authorization.
 
 ---
 
-## 13. Reconciliation Result
+## 10. Reconciliation Result
 
-### LOCKED
+### LOCKED — OWNER DECISION
 
 - Clear ≠ Delete.
-- Conversation tetap ada ketika Clear dilakukan.
-- Hybrid Attachment Model.
-- Local path bukan durable attachment identity.
-- Backend-persisted attachment adalah durable source of truth.
-
-### OWNER PROPOSAL — NOT LOCKED
-
 - Clear bersifat temporary.
+- Scope Clear = application session lifetime.
 - Clear tidak melakukan destructive backend mutation.
-- Clear tidak menghapus Attachment.
+- Clear tidak menghapus Message.
+- Clear tidak menghapus Conversation.
+- Clear tidak menghapus atau detach Attachment.
+- Clear tidak mengubah Storage Object lifecycle.
 - Clear tidak mengubah Recovery snapshot.
-- Data kembali terlihat setelah temporary scope berakhir.
+- Tidak ada explicit Restore action.
+- Clear state tidak dipersist sebagai backend durable state.
+- Data kembali visible setelah application session scope berakhir.
 
-### CONFIRMED / EXISTING GAP
+### CONFIRMED / EXISTING IMPLEMENTATION GAP
 
-- **Current FE Clear implementation masih destructive:** Clear memanggil delete Message untuk setiap Message yang memiliki runtimeRecordId.
-- Backend belum memiliki dedicated Clear operation/presentation-state capability.
-- Attachment backend persistence/reconstruction **sudah implemented**; verification/E2E masih open.
-- Attachment Recovery relationship **sudah implemented**; authenticated recovery/E2E masih open.
+- **Current FE Clear implementation masih destructive:** Clear memanggil delete Message untuk setiap Message yang memiliki `runtimeRecordId`.
+- Current backend belum memiliki dedicated Clear capability; locked semantics tidak memerlukan destructive backend Clear RPC.
+- Local empty-state persistence saat ini harus direkonsiliasi agar tidak menyatakan durable deletion.
+- Attachment backend persistence/reconstruction sudah implemented; semantic/authenticated E2E masih open.
+- Attachment Recovery relationship sudah implemented; authenticated recovery/E2E masih open.
 - Attachment deletion/retention runtime dan cleanup semantics masih memerlukan verification.
 
-### OPEN OWNER DECISIONS
+### NO LONGER OPEN OWNER DECISIONS
 
-1. Temporary scope: screen, application session, atau explicit restore.
-2. Apakah Clear state cukup in-memory atau perlu local session persistence.
-3. Bagaimana UI memberi indikasi bahwa data sedang cleared tanpa membingungkan user.
-4. Apakah ada action `Restore` atau Clear berakhir otomatis sesuai scope.
+1. Temporary scope → **LOCKED: application session lifetime**.
+2. Clear state persistence → **LOCKED: application-session presentation state; no backend persistence**.
+3. Restore action → **LOCKED: none**.
+4. Clear attachment behavior → **LOCKED: non-destructive**.
+5. Clear Recovery behavior → **LOCKED: snapshot unchanged**.
 
 ---
 
-## 14. Implementation Gate
+## 11. Implementation Gate
 
-**NO CODING YET.**
+**SEMANTICS LOCKED — IMPLEMENTATION MAY PROCEED.**
 
-Sebelum implementasi Clear:
+Required sequence:
 
 ```text
-Owner lock semantics
+Locked Owner Decision
         ↓
-Approved Contract update
+Approved Contract / design reconciliation
         ↓
 FE state design
         ↓
-backend impact verification
+remove destructive Clear path
         ↓
-implementation
+backend impact verification
         ↓
 E2E verification
 ```
 
-Tidak boleh membuat backend deletion/soft-delete workaround untuk memenuhi UI Clear sebelum semantics final dikunci.
+Implementation must not use hard-delete, soft-delete, attachment deletion, or Recovery mutation as a workaround for Clear.
 
 ---
 
-## 15. Relation to Existing Documents
+## 12. Relation to Existing Documents
 
 Parent working document:
 
@@ -389,4 +318,4 @@ Approved contract:
 
 `docs/contract/sh_project_conversation_message_contract.md`
 
-Dokumen ini **tidak mengubah** Approved Contract dan **tidak mengubah** Canonical.
+Dokumen ini **tidak mengubah Canonical**.
