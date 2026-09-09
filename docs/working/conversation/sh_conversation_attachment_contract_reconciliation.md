@@ -2,7 +2,7 @@
 
 ## Status
 
-**RECONCILIATION ALIGNED — DURABLE CLEANUP BACKEND IMPLEMENTED / E2E DEFERRED**
+**RECONCILIATION ALIGNED — BACKEND CLEANUP + ORPHAN RECONCILIATION IMPLEMENTED / E2E DEFERRED**
 
 Dokumen ini adalah working reconciliation record untuk domain Conversation → Message → Attachment.
 
@@ -217,7 +217,7 @@ Jika Storage API gagal, queue tetap retryable (`FAILED` → `available_at` berik
 
 ---
 
-## 6. Orphan Reconciliation
+## 6. Orphan / Ambiguous Upload Reconciliation — BACKEND IMPLEMENTED
 
 Dibedakan:
 
@@ -225,31 +225,47 @@ Dibedakan:
 Storage Object tanpa Attachment Resource
 → ORPHAN OBJECT
 
-Attachment Resource tanpa active Message
-→ belum tentu orphan
-→ dapat masih diperlukan Recovery/dependency sah
+Attachment Resource PENDING/FAILED + Storage Object ada
+→ RETRYABLE ATTACHMENT RESOURCE
 
-Attachment Resource tanpa Message dan tanpa dependency sah
-→ candidate cleanup
+Attachment Resource PENDING/FAILED + Storage Object tidak ada
+→ RETRYABLE UPLOAD
+
+PERSISTED + Message/Recovery dependency
+→ REFERENCED / RETAINED
+
+PERSISTED + tidak ada Message + tidak ada Recovery dependency
+→ cleanup candidate
 ```
 
-Current implementation menyediakan PENDING / PERSISTED / FAILED resource lifecycle dan mempertahankan attachment identity untuk retry.
+Current implementation tetap menyediakan PENDING / PERSISTED / FAILED resource lifecycle dan mempertahankan attachment identity untuk retry.
 
-Yang sudah dapat direkonsiliasi dari source:
+Backend reconciliation sekarang menyediakan:
 
-- failed upload dapat direpresentasikan sebagai `FAILED`;
-- retry logical attachment mempertahankan `attachment_id`;
-- persisted attachment memakai stable `storage_ref`;
-- Recovery refs mencegah Attachment Resource yang masih direferensikan snapshot dihapus secara sembarang karena FK `ON DELETE RESTRICT`;
-- durable detached `PERSISTED` attachment sekarang memiliki authoritative cleanup queue + Storage API worker.
+- service-only `runtime_reconcile_conversation_attachment_storage_refs_internal(text[])` untuk authoritative DB classification;
+- authenticated-scoped reconciliation RPC `runtime_reconcile_conversation_attachment_storage_refs(text[])` untuk trusted runtime callers;
+- `runtime-conversation-attachment-reconcile` Edge Function sebagai Storage ↔ DB reconciliation worker;
+- Storage Object yang tidak memiliki Attachment Resource diklasifikasikan sebagai orphan dan dihapus hanya melalui Supabase Storage API;
+- PENDING/FAILED resource dengan object **tidak dihapus** sehingga stable attachment identity tetap dapat dipakai untuk retry;
+- PENDING/FAILED resource tanpa object tetap dipertahankan sebagai retryable upload state;
+- PERSISTED resource tanpa Storage Object dilaporkan sebagai integrity gap dan tidak diam-diam dihapus;
+- Recovery dependency tetap menjadi retention guard.
 
-Yang **belum selesai** dan menjadi backend work berikutnya:
+Reconciliation worker bersifat service-role-only. Ia tidak menggunakan Account/SH identity caller untuk menentukan ownership saat melakukan global orphan scan, sehingga object milik Account/SH lain tidak salah diklasifikasikan sebagai orphan hanya karena tidak terlihat dari caller.
 
-- authoritative reconciliation untuk orphan Storage Object yang **tidak lagi memiliki Attachment Resource** akibat ambiguous upload/database failure;
-- reconciliation khusus PENDING/FAILED upload state yang tidak pernah memperoleh active Message relationship;
-- runtime verification untuk failure window tersebut.
+Physical deletion tetap dilakukan melalui Storage API, bukan SQL, karena SQL deletion terhadap Storage metadata tidak menghapus physical object.
 
-**Status: DURABLE RETENTION CLEANUP IMPLEMENTED / AMBIGUOUS-UPLOAD ORPHAN RECONCILIATION REMAINS NEXT BACKEND WORK.**
+DEV saat reconciliation diimplementasikan berada dalam clean state:
+
+```text
+conversation_attachments = 0
+cleanup_queue = 0
+second-head-conversation objects = 0
+```
+
+Tidak ada existing orphan/pending/failed data yang perlu dimigrasikan atau direpair.
+
+**Status: AMBIGUOUS-UPLOAD / ORPHAN RECONCILIATION BACKEND IMPLEMENTED / RUNTIME E2E DEFERRED.**
 
 ---
 
@@ -297,9 +313,11 @@ Current migration menerapkan:
 - Storage read hanya untuk persisted attachment milik current account/SH;
 - Storage write hanya untuk PENDING/FAILED attachment milik current account/SH;
 - cleanup queue tidak diekspos sebagai tabel langsung ke `anon`/`authenticated`;
-- cleanup worker memakai service-level Storage API access, sementara identity/queue mutation tetap melewati trusted backend RPC.
+- cleanup worker memakai service-level Storage API access;
+- global orphan classification RPC hanya dapat dieksekusi oleh `service_role`;
+- reconciliation Edge Function hanya menerima JWT dengan `service_role` role.
 
-Current source juga membatasi RPC execution ke `authenticated` / `service_role` dan mencabut PUBLIC/anon execution.
+Current source juga membatasi RPC execution sesuai trusted boundary dan mencabut PUBLIC/anon execution pada reconciliation internal.
 
 **Status: SOURCE-VERIFIED DESIGN/IMPLEMENTATION / AUTHENTICATED RUNTIME TEST DEFERRED.**
 
@@ -318,7 +336,10 @@ public.conversation_attachment_cleanup_queue
 private bucket: second-head-conversation
 trusted create/finalize/fail/load/detach RPC boundary
 cleanup claim/complete/fail RPC boundary
-authenticated Edge Function: runtime-conversation-attachment-cleanup
+attachment storage reconciliation RPC boundary
+service-only orphan reconciliation RPC boundary
+Edge Function: runtime-conversation-attachment-cleanup
+Edge Function: runtime-conversation-attachment-reconcile
 ```
 
 Applied DEV migrations:
@@ -327,13 +348,15 @@ Applied DEV migrations:
 20260908113655_conversation_attachments
 20260908120543_revoke_conversation_attachment_truncate
 20260909024233_conversation_attachment_cleanup
+20260909024649_conversation_attachment_orphan_reconciliation
+20260909024705_conversation_attachment_orphan_reconciliation_global
 ```
 
-Repository migration source for the cleanup change:
+Repository migration sources are versioned under:
 
-`database/migrations/20260909120000_conversation_attachment_cleanup.sql`
+`database/migrations/`
 
-The cleanup migration source is versioned in GitHub and the corresponding migration is confirmed in Supabase DEV migration history. The repository source and applied DEV migration are treated as the same migration artifact; no separate ad-hoc schema variant was created.
+The cleanup/reconciliation migrations are stored with the exact version/name reported by Supabase DEV migration history. No separate ad-hoc schema variant is treated as authoritative.
 
 ### Frontend checkpoint
 
@@ -385,7 +408,7 @@ Recovery relationship            IMPLEMENTED
 FE integration                   IMPLEMENTED
 Delete relationship              SOURCE-VERIFIED
 Durable cleanup mechanism        IMPLEMENTED
-Ambiguous-upload orphan cleanup NEXT BACKEND WORK
+Ambiguous-upload reconciliation  IMPLEMENTED
 Authenticated E2E                DEFERRED
 APK E2E                          DEFERRED
 ```
@@ -411,23 +434,20 @@ Tidak ada migration/schema alternatif yang dibuat.
 11. Recovery-aware retention guard.
 12. Storage API cleanup worker path.
 13. Repository migration ↔ Supabase DEV migration history reconciliation.
+14. Orphan Storage Object classification and service-only cleanup path.
+15. PENDING/FAILED ambiguous upload reconciliation classification.
 
 ### Masih membutuhkan execution / runtime verification — sengaja ditunda
 
-14. authenticated upload → persisted;
-15. reload/reopen → attachment reconstructed;
-16. private storage download dengan identity yang benar;
-17. failed/ambiguous upload → retry memakai attachment identity yang sama;
-18. wrong Account/SH access denied;
-19. recovery restore terhadap object/resource yang tersedia;
-20. missing object/resource → explicit recovery gap;
-21. real APK E2E.
+16. authenticated upload → persisted;
+17. reload/reopen → attachment reconstructed;
+18. private storage download dengan identity yang benar;
+19. failed/ambiguous upload → retry memakai attachment identity yang sama;
+20. wrong Account/SH access denied;
+21. recovery restore terhadap object/resource yang tersedia;
+22. missing object/resource → explicit recovery gap;
+23. real APK E2E.
 
-### Backend work berikutnya
+**Overall attachment status: CONTRACT PASS / BACKEND CLEANUP + ORPHAN RECONCILIATION IMPLEMENTED / E2E DEFERRED.**
 
-22. Authoritative orphan/ambiguous-upload reconciliation untuk Storage Object yang sudah kehilangan Attachment Resource.
-23. PENDING/FAILED cleanup/reconciliation semantics untuk upload failure window.
-
-**Overall attachment status: CONTRACT PASS / BACKEND DURABLE CLEANUP IMPLEMENTED / ORPHAN RECONCILIATION NEXT / E2E DEFERRED.**
-
-No FE implementation was changed by this cleanup backend update.
+No FE implementation was changed by this backend reconciliation update.
