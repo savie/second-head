@@ -2,7 +2,7 @@
 
 ## Status
 
-**RECONCILIATION COMPLETE — APPROVED CONTRACT + IMPLEMENTATION CHECKPOINT UPDATED**
+**RECONCILIATION ALIGNED — CURRENT IMPLEMENTATION CHECKPOINT RECORDED**
 
 Dokumen ini adalah working reconciliation record untuk domain Conversation → Message → Attachment.
 
@@ -97,7 +97,7 @@ Clear ≠ Delete
 
 Maka Clear tidak menghapus Message, Attachment, Storage Object, atau Recovery Snapshot.
 
-Exact presentation/session scope Clear tetap berada pada design/implementation contract Clear dan tidak diubah oleh reconciliation attachment ini.
+Exact presentation/session scope Clear berada pada design/implementation contract Clear dan tidak diubah oleh reconciliation attachment ini.
 
 ---
 
@@ -145,7 +145,7 @@ Conversation Delete mengikuti semantics yang sama setelah child Messages dihapus
 
 ## 4. Recovery Reconciliation — CURRENT CHECKPOINT
 
-Current DEV Recovery **sudah menangkap dan restore** Conversation Messages dengan explicit attachment relationship support.
+Current DEV Recovery **sudah memiliki implementation path** untuk menangkap dan restore Conversation Messages dengan explicit attachment relationship support.
 
 Current resources:
 
@@ -194,7 +194,7 @@ Attachment Resource tanpa Message dan tanpa dependency sah
 
 Karena Storage upload dan PostgreSQL transaction tidak atomic, implementation harus menangani failure window antara object upload, descriptor persistence, dan Message association.
 
-Current implementation sudah menyediakan PENDING / PERSISTED / FAILED resource lifecycle dan mempertahankan attachment identity untuk retry. Yang belum boleh dianggap PASS tanpa verification adalah full cleanup/reconciliation behavior untuk orphan object/resource dan ambiguous failure windows.
+Current implementation menyediakan PENDING / PERSISTED / FAILED resource lifecycle dan mempertahankan attachment identity untuk retry. Yang belum boleh dianggap PASS tanpa verification adalah full cleanup/reconciliation behavior untuk orphan object/resource dan ambiguous failure windows.
 
 Required outcome:
 
@@ -243,7 +243,7 @@ Unauthenticated             DENY
 
 Filename, local path, UI state, storage reference, atau attachment ID saja bukan authority source.
 
-Current migration already applies private Storage bucket and trusted attachment RPC boundary. Full authenticated semantic harness tetap harus dijalankan untuk membuktikan isolation aktual.
+Current migration menerapkan private Storage bucket dan trusted attachment RPC boundary. Full authenticated semantic harness tetap harus dijalankan untuk membuktikan isolation aktual.
 
 **Status: DESIGN/IMPLEMENTATION PRESENT / SEMANTIC VERIFICATION OPEN.**
 
@@ -251,9 +251,9 @@ Current migration already applies private Storage bucket and trusted attachment 
 
 ## 8. Current Implementation Reconciliation
 
-Attachment implementation saat ini sudah tersedia pada BE dan FE.
+Current `dev` source menunjukkan backend dan frontend attachment path sudah wired.
 
-### Backend
+### Backend checkpoint
 
 ```text
 public.conversation_attachments
@@ -269,7 +269,19 @@ Migration yang sudah applied di DEV:
 20260908120543_revoke_conversation_attachment_truncate
 ```
 
-### Frontend
+Backend contract checkpoint:
+
+```text
+create(filename, mime_type, size_bytes)
+finalize(attachment_id, message_id)
+fail(attachment_id)
+load(message_id)
+detach(attachment_id)
+```
+
+`runtime_finalize_conversation_attachment` menggunakan stable `attachment_id` + `message_id`; storage reference tidak dikirim ulang sebagai finalize authority.
+
+### Frontend checkpoint
 
 ```text
 ConversationView
@@ -283,7 +295,19 @@ ConversationAttachmentService
 Supabase RPC / Storage
 ```
 
-Current FE sudah mencakup local cache, durable attachment creation/upload/finalize, persisted attachment hydration saat reload, download fallback, failed-state retry, dan descriptor serialization.
+Current FE implementation yang terkonfirmasi di source:
+
+- local file disimpan sebagai UX/cache;
+- filename digunakan untuk derivasi MIME type sebelum durable attachment creation pada file-picker path;
+- durable attachment creation/upload/finalize sudah wired;
+- stable `attachment_id` dipertahankan pada failed/retry path;
+- persisted attachment di-hydrate kembali saat conversation reload;
+- local cached attachment identity dicocokkan kembali dengan backend attachment identity;
+- jika local file hilang, FE mencoba download dari durable backend storage;
+- failed attachment yang belum persisted dapat dipertahankan di local state untuk retry;
+- attachment descriptor diserialisasi ke local conversation state.
+
+Source checkpoint juga menunjukkan upload transport error tetap mencoba finalize agar retry dapat mempertahankan identity/storage reference yang sama.
 
 **Status: IMPLEMENTED / BACKEND + FE WIRED.**
 
@@ -330,4 +354,4 @@ Remaining verification:
 9. missing object/resource → explicit recovery gap;
 10. real APK E2E.
 
-**Overall attachment status: IMPLEMENTED / CONTRACT PASS / VERIFICATION OPEN.**
+**Overall attachment status: IMPLEMENTATION CHECKPOINT ALIGNED / CONTRACT PASS / VERIFICATION OPEN.**
