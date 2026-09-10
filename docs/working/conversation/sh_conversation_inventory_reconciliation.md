@@ -174,15 +174,15 @@ runtime_delete_conversation_message_v2(p_message_id uuid)
 
 ### Bridge
 
-`ConversationRuntimeBridge` masih memakai nama parameter `conversationId` pada method update/delete, walaupun value yang diteruskan adalah Message ID.
+`ConversationRuntimeBridge.updateMessage()` dan `deleteMessage()` sekarang memakai nama parameter `messageId`, selaras dengan value yang memang diteruskan sebagai Message ID. Named call sites di `ConversationView` juga sudah menggunakan `messageId`.
 
 ### Classification
 
-**CONFIRMED ADAPTER CONTRACT / NAMING GAP**
+**PASS / ADAPTER CONTRACT ALIGNED**
 
-Ini bukan bukti backend menerima Conversation ID. Semantics caller saat ini benar; nama parameter bridge misleading.
+Semantics caller dan backend tetap tidak berubah. Perubahan hanya memperjelas naming pada FE adapter boundary agar Conversation ID tidak tertukar dengan Message ID.
 
-Expected minimal fix:
+Fix yang diterapkan:
 
 ```text
 Bridge updateMessage(messageId: ...)
@@ -193,7 +193,7 @@ Service p_message_id
 Backend Message ID
 ```
 
-Tidak ada migration requirement berdasarkan evidence saat ini.
+Tidak ada migration requirement dan tidak ada perubahan backend/schema.
 
 ---
 
@@ -355,7 +355,17 @@ metadata
 attachments
 ```
 
-Current `ConversationMessage` membawa runtime record identity, local attachment representation, dan attachment descriptors.
+Current `ConversationMessage` membawa runtime record identity, local attachment representation, dan attachment descriptors, serta mempertahankan semantic Message projection berikut untuk local durable state:
+
+```text
+messageId
+threadId
+role
+content
+createdAt
+metadata
+attachments
+```
 
 Reconciliation target:
 
@@ -364,20 +374,45 @@ ConversationMessage
    ↕
 toJson / fromJson
    ↕
+local durable semantic projection
+   ↕
 ConversationRecord
    ↕
 backend Message + attachment resources
 ```
 
-Yang masih perlu audit penuh:
+Keputusan Owner/User yang sudah ada dan sudah didokumentasikan pada serialization audit adalah:
 
-- metadata round-trip;
-- attachment descriptor round-trip;
-- local-only state versus durable state;
-- duplicate/ordering behavior saat hydration;
-- failed attachment persistence across reload.
+> **Local Conversation state menggunakan full durable Message projection.**
 
-**Status: AUDIT OPEN.**
+Artinya local state bukan sekadar UI/cache projection yang boleh kehilangan semantic Message fields. Keputusan ini tidak mengubah backend Message contract atau menjadikan local sebagai backend source of truth.
+
+Boundary synchronization tetap terpisah:
+
+```text
+BACKEND = authoritative persistence
+LOCAL   = durable semantic projection
+LOCAL ↔ BACKEND = synchronization/reconciliation workstream terpisah
+```
+
+### Verification yang masih open
+
+Yang belum boleh dianggap PASS hanya berdasarkan code/schema:
+
+- metadata/role/threadId/messageId/createdAt/content round-trip;
+- legacy local JSON fallback compatibility;
+- attachment descriptor round-trip bersama Message semantic fields;
+- local fallback reconstruction ketika backend unavailable.
+
+Verification harus membuktikan:
+
+```text
+serialize → persist → read → deserialize
+```
+
+tetap mempertahankan semantic fields yang ditetapkan di atas.
+
+**Status: DECISION RESOLVED / IMPLEMENTATION ALIGNED / SEMANTIC ROUND-TRIP VERIFICATION OPEN.**
 
 ---
 
@@ -444,6 +479,8 @@ Attachment relationship juga harus diverifikasi terhadap Clear versus Delete; ja
 ## 11. Local Persistence / Backend Persistence
 
 Current architecture memiliki local conversation state dan backend persistence.
+
+Local state mengikuti keputusan serialization sebagai **durable semantic Message projection**, bukan sekadar UI/cache projection. Namun backend tetap menjadi authoritative persistence.
 
 Fallback:
 
@@ -667,14 +704,14 @@ Belum ada keputusan untuk memperluas role taxonomy.
 ### GAP-C01 — Bridge Message ID Naming
 
 ```text
-Status: CONFIRMED OPEN
+Status: RESOLVED
 Layer: FE adapter
 Severity: maintainability / contract clarity
 ```
 
-Caller sudah membawa Message ID melalui `runtimeRecordId`, tetapi bridge menamainya `conversationId`.
+Caller sudah membawa Message ID melalui `runtimeRecordId`. Bridge parameter update/delete sekarang juga dinamai `messageId`, dan seluruh named call sites di `ConversationView` sudah aligned.
 
-Minimal fix tetap: align bridge parameter naming dengan Message ID semantics. Tidak ada migration requirement.
+Perbaikan ini hanya menyelaraskan adapter naming dengan existing Message ID contract. Tidak ada migration requirement dan tidak ada perubahan backend/schema.
 
 ### GAP-C02 — Attachment Backend Persistence / Reconstruction
 
@@ -710,9 +747,43 @@ Authenticated attachment E2E
 Recovery E2E
 ```
 
+### GAP-C03 — Message Serialization Semantic Model
+
+```text
+Status: RESOLVED — DECISION + IMPLEMENTATION ALIGNED
+Layer: Conversation local state / Message serialization
+```
+
+Owner/User decision menetapkan **full durable Message projection** untuk local Conversation state.
+
+Minimum semantic projection:
+
+```text
+messageId
+threadId
+role
+content
+createdAt
+metadata
+attachments
+```
+
+Current serialization implementation sudah mempertahankan field tersebut pada `ConversationMessage` dan `toJson/fromJson` path, dengan presentation/local-only fields tetap dibedakan dari semantic fields.
+
+Remaining work adalah verification:
+
+```text
+semantic round-trip
+legacy local JSON compatibility
+attachment descriptor round-trip
+local fallback reconstruction
+```
+
+Keputusan ini tidak mengubah backend authority dan tidak menutup workstream Local ↔ Backend synchronization.
+
 ### Migration gap
 
-**NO CURRENT ATTACHMENT MIGRATION GAP.** DEV schema and migration source have been reconciled for the durable attachment implementation. Migration history now includes the two attachment-related migrations above.
+**NO CURRENT ATTACHMENT MIGRATION GAP.** DEV schema dan migration source telah direkonsiliasi untuk durable attachment implementation. Migration history sekarang mencakup dua attachment-related migrations di atas.
 
 ---
 
@@ -742,10 +813,14 @@ Current sequence:
 9. Final Conversation domain consolidation
 ```
 
+Message ID bridge naming reconciliation is no longer in the execution queue; it is resolved.
+
+Message Serialization decision and implementation reconciliation are also no longer an unresolved decision queue item. Verification remains open and must prove the full durable projection through round-trip and fallback tests.
+
 Other open audit queue remains:
 
 ```text
-Message serialization
+Message serialization semantic verification
 Clear/Delete semantics
 Project ↔ Conversation lifecycle
 Context runtime usage
@@ -860,14 +935,16 @@ Attachment Contract                   PASS / LOCKED
 Backend Message RPC                   PASS
 ConversationService                   PASS
 Caller Message ID                     PASS
-Bridge Message ID naming              CONFIRMED OPEN GAP
+Bridge Message ID naming              RESOLVED
 Attachment backend schema             IMPLEMENTED
 Attachment private storage            IMPLEMENTED
 Attachment RPC boundary               IMPLEMENTED
 Attachment FE wiring                  IMPLEMENTED
 Attachment reload reconstruction     IMPLEMENTED / VERIFY E2E
 Attachment retry identity             IMPLEMENTED / VERIFY E2E
-Message serialization                 AUDIT OPEN
+Message serialization decision        RESOLVED
+Message serialization implementation  ALIGNED
+Message serialization verification    OPEN
 Clear semantics                       OPEN
 Lifecycle semantics                   OPEN
 Context runtime usage                 OPEN
@@ -879,6 +956,6 @@ Recovery attachment semantics         OPEN
 Clone dependency check                REQUIRED BEFORE E2E
 ```
 
-**Overall Conversation status: AUDIT IN PROGRESS / ATTACHMENT IMPLEMENTATION RECONCILED / NOT FINAL E2E READY.**
+**Overall Conversation status: AUDIT IN PROGRESS / ATTACHMENT IMPLEMENTATION RECONCILED / MESSAGE SERIALIZATION DECISION + IMPLEMENTATION ALIGNED / NOT FINAL E2E READY.**
 
-The old attachment persistence/reconstruction gap is no longer the current implementation state. The remaining blocker is verification through the defined BE → FE → Clone dependency → Security → E2E → Recovery gates.
+The old attachment persistence/reconstruction gap is no longer the current implementation state. The Message ID bridge naming gap is resolved. Message Serialization is no longer an open semantic-model decision: the Owner/User decision is full durable Message projection and the current implementation is aligned. Remaining work is verification through the defined semantic round-trip/fallback checks plus the broader Conversation BE → FE → Clone dependency → Security → E2E → Recovery gates.
