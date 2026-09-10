@@ -33,7 +33,7 @@ class ConversationRuntimeBridge {
   Future<Uint8List> downloadAttachment(ConversationAttachment attachment) => const ConversationAttachmentService().download(attachment);
   Future<void> detachAttachment(String attachmentId) => const ConversationAttachmentService().detach(attachmentId);
   Future<void> rename({required String conversationId, required String title}) => _service.rename(conversationId: conversationId, title: title);
-  Future<void> updateMessage({required String conversationId, required DateTime createdAt, required String role, required String oldContent, required String newContent}) => _service.updateMessage(messageId: conversationId, oldContent: oldContent, newContent: newContent);
-  Future<void> deleteMessage({required String conversationId, required DateTime createdAt, required String role, required String content}) => _service.deleteMessage(messageId: conversationId);
+  Future<void> updateMessage({required String messageId, required DateTime createdAt, required String role, required String oldContent, required String newContent}) => _service.updateMessage(messageId: messageId, oldContent: oldContent, newContent: newContent);
+  Future<void> deleteMessage({required String messageId, required DateTime createdAt, required String role, required String content}) => _service.deleteMessage(messageId: messageId);
   Future<void> deleteConversation({required String conversationId}) => _service.deleteConversation(conversationId: conversationId);
 }

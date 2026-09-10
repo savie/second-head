@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import '../../core/backend/backend_client.dart';
@@ -107,9 +109,24 @@ class ConversationService {
     return records;
   }
 
-  Future<ConversationRecord> record({required String role, required String content, Map<String, dynamic>? metadata}) async {
+  Future<ConversationRecord> record({
+    required String role,
+    required String content,
+    Map<String, dynamic>? metadata,
+    String? messageId,
+    DateTime? createdAt,
+  }) async {
     final conversationId = await _ensureActiveConversation();
-    final result = await backendClient.rpc('runtime_record_conversation_message', params: {'p_conversation_id': conversationId, 'p_role': role, 'p_content': content, 'p_metadata': metadata ?? const <String, dynamic>{}});
+    final stableMessageId = messageId ?? _newMessageId();
+    final stableCreatedAt = (createdAt ?? DateTime.now()).toUtc();
+    final result = await backendClient.rpc('runtime_record_conversation_message_v2', params: {
+      'p_conversation_id': conversationId,
+      'p_message_id': stableMessageId,
+      'p_created_at': stableCreatedAt.toIso8601String(),
+      'p_role': role,
+      'p_content': content,
+      'p_metadata': metadata ?? const <String, dynamic>{},
+    });
     if (result is! Map) throw StateError('Conversation runtime returned an invalid record.');
     return ConversationRecord.fromMap(Map<String, dynamic>.from(result));
   }
@@ -153,6 +170,15 @@ class ConversationService {
   Future<void> deleteConversation({required String conversationId}) async {
     await backendClient.rpc('runtime_delete_conversation_thread', params: {'p_conversation_id': conversationId});
     if (activeConversationId.value == conversationId) activeConversationId.value = null;
+  }
+
+  static String _newMessageId() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    final hex = bytes.map((value) => value.toRadixString(16).padLeft(2, '0')).join();
+    return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
   }
 }
 

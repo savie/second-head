@@ -225,6 +225,9 @@ class ConversationViewState extends State<ConversationView> {
       attachments: attachments,
       runtimeRecordId: record.messageId,
       createdAt: record.createdAt,
+      role: record.role,
+      threadId: record.threadId,
+      metadata: record.metadata,
     );
   }
 
@@ -405,6 +408,9 @@ class ConversationViewState extends State<ConversationView> {
         attachments: [persisted],
         runtimeRecordId: messageRecord.messageId,
         createdAt: messageRecord.createdAt,
+        role: messageRecord.role,
+        threadId: messageRecord.threadId,
+        metadata: messageRecord.metadata,
       );
       if (!mounted) return;
       setState(() => _messages.add(message));
@@ -421,6 +427,9 @@ class ConversationViewState extends State<ConversationView> {
             : [attachment.copyWith(status: 'FAILED')],
         runtimeRecordId: messageRecord.messageId,
         createdAt: messageRecord.createdAt,
+        role: messageRecord.role,
+        threadId: messageRecord.threadId,
+        metadata: messageRecord.metadata,
       );
       if (!mounted) return;
       setState(() => _messages.add(message));
@@ -539,7 +548,7 @@ class ConversationViewState extends State<ConversationView> {
         final id = message.runtimeRecordId;
         if (id != null) {
           await _runtime.deleteMessage(
-            conversationId: id,
+            messageId: id,
             createdAt: message.createdAt ?? DateTime.now(),
             role: message.assistant ? 'assistant' : 'user',
             content: message.text,
@@ -666,7 +675,7 @@ class ConversationViewState extends State<ConversationView> {
       try {
         if (message.runtimeRecordId != null) {
           await _runtime.deleteMessage(
-            conversationId: message.runtimeRecordId!,
+            messageId: message.runtimeRecordId!,
             createdAt: message.createdAt ?? DateTime.now(),
             role: message.assistant ? 'assistant' : 'user',
             content: message.text,
@@ -690,7 +699,7 @@ class ConversationViewState extends State<ConversationView> {
       try {
         if (message.runtimeRecordId != null) {
           await _runtime.updateMessage(
-            conversationId: message.runtimeRecordId!,
+            messageId: message.runtimeRecordId!,
             createdAt: message.createdAt ?? DateTime.now(),
             role: 'assistant',
             oldContent: message.text,
@@ -738,7 +747,7 @@ class ConversationViewState extends State<ConversationView> {
     try {
       if (message.runtimeRecordId != null) {
         await _runtime.updateMessage(
-          conversationId: message.runtimeRecordId!,
+          messageId: message.runtimeRecordId!,
           createdAt: message.createdAt ?? DateTime.now(),
           role: message.assistant ? 'assistant' : 'user',
           oldContent: message.text,
@@ -773,7 +782,7 @@ class ConversationViewState extends State<ConversationView> {
         final message = _messages[index];
         if (message.runtimeRecordId != null) {
           await _runtime.deleteMessage(
-            conversationId: message.runtimeRecordId!,
+            messageId: message.runtimeRecordId!,
             createdAt: message.createdAt ?? DateTime.now(),
             role: message.assistant ? 'assistant' : 'user',
             content: message.text,
@@ -1074,7 +1083,10 @@ class ConversationMessage {
     this.attachments = const [],
     this.runtimeRecordId,
     this.createdAt,
-  });
+    String? role,
+    this.threadId,
+    this.metadata = const <String, dynamic>{},
+  }) : role = role ?? (assistant ? 'assistant' : 'user');
 
   String text;
   final bool assistant;
@@ -1083,6 +1095,9 @@ class ConversationMessage {
   final List<ConversationAttachment> attachments;
   final String? runtimeRecordId;
   final DateTime? createdAt;
+  final String role;
+  final String? threadId;
+  final Map<String, dynamic> metadata;
 
   Map<String, dynamic> toJson() => {
         'text': text,
@@ -1092,6 +1107,9 @@ class ConversationMessage {
         'attachments': [for (final attachment in attachments) attachment.toJson()],
         'runtimeRecordId': runtimeRecordId,
         'createdAt': createdAt?.toIso8601String(),
+        'role': role,
+        'threadId': threadId,
+        'metadata': metadata,
       };
 
   factory ConversationMessage.fromJson(Map<String, dynamic> json) =>
@@ -1121,6 +1139,11 @@ class ConversationMessage {
         createdAt: json['createdAt'] is String
             ? DateTime.tryParse(json['createdAt'] as String)
             : null,
+        role: json['role'] is String ? json['role'] as String : null,
+        threadId: json['threadId'] is String ? json['threadId'] as String : null,
+        metadata: json['metadata'] is Map
+            ? Map<String, dynamic>.from(json['metadata'] as Map)
+            : const <String, dynamic>{},
       );
 }
 
