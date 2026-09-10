@@ -4,6 +4,35 @@
 **Primary Development Branch:** `dev`  
 **Historical Reference Branch:** `dev_old`
 
+## 0. Agent AI
+Gunakan workspace dengan akses penuh.
+
+Repository:
+https://github.com/savie/second-head
+
+Branch kerja:
+dev
+
+Requirement wajib:
+- GitHub workspace aktif
+- Bisa read repository
+- Bisa edit file
+- Bisa create file
+- Bisa delete file jika diperlukan
+- Bisa commit perubahan langsung ke branch dev
+- Jangan hanya memberi instruksi
+
+Supabase DEV:
+https://supabase.com/dashboard/project/pkhkgvsrqeupvwoqjwmd
+
+Requirement:
+- Supabase connector aktif
+- Bisa read schema/database
+- Bisa cek migration history
+- Bisa execute SQL
+- Bisa apply migration
+- Bisa verify function/table live
+
 ## 1. Authority
 
 Urutan authority:
@@ -48,6 +77,8 @@ Sebelum implementation:
 6. Baru execute.
 
 Jangan menganggap konteks percakapan sebelumnya sebagai repository state aktual.
+
+Audit → Evidence → Contract → Implement → Verify → Commit  → Push
 
 ---
 
