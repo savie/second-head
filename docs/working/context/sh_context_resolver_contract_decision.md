@@ -1,7 +1,7 @@
 # SH Context Resolver Contract Decision
 
 **Status:** WORKING document  
-**Scope:** Context Runtime contract preparation  
+**Scope:** Context Runtime contract preparation
 
 ## Authority
 
@@ -66,59 +66,72 @@ runtime_get_context_package()
 
 ---
 
-# Resolver Contract Questions
-
-Sebelum implementasi harus diputuskan:
+# Contract Decision
 
 ## 1. Resolver Output
 
-Pilihan yang perlu diputuskan:
-
-A.
-
-```
-separate domain payload
-```
-
-atau
-
-B.
+Decision:
 
 ```
 unified semantic context package
 ```
 
+Alasan:
+
+- Context Runtime memiliki satu boundary output.
+- Domain resolver tetap menjaga ownership semantic masing-masing.
+- Tidak membuat consumer harus memahami banyak payload terpisah.
+
+Resolver internal tetap dapat berasal dari domain berbeda.
+
 ---
 
 ## 2. Resolver Ordering
 
-Belum ditetapkan.
+Decision awal:
 
-Perlu keputusan mengenai urutan:
+```
+actor
+ ↓
+conversation
+ ↓
+state
+ ↓
+memory
+ ↓
+knowledge
+ ↓
+experience
+ ↓
+journey
+```
 
-- conversation
-- state
-- memory
-- knowledge
-- experience
-- journey
+Catatan:
+
+Ordering ini adalah contract assembly order, bukan ranking importance.
 
 ---
 
 ## 3. Inclusion Policy
 
-Resolver harus menentukan:
+Context Resolver wajib mempertahankan:
 
 - relevance boundary;
 - visibility boundary;
 - ownership boundary;
 - lifecycle boundary.
 
+Tidak semua data domain otomatis masuk Context Package.
+
 ---
 
 ## 4. Security Boundary
 
-Resolver tidak boleh bypass:
+Decision:
+
+Context Resolver tidak boleh bypass domain security.
+
+Resolver harus menggunakan boundary existing:
 
 - Memory boundary;
 - Knowledge boundary;
@@ -127,7 +140,29 @@ Resolver tidak boleh bypass:
 
 ---
 
-## 5. Non Goal
+## 5. Output Contract Direction
+
+Target contract:
+
+```
+runtime_get_context_package()
+        |
+        + actor
+        + conversation
+        + state
+        + semantic_context
+              |
+              + memory
+              + knowledge
+              + experience
+              + journey
+```
+
+Implementasi detail belum dilakukan sebelum verification contract.
+
+---
+
+# Non Goal
 
 Dokumen ini tidak:
 
@@ -140,20 +175,20 @@ Dokumen ini tidak:
 
 ---
 
-# Decision Gate
+# Implementation Gate
 
-Implementation hanya dilakukan setelah:
+Implementasi hanya dilakukan setelah:
 
-- resolver contract jelas;
-- output contract jelas;
-- security boundary jelas;
-- inclusion policy disetujui.
+- existing resolver/function diverifikasi;
+- security boundary diverifikasi;
+- migration/function naming diverifikasi;
+- output contract sesuai runtime existing.
 
 Current status:
 
 ```
 Context Resolver:
-DESIGN PENDING
+CONTRACT DECIDED
 
 Runtime implementation:
 NOT STARTED
