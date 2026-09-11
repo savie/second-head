@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { recordExplicitSemanticLifecycle } from "./semantic_lifecycle.ts";
 
 type Identity = { account_id: string; sh_id: string; ownership_role: string };
 type ContextPackage = Record<string, unknown>;
@@ -112,11 +113,17 @@ Deno.serve(async (req: Request) => {
 
   try {
     const context = await loadContext(resolved.supabase, resolved.identity.sh_id, userMessage);
+    const semantic = await recordExplicitSemanticLifecycle(resolved.supabase, resolved.identity.sh_id, userMessage);
     const result = await executeWithFallback(userMessage, context);
     return json({
       sh_id: resolved.identity.sh_id,
       response: result.output,
-      meta: { runtime: "ai-runtime", provider: result.provider, context: "runtime_get_context_package" },
+      meta: {
+        runtime: "ai-runtime",
+        provider: result.provider,
+        context: "runtime_get_context_package",
+        semantic_capture: Object.keys(semantic).length > 0,
+      },
     });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "AI_RUNTIME_EXECUTION_FAILED" }, 502);
