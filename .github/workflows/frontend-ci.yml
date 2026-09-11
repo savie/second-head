@@ -5,6 +5,7 @@ on:
     branches: [dev]
     paths:
       - 'app/**'
+      - 'functions/**'
       - '.github/workflows/frontend-ci.yml'
 
 jobs:
