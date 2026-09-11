@@ -1,5 +1,8 @@
 import 'dart:typed_data';
 
+import '../../core/result.dart';
+import '../../runtime/ai_runtime/ai_runtime_client.dart';
+import '../../runtime/runtime_contract.dart';
 import 'conversation_attachment_service.dart';
 import 'conversation_service.dart';
 
@@ -10,6 +13,7 @@ class ConversationRuntimeBridge {
   const ConversationRuntimeBridge({ConversationService service = const ConversationService()}) : _service = service;
 
   final ConversationService _service;
+  static String? _pendingRuntimeInput;
 
   String? get activeConversationId => ConversationService.activeConversationId.value;
 
@@ -24,8 +28,28 @@ class ConversationRuntimeBridge {
   Future<void> selectConversation(String conversationId) => _service.selectConversation(conversationId);
   Future<void> moveConversation({required String conversationId, required String projectId}) => _service.moveConversation(conversationId: conversationId, projectId: projectId);
   Future<void> removeConversationFromProject({required String conversationId}) => _service.removeConversationFromProject(conversationId: conversationId);
-  Future<ConversationRecord> recordUser(String content) => _service.record(role: 'user', content: content);
-  Future<ConversationRecord> recordAssistant(String content) => _service.record(role: 'assistant', content: content);
+
+  Future<ConversationRecord> recordUser(String content) async {
+    _pendingRuntimeInput = content;
+    return _service.record(role: 'user', content: content);
+  }
+
+  Future<ConversationRecord> recordAssistant(String fallbackContent) async {
+    final input = _pendingRuntimeInput;
+    _pendingRuntimeInput = null;
+
+    if (input != null && input.trim().isNotEmpty) {
+      final runtimeResult = await const AIRuntimeClient().send(
+        RuntimeRequest(input: input),
+      );
+      if (runtimeResult case AppSuccess<RuntimeResponse>(value: final response)) {
+        return _service.record(role: 'assistant', content: response.output);
+      }
+    }
+
+    return _service.record(role: 'assistant', content: fallbackContent);
+  }
+
   Future<ConversationRecord> recordWithAttachments({required String role, required String content, required List<PendingConversationAttachment> attachments, Map<String, dynamic>? metadata}) => _service.recordWithAttachments(role: role, content: content, attachments: attachments, metadata: metadata);
   Future<ConversationAttachment> createAttachment({required String filename, required String mimeType, required int sizeBytes, String? localPath}) => const ConversationAttachmentService().create(filename: filename, mimeType: mimeType, sizeBytes: sizeBytes, localPath: localPath);
   Future<ConversationAttachment> uploadAndFinalizeAttachment({required ConversationAttachment attachment, required Uint8List bytes, required String messageId}) => const ConversationAttachmentService().uploadAndFinalize(attachment: attachment, bytes: bytes, messageId: messageId);
