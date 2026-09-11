@@ -50,7 +50,7 @@ final class SupabaseAIRuntimeAdapter implements AIProviderAdapter {
     } on FunctionException catch (error) {
       return AppFailure<AIProviderResponse>(
         UnexpectedAppError(
-          'AI Runtime invocation failed: ${error.reason ?? error.details ?? error.status}',
+          'AI Runtime invocation failed: ${error.details ?? error.status}',
         ),
       );
     } catch (error) {
