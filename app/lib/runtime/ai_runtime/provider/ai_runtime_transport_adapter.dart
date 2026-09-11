@@ -22,10 +22,8 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
   ) async {
     try {
       final response = await _backend.functions.invoke(
-        'runtime-p4a-001',
-        body: <String, dynamic>{
-          'user_message': request.input,
-        },
+        'ai-runtime',
+        body: <String, dynamic>{'user_message': request.input},
       );
       final data = response.data;
       if (data is! Map) {
@@ -39,9 +37,7 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
       final output = data['response'];
       if (output is! String || output.trim().isEmpty) {
         return AppFailure<AIProviderResponse>(
-          const UnexpectedAppError(
-            'AI Runtime returned no response text',
-          ),
+          const UnexpectedAppError('AI Runtime returned no response text'),
         );
       }
 
