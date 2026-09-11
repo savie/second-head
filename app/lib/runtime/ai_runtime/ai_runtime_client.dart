@@ -1,23 +1,29 @@
 import '../runtime_contract.dart';
 import '../../core/result.dart';
+import 'provider/ai_provider_adapter.dart';
+import 'provider/supabase_ai_runtime_adapter.dart';
 
-/// Initial AI Runtime implementation boundary.
+/// Generic AI Runtime implementation of the RuntimeClient boundary.
 ///
-/// This implementation intentionally does not depend on:
-/// - AI providers
-/// - model vendors
-/// - Supabase
-///
-/// Provider execution will be introduced behind a separate adapter boundary.
+/// Provider selection, credentials, context retrieval, persistence, and
+/// semantic lifecycle remain behind the deployed runtime execution unit.
 final class AIRuntimeClient implements RuntimeClient {
-  const AIRuntimeClient();
+  const AIRuntimeClient({AIProviderAdapter adapter = const SupabaseAIRuntimeAdapter()})
+      : _adapter = adapter;
+
+  final AIProviderAdapter _adapter;
 
   @override
   Future<AppResult<RuntimeResponse>> send(RuntimeRequest request) async {
-    return AppFailure<RuntimeResponse>(
-      UnexpectedAppError(
-        'AI Runtime execution is not implemented yet',
-      ),
+    final result = await _adapter.execute(
+      AIProviderRequest(input: request.input),
     );
+
+    return switch (result) {
+      AppSuccess<AIProviderResponse>(value: final response) =>
+        AppSuccess<RuntimeResponse>(RuntimeResponse(output: response.output)),
+      AppFailure<AIProviderResponse>(error: final error) =>
+        AppFailure<RuntimeResponse>(error),
+    };
   }
 }
