@@ -1,8 +1,8 @@
-# SECOND HEAD — Tool / Action Generalization — Step 6 Completion
+# SECOND HEAD — Tool / Action Generalization
 
 ## Status
 
-**WORKING / IMPLEMENTED — STEP 6 COMPLETE FOR CURRENT REPRESENTATIVE SCOPE**
+**WORKING / IMPLEMENTED — Tool Action COMPLETE FOR CURRENT REPRESENTATIVE SCOPE**
 
 Dokumen ini adalah working completion record. Bukan Canonical dan tidak mengubah Approved Contract.
 
@@ -26,7 +26,7 @@ Current Implementation
 Historical evidence
 ```
 
-Architecture Step 6 menetapkan:
+Architecture Tool Action menetapkan:
 
 1. common Tool contract;
 2. Action lifecycle;
@@ -154,11 +154,11 @@ Registry awal menggunakan existing capability boundaries:
 
 | Tool | Risk | Confirmation | Boundary |
 |---|---|---:|---|
-| `R8_SEARCH_YOUTUBE` | READ_ONLY | No | YouTube MCP |
-| `R8_GET_YOUTUBE_VIDEO` | READ_ONLY | No | YouTube MCP |
-| `R6_CREATE_TASK` | LOW | Yes | existing `r6_create_task` RPC |
+| `SEARCH_YOUTUBE` | READ_ONLY | No | YouTube MCP |
+| `GET_YOUTUBE_VIDEO` | READ_ONLY | No | YouTube MCP |
+| `CREATE_TASK` | LOW | Yes | existing `create_task` RPC |
 
-Dengan demikian Step 6 tidak membuat provider baru atau menggandakan R6/R8 implementation. Generic bridge hanya menjadi execution boundary di atas capability yang sudah ada.
+Dengan demikian Tool Action tidak membuat provider baru atau menggandakan R6/R8 implementation. Generic bridge hanya menjadi execution boundary di atas capability yang sudah ada.
 
 ## 3. MCP / Connector Boundary
 
@@ -248,9 +248,9 @@ verify_jwt true
 
 ## 7. Important Boundary
 
-Step 6 dinyatakan **complete at implementation/contract level for the current representative scope**, bukan berarti semua external tools SH sudah tersedia.
+Tool Action dinyatakan **complete at implementation/contract level for the current representative scope**, bukan berarti semua external tools SH sudah tersedia.
 
-Yang belum termasuk Step 6 completion:
+Yang belum termasuk Tool Action completion:
 
 - seluruh external capability inventory;
 - Google Calendar genericization beyond existing representative path;
@@ -275,7 +275,7 @@ atau verification hardening yang diperlukan sebelum capability expansion.
 
 ## 9. Conclusion
 
-Step 6 berhasil menutup GAP generic Tool/Action bridge yang sebelumnya tercatat pada inventory.
+Tool Action berhasil menutup GAP generic Tool/Action bridge yang sebelumnya tercatat pada inventory.
 
 Hasilnya menjaga boundary:
 
