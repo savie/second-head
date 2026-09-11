@@ -1,14 +1,14 @@
 import '../runtime_contract.dart';
 import '../../core/result.dart';
 import 'provider/ai_provider_adapter.dart';
-import 'provider/supabase_ai_runtime_adapter.dart';
+import 'provider/ai_runtime_transport_adapter.dart';
 
 /// Generic AI Runtime implementation of the RuntimeClient boundary.
 ///
 /// Provider selection, credentials, context retrieval, persistence, and
-/// semantic lifecycle remain behind the deployed runtime execution unit.
+/// semantic lifecycle remain behind the AI Runtime execution boundary.
 final class AIRuntimeClient implements RuntimeClient {
-  const AIRuntimeClient({AIProviderAdapter adapter = const SupabaseAIRuntimeAdapter()})
+  const AIRuntimeClient({AIProviderAdapter adapter = const AIRuntimeTransportAdapter()})
       : _adapter = adapter;
 
   final AIProviderAdapter _adapter;
