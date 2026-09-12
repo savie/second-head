@@ -286,8 +286,7 @@ class ConversationViewState extends State<ConversationView> {
 
     final pendingAttachments =
         List<PendingConversationAttachment>.from(_pendingAttachments);
-
-    _composerController.clear();
+    final originalText = text;
 
     setState(() {
       _staticReplyPending = true;
@@ -309,6 +308,7 @@ class ConversationViewState extends State<ConversationView> {
       setState(() {
         _messages.add(userMessage);
         _pendingAttachments.clear();
+        _composerController.clear();
       });
 
       await _persistConversation();
@@ -337,6 +337,10 @@ class ConversationViewState extends State<ConversationView> {
       _scrollToLatest();
     } catch (error) {
       if (!mounted) return;
+
+      _composerController
+        ..text = originalText
+        ..selection = TextSelection.collapsed(offset: originalText.length);
 
       setState(() {
         _staticReplyPending = false;
@@ -1605,31 +1609,85 @@ class Composer extends StatelessWidget {
           children: [
             if (pendingAttachments.isNotEmpty)
               SizedBox(
-                height: 54,
+                height: 82,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(bottom: 6),
                   itemCount: pendingAttachments.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 6),
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     final attachment = pendingAttachments[index];
+                    final isImage =
+                        attachment.mimeType.startsWith('image/');
+                    final localPath = attachment.localPath;
 
-                    return InputChip(
-                      avatar: Icon(
-                        attachment.mimeType.startsWith('image/')
-                            ? Icons.image_outlined
-                            : Icons.attach_file_outlined,
-                        size: 18,
-                      ),
-                      label: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 150),
-                        child: Text(
-                          attachment.filename,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: isImage ? 76 : 190,
+                          height: 76,
+                          padding: EdgeInsets.only(
+                            right: isImage ? 0 : 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: shBorder),
+                            color: shSurface,
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: isImage &&
+                                  localPath != null &&
+                                  File(localPath).existsSync()
+                              ? Image.file(
+                                  File(localPath),
+                                  fit: BoxFit.cover,
+                                )
+                              : Row(
+                                  children: [
+                                    const SizedBox(width: 10),
+                                    Icon(
+                                      isImage
+                                          ? Icons.image_outlined
+                                          : Icons.attach_file_outlined,
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        attachment.filename,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
-                      ),
-                      onDeleted: () => onRemoveAttachment(index),
+                        Positioned(
+                          top: -6,
+                          right: -6,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => onRemoveAttachment(index),
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                width: 26,
+                                height: 26,
+                                decoration: BoxDecoration(
+                                  color: shSurface,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: shBorder),
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
