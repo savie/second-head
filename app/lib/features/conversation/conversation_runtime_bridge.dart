@@ -34,20 +34,29 @@ class ConversationRuntimeBridge {
     return _service.record(role: 'user', content: content);
   }
 
-  Future<ConversationRecord> recordAssistant(String fallbackContent) async {
+  Future<ConversationRecord> recordAssistant() async {
     final input = _pendingRuntimeInput;
     _pendingRuntimeInput = null;
 
-    if (input != null && input.trim().isNotEmpty) {
-      final runtimeResult = await const AIRuntimeClient().send(
-        RuntimeRequest(input: input),
-      );
-      if (runtimeResult case AppSuccess<RuntimeResponse>(value: final response)) {
-        return _service.record(role: 'assistant', content: response.output);
-      }
+    if (input == null || input.trim().isEmpty) {
+      throw StateError('AI runtime input is missing.');
     }
 
-    return _service.record(role: 'assistant', content: fallbackContent);
+    final runtimeResult = await const AIRuntimeClient().send(
+      RuntimeRequest(input: input),
+    );
+    return switch (runtimeResult) {
+      AppSuccess<RuntimeResponse>(value: final response) =>
+        _service.record(role: 'assistant', content: response.output),
+      AppFailure<RuntimeResponse>(error: final error) =>
+        throw StateError(_appErrorMessage(error)),
+    };
+  }
+
+  static String _appErrorMessage(AppError error) {
+    return switch (error) {
+      UnexpectedAppError(message: final message) => message,
+    };
   }
 
   Future<ConversationRecord> recordWithAttachments({required String role, required String content, required List<PendingConversationAttachment> attachments, Map<String, dynamic>? metadata}) => _service.recordWithAttachments(role: role, content: content, attachments: attachments, metadata: metadata);
