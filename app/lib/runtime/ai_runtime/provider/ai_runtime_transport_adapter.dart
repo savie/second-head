@@ -23,7 +23,11 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
     try {
       final response = await _backend.functions.invoke(
         'ai-runtime',
-        body: <String, dynamic>{'user_message': request.input},
+        body: <String, dynamic>{
+          'user_message': request.input,
+          'conversation_id': request.conversationId,
+          'user_message_id': request.userMessageId,
+        },
       );
       final data = response.data;
       if (data is! Map) {
@@ -42,7 +46,15 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
       }
 
       return AppSuccess<AIProviderResponse>(
-        AIProviderResponse(output: output),
+        AIProviderResponse(
+          output: output,
+          requestId: data['meta'] is Map
+              ? (data['meta'] as Map)['request_id'] as String?
+              : data['request_id'] as String?,
+          provider: data['meta'] is Map
+              ? (data['meta'] as Map)['provider'] as String?
+              : data['provider'] as String?,
+        ),
       );
     } on FunctionException catch (error) {
       return AppFailure<AIProviderResponse>(
