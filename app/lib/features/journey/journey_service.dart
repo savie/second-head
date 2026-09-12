@@ -40,10 +40,16 @@ class JourneyService {
 
   Future<String> _resolveShId() async {
     final result = await backendClient.rpc('resolve_identity');
-    if (result is! Map) {
-      throw StateError('Journey identity resolution returned an invalid result.');
+    if (result is! List || result.isEmpty) {
+      throw StateError('Journey identity resolution returned no actor.');
     }
-    final shId = result['sh_id']?.toString();
+
+    final row = result.first;
+    if (row is! Map) {
+      throw StateError('Journey identity resolution returned an invalid row.');
+    }
+
+    final shId = row['sh_id']?.toString();
     if (shId == null || shId.isEmpty) {
       throw StateError('Journey identity resolution did not return sh_id.');
     }
