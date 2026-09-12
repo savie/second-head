@@ -13,6 +13,7 @@ import '../../core/navigation/sh_navigation_shell.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/theme/sh_theme.dart';
+import '../../core/result.dart';
 import '../journey/semantic_hook.dart';
 import 'conversation_runtime_bridge.dart';
 
@@ -142,7 +143,7 @@ class ConversationViewState extends State<ConversationView> {
         _isLoadingConversation = false;
         _conversationStatus = 'Ready';
       });
-    } catch (_) {
+    } catch (error) {
       final state = await StorageService.readConversationState();
       if (!mounted) return;
 
@@ -166,11 +167,20 @@ class ConversationViewState extends State<ConversationView> {
 
       setState(() {
         _isLoadingConversation = false;
-        _conversationStatus = 'Local only — backend sync unavailable';
+        _conversationStatus = _conversationLoadFailureStatus(error);
       });
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
+  }
+
+  String _conversationLoadFailureStatus(Object error) {
+    if (error is UnauthenticatedAppError) return 'Sign-in required';
+    if (error is AuthorizationDeniedAppError) return 'Conversation access denied';
+    if (error is NetworkUnavailableAppError) return 'Network unavailable';
+    if (error is InvalidMessageAppError) return 'Invalid conversation request';
+    if (error is BackendRuntimeAppError) return 'Backend/runtime error';
+    return 'Unable to load conversation';
   }
 
   Future<ConversationMessage> _messageFromBackend(
@@ -277,15 +287,22 @@ class ConversationViewState extends State<ConversationView> {
       });
       await _persistConversation();
       _scrollToLatest();
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() {
-        _messages.add(ConversationMessage(text, false, 'Now'));
         _staticReplyPending = false;
-        _conversationStatus = 'Local only — backend sync unavailable';
+        _conversationStatus = _sendFailureStatus(error);
       });
-      await _persistConversation();
     }
+  }
+
+  String _sendFailureStatus(Object error) {
+    if (error is UnauthenticatedAppError) return 'Sign-in required';
+    if (error is AuthorizationDeniedAppError) return 'Conversation access denied';
+    if (error is NetworkUnavailableAppError) return 'Network unavailable';
+    if (error is InvalidMessageAppError) return 'Invalid message';
+    if (error is BackendRuntimeAppError) return 'Backend/runtime error';
+    return 'Unable to send message';
   }
 
   Future<void> _processFrontendSemantic(String text) async {
