@@ -1635,46 +1635,49 @@ class Composer extends StatelessWidget {
                 ),
               ),
             Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            IconButton(
-              onPressed: onAttach,
-              icon: const Icon(Icons.add_circle_outline, size: 28),
-              padding: const EdgeInsets.all(6),
-              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 50, maxHeight: 130),
-                child: TextField(
-                  controller: controller,
-                  minLines: 1,
-                  maxLines: 5,
-                  textInputAction: TextInputAction.newline,
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(
-                    hintText: 'Message SH...',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: onAttach,
+                  icon: const Icon(Icons.add_circle_outline, size: 28),
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 50, maxHeight: 130),
+                    child: TextField(
+                      controller: controller,
+                      minLines: 1,
+                      maxLines: 5,
+                      textInputAction: TextInputAction.newline,
+                      keyboardType: TextInputType.multiline,
+                      decoration: const InputDecoration(
+                        hintText: 'Message SH...',
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 13,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 50,
-              height: 50,
-              child: IconButton(
-                onPressed: onSend,
-                tooltip: 'Send',
-                icon: const Icon(Icons.arrow_upward, size: 25),
-              ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: IconButton(
+                    onPressed: onSend,
+                    tooltip: 'Send',
+                    icon: const Icon(Icons.arrow_upward, size: 25),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       );
-    ],
-  );
 }
 
 class AttachAction extends StatelessWidget {
