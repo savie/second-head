@@ -2,17 +2,15 @@
 
 ## Status
 
-**Working status record — current reconciliation checkpoint.**
+**WORKING — CURRENT RECONCILIATION CHECKPOINT**
 
-Dokumen ini mencatat posisi Backend (Supabase), Frontend (Flutter), verification, blocker, dan dependency berdasarkan current `dev` sampai checkpoint ini.
+Dokumen ini mencatat posisi Backend (Supabase), Frontend (Flutter), verification, blocker, dan dependency terhadap current `dev` dan Supabase DEV.
 
-Dokumen ini **bukan Canonical** dan tidak mengubah Canonical maupun Approved Contract.
+Dokumen ini bukan Canonical dan tidak mengubah Approved Contract.
 
-`dev_old` digunakan sebagai historical reference/evidence dan bukan baseline implementation baru.
+`dev_old` hanya historical reference/evidence.
 
----
-
-## 1. Authority dan Prinsip Kerja
+## 1. Authority & Principle
 
 ```text
 OWNER / USER DECISION
@@ -23,261 +21,195 @@ APPROVED CONTRACT
         ↓
 ARCHITECTURE / DESIGN
         ↓
-IMPLEMENTATION
+CURRENT IMPLEMENTATION
+        ↓
+RUNTIME / DATABASE EVIDENCE
+        ↓
+DEVICE / E2E EVIDENCE
 ```
 
-1. Backend / Supabase menjadi authority untuk identity, ownership, authority, permission, capability, dan runtime enforcement.
-2. Frontend mengikuti contract dan capability backend; frontend tidak boleh menebak authority secara mandiri.
-3. Tidak ada perubahan Canonical melalui dokumen ini.
-4. `dev_old` hanya historical evidence.
-5. `pending`, `partial`, `completed`, `superseded`, dan `deferred` harus dibedakan.
-6. Current implementation evidence tidak otomatis berarti verified atau semantically final.
-
----
+Frontend mengikuti backend capability/contract dan tidak menjadi authority identity, ownership, permission, atau runtime enforcement.
 
 ## 2. Current Work Status
 
-| No. | Workstream | Status | Disposition |
-|---|---|---|---|
-| 1 | Task RPC dependency | ✅ COMPLETED | Broken `r6_tasks` dependency direkonsiliasi ke `task_reminders`. |
-| 2 | Migration source reconstruction | ✅ COMPLETED | Current DEV migration lineage/source artifact sudah direkonstruksi; tidak menggunakan migration fiktif atau `dev_old` sebagai current source. |
-| 3 | Old Conversation contract | 🟡 SUPERSEDED / RECONCILED | Capability matrix lama sudah stale terhadap current DEV; contract sekarang direkonsiliasi dan tetap bukan Canonical. |
-| 4 | Knowledge FK validation | ✅ COMPLETED | FK `knowledge_private_sh_id_fk` sudah divalidasi. |
-| 5 | anon EXECUTE hardening | ✅ COMPLETED | Runtime privileged surface sudah di-hardening; residual surface tetap dianalisis berdasarkan execution context. |
-| 6 | Recovery ↔ Conversation continuity backend | ✅ COMPLETED | Recovery hierarchy sudah mencakup Project → Conversation Thread → Message continuity sesuai current backend implementation. |
-| 7 | Contract reconciliation | 🟢 CURRENT CHECKPOINT | Contract/docs drift direkonsiliasi terhadap current DEV evidence; remaining semantic/open items dicatat eksplisit. |
-| 8 | Backend fixes | ✅ COMPLETED FOR IDENTIFIED GAPS | Backend fixes yang sudah teridentifikasi telah diterapkan. Ini bukan klaim bahwa seluruh backend capability SH sudah final. |
-| 9 | Security / authenticated verification | 🟡 PARTIAL | Static/security baseline dan boundary tests sudah dilakukan; succession wrapper validation dan authenticated adversarial coverage masih harus ditutup. |
-| 10 | Frontend integration | 🟡 PARTIAL / CURRENT IMPLEMENTATION EXISTS | FE sudah memiliki substantial current integration untuk Identity dan Project/Conversation; broader SH capability integration belum final. |
+| Workstream | Current status |
+|---|---|
+| Task RPC dependency | COMPLETED |
+| Migration source reconstruction | COMPLETED |
+| Conversation contract reconciliation | COMPLETED / RECONCILED |
+| Knowledge FK validation | COMPLETED |
+| anon EXECUTE hardening | COMPLETED for identified scope |
+| Recovery ↔ Conversation continuity backend | COMPLETED |
+| Attachment FE call-path repair | COMPLETED |
+| Attachment happy-path E2E | VERIFIED |
+| Memory tested persistence/projection | VERIFIED for tested path |
+| Journey retrieval + FE/account isolation | VERIFIED for tested path |
+| Context Resolver integration | IMPLEMENTED / RECONCILED / VERIFIED |
+| Broader Knowledge/Experience semantic E2E | OPEN |
+| Security/succession semantic harness | OPEN |
+| Recovery restore E2E | OPEN |
+| Attachment retry/idempotency | OPEN NON-BLOCKING RISK |
 
----
+## 3. Identity / Actor
 
-## 3. Current Backend / Supabase Position
-
-Current DEV memiliki migration history **173 entries**, dengan latest actor-resolution context migration `20260908032300_actor_resolution_context` pada checkpoint ini.
-
-Current runtime foundation mencakup identity/ownership, Project/Conversation hierarchy, SH State, Recovery hierarchy, governance/runtime boundaries, external capability surfaces, dan related persistence.
-
-Current DEV migration reconstruction sudah selesai. Repository migration artifacts tidak boleh dianggap sebagai pengganti current remote state tanpa verification terhadap Supabase DEV.
-
----
-
-## 4. Actor / Identity
-
-Actor Resolution Addendum telah diimplementasikan pada current DEV:
+Current actor resolution preserves the trusted pipeline:
 
 ```text
-Supabase resolver
-      ↓
-Backend auth service
-      ↓
-ResolvedActorContext
-      ↓
-Flutter identity context
-      ↓
-Account representation
+Authentication
+ → Identity Resolution
+ → Actor Classification
+ → Authority Resolution
+ → Runtime Context
+ → Permission Policy
+ → Enforcement
 ```
 
-Current verified classifications:
+Current tested Creator/SH-000 and ordinary account classifications are validated for scope tested. `SYSTEM_RUNTIME` technical mechanism remains OPEN.
+
+## 4. Project / Conversation / Message
+
+Current backend runtime paths and Flutter consumers exist for project/conversation management, Message load/record/update/delete, context loading, and runtime bridge.
+
+Current tested conversation path is dynamically connected to AI runtime and persisted assistant response.
+
+**Status: CURRENT IMPLEMENTATION / TESTED RUNTIME PASS.**
+
+Separate OPEN item: audit update/delete adapter parameter contract explicitly; do not infer PASS from unrelated E2E.
+
+## 5. Conversation Attachment
+
+Current FE path:
 
 ```text
-Creator account
-→ actor CREATOR
-→ authority CREATOR
-→ SH-000
-
-Ordinary account
-→ actor ACCOUNT_OWNER
-→ authority null
-→ ORDINARY_SH
+Composer
+ ↓
+recordUserWithAttachments
+ ↓
+ConversationService.recordWithAttachments
+ ↓
+Message
+ ↓
+Attachment
+ ↓
+Storage
+ ↓
+Finalize
+ ↓
+AI Runtime
 ```
 
-Frontend mengonsumsi backend-resolved context dan tidak menjadi authority actor.
+Device + DEV evidence verifies preview, caption/send, Message persistence, Attachment persistence, same Message linkage, Storage object, `PERSISTED` status, SH response, navigation persistence, and account isolation.
 
-Scope Actor Resolution dinyatakan closed untuk current contract; `SYSTEM_RUNTIME` technical mechanism tetap OPEN.
+**Status: HAPPY-PATH E2E VERIFIED.**
 
----
+Retry/idempotency after an actual failure remains an OPEN non-blocking hardening item.
 
-## 5. Project / Conversation / Message
+## 6. Memory / Knowledge / Experience / Journey
 
-Current DEV dan current Flutter sudah memiliki substantial implementation.
+### Memory
 
-### Backend evidence
+Tested explicit Memory capture persisted in DEV and produced the corresponding Journey projection. Owner-private behavior was verified for the tested path.
 
-Current runtime paths mencakup antara lain:
+**Status: TESTED PERSISTENCE / PROJECTION VERIFIED; full semantic lifecycle OPEN.**
+
+### Knowledge
+
+Domain/source exists in current DEV. Current checkpoint has no positive Knowledge row.
+
+**Status: DOMAIN PRESENT / POSITIVE SEMANTIC E2E OPEN.**
+
+### Experience
+
+Domain/source exists in current DEV. Current checkpoint has no positive Experience row.
+
+**Status: DOMAIN PRESENT / POSITIVE SEMANTIC E2E OPEN.**
+
+### Journey
+
+Journey retrieval through `runtime_get_journey_context()` and Context Resolver integration are implemented/reconciled. FE hydration uses trusted backend retrieval and local Journey storage is account-scoped.
+
+Device account-switch verification confirms owner data does not bleed across accounts.
+
+**Status: VERIFIED for tested persistence/retrieval/FE/account-isolation path.**
+
+## 7. Context Resolver
+
+Current integration:
 
 ```text
-runtime_create_project
-runtime_list_projects
-runtime_rename_project
-runtime_delete_project
-runtime_create_conversation
-runtime_list_conversations
-runtime_rename_conversation_thread
-runtime_delete_conversation_thread
-runtime_assign_conversation_project
-runtime_load_conversation_messages
-runtime_record_conversation_message
-runtime_update_conversation_message_v2
-runtime_delete_conversation_message_v2
-runtime_load_conversation_context_for_thread
+runtime_get_context_package()
+        ↓
+assemble_context()
+        ↓
+Memory → Knowledge → Experience → Journey
 ```
 
-### Frontend evidence
+Context package ordering remains:
 
-`ConversationService` / `ConversationRuntimeBridge` dan `ProjectConversationManagementView` saat ini mengonsumsi capability tersebut untuk create/list/select/rename/delete, project management, move/remove, message CRUD, context loading, search, loading/error/empty states, dan destructive confirmations.
+`actor → conversation → state → memory → knowledge → experience → journey`
 
-### Current classification
+**Status: IMPLEMENTED / RECONCILED / VERIFIED for current scope.**
+
+## 8. Security
+
+Existing SELF / OTHER / SPOOF / UNAUTH boundary testing and runtime authorization work remain valid for their tested scope.
+
+Succession semantic positive/negative execution remains OPEN because this requires execution evidence beyond source review.
+
+## 9. Recovery / Continuity
+
+Conversation hierarchy is integrated into current Recovery backend lineage. Full restore/reconstruction E2E remains OPEN.
+
+## 10. Documentation Drift
+
+This checkpoint reconciles stale statements that previously described:
+
+- dynamic AI runtime as not complete;
+- attachment APK E2E as deferred;
+- Memory/Journey backend integration as open;
+- Journey Context Resolver integration as pending/blocked.
+
+Those statements are no longer valid for the tested current paths.
+
+Knowledge and Experience remain OPEN because positive current data/semantic E2E evidence is absent; they are not promoted merely because source/schema exists.
+
+No Canonical semantics are changed by this document.
+
+## 11. Verification Discipline
 
 ```text
-Project / Conversation management UI → CURRENT IMPLEMENTATION
-Runtime RPC paths                 → CURRENT IMPLEMENTATION
-Semantic/security verification    → PARTIAL / OPEN
-Dynamic AI response pipeline      → NOT YET COMPLETE
+Claim → Expected → Evidence → Actual → Result
 ```
 
-Penting: current FE implementation tidak mengubah Approved Contract menjadi authority baru. Sebaliknya, old capability-gap matrix tidak boleh lagi dipakai sebagai current-state claim.
+`DB PASS ≠ HTTP E2E PASS` and `source exists ≠ runtime verified`.
 
----
-
-## 6. State
-
-Current DEV memiliki dedicated `public.sh_states` dan state-related runtime/recovery lineage.
-
-State tetap dibedakan dari identity dan recovery.
-
-Status detail State verification harus mengikuti current State Persistence contract + current backend implementation + current FE consumer, bukan historical pre-implementation gap.
-
----
-
-## 7. Recovery ↔ Conversation Continuity
-
-Backend recovery hierarchy telah direkonsiliasi terhadap Project → Conversation Thread → Message.
-
-Recovery mempertahankan identity/thread/project/message references yang diperlukan dan tidak boleh diperlakukan sebagai clone creation atau identity replacement.
-
-Authenticated E2E melalui current APK tetap merupakan verification item terpisah dari backend static verification.
-
----
-
-## 8. Security Verification
-
-### Sudah dilakukan
-
-- identity / ownership boundary audit;
-- RLS posture audit;
-- privileged runtime execute surface audit;
-- FK integrity audit;
-- recovery hierarchy audit;
-- legacy runtime exposure audit;
-- Creator authority structure audit;
-- SELF / OTHER / SPOOF / UNAUTH boundary tests.
-
-### Masih terbuka
+## 12. Current Gate
 
 ```text
-runtime_validate_selected_transfer_scope()
+Closed / verified domains
         ↓
-succession_rules semantics
+Do not reopen without new evidence
         ↓
-runtime_execute_succession()
+Choose confirmed OPEN dependency
         ↓
-wrapper / authorization validation
+Inspect → Impact → Change (only if authorized) → Test → Verify → Reconcile
 ```
 
-`runtime_execute_succession(uuid)` masih merupakan confirmed review item karena authenticated EXECUTE surface ditemukan pada wrapper tersebut dan perlu dipastikan isolation/authorization-nya secara penuh.
-
-Security Harness Step 7 **belum PASS final** sampai item ini ditutup.
-
----
-
-## 9. Frontend Current Position
-
-Frontend tidak lagi tepat diklasifikasikan sebagai `PENDING` secara keseluruhan.
-
-Current `app/` memiliki implementation untuk:
-
-- Auth / Identity / Actor Context;
-- Project / Conversation management;
-- Conversation persistence/runtime bridge;
-- Journey surface;
-- Lifecycle/EOL surface;
-- Clone / Inheritance / Legacy / Recovery / Succession surfaces;
-- profile/navigation/core storage;
-- bounded local/offline behavior;
-- attachment/camera/gallery/file interaction.
-
-Namun kedalaman integration berbeda-beda.
-
-### Important boundary
+## 13. Current Summary
 
 ```text
-FE surface exists
-      ≠
-backend semantic integration complete
-      ≠
-security verified
-      ≠
-E2E verified
+Identity / Actor                 → VALIDATED
+Conversation / Message           → TESTED RUNTIME PASS
+Attachment happy path            → E2E VERIFIED
+Memory tested path               → VERIFIED
+Journey tested path              → VERIFIED
+Context Resolver                 → IMPLEMENTED / VERIFIED
+Knowledge                        → OPEN POSITIVE E2E
+Experience                       → OPEN POSITIVE E2E
+Recovery restore                 → OPEN E2E
+Succession semantic harness      → OPEN
+Attachment retry/idempotency     → OPEN NON-BLOCKING RISK
+SYSTEM_RUNTIME mechanism         → OPEN
 ```
 
-Beberapa Journey/continuity surfaces masih memiliki local-store semantics dan tidak boleh diperlakukan otomatis sebagai authoritative backend Memory/Knowledge/Experience integration.
-
-Conversation UI juga belum menjadi complete dynamic AI runtime; current send path masih memiliki static assistant response behavior.
-
----
-
-## 10. Documentation Drift Status
-
-Dokumen current `docs/` harus dibaca bersama current implementation.
-
-Drift yang sudah direkonsiliasi pada checkpoint ini:
-
-1. Conversation contract lama memiliki capability matrix yang tertinggal dari current runtime/FE.
-2. Backend/Frontend status lama masih menyebut FE `PENDING`, padahal current FE sudah memiliki substantial integration.
-3. Supabase Map lama menyebut 26 public tables dan migration reconstruction belum tersedia; keduanya sudah stale terhadap current DEV checkpoint.
-4. Working inventory sekarang menjadi index reconciliation yang membedakan authority, current implementation, legacy, gap, open, dan deferred.
-
-Tidak ada drift yang boleh diperbaiki dengan mengubah Canonical semantics secara implisit.
-
----
-
-## 11. Current Gate
-
-```text
-Documentation reconciliation
-        ↓
-Current BE + FE inventory
-        ↓
-Security / authenticated verification
-        ↓
-Domain-by-domain semantic reconciliation
-        ↓
-Confirmed gaps only
-        ↓
-Implementation
-        ↓
-E2E / regression
-```
-
-Frontend dapat dianalisis paralel selama inventory/reconciliation, tetapi implementation tetap mengikuti backend authority dan confirmed dependency.
-
-Tidak ada coding hanya untuk menutup status dokumen.
-
----
-
-## 12. Current Summary
-
-```text
-Identity / Actor Resolution        → CLOSED for current scope
-Migration reconstruction           → COMPLETED
-Project / Conversation FE          → CURRENT / PARTIAL
-Project / Conversation semantics   → VERIFICATION OPEN
-State                               → CURRENT foundation / verification by contract
-Recovery backend                   → COMPLETED / E2E verification separate
-Security Harness                   → PARTIAL / succession wrapper open
-Frontend integration overall       → PARTIAL, not globally pending
-SYSTEM_RUNTIME mechanism           → OPEN
-Dynamic AI runtime                 → OPEN
-Broader domain reconciliation      → NEXT
-```
+**Next action must follow confirmed dependency. Documentation status is now aligned to current evidence for the reconciled domains.**
