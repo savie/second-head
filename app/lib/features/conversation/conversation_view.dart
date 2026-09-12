@@ -28,6 +28,10 @@ class ConversationView extends StatefulWidget {
 }
 
 class ConversationViewState extends State<ConversationView> {
+  // Clear is session-only presentation state. It must never delete durable
+  // backend messages or persist an empty conversation to local storage.
+  static final Set<String> _clearedConversationIds = <String>{};
+
   final Connectivity _connectivity = Connectivity();
   final ConversationRuntimeBridge _runtime = const ConversationRuntimeBridge();
   final TextEditingController _composerController = TextEditingController();
@@ -132,11 +136,15 @@ class ConversationViewState extends State<ConversationView> {
         );
       }
 
+      final isCleared = activeId != null &&
+          _clearedConversationIds.contains(activeId);
       _messages
         ..clear()
-        ..addAll(hydrated);
+        ..addAll(isCleared ? const <ConversationMessage>[] : hydrated);
       if (summary != null) conversationTitle.value = summary.title;
-      await _persistConversation();
+      if (!isCleared) {
+        await _persistConversation();
+      }
 
       if (!mounted) return;
       setState(() {
@@ -147,8 +155,12 @@ class ConversationViewState extends State<ConversationView> {
       final state = await StorageService.readConversationState();
       if (!mounted) return;
 
+      final activeId = _runtime.activeConversationId;
+      final isCleared = activeId != null &&
+          _clearedConversationIds.contains(activeId);
+
       _messages.clear();
-      if (state != null) {
+      if (!isCleared && state != null) {
         final title = state['title'];
         final raw = state['messages'];
         if (title is String && title.trim().isNotEmpty) {
@@ -559,29 +571,12 @@ class ConversationViewState extends State<ConversationView> {
 
   Future<void> _clearConversation() async {
     Navigator.pop(context);
-    final records = List<ConversationMessage>.from(_messages);
-    try {
-      for (final message in records) {
-        final id = message.runtimeRecordId;
-        if (id != null) {
-          await _runtime.deleteMessage(
-            messageId: id,
-            createdAt: message.createdAt ?? DateTime.now(),
-            role: message.assistant ? 'assistant' : 'user',
-            content: message.text,
-          );
-        }
-      }
-      if (!mounted) return;
-      setState(() => _messages.clear());
-      await _persistConversation();
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to clear conversation')),
-        );
-      }
-    }
+    final conversationId = _runtime.activeConversationId;
+    if (conversationId == null || conversationId.isEmpty) return;
+
+    _clearedConversationIds.add(conversationId);
+    if (!mounted) return;
+    setState(() => _messages.clear());
   }
 
   Future<void> _deleteConversation() async {
