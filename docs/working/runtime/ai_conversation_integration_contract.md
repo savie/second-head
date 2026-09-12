@@ -45,15 +45,23 @@ ConversationService Message Persistence
 
 ## 2. Current Evidence
 
-Current frontend sudah memiliki `activeConversationId` dan `ConversationService` memiliki thread-scoped context loader melalui `runtime_load_conversation_context_for_thread`.
+Current frontend memiliki `activeConversationId` dan `ConversationService` memiliki thread-scoped context loader melalui `runtime_load_conversation_context_for_thread`.
 
-Namun `RuntimeRequest` saat ini hanya membawa `input`, sedangkan transport hanya mengirim `user_message` ke `ai-runtime`.
+Sebelumnya `RuntimeRequest` hanya membawa `input`, sedangkan transport hanya mengirim `user_message` ke `ai-runtime`.
 
-Current `ai-runtime` menerima `p_sh_id` melalui identity resolution dan meminta `runtime_get_context_package(p_sh_id, p_query_text)`. Context package tersebut menggunakan `runtime_load_conversation_context(p_sh_id)`, sehingga conversation context masih berada pada scope SH, bukan active conversation/thread.
+Current implementation sekarang telah memperluas request menjadi:
 
-Kesimpulan audit:
+```text
+user_message
+conversation_id
+user_message_id
+```
 
-**Dynamic provider execution sudah verified, tetapi conversation-aware runtime context belum verified.**
+AI Runtime tetap menyelesaikan actor melalui `resolve_identity()`, kemudian mengambil existing Context Runtime Package dan melakukan thread-scoped Conversation retrieval melalui `runtime_load_conversation_context_for_thread`.
+
+Kesimpulan:
+
+**Conversation-aware runtime path sudah diimplementasikan, tetapi belum dianggap verified sampai fresh E2E isolation dan security gate lulus.**
 
 ---
 
@@ -91,7 +99,7 @@ Perubahan consumer integration tidak boleh bypass `resolve_identity()` atau memb
 
 ## 4. Required Request Correlation
 
-AI Runtime request harus dapat mengidentifikasi minimal:
+AI Runtime request sekarang membawa:
 
 ```text
 user_message
@@ -103,7 +111,16 @@ user_message_id
 
 `user_message_id` menjadi correlation reference antara Message persistence dan runtime audit.
 
-Runtime-generated `request_id` tetap menjadi correlation ID eksekusi runtime.
+Runtime-generated `request_id` menjadi correlation ID eksekusi runtime.
+
+Assistant Message sekarang menyimpan metadata correlation:
+
+```text
+runtime_request_id
+runtime_provider
+runtime_user_message_id
+runtime_conversation_id
+```
 
 Target correlation:
 
@@ -117,39 +134,43 @@ RUNTIME_RESPONSE.request_id
 assistant Message metadata.runtime_request_id
 ```
 
-Nama field final masih implementation detail sampai contract ini disetujui/frozen.
-
 ---
 
 ## 5. Context Boundary
 
-AI Runtime tidak boleh mengambil context Conversation secara global berdasarkan SH apabila request sudah memiliki target Conversation.
+AI Runtime tidak menggunakan Conversation context global berdasarkan SH sebagai context utama apabila request memiliki target Conversation.
 
-Target behavior:
+Current implementation:
 
 ```text
 request.conversation_id
         ↓
-ownership verification
+resolve_identity()
         ↓
 runtime_load_conversation_context_for_thread()
         ↓
 thread context
+        ↓
+provider
 ```
 
-`runtime_get_context_package(p_sh_id, p_query_text)` tetap dipertahankan sebagai existing Context Runtime contract sampai ada authority eksplisit untuk memperluas input-nya.
+`runtime_get_context_package(p_sh_id, p_query_text)` tetap dipertahankan sebagai existing Context Runtime contract dan tidak diperluas oleh implementation ini.
 
-Untuk integrasi awal, AI Runtime dapat melakukan thread-scoped Conversation retrieval sebagai dependency tambahan dan menggabungkannya ke execution context, tanpa mengubah output contract Context Runtime Package.
+AI Runtime menggabungkan hasil thread-scoped Conversation retrieval ke execution context dengan marker:
 
-Ini adalah proposed implementation direction, bukan perubahan Canonical.
+```text
+conversation_context_scope = active-thread
+```
+
+Ini adalah implementation terhadap working contract, bukan perubahan Canonical.
 
 ---
 
 ## 6. Message Identity
 
-User Message harus dipersist sebelum AI execution, sehingga AI Runtime menerima identity dari Message yang sudah durable.
+User Message dipersist sebelum AI execution, sehingga AI Runtime menerima identity dari Message yang sudah durable.
 
-Flow target:
+Current flow:
 
 ```text
 record user Message
@@ -158,14 +179,16 @@ message_id + conversation_id
       ↓
 AI Runtime Request
       ↓
+ownership + thread verification
+      ↓
 provider
       ↓
 assistant response
       ↓
-record assistant Message
+record assistant Message + runtime correlation metadata
 ```
 
-Tidak boleh menggunakan content string sebagai satu-satunya correlation mechanism.
+Content string tidak digunakan sebagai satu-satunya correlation mechanism.
 
 ---
 
@@ -173,7 +196,7 @@ Tidak boleh menggunakan content string sebagai satu-satunya correlation mechanis
 
 AI Runtime failure bukan assistant success.
 
-Target:
+Current behavior:
 
 ```text
 AI Runtime SUCCESS
@@ -184,7 +207,7 @@ AI Runtime FAILURE
   → surface runtime failure state
 ```
 
-Fallback UI/content hanya boleh digunakan jika contract eksplisit mendefinisikan fallback tersebut sebagai valid system behavior. Saat ini tidak ada evidence yang cukup untuk menjadikan static assistant text sebagai successful AI response.
+Static fallback assistant response pada dynamic AI path telah dihapus.
 
 ---
 
@@ -192,7 +215,9 @@ Fallback UI/content hanya boleh digunakan jika contract eksplisit mendefinisikan
 
 `conversation_id` dari frontend adalah request target, bukan authority.
 
-Runtime harus memverifikasi bahwa target Conversation dimiliki actor yang telah di-resolve:
+Runtime menggunakan authenticated identity lalu memanggil thread-scoped RPC yang melakukan ownership validation terhadap account + SH sebelum mengembalikan Conversation context.
+
+Flow:
 
 ```text
 Authorization
@@ -201,12 +226,14 @@ resolve_identity()
  ↓
 resolved account + sh
  ↓
+runtime_load_conversation_context_for_thread()
+ ↓
 conversation ownership check
  ↓
 thread context
 ```
 
-Frontend tidak boleh menjadi source of truth untuk authority.
+Frontend tidak menjadi source of truth untuk authority.
 
 ---
 
@@ -229,60 +256,70 @@ Scope ini tidak mencakup:
 
 Sebelum dynamic AI conversation integration dianggap selesai:
 
-1. Request membawa active `conversation_id`.
-2. Runtime memverifikasi ownership Conversation.
-3. Context yang diberikan ke model berasal dari target Conversation/thread.
-4. User Message dan assistant Message berada pada Conversation yang sama.
-5. Runtime audit memiliki `request_id`.
-6. Message ↔ runtime correlation dapat ditelusuri.
-7. Runtime failure tidak menghasilkan fake assistant success.
-8. Fresh E2E membuktikan conversation isolation dengan minimal dua Conversation.
-9. Security test membuktikan actor tidak dapat menggunakan Conversation actor lain.
+1. Request membawa active `conversation_id`. **IMPLEMENTED**
+2. Runtime memverifikasi ownership Conversation. **IMPLEMENTED — E2E PENDING**
+3. Context yang diberikan ke model berasal dari target Conversation/thread. **IMPLEMENTED — E2E PENDING**
+4. User Message dan assistant Message berada pada Conversation yang sama. **IMPLEMENTED — E2E PENDING**
+5. Runtime audit memiliki `request_id`. **VERIFIED**
+6. Message ↔ runtime correlation dapat ditelusuri. **IMPLEMENTED — E2E PENDING**
+7. Runtime failure tidak menghasilkan fake assistant success. **IMPLEMENTED**
+8. Fresh E2E membuktikan conversation isolation dengan minimal dua Conversation. **OPEN**
+9. Security test membuktikan actor tidak dapat menggunakan Conversation actor lain. **OPEN**
 
 ---
 
 ## 11. Current Status
 
 ```text
-Request identity                 IMPLEMENTED
-SH identity resolution            VERIFIED
-Provider execution                VERIFIED
-Message persistence ownership     VERIFIED
-Duplicate persistence             CLOSED
-Failure false-success correction IMPLEMENTED
+Request identity                  IMPLEMENTED
+SH identity resolution             VERIFIED
+Provider execution                 VERIFIED
+Message persistence ownership      VERIFIED
+Duplicate persistence              CLOSED
+Failure false-success correction  IMPLEMENTED
 
-conversation_id in AI request     OPEN
-thread-scoped AI context          OPEN
-Message ↔ request correlation     OPEN
-cross-conversation isolation      OPEN
+conversation_id → runtime          IMPLEMENTED
+user_message_id → runtime          IMPLEMENTED
+thread-scoped AI context           IMPLEMENTED
+response correlation metadata      IMPLEMENTED
+cross-conversation isolation       OPEN
+security isolation E2E             OPEN
 ```
 
 **Gate belum READY FOR FINAL E2E.**
 
 ---
 
-## 12. Next Execution
+## 12. Implementation Record
 
-Urutan implementation yang disarankan:
+Current DEV implementation commits:
+
+- Runtime contract correlation: `00c5b13cd7610fac7be584bd5de8c88fdece726f`
+- Provider boundary correlation: `390421dedda580385d57f9a40959309cb819ce41`
+- Transport payload correlation: `b9482b8adaf235a6746a7d71dc9592b8534bb43b`
+- Conversation bridge correlation + failure semantics: `7358d0ca336f43a21b286c05db262a7dbf6b4a05`
+- AI Runtime thread-scoped context: `7fa12dff5e4520597cf1a0a8a6eb6ba6d04019d0`
+
+Supabase DEV `ai-runtime` is deployed at version **10**, `verify_jwt=true`.
+
+Version 10 includes the conversation-aware runtime implementation and the existing semantic lifecycle dependency. No database migration was introduced for this integration step.
+
+---
+
+## 13. Next Execution
 
 ```text
-Contract review
+Current implementation
       ↓
-RuntimeRequest extension
+Fresh APK / client E2E
       ↓
-Transport payload extension
+Conversation A isolation
       ↓
-AI Runtime conversation ownership check
+Conversation B isolation
       ↓
-Thread-scoped context injection
+request ↔ Message correlation verification
       ↓
-Response correlation metadata
+cross-actor Conversation access rejection
       ↓
-ConversationService persistence metadata
-      ↓
-Fresh E2E isolation test
-      ↓
-Security verification
+FINAL GATE
 ```
-
-Tidak ada migration yang diperlukan pada tahap contract design ini.
