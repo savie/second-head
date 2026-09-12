@@ -16,12 +16,22 @@ final class AIRuntimeClient implements RuntimeClient {
   @override
   Future<AppResult<RuntimeResponse>> send(RuntimeRequest request) async {
     final result = await _adapter.execute(
-      AIProviderRequest(input: request.input),
+      AIProviderRequest(
+        input: request.input,
+        conversationId: request.conversationId,
+        userMessageId: request.userMessageId,
+      ),
     );
 
     return switch (result) {
       AppSuccess<AIProviderResponse>(value: final response) =>
-        AppSuccess<RuntimeResponse>(RuntimeResponse(output: response.output)),
+        AppSuccess<RuntimeResponse>(
+          RuntimeResponse(
+            output: response.output,
+            requestId: response.requestId,
+            provider: response.provider,
+          ),
+        ),
       AppFailure<AIProviderResponse>(error: final error) =>
         AppFailure<RuntimeResponse>(error),
     };
