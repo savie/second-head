@@ -13,7 +13,7 @@ class ConversationRuntimeBridge {
   const ConversationRuntimeBridge({ConversationService service = const ConversationService()}) : _service = service;
 
   final ConversationService _service;
-  static String? _pendingRuntimeInput;
+  static _PendingRuntimeMessage? _pendingRuntimeMessage;
 
   String? get activeConversationId => ConversationService.activeConversationId.value;
 
@@ -30,24 +30,42 @@ class ConversationRuntimeBridge {
   Future<void> removeConversationFromProject({required String conversationId}) => _service.removeConversationFromProject(conversationId: conversationId);
 
   Future<ConversationRecord> recordUser(String content) async {
-    _pendingRuntimeInput = content;
-    return _service.record(role: 'user', content: content);
+    final record = await _service.record(role: 'user', content: content);
+    _pendingRuntimeMessage = _PendingRuntimeMessage(
+      input: content,
+      conversationId: record.threadId,
+      userMessageId: record.messageId,
+    );
+    return record;
   }
 
   Future<ConversationRecord> recordAssistant(String _fallbackContent) async {
-    final input = _pendingRuntimeInput;
-    _pendingRuntimeInput = null;
+    final pending = _pendingRuntimeMessage;
+    _pendingRuntimeMessage = null;
 
-    if (input == null || input.trim().isEmpty) {
+    if (pending == null || pending.input.trim().isEmpty) {
       throw StateError('AI runtime input is missing.');
     }
 
     final runtimeResult = await const AIRuntimeClient().send(
-      RuntimeRequest(input: input),
+      RuntimeRequest(
+        input: pending.input,
+        conversationId: pending.conversationId,
+        userMessageId: pending.userMessageId,
+      ),
     );
     return switch (runtimeResult) {
       AppSuccess<RuntimeResponse>(value: final response) =>
-        _service.record(role: 'assistant', content: response.output),
+        _service.record(
+          role: 'assistant',
+          content: response.output,
+          metadata: {
+            'runtime_request_id': response.requestId,
+            'runtime_provider': response.provider,
+            'runtime_user_message_id': pending.userMessageId,
+            'runtime_conversation_id': pending.conversationId,
+          },
+        ),
       AppFailure<RuntimeResponse>(error: final error) =>
         throw StateError(_appErrorMessage(error)),
     };
@@ -69,4 +87,16 @@ class ConversationRuntimeBridge {
   Future<void> updateMessage({required String messageId, required DateTime createdAt, required String role, required String oldContent, required String newContent}) => _service.updateMessage(messageId: messageId, oldContent: oldContent, newContent: newContent);
   Future<void> deleteMessage({required String messageId, required DateTime createdAt, required String role, required String content}) => _service.deleteMessage(messageId: messageId);
   Future<void> deleteConversation({required String conversationId}) => _service.deleteConversation(conversationId: conversationId);
+}
+
+final class _PendingRuntimeMessage {
+  const _PendingRuntimeMessage({
+    required this.input,
+    required this.conversationId,
+    required this.userMessageId,
+  });
+
+  final String input;
+  final String conversationId;
+  final String userMessageId;
 }
