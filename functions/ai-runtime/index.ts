@@ -33,14 +33,6 @@ async function loadContext(supabase: ReturnType<typeof createClient>, shId: stri
   return data as ContextPackage;
 }
 
-async function recordConversation(supabase: ReturnType<typeof createClient>, shId: string, role: "user" | "assistant", content: string) {
-  const { error } = await supabase.rpc("runtime_record_conversation", {
-    p_sh_id: shId, p_role: role, p_content: content,
-    p_metadata: { source: "ai-runtime", persistence: "runtime_record_conversation" },
-  });
-  if (error) throw new Error(`RUNTIME_CONVERSATION_PERSIST_FAILED: ${error.message}`);
-}
-
 async function recordAudit(supabase: ReturnType<typeof createClient>, shId: string, eventType: "RUNTIME_REQUEST" | "RUNTIME_RESPONSE" | "RUNTIME_MEMORY_DECISION", status: "SUCCESS" | "REJECTED" | "FAILED", metadata: Record<string, unknown> = {}) {
   const { error } = await supabase.rpc("runtime_record_audit", {
     p_sh_id: shId, p_event_type: eventType, p_status: status,
@@ -133,9 +125,6 @@ Deno.serve(async (req: Request) => {
     stage = "request_audit";
     await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_REQUEST", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), user_message_length: userMessage.length, model_policy: "ZERO_BUDGET_AUTOMATIC_MULTI_MODEL" });
 
-    stage = "user_conversation_persistence";
-    await recordConversation(resolved.supabase, resolved.identity.sh_id, "user", userMessage);
-
     stage = "context_retrieval";
     const context = await loadContext(resolved.supabase, resolved.identity.sh_id, userMessage);
 
@@ -152,16 +141,13 @@ Deno.serve(async (req: Request) => {
       await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_MEMORY_DECISION", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), candidate_detected: semanticSignals.length, decisions: semanticDecisions, persistence: "not_performed" });
     }
 
-    stage = "assistant_conversation_persistence";
-    await recordConversation(resolved.supabase, resolved.identity.sh_id, "assistant", result.output);
-
     stage = "response_audit";
-    await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_RESPONSE", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), provider: result.provider, provider_attempts: result.attempts, context: "runtime_get_context_package", semantic_capture: Object.keys(semantic).length > 0, semantic_candidate_count: semanticSignals.length });
+    await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_RESPONSE", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), provider: result.provider, provider_attempts: result.attempts, context: "runtime_get_context_package", semantic_capture: Object.keys(semantic).length > 0, semantic_candidate_count: semanticSignals.length, conversation_persistence: "frontend-conversation-service" });
 
     return json({ sh_id: resolved.identity.sh_id, response: result.output, meta: {
       request_id: requestId, runtime: "ai-runtime", provider: result.provider, provider_attempts: result.attempts,
       context: "runtime_get_context_package", semantic_capture: Object.keys(semantic).length > 0, semantic_candidates: semanticDecisions,
-      persistence: "verified-path", audit: "verified-path", duration_ms: durationMs(), stage,
+      conversation_persistence: "frontend-conversation-service", audit: "verified-path", duration_ms: durationMs(), stage,
     } });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "AI_RUNTIME_EXECUTION_FAILED";
