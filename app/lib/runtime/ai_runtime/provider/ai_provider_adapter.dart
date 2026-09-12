@@ -11,15 +11,23 @@ abstract interface class AIProviderAdapter {
 final class AIProviderRequest {
   const AIProviderRequest({
     required this.input,
+    required this.conversationId,
+    required this.userMessageId,
   });
 
   final String input;
+  final String conversationId;
+  final String userMessageId;
 }
 
 final class AIProviderResponse {
   const AIProviderResponse({
     required this.output,
+    this.requestId,
+    this.provider,
   });
 
   final String output;
+  final String? requestId;
+  final String? provider;
 }
