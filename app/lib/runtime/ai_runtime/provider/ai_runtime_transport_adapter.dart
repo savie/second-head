@@ -32,7 +32,7 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
       final data = response.data;
       if (data is! Map) {
         return AppFailure<AIProviderResponse>(
-          const UnexpectedAppError(
+          const BackendRuntimeAppError(
             'AI Runtime returned an invalid response envelope',
           ),
         );
@@ -41,7 +41,7 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
       final output = data['response'];
       if (output is! String || output.trim().isEmpty) {
         return AppFailure<AIProviderResponse>(
-          const UnexpectedAppError('AI Runtime returned no response text'),
+          const BackendRuntimeAppError('AI Runtime returned no response text'),
         );
       }
 
@@ -57,14 +57,23 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
         ),
       );
     } on FunctionException catch (error) {
+      final status = error.status;
+      final details = error.details?.toString();
+      final message = details == null || details.isEmpty
+          ? 'AI Runtime invocation failed: $status'
+          : 'AI Runtime invocation failed: $details';
+
       return AppFailure<AIProviderResponse>(
-        UnexpectedAppError(
-          'AI Runtime invocation failed: ${error.details ?? error.status}',
-        ),
+        switch (status) {
+          401 => UnauthenticatedAppError(message),
+          403 => AuthorizationDeniedAppError(message),
+          400 || 422 => InvalidMessageAppError(message),
+          _ => BackendRuntimeAppError(message),
+        },
       );
     } catch (error) {
       return AppFailure<AIProviderResponse>(
-        UnexpectedAppError('AI Runtime invocation failed: $error'),
+        NetworkUnavailableAppError('AI Runtime invocation failed: $error'),
       );
     }
   }
