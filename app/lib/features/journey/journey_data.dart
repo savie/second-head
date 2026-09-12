@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../core/storage/storage_service.dart';
+import '../auth/auth_screens.dart';
 
 class JourneyItem {
   JourneyItem(
@@ -47,13 +48,22 @@ List<JourneyItem> shJourneyItems = [];
 class JourneyStore {
   static bool _loaded = false;
 
+  static String? get _accountId => AuthSession.identityContext.identity?.accountId;
+
   static Future<void> ensureLoaded() async {
     if (_loaded) return;
     await refreshFromDisk();
   }
 
   static Future<void> refreshFromDisk() async {
-    final file = await StorageService.journeyItemsFile();
+    final accountId = _accountId;
+    if (accountId == null || accountId.isEmpty) {
+      shJourneyItems = [];
+      _loaded = false;
+      return;
+    }
+
+    final file = await StorageService.journeyItemsFile(accountId: accountId);
     if (!await file.exists()) {
       shJourneyItems = [];
       _loaded = true;
@@ -76,7 +86,12 @@ class JourneyStore {
   }
 
   static Future<void> persist() async {
-    final file = await StorageService.journeyItemsFile();
+    final accountId = _accountId;
+    if (accountId == null || accountId.isEmpty) {
+      throw StateError('Cannot persist Journey without an authenticated account.');
+    }
+
+    final file = await StorageService.journeyItemsFile(accountId: accountId);
     await file.writeAsString(
       jsonEncode([for (final item in shJourneyItems) item.toJson()]),
       flush: true,
