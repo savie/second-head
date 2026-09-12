@@ -35,7 +35,7 @@ class JourneyItem {
   factory JourneyItem.fromJson(Map<String, dynamic> json) => JourneyItem(
         (json['title'] as String?) ?? '',
         (json['subtitle'] as String?) ?? '',
-        (json['date'] as String?) ?? '',
+        (json['date'] as String?) ?? 'Memory',
         (json['type'] as String?) ?? 'Memory',
         (json['content'] as String?) ?? '',
         json['is_private'] != false,
@@ -47,11 +47,13 @@ List<JourneyItem> shJourneyItems = [];
 
 class JourneyStore {
   static bool _loaded = false;
+  static String? _loadedAccountId;
 
   static String? get _accountId => AuthSession.identityContext.identity?.accountId;
 
   static Future<void> ensureLoaded() async {
-    if (_loaded) return;
+    final accountId = _accountId;
+    if (_loaded && _loadedAccountId == accountId) return;
     await refreshFromDisk();
   }
 
@@ -60,17 +62,21 @@ class JourneyStore {
     if (accountId == null || accountId.isEmpty) {
       shJourneyItems = [];
       _loaded = false;
+      _loadedAccountId = null;
       return;
     }
 
     final file = await StorageService.journeyItemsFile(accountId: accountId);
     if (!await file.exists()) {
+      if (_accountId != accountId) return;
       shJourneyItems = [];
       _loaded = true;
+      _loadedAccountId = accountId;
       return;
     }
     try {
       final decoded = jsonDecode(await file.readAsString());
+      if (_accountId != accountId) return;
       if (decoded is List) {
         shJourneyItems = [
           for (final raw in decoded)
@@ -80,9 +86,11 @@ class JourneyStore {
         shJourneyItems = [];
       }
     } catch (_) {
+      if (_accountId != accountId) return;
       shJourneyItems = [];
     }
     _loaded = true;
+    _loadedAccountId = accountId;
   }
 
   static Future<void> persist() async {
@@ -96,6 +104,9 @@ class JourneyStore {
       jsonEncode([for (final item in shJourneyItems) item.toJson()]),
       flush: true,
     );
-    _loaded = true;
+    if (_accountId == accountId) {
+      _loaded = true;
+      _loadedAccountId = accountId;
+    }
   }
 }
