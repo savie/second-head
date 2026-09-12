@@ -7,15 +7,23 @@ abstract interface class RuntimeClient {
 final class RuntimeRequest {
   const RuntimeRequest({
     required this.input,
+    required this.conversationId,
+    required this.userMessageId,
   });
 
   final String input;
+  final String conversationId;
+  final String userMessageId;
 }
 
 final class RuntimeResponse {
   const RuntimeResponse({
     required this.output,
+    this.requestId,
+    this.provider,
   });
 
   final String output;
+  final String? requestId;
+  final String? provider;
 }
