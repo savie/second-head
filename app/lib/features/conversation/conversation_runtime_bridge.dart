@@ -44,7 +44,7 @@ class ConversationRuntimeBridge {
     _pendingRuntimeMessage = null;
 
     if (pending == null || pending.input.trim().isEmpty) {
-      throw StateError('AI runtime input is missing.');
+      throw const InvalidMessageAppError('AI runtime input is missing.');
     }
 
     final runtimeResult = await const AIRuntimeClient().send(
@@ -67,13 +67,7 @@ class ConversationRuntimeBridge {
           },
         ),
       AppFailure<RuntimeResponse>(error: final error) =>
-        throw StateError(_appErrorMessage(error)),
-    };
-  }
-
-  static String _appErrorMessage(AppError error) {
-    return switch (error) {
-      UnexpectedAppError(message: final message) => message,
+        throw error,
     };
   }
 
