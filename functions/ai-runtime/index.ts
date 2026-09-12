@@ -93,50 +93,79 @@ async function openAiCompatible(providerName: string, url: string, keyName: stri
   return { output: parseProviderResponse(raw), provider: providerName };
 }
 
-const providers: Provider[] = [
-  (input, context) => openAiCompatible("openrouter", "https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY", "openrouter/free", input, context),
-  (input, context) => openAiCompatible("groq", "https://api.groq.com/openai/v1/chat/completions", "GROQ_API_KEY", "openai/gpt-oss-20b", input, context),
-  (input, context) => openAiCompatible("huggingface", "https://router.huggingface.co/v1/chat/completions", "HUGGINGFACE_API_KEY", "openai/gpt-oss-20b:groq", input, context),
+const providers: Array<{ name: string; execute: Provider }> = [
+  { name: "openrouter", execute: (input, context) => openAiCompatible("openrouter", "https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY", "openrouter/free", input, context) },
+  { name: "groq", execute: (input, context) => openAiCompatible("groq", "https://api.groq.com/openai/v1/chat/completions", "GROQ_API_KEY", "openai/gpt-oss-20b", input, context) },
+  { name: "huggingface", execute: (input, context) => openAiCompatible("huggingface", "https://router.huggingface.co/v1/chat/completions", "HUGGINGFACE_API_KEY", "openai/gpt-oss-20b:groq", input, context) },
 ];
 
 async function executeWithFallback(input: string, context: ContextPackage) {
   const failures: string[] = [];
-  for (const provider of providers) { try { return await provider(input, context); } catch (error) { failures.push(error instanceof Error ? error.message : "unknown provider failure"); } }
+  const attempts: Array<{ provider: string; outcome: "SUCCESS" | "FAILED"; error?: string }> = [];
+  for (const provider of providers) {
+    try {
+      const result = await provider.execute(input, context);
+      attempts.push({ provider: provider.name, outcome: "SUCCESS" });
+      return { ...result, attempts };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown provider failure";
+      failures.push(message);
+      attempts.push({ provider: provider.name, outcome: "FAILED", error: message });
+    }
+  }
   throw new Error(`MODEL_EXECUTION_FAILED: ${failures.join(" | ")}`);
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") return json({ error: "METHOD_NOT_ALLOWED" }, 405);
+  const requestId = crypto.randomUUID();
+  const startedAt = performance.now();
+  let stage = "request_received";
+  const durationMs = () => Math.round(performance.now() - startedAt);
+
+  if (req.method !== "POST") return json({ error: "METHOD_NOT_ALLOWED", request_id: requestId }, 405);
+  stage = "identity_resolution";
   const resolved = await resolveIdentity(req); if (resolved.error) return resolved.error;
   let body: { user_message?: string };
-  try { body = await req.json(); } catch { return json({ error: "RUNTIME_REJECTED: invalid JSON" }, 400); }
-  const userMessage = body.user_message?.trim(); if (!userMessage) return json({ error: "RUNTIME_REJECTED: user_message is required" }, 400);
+  try { body = await req.json(); } catch { return json({ error: "RUNTIME_REJECTED: invalid JSON", request_id: requestId }, 400); }
+  const userMessage = body.user_message?.trim(); if (!userMessage) return json({ error: "RUNTIME_REJECTED: user_message is required", request_id: requestId }, 400);
 
   try {
-    await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_REQUEST", "SUCCESS", { user_message_length: userMessage.length, model_policy: "ZERO_BUDGET_AUTOMATIC_MULTI_MODEL" });
+    stage = "request_audit";
+    await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_REQUEST", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), user_message_length: userMessage.length, model_policy: "ZERO_BUDGET_AUTOMATIC_MULTI_MODEL" });
+
+    stage = "user_conversation_persistence";
     await recordConversation(resolved.supabase, resolved.identity.sh_id, "user", userMessage);
 
+    stage = "context_retrieval";
     const context = await loadContext(resolved.supabase, resolved.identity.sh_id, userMessage);
-    const semantic = await recordExplicitSemanticLifecycle(resolved.supabase, resolved.identity.sh_id, userMessage);
-    if (Object.keys(semantic).length > 0) await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_MEMORY_DECISION", "SUCCESS", { semantic_capture: Object.keys(semantic) });
 
+    stage = "explicit_semantic_lifecycle";
+    const semantic = await recordExplicitSemanticLifecycle(resolved.supabase, resolved.identity.sh_id, userMessage);
+    if (Object.keys(semantic).length > 0) await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_MEMORY_DECISION", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), semantic_capture: Object.keys(semantic) });
+
+    stage = "provider_execution";
     const result = await executeWithFallback(userMessage, context);
     const semanticSignals = extractSemanticSignals(result.output);
     const semanticDecisions = semanticSignals.map((signal) => ({ domain: signal.domain, confidence: signal.confidence, evidence: signal.evidence, decision: evaluateSemanticSignal(signal) }));
     if (semanticSignals.length > 0) {
-      await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_MEMORY_DECISION", "SUCCESS", { candidate_detected: semanticSignals.length, decisions: semanticDecisions, persistence: "not_performed" });
+      stage = "model_semantic_evaluation";
+      await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_MEMORY_DECISION", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), candidate_detected: semanticSignals.length, decisions: semanticDecisions, persistence: "not_performed" });
     }
 
+    stage = "assistant_conversation_persistence";
     await recordConversation(resolved.supabase, resolved.identity.sh_id, "assistant", result.output);
-    await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_RESPONSE", "SUCCESS", { provider: result.provider, context: "runtime_get_context_package", semantic_capture: Object.keys(semantic).length > 0, semantic_candidate_count: semanticSignals.length });
+
+    stage = "response_audit";
+    await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_RESPONSE", "SUCCESS", { request_id: requestId, stage, duration_ms: durationMs(), provider: result.provider, provider_attempts: result.attempts, context: "runtime_get_context_package", semantic_capture: Object.keys(semantic).length > 0, semantic_candidate_count: semanticSignals.length });
 
     return json({ sh_id: resolved.identity.sh_id, response: result.output, meta: {
-      runtime: "ai-runtime", provider: result.provider, context: "runtime_get_context_package",
-      semantic_capture: Object.keys(semantic).length > 0, semantic_candidates: semanticDecisions,
-      persistence: "verified-path", audit: "verified-path",
+      request_id: requestId, runtime: "ai-runtime", provider: result.provider, provider_attempts: result.attempts,
+      context: "runtime_get_context_package", semantic_capture: Object.keys(semantic).length > 0, semantic_candidates: semanticDecisions,
+      persistence: "verified-path", audit: "verified-path", duration_ms: durationMs(), stage,
     } });
   } catch (error) {
-    try { await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_RESPONSE", "FAILED", { error: error instanceof Error ? error.message : "AI_RUNTIME_EXECUTION_FAILED" }); } catch {}
-    return json({ error: error instanceof Error ? error.message : "AI_RUNTIME_EXECUTION_FAILED" }, 502);
+    const errorMessage = error instanceof Error ? error.message : "AI_RUNTIME_EXECUTION_FAILED";
+    try { await recordAudit(resolved.supabase, resolved.identity.sh_id, "RUNTIME_RESPONSE", "FAILED", { request_id: requestId, stage, duration_ms: durationMs(), error: errorMessage }); } catch {}
+    return json({ error: errorMessage, request_id: requestId, stage, duration_ms: durationMs() }, 502);
   }
 });
