@@ -67,7 +67,7 @@ class JourneyViewState extends State<JourneyView> {
 
         final type = switch (record.eventType.toUpperCase()) {
           'MEMORY' => 'Memory',
-          'KNOWLEDGE' => 'Knowledge',
+          'KNOWLEDGE' || 'LEARNING' => 'Knowledge',
           'EXPERIENCE' => 'Experience',
           _ => record.eventType,
         };
