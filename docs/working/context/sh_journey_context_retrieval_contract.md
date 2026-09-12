@@ -1,10 +1,10 @@
 # SH Journey Context Retrieval Contract
 
-**Status:** WORKING
+**Status:** WORKING — RECONCILED
 
 **Purpose:**
 
-Menentukan boundary retrieval Journey sebelum masuk ke Context Package.
+Mendokumentasikan boundary retrieval Journey yang digunakan oleh Context Package.
 
 ---
 
@@ -32,8 +32,8 @@ Dokumen ini:
 
 - tidak mengubah Canonical;
 - tidak menggantikan Approved Contract;
-- tidak melakukan implementasi;
-- mendokumentasikan contract decision gate untuk integrasi Journey Context.
+- tidak membuat contract baru;
+- mendokumentasikan hasil reconciliation contract dan implementation Journey Context Retrieval.
 
 ---
 
@@ -60,64 +60,120 @@ VERIFIED
 
 ---
 
-# Gap
+# Retrieval Contract Decision
 
-Belum ada Journey Context Retrieval Contract.
-
-Journey domain runtime sudah tersedia, namun boundary retrieval menuju Context Package belum ditentukan.
-
----
-
-# Decision Required
+Journey Context Retrieval telah memiliki keputusan contract melalui Context Resolver Contract Decision.
 
 ## 1. Semantic Context Inclusion
 
-Keputusan diperlukan:
+Decision:
 
-Apakah Journey masuk ke semantic_context pada Context Package.
+```
+Journey INCLUDED in semantic_context
+```
 
----
+Journey retrieval merupakan bagian dari unified semantic context package.
 
 ## 2. Resolver Output Shape
 
-Alternatif output resolver:
+Decision:
 
-- event list;
-- continuity summary;
-- lifecycle state;
-- lineage reference.
+```
+unified semantic context package
+```
 
-Output contract harus ditentukan sebelum implementasi resolver.
+Journey tetap menjadi domain-owned retrieval boundary di dalam Context Resolver.
 
----
+## 3. Resolver Ordering
 
-## 3. Inclusion Policy
+Decision:
 
-Policy yang harus ditentukan:
+```
+actor
+ ↓
+conversation
+ ↓
+state
+ ↓
+memory
+ ↓
+knowledge
+ ↓
+experience
+ ↓
+journey
+```
 
-- relevance;
-- visibility;
-- ownership;
-- lifecycle.
+Ordering adalah contract assembly order, bukan ranking importance.
 
----
+## 4. Inclusion Policy
 
-## 4. Security Boundary
+Context Resolver wajib mempertahankan:
+
+- relevance boundary;
+- visibility boundary;
+- ownership boundary;
+- lifecycle boundary.
+
+Tidak semua Journey event otomatis masuk Context Package tanpa memenuhi boundary domain tersebut.
+
+## 5. Security Boundary
 
 Context Resolver tidak boleh bypass Journey domain boundary.
 
-Retrieval harus melalui resolver contract dan policy yang disepakati.
+Journey retrieval menggunakan existing Journey retrieval boundary:
+
+```
+runtime_get_journey_context()
+```
 
 ---
 
-# Non Goal
+# Implementation Evidence
 
-Dokumen ini tidak membuat:
+Verified runtime flow:
 
-- tabel baru;
-- duplicate journey runtime;
-- query langsung dari Context Runtime tanpa resolver boundary;
-- FE implementation.
+```
+runtime_get_context_package()
+↓
+assemble_context()
+↓
+Memory retrieval
+↓
+Knowledge retrieval
+↓
+Experience retrieval
+↓
+Journey retrieval
+```
+
+Journey retrieval is connected through:
+
+```
+runtime_get_journey_context()
+```
+
+Current implementation therefore reconciles with the resolved Context Resolver contract.
+
+---
+
+# FE Projection Boundary
+
+Journey UI may retrieve Journey data through the Journey retrieval boundary for presentation.
+
+Current FE Journey service resolves the authenticated SH identity through:
+
+```
+resolve_identity()
+```
+
+and then retrieves Journey context through:
+
+```
+runtime_get_journey_context()
+```
+
+This FE projection does not redefine or bypass the Context Resolver contract.
 
 ---
 
@@ -127,9 +183,31 @@ Dokumen ini tidak membuat:
 Journey Event Runtime:
 VERIFIED
 
-Journey Context Retrieval:
-PENDING CONTRACT
+Journey Context Retrieval Contract:
+DECIDED
 
-Context Package Integration:
-BLOCKED UNTIL CONTRACT CLOSED
+Journey Context Retrieval Runtime:
+IMPLEMENTED
+
+Context Resolver Integration:
+IMPLEMENTED
+
+Runtime Verification:
+VERIFIED
+
+Documentation Reconciliation:
+COMPLETED
 ```
+
+---
+
+# Non Goal
+
+Dokumen ini tidak membuat:
+
+- tabel baru;
+- duplicate journey runtime;
+- query langsung dari Context Runtime yang bypass Journey boundary;
+- FE contract baru;
+- perubahan Canonical;
+- perubahan migration SQL.
