@@ -9,6 +9,7 @@ import 'knowledge/knowledge_view.dart';
 import 'experience/experience_view.dart';
 import 'semantic_hook.dart';
 import 'journey_data.dart';
+import 'journey_service.dart';
 
 Future<JourneyDraft?> showJourneyEditor(
   BuildContext context, {
@@ -48,7 +49,59 @@ class JourneyViewState extends State<JourneyView> {
 
   Future<void> _loadJourney() async {
     await JourneyStore.refreshFromDisk();
+    try {
+      final records = await const JourneyService().load();
+      final existingSources = items
+          .map((item) => item.semanticSourceId)
+          .whereType<String>()
+          .toSet();
+      final additions = <JourneyItem>[];
+
+      for (final record in records) {
+        if (record.eventId.isEmpty || existingSources.contains(record.eventId)) {
+          continue;
+        }
+
+        final content = record.payload['content']?.toString().trim() ?? '';
+        if (content.isEmpty) continue;
+
+        final type = switch (record.eventType.toUpperCase()) {
+          'MEMORY' => 'Memory',
+          'KNOWLEDGE' => 'Knowledge',
+          'EXPERIENCE' => 'Experience',
+          _ => record.eventType,
+        };
+        final visibility = record.payload['visibility']?.toString().toUpperCase();
+
+        additions.add(
+          JourneyItem(
+            content,
+            record.continuityStatus.isEmpty
+                ? 'Backend Journey event'
+                : record.continuityStatus,
+            _formatJourneyDate(record.occurredAt),
+            type,
+            content,
+            visibility == 'PRIVATE' || visibility == 'OWNER_ONLY',
+            semanticSourceId: record.eventId,
+          ),
+        );
+      }
+
+      if (additions.isNotEmpty) {
+        items.insertAll(0, additions);
+        await JourneyStore.persist();
+      }
+    } catch (_) {
+      // Keep local Journey usable when backend retrieval is temporarily unavailable.
+    }
     if (mounted) setState(() {});
+  }
+
+  String _formatJourneyDate(DateTime value) {
+    final local = value.toLocal();
+    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 
   void _syncSemanticRecords() {
