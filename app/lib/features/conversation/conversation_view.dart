@@ -40,6 +40,7 @@ class ConversationViewState extends State<ConversationView> {
   final ImagePicker _picker = ImagePicker();
   final Set<int> selected = {};
   final List<ConversationMessage> _messages = [];
+  final List<PendingConversationAttachment> _pendingAttachments = [];
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Timer? _internetCheckTimer;
@@ -267,19 +268,49 @@ class ConversationViewState extends State<ConversationView> {
 
   Future<void> _send() async {
     final text = _composerController.text.trim();
-    if (text.isEmpty || _staticReplyPending) return;
+    if (_staticReplyPending) return;
+
+    if (text.isEmpty) {
+      if (_pendingAttachments.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Tulis pesan atau caption sebelum mengirim lampiran.',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    final pendingAttachments =
+        List<PendingConversationAttachment>.from(_pendingAttachments);
 
     _composerController.clear();
+
     setState(() {
       _staticReplyPending = true;
       _conversationStatus = 'SH is responding…';
     });
 
     try {
-      final user = await _runtime.recordUser(text);
+      final user = pendingAttachments.isEmpty
+          ? await _runtime.recordUser(text)
+          : await _runtime.recordUserWithAttachments(
+              content: text,
+              attachments: pendingAttachments,
+            );
+
       if (!mounted) return;
+
       final userMessage = await _messageFromBackend(user);
-      setState(() => _messages.add(userMessage));
+
+      setState(() {
+        _messages.add(userMessage);
+        _pendingAttachments.clear();
+      });
+
       await _persistConversation();
       _processFrontendSemantic(text);
       _scrollToLatest();
@@ -289,18 +320,24 @@ class ConversationViewState extends State<ConversationView> {
 
       const reply =
           'Got it. SH menerima pesan ini dan jalur respons aktif. Respons dinamis akan terhubung ke model AI nanti.';
+
       final assistant = await _runtime.recordAssistant(reply);
+
       if (!mounted) return;
+
       final assistantMessage = await _messageFromBackend(assistant);
+
       setState(() {
         _messages.add(assistantMessage);
         _staticReplyPending = false;
         _conversationStatus = 'Ready';
       });
+
       await _persistConversation();
       _scrollToLatest();
     } catch (error) {
       if (!mounted) return;
+
       setState(() {
         _staticReplyPending = false;
         _conversationStatus = _sendFailureStatus(error);
@@ -402,74 +439,21 @@ class ConversationViewState extends State<ConversationView> {
       filename: filename,
     );
 
-    ConversationRecord messageRecord;
-    try {
-      messageRecord = await _runtime.recordUser('');
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _messages.add(
-          ConversationMessage('', false, 'Now', attachmentPath: stored.path),
-        );
-      });
-      await _persistConversation();
-      return;
-    }
+    final pending = PendingConversationAttachment(
+      filename: filename,
+      mimeType: mimeType,
+      bytes: bytes,
+      localPath: stored.path,
+    );
 
-    ConversationAttachment? attachment;
-    try {
-      attachment = await _runtime.createAttachment(
-        filename: filename,
-        mimeType: mimeType,
-        sizeBytes: bytes.length,
-        localPath: stored.path,
-      );
-      final persisted = await _runtime.uploadAndFinalizeAttachment(
-        attachment: attachment,
-        bytes: bytes,
-        messageId: messageRecord.messageId,
-      );
-      final message = ConversationMessage(
-        messageRecord.content,
-        false,
-        _formatTime(messageRecord.createdAt),
-        attachmentPath: stored.path,
-        attachments: [persisted],
-        runtimeRecordId: messageRecord.messageId,
-        createdAt: messageRecord.createdAt,
-        role: messageRecord.role,
-        threadId: messageRecord.threadId,
-        metadata: messageRecord.metadata,
-      );
-      if (!mounted) return;
-      setState(() => _messages.add(message));
-      await _persistConversation();
-      _scrollToLatest();
-    } catch (_) {
-      final message = ConversationMessage(
-        messageRecord.content,
-        false,
-        _formatTime(messageRecord.createdAt),
-        attachmentPath: stored.path,
-        attachments: attachment == null
-            ? const []
-            : [attachment.copyWith(status: 'FAILED')],
-        runtimeRecordId: messageRecord.messageId,
-        createdAt: messageRecord.createdAt,
-        role: messageRecord.role,
-        threadId: messageRecord.threadId,
-        metadata: messageRecord.metadata,
-      );
-      if (!mounted) return;
-      setState(() => _messages.add(message));
-      await _persistConversation();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Attachment upload failed'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+    if (!mounted) return;
+
+    setState(() {
+      _pendingAttachments.add(pending);
+      _conversationStatus = 'Attachment ready — add a message';
+    });
+
+    _scrollToLatest();
   }
 
   Future<void> _retryAttachment(int messageIndex) async {
@@ -952,6 +936,18 @@ class ConversationViewState extends State<ConversationView> {
             controller: _composerController,
             onSend: _send,
             onAttach: _showAttachments,
+            pendingAttachments: _pendingAttachments,
+            onRemoveAttachment: (index) {
+              if (index < 0 || index >= _pendingAttachments.length) return;
+
+              setState(() {
+                _pendingAttachments.removeAt(index);
+
+                if (_pendingAttachments.isEmpty) {
+                  _conversationStatus = 'Ready';
+                }
+              });
+            },
           ),
       ],
     );
@@ -1591,16 +1587,54 @@ class Composer extends StatelessWidget {
     required this.controller,
     required this.onSend,
     required this.onAttach,
+    required this.pendingAttachments,
+    required this.onRemoveAttachment,
   });
 
   final TextEditingController controller;
   final VoidCallback onSend;
   final VoidCallback onAttach;
+  final List<PendingConversationAttachment> pendingAttachments;
+  final ValueChanged<int> onRemoveAttachment;
 
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (pendingAttachments.isNotEmpty)
+              SizedBox(
+                height: 54,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(bottom: 6),
+                  itemCount: pendingAttachments.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 6),
+                  itemBuilder: (context, index) {
+                    final attachment = pendingAttachments[index];
+
+                    return InputChip(
+                      avatar: Icon(
+                        attachment.mimeType.startsWith('image/')
+                            ? Icons.image_outlined
+                            : Icons.attach_file_outlined,
+                        size: 18,
+                      ),
+                      label: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: Text(
+                          attachment.filename,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      onDeleted: () => onRemoveAttachment(index),
+                    );
+                  },
+                ),
+              ),
+            Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             IconButton(
@@ -1639,6 +1673,8 @@ class Composer extends StatelessWidget {
           ],
         ),
       );
+    ],
+  );
 }
 
 class AttachAction extends StatelessWidget {

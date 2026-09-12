@@ -39,6 +39,33 @@ class ConversationRuntimeBridge {
     return record;
   }
 
+  Future<ConversationRecord> recordUserWithAttachments({
+    required String content,
+    required List<PendingConversationAttachment> attachments,
+    Map<String, dynamic>? metadata,
+  }) async {
+    if (content.trim().isEmpty) {
+      throw const InvalidMessageAppError(
+        'Attachment messages require non-empty content.',
+      );
+    }
+
+    final record = await _service.recordWithAttachments(
+      role: 'user',
+      content: content,
+      attachments: attachments,
+      metadata: metadata,
+    );
+
+    _pendingRuntimeMessage = _PendingRuntimeMessage(
+      input: content,
+      conversationId: record.threadId,
+      userMessageId: record.messageId,
+    );
+
+    return record;
+  }
+
   Future<ConversationRecord> recordAssistant(String _fallbackContent) async {
     final pending = _pendingRuntimeMessage;
     _pendingRuntimeMessage = null;
