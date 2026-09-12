@@ -34,7 +34,7 @@ class ConversationRuntimeBridge {
     return _service.record(role: 'user', content: content);
   }
 
-  Future<ConversationRecord> recordAssistant() async {
+  Future<ConversationRecord> recordAssistant(String _fallbackContent) async {
     final input = _pendingRuntimeInput;
     _pendingRuntimeInput = null;
 
