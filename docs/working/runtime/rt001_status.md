@@ -42,25 +42,42 @@ ai-runtime
 
 The existing `runtime_record_conversation` database function is not removed or revoked by this change because legacy/external consumers have not been exhaustively ruled out. Its current existence is therefore not evidence of current `ai-runtime` usage.
 
-## v8 Verification Gate
+## v8 Verification Gate — CLOSED
 
-Supabase DEV `ai-runtime` is now ACTIVE at version 8 with `verify_jwt=true` after deployment of the persistence-ownership correction.
+Supabase DEV `ai-runtime` reached ACTIVE version 8 with `verify_jwt=true` after deployment of the persistence-ownership correction.
 
-GitHub `dev` contains the corresponding runtime source change.
+A fresh APK verification test (`RT-001 verification test ke 4`) passed with:
 
-Required next verification:
+- one persisted user Message for the test input;
+- one persisted assistant Message for the same conversation;
+- matching `RUNTIME_REQUEST SUCCESS` and `RUNTIME_RESPONSE SUCCESS` audit events;
+- the same runtime `request_id` across the request/response audit pair;
+- provider `openrouter` succeeding on the first attempt;
+- response metadata explicitly identifying `conversation_persistence=frontend-conversation-service`;
+- no duplicate Message row for the fresh test input.
 
-1. User performs one fresh message test in the existing APK.
-2. Assistant verifies runtime audit success and provider success.
-3. Assistant verifies exactly one persisted user Message and exactly one persisted assistant Message for that test input.
-4. Assistant verifies the persisted rows use the current `runtime_record_conversation_message_v2` path rather than `runtime_record_conversation`.
-5. If the counts and path are clean, close the duplicate-persistence follow-up.
+The previous duplicate rows from the earlier test are historical evidence and are not removed speculatively.
 
-Until this fresh E2E passes, the duplicate-persistence correction is **IMPLEMENTED / READY FOR E2E**, not closed.
+Therefore the duplicate-persistence follow-up is **CLOSED — E2E VERIFIED**.
+
+## Follow-up: AI Conversation Integration Audit
+
+The duplicate-persistence gate is closed, but broader dynamic AI conversation integration is not yet closed.
+
+Current evidence identifies two separate gaps:
+
+1. **Active-thread identity is not part of the AI runtime request.** `RuntimeRequest` currently carries only `input`, and the Flutter transport invokes `ai-runtime` with only `user_message`.
+2. **Context Runtime currently assembles conversation context by `p_sh_id`, not by the active conversation/thread.** `runtime_get_context_package()` calls `runtime_load_conversation_context(p_sh_id)`, whose current implementation selects recent conversation rows for the authenticated account/SH. This is different from the frontend's explicit thread-scoped capability `runtime_load_conversation_context_for_thread(p_conversation_id, p_limit)`.
+
+This is an architectural integration gap, not a reason to bypass identity/security boundaries. It requires an explicit contract/implementation decision before changing the runtime request or Context Runtime input shape.
+
+A separate failure-semantics correction has been implemented in the Flutter bridge: runtime failure no longer falls back to persisting a static assistant response. The bridge now propagates `AppFailure<RuntimeResponse>` instead of converting it into an assistant Message. This addresses the approved conversation contract requirement that backend failure must not produce false success.
+
+The current `ConversationView` catch path still requires focused verification because it can add a local user representation after the user Message has already been persisted. This is a UI-state issue and must not be mistaken for backend duplicate persistence.
 
 ## Boundary Note
 
-The current Flutter transport invokes `ai-runtime`; no current Flutter source invocation of `runtime-p4a-001` was found. The previous E2E evidence established the APK → `ai-runtime` path. The v8 E2E is specifically required to verify the corrected persistence ownership and absence of duplicate Message rows.
+The current Flutter transport invokes `ai-runtime`; no current Flutter source invocation of `runtime-p4a-001` was found. The fresh E2E evidence confirms the corrected APK → `ai-runtime` path.
 
 ## Legacy Boundary
 
@@ -68,6 +85,6 @@ The current Flutter transport invokes `ai-runtime`; no current Flutter source in
 
 ## Decision
 
-RT-001 runtime/provider execution remains verified. The dual-write defect is now corrected at the current runtime boundary: `ConversationService` persists Conversation Messages, while `ai-runtime` executes the authenticated AI path and records runtime audit/semantic lifecycle state. Fresh APK E2E is the closure gate for the duplicate-persistence follow-up.
+RT-001 runtime/provider execution remains verified. The dual-write defect is **CLOSED — E2E VERIFIED**. The current next gate is the **AI Conversation Integration Audit**, specifically active-thread correlation, thread-scoped context, runtime request ↔ Message correlation, and failure-state verification.
 
 Do not use the legacy runtime as a dependency. Keep `runtime-p4a-001` reference-only pending its separate retirement gate and available Edge Function administrative operation.
