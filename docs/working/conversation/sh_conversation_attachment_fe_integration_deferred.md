@@ -2,21 +2,15 @@
 
 ## Status
 
-**IMPLEMENTED — FE CALL-PATH REPAIR APPLIED / FULL E2E VERIFICATION STILL OPEN**
+**RECONCILIATED — HAPPY-PATH E2E VERIFIED / RETRY IDEMPOTENCY OPEN**
 
-Dokumen ini mencatat reconciliation Backend ↔ Frontend untuk Conversation Attachment.
+Dokumen ini adalah working reconciliation record untuk Backend ↔ Frontend Conversation Attachment.
 
-Dokumen ini **bukan Canonical** dan tidak mengubah Approved Contract.
+Dokumen ini bukan Canonical dan tidak mengubah Approved Attachment Contract.
 
----
+## 1. Contract
 
-## 1. Confirmed Contract
-
-Backend `runtime_record_conversation_message()` mensyaratkan `content` non-empty.
-
-Attachment secara semantic adalah **Message-owned resource/payload** dan bukan Message mandiri.
-
-Model yang berlaku:
+Attachment adalah **Message-owned resource/payload**, bukan Message mandiri.
 
 ```text
 Message
@@ -24,21 +18,9 @@ Message
 └── Attachment[]
 ```
 
-Tidak ada perubahan Backend/contract untuk mengakomodasi attachment-only Message.
+Backend Message tetap mensyaratkan content non-empty. Tidak ada attachment-only Message workaround.
 
----
-
-## 2. FE Call-Path Repair
-
-Temuan awal adalah call path attachment yang membuat Message dengan:
-
-```text
-recordUser('')
-```
-
-Call tersebut tidak kompatibel dengan current Backend Message contract.
-
-Source DEV sekarang menggunakan existing orchestration path:
+## 2. Current FE Call Path
 
 ```text
 Composer content (non-empty)
@@ -47,7 +29,7 @@ recordUserWithAttachments(...)
         ↓
 ConversationService.recordWithAttachments()
         ↓
-Message created with valid content
+Message created
         ↓
 Attachment create
         ↓
@@ -55,96 +37,85 @@ Storage upload
         ↓
 Finalize
         ↓
-Message + Attachment[]
+Attachment PERSISTED
+        ↓
+AI Runtime
+        ↓
+SH response
 ```
 
-Dengan demikian, disposition `DEFERRED — FE CALL-PATH CONTRACT MISMATCH` pada dokumen versi sebelumnya sudah tidak sesuai dengan source aktual dan direkonsiliasi menjadi **IMPLEMENTED**.
+The previous `recordUser('')` mismatch is no longer the current path.
 
----
+## 3. Backend Finalize
 
-## 3. Backend Finalize Correction
+`runtime_finalize_conversation_attachment()` current DEV definition has the corrected qualified attachment lookup/update, ownership checks, storage-object existence check, and trusted execution boundary.
 
-Backend `runtime_finalize_conversation_attachment()` telah diperbaiki untuk menghindari ambiguity antara output parameter/function variable dan kolom `conversation_attachments`.
+**Status: IMPLEMENTED / RUNTIME PRESENT.**
 
-Current runtime definition menggunakan alias tabel pada lookup dan update target.
+## 4. Device + DEV E2E Result
 
-Runtime DB inspection DEV saat reconciliation mengonfirmasi function berada pada:
+Current device test established:
 
-- `SECURITY DEFINER`
-- schema `public`
-- qualified attachment lookup
-- qualified update target
-- storage object existence check
-- valid message ownership check
+1. photo selected;
+2. preview visible;
+3. composer remained available;
+4. non-empty caption `Test attachment E2E` sent;
+5. user Message persisted;
+6. Attachment persisted and linked to the same Message ID;
+7. Storage object existed;
+8. finalize resulted in `PERSISTED`;
+9. SH returned a response;
+10. message/attachment remained after navigation;
+11. attachment/message did not appear after switching to another account.
 
-Status backend correction: **IMPLEMENTED / RUNTIME DEFINITION PRESENT**.
+**Happy-path attachment E2E: VERIFIED.**
 
-Catatan: keberadaan function definition bukan bukti full device E2E. Device E2E tetap menjadi verification gate terpisah.
+This is stronger than source-only evidence because the current result is supported by device behavior plus DEV database/runtime evidence.
 
----
+## 5. Retry / Failure Semantics
 
-## 4. Current Verification State
+Retry in this context means retrying a **failed attachment send/persistence path**, not Edit Message and not Regenerate Assistant.
 
-### IMPLEMENTED / EVIDENCED
+```text
+Edit       → update existing message content
+Regenerate → replace/regenerate assistant response behavior
+Retry      → recover a failed attachment/message send path
+```
 
-1. FE composer attachment path menggunakan `recordUserWithAttachments()`.
-2. Attachment diperlakukan sebagai resource milik Message.
-3. Backend Message tetap mensyaratkan non-empty content.
-4. Backend finalize ambiguity correction sudah terdapat pada DEV database runtime.
-5. Attachment storage bucket tetap private dan berada di domain Conversation Attachment.
+The current happy path does not require a retry test because no failure occurred.
 
-### VERIFIED SEPARATELY
+### Open risk
 
-Journey/account-isolation verification tidak menjadi bagian dari attachment verification dan tidak mengubah status attachment.
+A future failed/ambiguous upload must prove that retry of the same logical attachment preserves the same `attachment_id` and does not create duplicate durable Attachment resources/messages merely because orchestration is repeated.
 
-### OPEN — FULL ATTACHMENT E2E
+**Status: OPEN RISK / NON-BLOCKING HARDENING.**
 
-Verification minimum yang masih harus dibuktikan:
+Do not claim retry/idempotency PASS without an actual failure/retry execution test.
 
-1. Foto/file dipilih dan preview tetap tampil.
-2. Composer tetap tersedia untuk caption/pesan.
-3. Send membuat Message dengan non-empty content.
-4. Attachment menggunakan Message ID yang sama.
-5. Storage upload berhasil.
-6. Finalize menghasilkan status `PERSISTED`.
-7. SH menerima message dan memberikan response.
-8. Tab switch / reload tetap merekonstruksi Message + Attachment.
-9. Wrong Account/SH tetap ditolak.
-10. Retry setelah failure menggunakan identity attachment yang benar sesuai contract.
+## 6. Scope Boundary
 
-**Catatan retry:** current `recordWithAttachments()` membuat attachment baru ketika orchestration dijalankan ulang. Idempotent retry terhadap attachment ID yang sama belum diverifikasi/diimplementasikan sebagai FE orchestration behavior. Ini tetap **OPEN RISK**, bukan dianggap solved.
-
----
-
-## 5. Scope Boundary
-
-Reconciliation ini hanya mengubah status dokumentasi agar sesuai dengan implementation aktual.
-
-Tidak ada perubahan pada:
+This reconciliation does not change:
 
 - Canonical architecture;
 - Approved Attachment Contract;
 - Message semantic contract;
-- Attachment schema;
-- Storage policy;
-- Recovery semantics;
-- Cleanup/reconciliation worker;
-- attachment retry architecture;
-- unrelated frontend domains.
+- attachment schema;
+- storage policy;
+- recovery semantics;
+- cleanup/reconciliation worker;
+- retry architecture;
+- unrelated domains.
 
-Temuan lain tetap diperlakukan sebagai `OPEN / OUT OF SCOPE` sampai ada authorization atau blocker nyata.
-
----
-
-## 6. Disposition
+## 7. Final Disposition
 
 ```text
-Old FE integration item       DEFERRED
-Current FE call path          IMPLEMENTED
-Backend finalize correction   IMPLEMENTED
-Full attachment E2E           OPEN
-Retry identity                OPEN RISK
-Documentation reconciliation  COMPLETED
+Old FE call-path mismatch      CLOSED / RECONCILED
+Backend finalize correction     IMPLEMENTED
+Happy-path attachment E2E      VERIFIED
+Navigation persistence         VERIFIED
+Account isolation              VERIFIED
+Retry identity/idempotency     OPEN RISK
+Documentation reconciliation   COMPLETED
 ```
 
-**Current disposition: FE integration repair is implemented; attachment feature must not be marked fully VERIFIED until the device/runtime E2E gate is completed.**
+**Current attachment gate: HAPPY PATH CLOSED / VERIFIED.**
