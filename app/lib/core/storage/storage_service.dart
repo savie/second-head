@@ -231,9 +231,10 @@ class StorageService {
     return File('${dir.path}/$filename');
   }
 
-  static Future<File> journeyItemsFile() async {
+  static Future<File> journeyItemsFile({required String accountId}) async {
     final dir = await internalRoot();
-    return File('${dir.path}/journey_items.json');
+    final safeAccountId = accountId.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    return File('${dir.path}/journey_items_$safeAccountId.json');
   }
 
   static Future<File> integrationAuthorizationsFile() async {
