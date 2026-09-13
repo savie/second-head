@@ -1,32 +1,32 @@
-# SECOND HEAD — Transition Capability Evidence Audit
+# SECOND HEAD — Audit Bukti Capability Transition
 
 ## Status
 
-**WORKING AUDIT RECORD — PARTIAL PASS / IMPLEMENTATION GATE NOT CLOSED**
+**CATATAN AUDIT KERJA — PARTIAL PASS / GATE IMPLEMENTASI BELUM DITUTUP**
 
-## Authority
+## Otoritas
 
-Supporting audit record only.
+Hanya sebagai catatan audit pendukung.
 
-Tidak mengubah Canonical, Approved Contract, schema, migration, runtime implementation, atau policy authority.
+Tidak mengubah Canonical, Approved Contract, schema, migration, implementasi runtime, atau otoritas policy.
 
-## Objective
+## Tujuan
 
 Memverifikasi capability aktual DEV untuk memenuhi `sh_lifecycle_transition_contract_20260913.md`, khususnya:
 
-- candidate retrieval
-- callable transition capability
+- retrieval candidate
+- capability transition yang callable
 - EXECUTE grant
 - authentication / ownership guard
 - lifecycle guard
 - policy guard
-- Journey projection
+- proyeksi Journey
 - atomicity
 - idempotency / correlation
 - provenance
-- positive / negative E2E evidence
+- evidence E2E positif / negatif
 
-## Evidence Sources
+## Sumber Evidence
 
 ### GitHub DEV
 
@@ -38,64 +38,64 @@ Runtime entrypoint:
 
 `functions/ai-runtime/semantic_lifecycle.ts`
 
-Current blob SHA inspected: `78fccb57fa0f3299b3f8a03c6aa8d421ab1e9a12`
+Current blob SHA yang diinspeksi: `78fccb57fa0f3299b3f8a03c6aa8d421ab1e9a12`
 
 ### Supabase DEV
 
 Project: `pkhkgvsrqeupvwoqjwmd`
 
-Actual database function inventory and definitions inspected directly from `pg_proc` / `pg_get_functiondef`.
+Inventory dan definition function database aktual diinspeksi langsung dari `pg_proc` / `pg_get_functiondef`.
 
-## Findings
+## Temuan
 
-### 1. Candidate Retrieval
+### 1. Retrieval Candidate
 
-**STATUS: PARTIAL / DOMAIN-SPECIFIC**
+**STATUS: PARTIAL / SPESIFIK DOMAIN**
 
-Memory and Knowledge retrieval paths exist, but no dedicated generic lifecycle-transition resolver was found.
+Path retrieval Memory dan Knowledge tersedia, tetapi tidak ditemukan resolver generic lifecycle-transition khusus.
 
-`runtime_record_memory` can locate an existing CANDIDATE / ACTIVE / UPDATED record by exact content and lock the selected row. `runtime_record_knowledge_candidate` can locate an existing CANDIDATE by exact content and lock the row.
+`runtime_record_memory` dapat mencari record `CANDIDATE` / `ACTIVE` / `UPDATED` yang sudah ada berdasarkan exact content dan melakukan lock pada row yang dipilih. `runtime_record_knowledge_candidate` dapat mencari `CANDIDATE` yang sudah ada berdasarkan exact content dan melakukan lock pada row.
 
-These are capture/deduplication mechanisms, not an explicit transition API. They do not establish a stable transition target contract based on record identity + expected current lifecycle + operation key.
+Mekanisme tersebut adalah mekanisme capture/deduplication, bukan API transition eksplisit. Mekanisme tersebut tidak menetapkan kontrak target transition yang stabil berdasarkan record identity + expected current lifecycle + operation key.
 
-### 2. Dedicated CANDIDATE → ACTIVE Capability
+### 2. Capability Dedicated CANDIDATE → ACTIVE
 
-**STATUS: NOT FOUND**
+**STATUS: TIDAK DITEMUKAN**
 
-Actual DEV public function inventory contains no function whose name or definition establishes a dedicated candidate activation/promote transition.
+Inventory public function DEV aktual tidak memiliki function yang nama atau definition-nya menetapkan transition aktivasi/promosi candidate secara dedicated.
 
-Memory capture accepts `CANDIDATE` or `ACTIVE`, but this is creation/capture authority, not a safe generic activation operation.
+Capture Memory menerima `CANDIDATE` atau `ACTIVE`, tetapi ini adalah otoritas creation/capture, bukan operasi aktivasi generic yang aman.
 
-Knowledge candidate capture explicitly writes `CANDIDATE`; no dedicated activation function was found.
+Capture candidate Knowledge secara eksplisit menulis `CANDIDATE`; tidak ditemukan function aktivasi dedicated.
 
-Experience capture writes `ACTIVE` directly; a candidate activation boundary is therefore not currently implemented for Experience.
+Capture Experience menulis `ACTIVE` secara langsung; karena itu boundary aktivasi candidate saat ini belum terimplementasi untuk Experience.
 
 ### 3. ACTIVE → UPDATE / SUPERSEDE
 
-**STATUS: PARTIAL / MEMORY ONLY**
+**STATUS: PARTIAL / MEMORY SAJA**
 
-`runtime_replace_memory` implements a concrete Memory replacement flow:
+`runtime_replace_memory` mengimplementasikan flow replacement Memory yang konkret:
 
-1. authenticate caller
+1. autentikasi caller
 2. resolve current account
-3. verify active SH ownership
-4. resolve exactly one current candidate/active replacement target
-5. insert successor as CANDIDATE
-6. mark old record `UPDATED`
+3. verifikasi ownership SH aktif
+4. resolve tepat satu replacement target current candidate/active
+5. insert successor sebagai CANDIDATE
+6. set record lama menjadi `UPDATED`
 7. set `superseded_by`
 8. emit Journey event
 
-This proves a domain-specific replacement capability, but not a generic lifecycle transition contract. The successor remains CANDIDATE.
+Ini membuktikan capability replacement spesifik domain, tetapi bukan generic lifecycle transition contract. Successor tetap `CANDIDATE`.
 
-No equivalent dedicated Knowledge or Experience update/supersede transition capability was found.
+Tidak ditemukan capability transition update/supersede dedicated yang ekuivalen untuk Knowledge atau Experience.
 
 ### 4. Authentication / Ownership
 
-**STATUS: PASS AT FUNCTION GUARD LEVEL**
+**STATUS: PASS PADA LEVEL FUNCTION GUARD**
 
-Relevant SECURITY DEFINER write functions explicitly require `auth.uid()` and validate the requested SH belongs to `public.current_account_id()` and is not deactivated.
+Relevant SECURITY DEFINER write functions secara eksplisit membutuhkan `auth.uid()` dan memvalidasi bahwa SH yang diminta dimiliki oleh `public.current_account_id()` dan tidak deactivated.
 
-Observed functions include:
+Function yang teramati mencakup:
 
 - `runtime_record_memory`
 - `runtime_record_memory_with_journey`
@@ -104,164 +104,164 @@ Observed functions include:
 - `runtime_record_experience`
 - `runtime_replace_memory`
 
-This is positive function-level evidence only. Authenticated negative and cross-actor E2E tests remain open.
+Ini hanya evidence level function. Authenticated negative test dan cross-actor E2E masih OPEN.
 
 ### 5. EXECUTE Grants
 
-**STATUS: PASS FOR EXISTING PUBLIC RUNTIME FUNCTIONS; SECURITY REVIEW OPEN FOR FUTURE TRANSITION API**
+**STATUS: PASS UNTUK PUBLIC RUNTIME FUNCTION YANG SUDAH ADA; SECURITY REVIEW OPEN UNTUK TRANSITION API DI MASA DEPAN**
 
-Observed:
+Yang teramati:
 
 - `anon_execute = false`
 - `authenticated_execute = true`
 
-for the existing runtime capture/replacement functions above.
+untuk runtime capture/replacement function yang disebut di atas.
 
-`runtime_record_journey_event` is SECURITY INVOKER and also has authenticated EXECUTE while anon EXECUTE is false.
+`runtime_record_journey_event` adalah SECURITY INVOKER dan juga memiliki authenticated EXECUTE sementara anon EXECUTE false.
 
-No new transition function exists, so no transition-specific grant has been established or reviewed.
+Karena belum ada transition function baru, belum ada grant khusus transition yang dapat ditetapkan atau direview.
 
 ### 6. Lifecycle Guards
 
 **STATUS: PARTIAL**
 
-Memory capture validates only `CANDIDATE` / `ACTIVE` input values.
+Capture Memory hanya memvalidasi nilai input `CANDIDATE` / `ACTIVE`.
 
-Knowledge candidate capture writes only `CANDIDATE`.
+Capture candidate Knowledge hanya menulis `CANDIDATE`.
 
-Memory replacement resolves only non-superseded `CANDIDATE` / `ACTIVE` source records and writes the old record as `UPDATED`.
+Replacement Memory hanya me-resolve source `CANDIDATE` / `ACTIVE` yang belum superseded dan menulis record lama sebagai `UPDATED`.
 
-No generic guard exists for:
+Tidak ada guard generic untuk:
 
 `record_id + expected_current_lifecycle + requested_transition`
 
-therefore transition legality is not centrally enforced.
+sehingga legalitas transition belum ditegakkan secara terpusat.
 
 ### 7. Policy Guards
 
 **STATUS: PARTIAL**
 
-Existing functions validate scope and visibility; Experience additionally validates transfer policy. Existing lifecycle-transfer functions provide stronger transfer-specific policy enforcement.
+Function yang ada memvalidasi scope dan visibility; Experience juga memvalidasi transfer policy. Function lifecycle-transfer yang ada menyediakan enforcement policy yang lebih kuat dan spesifik terhadap transfer.
 
-However, a model-derived candidate activation function with explicit policy/confirmation authority does not exist. Therefore policy guards are not yet sufficient to authorize model-derived lifecycle activation.
+Namun function aktivasi candidate yang berasal dari model, dengan policy/confirmation authority eksplisit, belum ada. Karena itu policy guard saat ini belum cukup untuk mengotorisasi aktivasi lifecycle yang berasal dari model.
 
-### 8. Journey Projection
+### 8. Proyeksi Journey
 
-**STATUS: EXISTING / PARTIAL**
+**STATUS: ADA / PARTIAL**
 
-`runtime_record_journey_event` verifies active SH ownership and validates continuity/event type before inserting Journey events.
+`runtime_record_journey_event` memverifikasi ownership SH aktif dan memvalidasi continuity/event type sebelum memasukkan Journey event.
 
-`runtime_replace_memory` calls Journey recording after domain mutation.
+`runtime_replace_memory` memanggil pencatatan Journey setelah mutation domain.
 
-The current `semantic_lifecycle.ts` also performs explicit domain persistence followed by separate Journey RPC calls for several paths.
+`semantic_lifecycle.ts` saat ini juga melakukan persistence domain eksplisit lalu memanggil Journey RPC secara terpisah untuk beberapa path.
 
-Therefore Journey projection exists, but an atomic domain+Journey transaction boundary is **NOT PROVEN** across the semantic runtime paths.
+Karena itu proyeksi Journey tersedia, tetapi transaction boundary atomic antara domain + Journey **BELUM TERBUKTI** pada seluruh path semantic runtime.
 
 ### 9. Idempotency / Correlation
 
 **STATUS: OPEN / EVIDENCE GAP**
 
-No request-level logical operation key was found in the inspected runtime function signatures.
+Tidak ditemukan logical operation key level request pada signature runtime function yang diinspeksi.
 
-Content matching / candidate reuse is not equivalent to retry-safe operation idempotency.
+Content matching / reuse candidate tidak sama dengan request-level idempotency yang aman terhadap retry.
 
-The transition contract requirement for stable operation identity therefore remains unsatisfied.
+Karena itu requirement transition contract untuk stable operation identity masih belum terpenuhi.
 
 ### 10. Provenance
 
 **STATUS: PARTIAL**
 
-Memory and Knowledge paths accept provenance; Experience accepts provenance; replacement currently writes a new Memory without a dedicated transition-operation provenance structure.
+Path Memory dan Knowledge menerima provenance; Experience menerima provenance; replacement saat ini membuat Memory baru tanpa dedicated transition-operation provenance structure.
 
-The current runtime sends `source_message` / `capture_mode` for explicit semantic paths.
+Runtime saat ini mengirim `source_message` / `capture_mode` untuk semantic path eksplisit.
 
-What remains unproven is a complete transition provenance chain containing actor/account, SH, source signal, model/provider, decision, confirmation/authorization, transition, resulting record, and Journey event under one stable correlation identity.
+Yang masih belum terbukti adalah rantai provenance transition lengkap yang berisi actor/account, SH, source signal, model/provider, decision, confirmation/authorization, transition, resulting record, dan Journey event di bawah satu stable correlation identity.
 
-### 11. Model Authority Boundary
+### 11. Boundary Otoritas Model
 
 **STATUS: PASS / RECONCILED**
 
-The current semantic runtime inspected is explicitly based on user-message pattern detection for the existing explicit lifecycle path. The implementation does not establish model output as an independent persistence authority.
+Semantic runtime yang diinspeksi saat ini secara eksplisit berbasis pattern detection pada user message untuk path lifecycle eksplisit yang sudah ada. Implementasi tersebut tidak menetapkan output model sebagai otoritas persistence independen.
 
-This does not prove the future model-derived pipeline is safe; that pipeline remains outside current verified capability.
+Ini tidak membuktikan pipeline model-derived di masa depan aman; pipeline tersebut masih berada di luar capability yang terverifikasi saat ini.
 
 ### 12. Security Surface
 
-**STATUS: REVIEW REQUIRED BEFORE NEW TRANSITION API**
+**STATUS: REVIEW DIPERLUKAN SEBELUM TRANSITION API BARU**
 
-Existing runtime write functions are SECURITY DEFINER in `public` but explicitly deny anonymous execution and perform authentication/ownership checks.
+Runtime write function yang ada menggunakan SECURITY DEFINER di `public`, tetapi secara eksplisit menolak anonymous execution dan melakukan authentication/ownership checks.
 
-Because SECURITY DEFINER bypasses normal RLS execution context, any future transition function must receive an explicit security review of function body, search_path, grants, ownership checks, lifecycle/policy checks, and cross-actor behavior before exposure.
+Karena SECURITY DEFINER melewati execution context RLS normal, transition function masa depan harus mendapat security review eksplisit terhadap function body, search_path, grants, ownership checks, lifecycle/policy checks, dan perilaku cross-actor sebelum diekspos.
 
-## Capability Matrix
+## Matriks Capability
 
-| Capability | DEV Evidence | Status |
+| Capability | Evidence DEV | Status |
 |---|---|---|
-| Candidate creation | Memory + Knowledge | PASS |
-| Candidate retrieval by content | Memory + Knowledge | PARTIAL |
-| Candidate → Active generic transition | None found | OPEN |
-| Memory replacement | `runtime_replace_memory` | PASS / domain-specific |
-| Knowledge update/supersede | None found | OPEN |
-| Experience candidate workflow | None found | OPEN |
-| Auth guard | Existing runtime functions | PASS |
-| Ownership guard | Existing runtime functions | PASS |
-| EXECUTE grant | authenticated only | PASS |
-| Policy guard | domain-specific | PARTIAL |
-| Journey projection | Existing | PASS / atomicity open |
-| Atomic domain + Journey | Not proven | OPEN |
-| Request idempotency | None found | OPEN |
-| Full provenance chain | Partial | OPEN |
-| Authenticated positive E2E | Existing historical evidence for capture | PARTIAL |
-| Authenticated negative/cross-actor E2E | Not completed for transition | OPEN |
-| Transfer E2E | Existing capability, not transition proof | PARTIAL |
+| Pembuatan candidate | Memory + Knowledge | PASS |
+| Retrieval candidate berdasarkan content | Memory + Knowledge | PARTIAL |
+| Generic Candidate → Active | Tidak ditemukan | OPEN |
+| Memory replacement | `runtime_replace_memory` | PASS / spesifik domain |
+| Knowledge update/supersede | Tidak ditemukan | OPEN |
+| Experience candidate workflow | Tidak ditemukan | OPEN |
+| Auth guard | Runtime function yang ada | PASS |
+| Ownership guard | Runtime function yang ada | PASS |
+| EXECUTE grant | authenticated saja | PASS |
+| Policy guard | spesifik domain | PARTIAL |
+| Proyeksi Journey | Existing | PASS / atomicity open |
+| Atomic domain + Journey | Tidak terbukti | OPEN |
+| Request idempotency | Tidak ditemukan | OPEN |
+| Rantai provenance lengkap | Partial | OPEN |
+| Authenticated positive E2E | Evidence historis untuk capture | PARTIAL |
+| Authenticated negative/cross-actor E2E | Belum selesai untuk transition | OPEN |
+| Transfer E2E | Capability ada, bukan proof transition | PARTIAL |
 
-## Critical Finding
+## Temuan Kritis
 
-The implementation gate must remain **CLOSED**.
+Gate implementasi harus tetap **CLOSED**.
 
-There is currently no safe, explicit, generic CANDIDATE → ACTIVE transition capability that can be invoked by a model-derived semantic decision while satisfying the transition contract requirements for authorization, confirmation, lifecycle legality, idempotency, provenance, and Journey consistency.
+Saat ini tidak ada capability CANDIDATE → ACTIVE yang aman, eksplisit, dan generic yang dapat dipanggil oleh semantic decision yang berasal dari model sambil memenuhi requirement transition contract untuk authorization, confirmation, lifecycle legality, idempotency, provenance, dan konsistensi Journey.
 
-The existing system has reusable domain capabilities, but reusing capture functions as activation would conflate:
+Sistem yang ada memiliki reusable domain capability, tetapi menggunakan ulang capture function sebagai aktivasi akan mencampur:
 
-- capture authority
-- transition authority
-- lifecycle state mutation
+- otoritas capture
+- otoritas transition
+- mutation state lifecycle
 - model decision
-- retry semantics
+- semantics retry
 
-That would violate the current design gate.
+Hal tersebut akan melanggar design gate saat ini.
 
-## Decision
+## Keputusan
 
-**REUSE EXISTING CAPABILITY:** only for already-implemented domain behavior where semantics match (for example Memory replacement).
+**REUSE EXISTING CAPABILITY:** hanya untuk perilaku domain yang sudah terimplementasi dan semantiknya cocok, misalnya Memory replacement.
 
-**EXTEND EXISTING CAPABILITY:** plausible for Memory/Knowledge, but only after transition-specific authorization, idempotency, provenance, and transaction boundaries are designed and evidenced.
+**EXTEND EXISTING CAPABILITY:** masuk akal untuk Memory/Knowledge, tetapi hanya setelah authorization transition, idempotency, provenance, dan transaction boundary dirancang dan memiliki evidence.
 
-**CREATE NEW CAPABILITY:** required if no existing domain function can safely express an authorized lifecycle transition without overloading capture semantics.
+**CREATE NEW CAPABILITY:** diperlukan jika tidak ada function domain yang ada yang dapat mengekspresikan lifecycle transition terotorisasi dengan aman tanpa membebani semantik capture.
 
-No implementation is authorized by this audit.
+Tidak ada implementasi yang diotorisasi oleh audit ini.
 
-## Next Gate
+## Gate Berikutnya
 
 **Lifecycle Transition Runtime Design Review**
 
-Before migration/runtime coding, define the smallest domain-specific transition API surface and resolve:
+Sebelum coding migration/runtime, definisikan surface API transition domain-specific yang paling kecil dan selesaikan:
 
 1. confirmation authority
-2. candidate retrieval by stable record ID
+2. retrieval candidate berdasarkan stable record ID
 3. expected-current-lifecycle check
-4. transition authorization source
+4. sumber transition authorization
 5. operation/correlation key
-6. provenance contract
-7. domain + Journey transaction boundary
-8. Knowledge activation path
-9. Memory activation path
-10. Experience lifecycle model
-11. authenticated positive E2E plan
-12. authenticated negative/cross-actor E2E plan
-13. security review for SECURITY DEFINER exposure
+6. kontrak provenance
+7. transaction boundary domain + Journey
+8. path aktivasi Knowledge
+9. path aktivasi Memory
+10. model lifecycle Experience
+11. rencana authenticated positive E2E
+12. rencana authenticated negative/cross-actor E2E
+13. security review untuk exposure SECURITY DEFINER
 
-## Final State
+## State Akhir
 
 `POLICY CONTRACT = RECONCILED`
 
