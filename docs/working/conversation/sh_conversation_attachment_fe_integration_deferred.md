@@ -44,37 +44,37 @@ AI Runtime
 SH response
 ```
 
-The previous `recordUser('')` mismatch is no longer the current path.
+Mismatch `recordUser('')` yang sebelumnya ada sudah bukan path saat ini.
 
 ## 3. Backend Finalize
 
-`runtime_finalize_conversation_attachment()` current DEV definition has the corrected qualified attachment lookup/update, ownership checks, storage-object existence check, and trusted execution boundary.
+Definition DEV saat ini untuk `runtime_finalize_conversation_attachment()` sudah memiliki lookup/update attachment yang qualified dengan benar, ownership check, pemeriksaan keberadaan storage object, serta trusted execution boundary.
 
 **Status: IMPLEMENTED / RUNTIME PRESENT.**
 
 ## 4. Device + DEV E2E Result
 
-Current device test established:
+Pengujian device saat ini membuktikan:
 
-1. photo selected;
-2. preview visible;
-3. composer remained available;
-4. non-empty caption `Test attachment E2E` sent;
-5. user Message persisted;
-6. Attachment persisted and linked to the same Message ID;
-7. Storage object existed;
-8. finalize resulted in `PERSISTED`;
-9. SH returned a response;
-10. message/attachment remained after navigation;
-11. attachment/message did not appear after switching to another account.
+1. foto dipilih;
+2. preview terlihat;
+3. composer tetap tersedia;
+4. caption non-empty `Test attachment E2E` dikirim;
+5. user Message tersimpan;
+6. Attachment tersimpan dan terhubung ke Message ID yang sama;
+7. Storage object ada;
+8. finalize menghasilkan `PERSISTED`;
+9. SH mengembalikan response;
+10. message/attachment tetap ada setelah navigation;
+11. attachment/message tidak muncul setelah berpindah ke account lain.
 
 **Happy-path attachment E2E: VERIFIED.**
 
-This is stronger than source-only evidence because the current result is supported by device behavior plus DEV database/runtime evidence.
+Evidence ini lebih kuat daripada source-only karena hasil saat ini didukung oleh perilaku device sekaligus evidence database/runtime DEV.
 
 ## 5. Retry / Failure Semantics
 
-Retry in this context means retrying a **failed attachment send/persistence path**, not Edit Message and not Regenerate Assistant.
+Retry dalam konteks ini berarti retry pada **failed attachment send/persistence path**, bukan Edit Message dan bukan Regenerate Assistant.
 
 ```text
 Edit       → update existing message content
@@ -82,19 +82,19 @@ Regenerate → replace/regenerate assistant response behavior
 Retry      → recover a failed attachment/message send path
 ```
 
-The current happy path does not require a retry test because no failure occurred.
+Happy path saat ini tidak membutuhkan retry test karena tidak terjadi failure.
 
 ### Open risk
 
-A future failed/ambiguous upload must prove that retry of the same logical attachment preserves the same `attachment_id` and does not create duplicate durable Attachment resources/messages merely because orchestration is repeated.
+Upload yang gagal atau ambigu di masa depan harus membuktikan bahwa retry dari logical attachment yang sama mempertahankan `attachment_id` yang sama dan tidak membuat duplicate Attachment/Message durable hanya karena orchestration dijalankan ulang.
 
 **Status: OPEN RISK / NON-BLOCKING HARDENING.**
 
-Do not claim retry/idempotency PASS without an actual failure/retry execution test.
+Jangan menyatakan retry/idempotency PASS tanpa execution test nyata terhadap failure/retry.
 
 ## 6. Scope Boundary
 
-This reconciliation does not change:
+Reconciliation ini tidak mengubah:
 
 - Canonical architecture;
 - Approved Attachment Contract;
