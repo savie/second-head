@@ -99,6 +99,18 @@ class JourneyRuntimeService {
   Future<String> createClone({required String agreementId, required String cloneName}) async => _uuid(await backendClient.rpc('runtime_create_clone', params: {'p_agreement_id': agreementId, 'p_clone_name': cloneName}), 'Clone creation');
   Future<String> recordInheritance({required String authorizationId, Map<String, dynamic> payload = const {}, Map<String, dynamic> provenance = const {}}) async => _uuid(await backendClient.rpc('runtime_record_inheritance', params: {'p_authorization_id': authorizationId, 'p_payload': payload, 'p_provenance': provenance}), 'Inheritance recording');
   Future<String> executeSuccession({required String successionId}) async => _uuid(await backendClient.rpc('runtime_execute_succession', params: {'p_succession_id': successionId}), 'Succession execution');
+
+  Future<String> preserveSelectedTransferAsLegacy({
+    required String sourceShId,
+    required Map<String, dynamic> scope,
+  }) async => _uuid(
+        await backendClient.rpc(
+          'runtime_preserve_selected_transfer_as_legacy',
+          params: {'p_source_sh_id': sourceShId, 'p_scope': scope},
+        ),
+        'Selected legacy preservation',
+      );
+
   Future<String> recordLegacy({required String sourceShId, required String legacyType, Map<String, dynamic> payload = const {}, Map<String, dynamic> provenance = const {}, DateTime? retentionUntil}) async => _uuid(await backendClient.rpc('runtime_record_legacy', params: {'p_source_sh_id': sourceShId, 'p_legacy_type': legacyType, 'p_payload': payload, 'p_provenance': provenance, 'p_retention_until': retentionUntil?.toUtc().toIso8601String()}), 'Legacy recording');
   Future<String> endOfLife({required String shId, String? reason}) async => _uuid(await backendClient.rpc('runtime_end_of_life_sh', params: {'p_sh_id': shId, 'p_reason': reason}), 'End-of-life operation');
   Future<String> createInheritanceAuthorization({required String sourceShId, required String targetShId, required String sourceAccountId, required String targetAccountId, Map<String, dynamic> scope = const {}}) async { final result = await backendClient.rpc('runtime_create_inheritance_authorization', params: {'p_source_sh_id': sourceShId, 'p_target_sh_id': targetShId, 'p_source_account_id': sourceAccountId, 'p_target_account_id': targetAccountId, 'p_scope': scope}); if (result is List && result.isNotEmpty && result.first is Map) return _uuid((result.first as Map)['authorization_id'], 'Inheritance authorization creation'); if (result is Map) return _uuid(result['authorization_id'], 'Inheritance authorization creation'); return _uuid(result, 'Inheritance authorization creation'); }
