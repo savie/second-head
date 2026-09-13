@@ -4,7 +4,7 @@
 
 **WORKING — CURRENT CHECKPOINT / EVIDENCE RECONCILIATED**
 
-Dokumen ini adalah checkpoint continuity untuk domain:
+Dokumen ini merupakan checkpoint continuity untuk domain:
 
 `Conversation → Attachment → Memory → Knowledge → Experience → Journey`
 
@@ -34,26 +34,26 @@ HISTORICAL / dev_old
 
 - Repository: `savie/second-head`, branch `dev`.
 - Database: Supabase DEV `pkhkgvsrqeupvwoqjwmd`.
-- Current DEV evidence inspected against repository source and runtime/database state.
-- Domain row counts at checkpoint: `conversations=37`, `conversation_threads=9`, `conversation_attachments=5`, `memories=1`, `knowledge=0`, `experiences=0`, `journey_events=1`.
-- Row counts are evidence of current state only; they are not capability proof by themselves.
+- Evidence DEV saat ini diperiksa terhadap source repository dan state runtime/database.
+- Jumlah row domain pada checkpoint: `conversations=37`, `conversation_threads=9`, `conversation_attachments=5`, `memories=1`, `knowledge=0`, `experiences=0`, `journey_events=1`.
+- Jumlah row hanya merupakan evidence state saat ini; jumlah tersebut bukan bukti capability dengan sendirinya.
 
 # 1. Conversation
 
 ## Current state
 
-Conversation/Message runtime and Flutter integration are implemented for the current tested path.
+Runtime Conversation/Message dan integrasi Flutter sudah terimplementasi untuk path yang saat ini diuji.
 
-Verified/current evidence includes:
+Evidence current/verified mencakup:
 
-- user message persistence;
-- assistant message persistence;
-- active conversation/thread identifiers;
-- runtime bridge passing `conversation_id` and `user_message_id`;
-- dynamic AI runtime response path;
+- persistence user message;
+- persistence assistant message;
+- identifier conversation/thread yang aktif;
+- runtime bridge yang meneruskan `conversation_id` dan `user_message_id`;
+- path response AI runtime yang dinamis;
 - provider fallback/runtime observability;
-- tab-switch/reload persistence observed on device for the current conversation test;
-- account isolation observed through account-switch testing.
+- persistence setelah tab-switch/reload yang diamati pada device untuk test conversation saat ini;
+- account isolation yang diamati melalui account-switch testing.
 
 ## Important distinction
 
@@ -61,19 +61,19 @@ Verified/current evidence includes:
 Edit Message ≠ Retry Attachment ≠ Regenerate Assistant
 ```
 
-`Edit` updates message content.
-`Regenerate` concerns an assistant response.
-`Retry` in the current attachment UI is intended for a failed attachment/message send path.
+`Edit` mengubah content message.
+`Regenerate` berkaitan dengan response assistant.
+`Retry` pada attachment UI saat ini dimaksudkan untuk path pengiriman attachment/message yang gagal.
 
 ## Open
 
-Conversation adapter update/delete parameter contract must remain a separate audit item until explicitly verified. It is not silently marked PASS by the attachment E2E result.
+Contract parameter adapter update/delete Conversation harus tetap menjadi item audit terpisah sampai diverifikasi secara eksplisit. Hasil tersebut tidak boleh ditandai PASS hanya karena hasil E2E attachment.
 
 # 2. Conversation Attachment
 
 ## Current happy path
 
-The following path is verified from device + DEV database/runtime evidence:
+Path berikut sudah diverifikasi melalui evidence device + database/runtime DEV:
 
 ```text
 Pick photo/file
@@ -103,15 +103,15 @@ Assistant message persisted
 Tab switch / account switch verification
 ```
 
-Current tested attachment had:
+Attachment yang diuji memiliki:
 
-- user caption: `Test attachment E2E`;
-- attachment linked to the same persisted user Message ID;
-- attachment status `PERSISTED`;
-- private bucket object present;
-- SH response successful.
+- caption user: `Test attachment E2E`;
+- attachment terhubung ke Message ID user yang sama dan sudah tersimpan;
+- status attachment `PERSISTED`;
+- private bucket object tersedia;
+- response SH berhasil.
 
-User also verified that the attachment/message remained after navigation and did not appear when switching accounts.
+User juga memverifikasi bahwa attachment/message tetap ada setelah navigation dan tidak muncul ketika berpindah account.
 
 ## Status
 
@@ -128,25 +128,25 @@ Account isolation            VERIFIED (device)
 
 ## Open risk — retry identity
 
-Current retry hardening is **not a blocker** and is not required to reopen the happy path.
+Hardening retry saat ini **bukan blocker** dan tidak diperlukan untuk membuka kembali happy path.
 
-The risk is that the current high-level `recordWithAttachments()` orchestration creates a Message and Attachment during a new send orchestration. A future failure/retry scenario must prove that retry of a logical failed attachment reuses the same `attachment_id` and does not create duplicate durable resources.
+Risikonya adalah orchestration tingkat tinggi `recordWithAttachments()` saat ini membuat Message dan Attachment dalam orchestration pengiriman baru. Skenario failure/retry di masa depan harus membuktikan bahwa retry dari logical attachment yang gagal menggunakan kembali `attachment_id` yang sama dan tidak membuat resource durable duplicate.
 
-Do not claim retry/idempotency PASS until a real failed/ambiguous upload execution is available and verified.
+Jangan menyatakan retry/idempotency PASS sampai tersedia execution nyata terhadap upload yang gagal/ambigu dan hasilnya telah diverifikasi.
 
 # 3. Memory
 
 ## Current evidence
 
-A current explicit memory capture was previously verified in DEV:
+Explicit memory capture saat ini sebelumnya telah diverifikasi di DEV:
 
-- `memories` contains the captured Memory;
-- lifecycle was `CANDIDATE`;
-- scope/visibility were owner-private;
-- corresponding Journey event existed;
-- runtime audit showed request, semantic capture, and successful response.
+- `memories` berisi Memory yang dicapture;
+- lifecycle bernilai `CANDIDATE`;
+- scope/visibility bersifat owner-private;
+- Journey event yang sesuai tersedia;
+- runtime audit menunjukkan request, semantic capture, dan response berhasil.
 
-Journey FE hydration now consumes backend Journey retrieval through the trusted identity boundary rather than treating local Journey storage as the sole authority.
+Hydration Journey pada FE sekarang menggunakan backend Journey retrieval melalui trusted identity boundary, bukan menjadikan local Journey storage sebagai satu-satunya authority.
 
 ## Status
 
@@ -157,13 +157,13 @@ Owner visibility                   VERIFIED for tested path
 General Memory semantic coverage   NOT globally closed
 ```
 
-Do not generalize the single tested Memory capture into proof of all Memory lifecycle/retrieval semantics.
+Jangan menggeneralisasi satu capture Memory yang diuji menjadi bukti seluruh semantics lifecycle/retrieval Memory.
 
 # 4. Knowledge
 
-Current DEV contains the `knowledge` domain and current semantic/runtime source references exist. The checkpoint database currently has zero `knowledge` rows.
+DEV saat ini memiliki domain `knowledge` dan reference source semantic/runtime tersedia. Database pada checkpoint saat ini memiliki zero `knowledge` rows.
 
-Therefore:
+Karena itu:
 
 ```text
 Domain implementation/source       CURRENT / PRESENT
@@ -171,13 +171,13 @@ Positive data instance             NONE at checkpoint
 Full semantic E2E                  OPEN
 ```
 
-No PASS claim is made for a positive Knowledge capture/retrieval E2E because there is no current positive Knowledge row/evidence in this checkpoint.
+Tidak ada claim PASS untuk positive Knowledge capture/retrieval E2E karena tidak ada row/evidence Knowledge positif pada checkpoint saat ini.
 
 # 5. Experience
 
-Current DEV contains the `experiences` domain and semantic source/migration lineage. The checkpoint database currently has zero `experiences` rows.
+DEV saat ini memiliki domain `experiences` dan lineage source semantic/migration. Database pada checkpoint saat ini memiliki zero `experiences` rows.
 
-Therefore:
+Karena itu:
 
 ```text
 Domain implementation/source       CURRENT / PRESENT
@@ -185,15 +185,15 @@ Positive data instance             NONE at checkpoint
 Full semantic E2E                  OPEN
 ```
 
-No PASS claim is made for a positive Experience capture/retrieval E2E without current positive runtime/data evidence.
+Tidak ada claim PASS untuk positive Experience capture/retrieval E2E tanpa evidence runtime/data positif yang current.
 
 # 6. Journey
 
 ## Current state
 
-Journey runtime retrieval and Context Resolver integration have already been reconciled.
+Runtime retrieval Journey dan integrasi Context Resolver sudah direkonsiliasi sebelumnya.
 
-Current contract/source evidence establishes:
+Evidence contract/source saat ini menetapkan:
 
 ```text
 runtime_get_context_package()
@@ -206,18 +206,18 @@ Experience
 Journey
 ```
 
-Journey retrieval remains bounded by `runtime_get_journey_context()` and trusted identity/ownership rules.
+Journey retrieval tetap dibatasi oleh `runtime_get_journey_context()` dan trusted identity/ownership rules.
 
-Current Journey UI loads backend Journey data and merges it with local presentation state using `event_id` identity. Local Journey storage is account-scoped.
+Journey UI saat ini memuat data Journey dari backend dan menggabungkannya dengan local presentation state menggunakan identity `event_id`. Local Journey storage bersifat account-scoped.
 
 ## Device verification
 
-Account A Journey Memory was visible.
-After switching to Account B, Account A Memory disappeared.
-A B Memory was created.
-Returning to Account A restored A's Memory without exposing B's Memory.
+Journey Memory Account A terlihat.
+Setelah berpindah ke Account B, Memory Account A menghilang.
+Memory B dibuat.
+Ketika kembali ke Account A, Memory A kembali terlihat tanpa mengekspos Memory B.
 
-Therefore current tested Journey local account isolation is **PASS**.
+Dengan demikian account isolation Journey local pada path yang diuji adalah **PASS**.
 
 ## Status
 
@@ -230,12 +230,12 @@ Local account isolation          VERIFIED (device)
 Cross-account exposure           DENIED in tested path
 ```
 
-Do not reopen Journey Context Resolver integration merely because older inventory text still says OPEN; that is documentation drift, not current runtime state.
+Jangan membuka kembali integrasi Journey Context Resolver hanya karena inventory lama masih menyatakan OPEN; itu merupakan documentation drift, bukan state runtime saat ini.
 
 # 7. Cross-domain Context
 
-Current Context Resolver contract is already decided and reconciled.
-The intended ordering remains:
+Context Resolver contract saat ini sudah diputuskan dan direkonsiliasi.
+Ordering yang dimaksudkan tetap:
 
 ```text
 actor
@@ -247,49 +247,49 @@ actor
  → journey
 ```
 
-The resolver produces a unified semantic context package while preserving domain boundaries, ownership/visibility, and relevance rules.
+Resolver menghasilkan unified semantic context package dengan tetap mempertahankan domain boundary, ownership/visibility, dan relevance rules.
 
-This checkpoint does **not** claim that every semantic domain has a positive AI E2E proving model consumption of every domain. Such proof is a separate verification layer.
+Checkpoint ini **tidak** menyatakan bahwa setiap semantic domain memiliki positive AI E2E yang membuktikan model menggunakan setiap domain. Bukti tersebut merupakan verification layer terpisah.
 
 # 8. Documentation Reconciliation Result
 
-The following stale classifications are superseded by this checkpoint when interpreting current state:
+Classification lama berikut dianggap stale ketika membaca state saat ini berdasarkan checkpoint ini:
 
 | Previous stale claim | Current classification |
 |---|---|
-| Conversation dynamic AI not complete | Current runtime path is implemented and verified for tested conversation/attachment flow |
-| Attachment APK E2E deferred | Happy-path attachment E2E is verified; failure-retry/idempotency remains open |
-| Memory/Journey backend integration open | Tested Memory persistence + Journey projection/retrieval are verified |
-| Journey Context Resolver integration pending | Already implemented/reconciled/verified |
-| Knowledge full semantic E2E | OPEN — no positive Knowledge instance at checkpoint |
-| Experience full semantic E2E | OPEN — no positive Experience instance at checkpoint |
+| Conversation dynamic AI not complete | Path runtime saat ini sudah terimplementasi dan terverifikasi untuk flow conversation/attachment yang diuji |
+| Attachment APK E2E deferred | Happy-path attachment E2E sudah terverifikasi; failure-retry/idempotency masih open |
+| Memory/Journey backend integration open | Memory persistence + Journey projection/retrieval pada path yang diuji sudah terverifikasi |
+| Journey Context Resolver integration pending | Sudah implemented/reconciled/verified |
+| Knowledge full semantic E2E | OPEN — tidak ada positive Knowledge instance pada checkpoint |
+| Experience full semantic E2E | OPEN — tidak ada positive Experience instance pada checkpoint |
 
-This table is a reconciliation statement, not an authority change.
+Tabel ini merupakan reconciliation statement, bukan perubahan authority.
 
 # 9. Explicit Non-Claims
 
-This checkpoint does **not** claim:
+Checkpoint ini **tidak** menyatakan:
 
-- retry/idempotency is verified;
-- full Knowledge lifecycle is verified;
-- full Experience lifecycle is verified;
-- all Conversation CRUD adapter parameters are verified;
-- full Recovery restore E2E is verified;
-- all Lifecycle/Clone/Inheritance/Succession semantics are verified;
-- every model/provider semantically consumes every Context domain correctly.
+- retry/idempotency sudah terverifikasi;
+- full Knowledge lifecycle sudah terverifikasi;
+- full Experience lifecycle sudah terverifikasi;
+- seluruh parameter Conversation CRUD adapter sudah terverifikasi;
+- full Recovery restore E2E sudah terverifikasi;
+- seluruh semantics Lifecycle/Clone/Inheritance/Succession sudah terverifikasi;
+- setiap model/provider menggunakan setiap Context domain secara semantik dengan benar.
 
 ## 10. Next Gate
 
-Do not reopen closed Conversation/Attachment/Journey work without new evidence.
+Jangan membuka kembali pekerjaan Conversation/Attachment/Journey yang sudah closed tanpa evidence baru.
 
-Next work should target a **confirmed OPEN dependency**, not documentation archaeology.
+Pekerjaan berikutnya harus menargetkan **confirmed OPEN dependency**, bukan dokumentasi archaeology.
 
-Priority candidates remain:
+Prioritas kandidat tetap:
 
 1. Conversation adapter update/delete parameter audit;
 2. Knowledge positive semantic/runtime verification;
 3. Experience positive semantic/runtime verification;
 4. Security/succession semantic harness;
-5. other confirmed gates from the master inventory.
+5. gate lain yang sudah confirmed dari master inventory.
 
-No implementation is implied by this list.
+Daftar ini tidak secara otomatis mengotorisasi implementasi.
