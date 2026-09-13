@@ -2,13 +2,15 @@
 
 ## Status
 
-**WORKING RECONCILIATION RECORD — CONFLICT IDENTIFIED — IMPLEMENTATION GATE CLOSED**
+**WORKING RECONCILIATION RECORD — AUTHORITY DECISION RECEIVED — STAGED LIFECYCLE SELECTED**
 
-Dokumen ini mencatat conflict antar working contracts yang ditemukan saat finalisasi authority transisi Knowledge. Dokumen ini tidak mengubah Canonical, Approved Contract, database, atau runtime.
+Dokumen ini mencatat conflict antar working contracts yang ditemukan saat finalisasi authority transisi Knowledge dan keputusan authority yang kemudian diberikan.
+
+Dokumen ini tidak mengubah Canonical.
 
 ## 1. Evidence
 
-Supabase DEV saat ini membuktikan vocabulary `public.knowledge`:
+Supabase DEV membuktikan vocabulary `public.knowledge`:
 
 ```text
 CANDIDATE
@@ -20,17 +22,17 @@ DEPRECATED
 ARCHIVED
 ```
 
-Tidak ditemukan RPC runtime khusus yang membuktikan acceptance, indexing, activation, update/supersession, deprecation, atau archive sebagai authority production.
+Sebelum keputusan ini tidak ditemukan RPC runtime khusus yang membuktikan acceptance, indexing, activation, update/supersession, deprecation, atau archive sebagai authority production.
 
-## 2. Conflict
+## 2. Conflict Yang Direkonsiliasi
 
-Dua working documents pada tanggal yang sama membawa kontrak yang berbeda:
+Dua working documents pada tanggal yang sama membawa kontrak berbeda:
 
 ### Contract A — Transition API Contract Finalization
 
 `docs/working/semantic/sh_transition_api_contract_finalization_20260913.md`
 
-Mendefinisikan Knowledge activation sebagai:
+Mendefinisikan activation langsung:
 
 ```text
 CANDIDATE → ACTIVE
@@ -42,8 +44,6 @@ melalui target:
 runtime_activate_knowledge_candidate
 ```
 
-Dokumen tersebut secara eksplisit menyebut target ini sebagai contract target dan implementation gate tetap tertutup.
-
 ### Contract B — Knowledge Transition Implementation Contract
 
 `docs/working/semantic/sh_knowledge_transition_implementation_contract_20260913.md`
@@ -54,7 +54,7 @@ Mendefinisikan lifecycle bertahap:
 CANDIDATE → ACCEPTED → INDEXED → ACTIVE → UPDATED / DEPRECATED → ARCHIVED
 ```
 
-Dengan transition-specific targets:
+Dengan target:
 
 ```text
 runtime_accept_knowledge
@@ -65,51 +65,60 @@ runtime_deprecate_knowledge
 runtime_archive_knowledge
 ```
 
-Dokumen tersebut juga menyatakan `VALIDATION` sebagai process boundary dan bukan lifecycle enum.
+## 3. Authority Decision
 
-## 3. Authority Assessment
+User authority decision pada 2026-09-13:
 
-Kedua dokumen adalah **WORKING** dan tidak ada evidence bahwa salah satunya telah dipromosikan menjadi Approved Contract atau Canonical.
+**STAGED LIFECYCLE = SELECTED.**
 
-Karena itu assistant tidak boleh silently memilih salah satu sebagai final authority.
-
-Evidence database mendukung keberadaan seluruh enum lifecycle pada Contract B, tetapi keberadaan enum saja tidak membuktikan bahwa Contract B adalah approved runtime authority.
-
-## 4. Impact
-
-Conflict ini mempengaruhi:
-
-- API/function naming;
-- lifecycle transition graph;
-- validation/acceptance authority;
-- indexing boundary;
-- activation authority;
-- operation ledger transition values;
-- Journey payload;
-- SQLSTATE/error contract;
-- E2E verification matrix;
-- migration shape.
-
-Implementing before reconciliation could create an incompatible transition API or an incorrect lifecycle authority boundary.
-
-## 5. Current Safe Decision
-
-Until higher-authority reconciliation exists:
+Authority lifecycle yang digunakan untuk implementation planning adalah:
 
 ```text
-DO NOT implement lifecycle transition RPCs
-DO NOT create lifecycle operation migration
-DO NOT alter knowledge lifecycle constraints
-DO NOT expose activation API
-DO NOT invent SQLSTATE mapping
-DO NOT reuse recovery confirmation as Knowledge authority
+CANDIDATE
+  ↓
+ACCEPTED
+  ↓
+INDEXED
+  ↓
+ACTIVE
+  ├──→ UPDATED + superseded_by successor
+  ↓
+DEPRECATED
+  ↓
+ARCHIVED
 ```
 
-Existing Knowledge acquisition remains unchanged.
+`VALIDATION` tetap process boundary, bukan lifecycle enum.
 
-## 6. What Is Already Safe To Carry Forward
+Acceptance dan indexing menjadi production lifecycle boundaries yang wajib dilewati sebelum activation.
 
-Independent of the conflict, the following boundary is consistent across the working material and runtime evidence:
+Contract A tidak lagi menjadi lifecycle direction untuk implementation. Dokumen tersebut tetap historical/working material sampai direkonsiliasi secara eksplisit pada tahap berikutnya; tidak ada silent rewrite terhadap dokumen authority lain.
+
+## 4. Impact Yang Sekarang Sudah Terselesaikan
+
+Keputusan staged lifecycle menetapkan:
+
+- lifecycle transition graph;
+- acceptance sebagai transition authority;
+- indexing sebagai transition authority;
+- activation hanya dari `INDEXED`;
+- target function naming untuk enam transition;
+- operation ledger transition taxonomy dasar;
+- E2E transition ordering.
+
+Hal berikut masih membutuhkan engineering finalization sebelum runtime mutation:
+
+- semantic confirmation authority;
+- operation ledger schema/atomicity;
+- exact Journey lifecycle event convention;
+- per-function SECURITY INVOKER/DEFINER decision;
+- SQLSTATE mapping berdasarkan implementation aktual;
+- runtime caller integration;
+- E2E positive/negative/concurrency verification.
+
+## 5. Safe Boundary
+
+Boundary yang tetap berlaku:
 
 ```text
 AUTHENTICATE
@@ -126,68 +135,29 @@ AUTHENTICATE
 → OBSERVABLE RESULT
 ```
 
-Also consistent:
+Tidak ada lifecycle authority dari model output, confidence, atau Journey replay.
 
-- model output is not lifecycle authority;
-- confidence is not lifecycle authority;
-- Journey is projection/history, not lifecycle authority;
-- `audit_events` remains generic runtime audit;
-- a dedicated Knowledge lifecycle operation ledger is required unless a higher-authority contract establishes another safe mechanism;
-- idempotency must be database-enforced;
-- concurrency requires target-row locking;
-- successful domain mutation, operation ledger, and required Journey projection must share an atomic boundary where technically possible;
-- duplicate operation identity must not be confused with semantic conflict.
-
-## 7. SQLSTATE Status
-
-No existing Knowledge transition implementation provides a standardized SQLSTATE mapping.
-
-Existing runtime functions predominantly use ordinary `RAISE EXCEPTION` messages without an explicit transition-specific SQLSTATE contract.
-
-Therefore exact SQLSTATE codes remain **OPEN** and must not be invented merely to close the gate.
-
-## 8. Confirmation Status
-
-Existing durable high-risk confirmation infrastructure is explicitly scoped to:
+## 6. Current Gate
 
 ```text
-RECOVERY_RESTORE
+Lifecycle authority conflict = RESOLVED
+Staged lifecycle decision = PASS
+Transition graph = PASS
+Function naming direction = PASS
+Operation ledger architecture = OPEN
+Confirmation authority = OPEN
+Journey exact convention = OPEN
+Security exposure review = OPEN
+SQLSTATE mapping = OPEN
+Runtime implementation = OPEN
+E2E verification = OPEN
+
+IMPLEMENTATION GATE = CLOSED
 ```
 
-It cannot be treated as Knowledge lifecycle confirmation authority without a separate authorized contract.
+Gate tetap CLOSED hanya karena dependency engineering yang belum dibuktikan, bukan karena lifecycle decision masih ambigu.
 
-## 9. Required Reconciliation
-
-A higher-authority decision must resolve:
-
-1. whether Knowledge uses staged lifecycle promotion:
-
-```text
-CANDIDATE → ACCEPTED → INDEXED → ACTIVE
-```
-
-or a direct activation model:
-
-```text
-CANDIDATE → ACTIVE
-```
-
-2. authoritative function names;
-3. whether acceptance and indexing are mandatory production boundaries;
-4. confirmation requirements per transition;
-5. operation ledger transition taxonomy;
-6. Journey event semantics;
-7. SQLSTATE mapping.
-
-## 10. Gate Decision
-
-**IMPLEMENTATION GATE = CLOSED**
-
-Reason is not lack of technical feasibility. Reason is **authority conflict** combined with missing confirmation and SQLSTATE finalization.
-
-No migration or runtime implementation should be created until the conflict is explicitly reconciled by the appropriate authority.
-
-## 11. Change Boundary
+## 7. Change Boundary
 
 ```text
 Supabase DEV schema = UNCHANGED
@@ -195,5 +165,29 @@ Supabase DEV data   = UNCHANGED
 Runtime code        = UNCHANGED
 Migration           = UNCHANGED
 Canonical           = UNCHANGED
-GitHub              = THIS WORKING RECONCILIATION RECORD ONLY
+GitHub              = RECONCILIATION RECORD UPDATED
+```
+
+## 8. Next Engineering Sequence
+
+```text
+SECURITY / CONFIRMATION DESIGN
+        ↓
+OPERATION LEDGER + ATOMICITY DESIGN
+        ↓
+JOURNEY CONTRACT FINALIZATION
+        ↓
+SQL CONTRACT / ERROR MAPPING
+        ↓
+SUPABASE-FIRST IMPLEMENTATION
+        ↓
+DATABASE TEST + SECURITY TEST
+        ↓
+MIGRATION HISTORY
+        ↓
+GITHUB RECONCILIATION
+        ↓
+RUNTIME INTEGRATION
+        ↓
+E2E VERIFICATION
 ```
