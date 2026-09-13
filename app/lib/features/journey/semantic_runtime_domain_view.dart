@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/backend/backend_client.dart';
 import '../../core/state/sh_profile_state.dart';
 import '../../core/theme/sh_theme.dart';
 import 'journey_runtime_service.dart';
@@ -74,18 +73,7 @@ class _SemanticRuntimeDomainViewState extends State<SemanticRuntimeDomainView> {
         case ShSemanticDomain.knowledge:
           await _runtime.createKnowledgeCandidate(shId: shId, content: draft.content, scope: draft.scope, visibility: draft.visibility);
         case ShSemanticDomain.experience:
-          final result = await backendClient.rpc('runtime_record_experience_with_journey', params: {
-            'p_sh_id': shId,
-            'p_experience_type': 'EXPLICIT_USER_REQUEST',
-            'p_content': draft.content,
-            'p_scope': draft.scope,
-            'p_visibility': draft.visibility,
-            'p_transfer_policy': 'NON_TRANSFERABLE',
-            'p_source_ref': 'journey-ui',
-            'p_provenance': {'capture_mode': 'JOURNEY_UI'},
-            'p_occurred_at': DateTime.now().toUtc().toIso8601String(),
-          });
-          if (result == null) throw StateError('Experience creation returned no identifier.');
+          await _runtime.createExperience(shId: shId, content: draft.content, scope: draft.scope, visibility: draft.visibility);
       }
       await _load();
     } catch (e) { _showError(e.toString()); }
@@ -95,6 +83,13 @@ class _SemanticRuntimeDomainViewState extends State<SemanticRuntimeDomainView> {
     final id = _recordId(record);
     final content = _content(record);
     if (id == null || content.isEmpty) { _showError('This Journey record has no editable canonical record identity.'); return; }
+    if (widget.domain == ShSemanticDomain.knowledge) {
+      final lifecycle = record.payload['lifecycle']?.toString().trim();
+      if (lifecycle == null || lifecycle.isEmpty) {
+        _showError('Knowledge edit is blocked because canonical lifecycle evidence is unavailable.');
+        return;
+      }
+    }
     final draft = await _editor('Edit ${widget.domain.label}', initialContent: content);
     if (!mounted || draft == null) return;
     try {
@@ -102,7 +97,7 @@ class _SemanticRuntimeDomainViewState extends State<SemanticRuntimeDomainView> {
         case ShSemanticDomain.memory:
           await _runtime.replaceMemory(shId: profileShId.value, newContent: draft.content, oldPattern: content, scope: draft.scope, visibility: draft.visibility);
         case ShSemanticDomain.knowledge:
-          final lifecycle = record.payload['lifecycle']?.toString() ?? 'CANDIDATE';
+          final lifecycle = record.payload['lifecycle']!.toString();
           await _runtime.updateKnowledge(knowledgeId: id, expectedLifecycle: lifecycle, operationKey: 'journey-ui-update-$id-${DateTime.now().microsecondsSinceEpoch}', updateRef: 'journey-ui-edit', successorContent: draft.content);
         case ShSemanticDomain.experience:
           _showError('Experience update runtime authority is not available yet; no local mutation was performed.');
