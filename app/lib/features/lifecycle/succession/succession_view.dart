@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../lifecycle_models.dart';
+import '../lifecycle_stage.dart';
 import '../lifecycle_authority_view.dart';
 
 class SuccessionView extends StatelessWidget {
