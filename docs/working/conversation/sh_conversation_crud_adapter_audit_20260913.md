@@ -4,41 +4,41 @@
 
 **WORKING — STATIC CONTRACT AUDIT PASS / DEVICE E2E OPEN**
 
-This document is a working audit record. It does not modify Canonical or Approved Contract authority.
+Dokumen ini adalah catatan audit working. Dokumen ini tidak mengubah otoritas Canonical atau Approved Contract.
 
 ## Scope
 
-Only individual Conversation Message `update` and `delete` adapter alignment.
+Hanya alignment adapter untuk `update` dan `delete` pada individual Conversation Message.
 
-Out of scope:
+Di luar scope:
 
 - Conversation create/delete E2E
 - Project mutation
 - Attachment retry/idempotency
 - Regenerate Assistant
-- broader Conversation refactor
+- refactor Conversation yang lebih luas
 
 ## Evidence
 
 ### Backend function signatures
 
-Supabase DEV currently exposes:
+Supabase DEV saat ini mengekspos:
 
 ```text
 runtime_update_conversation_message_v2(uuid,text,text)
 runtime_delete_conversation_message_v2(uuid)
 ```
 
-Both functions are `SECURITY DEFINER`.
+Kedua function menggunakan `SECURITY DEFINER`.
 
-Authenticated execution privilege:
+Privilege execution untuk authenticated:
 
 ```text
 update → true
 delete → true
 ```
 
-Anonymous execution privilege:
+Privilege execution untuk anonymous:
 
 ```text
 update → false
@@ -47,15 +47,15 @@ delete → false
 
 ### Backend authorization boundary
 
-`runtime_update_conversation_message_v2` resolves identity through `resolve_identity()` and updates only when the supplied message ID belongs to the resolved account and SH and the old content matches.
+`runtime_update_conversation_message_v2` me-resolve identity melalui `resolve_identity()` dan hanya melakukan update jika Message ID yang diberikan memang milik account dan SH yang ter-resolve serta old content cocok.
 
-`runtime_delete_conversation_message_v2` resolves identity through `resolve_identity()` and deletes only when the supplied message ID belongs to the resolved account and SH.
+`runtime_delete_conversation_message_v2` me-resolve identity melalui `resolve_identity()` dan hanya melakukan delete jika Message ID yang diberikan memang milik account dan SH yang ter-resolve.
 
-Therefore the function contract is actor/ownership scoped rather than ID-only.
+Jadi contract function dibatasi oleh actor/ownership, bukan hanya berdasarkan ID.
 
 ### Flutter adapter
 
-Current `ConversationService` maps:
+`ConversationService` saat ini memetakan:
 
 ```dart
 updateMessage(
@@ -69,7 +69,7 @@ updateMessage(
        p_new_content
 ```
 
-and:
+dan:
 
 ```dart
  deleteMessage(messageId)
@@ -77,7 +77,7 @@ and:
        p_message_id
 ```
 
-This matches the current backend signatures and parameter names.
+Mapping ini sesuai dengan signature dan nama parameter backend saat ini.
 
 ## Result
 
@@ -93,28 +93,28 @@ Static adapter contract           PASS
 
 ## Remaining verification gap
 
-Actual device/runtime E2E has not been used as evidence for:
+E2E device/runtime aktual belum digunakan sebagai evidence untuk:
 
 ```text
 Edit Message
-→ persisted updated content
-→ reload/navigation persistence
+→ content berubah dan tersimpan
+→ reload/navigation tetap mempertahankan perubahan
 
 Delete Message
-→ message removed
-→ reload/navigation persistence
+→ message terhapus
+→ reload/navigation tetap menunjukkan message sudah tidak ada
 ```
 
-Do not claim full Message CRUD E2E PASS until these actions are independently tested.
+Jangan menyatakan full Message CRUD E2E PASS sebelum kedua tindakan ini diuji secara independen.
 
 ## Next verification
 
-Use a disposable/test Conversation Message on the DEV device:
+Gunakan Conversation Message test/disposable di device DEV:
 
-1. Send a normal user message.
-2. Edit that exact message and verify the changed content persists after reload/navigation.
-3. Delete another test message and verify it disappears and remains absent after reload/navigation.
-4. Do not use attachment retry as evidence for either mutation.
+1. Kirim user message normal.
+2. Edit message tersebut dan verifikasi content yang berubah tetap tersimpan setelah reload/navigation.
+3. Hapus test message lain dan verifikasi message hilang serta tetap tidak muncul setelah reload/navigation.
+4. Jangan menggunakan attachment retry sebagai evidence untuk mutation mana pun.
 
 Expected:
 
@@ -123,4 +123,4 @@ Edit E2E        PASS / FAIL
 Delete E2E      PASS / FAIL
 ```
 
-Only the tested result should be promoted into the master inventory.
+Hanya hasil yang benar-benar diuji yang boleh dipromosikan ke master inventory.
