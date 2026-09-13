@@ -25,18 +25,11 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
   bool _loading = true;
   bool _preserving = false;
   String? _error;
-  final _retentionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _load();
-  }
-
-  @override
-  void dispose() {
-    _retentionController.dispose();
-    super.dispose();
   }
 
   Future<void> _load() async {
@@ -80,16 +73,6 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
       return;
     }
 
-    DateTime? retention;
-    final rawRetention = _retentionController.text.trim();
-    if (rawRetention.isNotEmpty) {
-      retention = DateTime.tryParse(rawRetention);
-      if (retention == null) {
-        _show('Retention date must be a valid ISO date/time.');
-        return;
-      }
-    }
-
     final memoryIds = <String>{};
     final knowledgeIds = <String>{};
     final experienceIds = <String>{};
@@ -109,7 +92,6 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
       'knowledge_ids': knowledgeIds.toList(),
       'experience_ids': experienceIds.toList(),
       'journey_event_ids': _selectedEventIds.toList(),
-      'retention_until': retention?.toUtc().toIso8601String(),
     };
 
     setState(() => _preserving = true);
@@ -177,14 +159,6 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
               style: TextStyle(color: shMuted, height: 1.4),
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _retentionController,
-              decoration: const InputDecoration(
-                labelText: 'Retention until (optional)',
-                hintText: '2027-01-01T00:00:00Z',
-              ),
-            ),
-            const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: _loading || _preserving ? null : _preserveSelectedLegacy,
               icon: const Icon(Icons.archive_outlined),
