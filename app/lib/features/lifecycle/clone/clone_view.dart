@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../lifecycle_models.dart';
-import '../lifecycle_widgets.dart';
+import '../lifecycle_authority_view.dart';
 
 class CloneView extends StatelessWidget {
   const CloneView({super.key, this.incomingItems = const []});
-
   final List<JourneyLifecyclePayload> incomingItems;
 
   @override
-  Widget build(BuildContext context) => LifecycleDetailView(stage: LifecycleStage.clone, incomingItems: incomingItems);
+  Widget build(BuildContext context) => const LifecycleAuthorityView(stage: LifecycleStage.clone);
 }
