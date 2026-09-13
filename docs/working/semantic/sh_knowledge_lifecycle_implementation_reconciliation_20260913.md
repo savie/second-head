@@ -13,6 +13,7 @@ Supabase DEV diubah terlebih dahulu, kemudian diverifikasi secara langsung. Migr
 ```text
 20260913092434 knowledge_lifecycle_authority_and_operations
 20260913092503 knowledge_lifecycle_authority_exposure_hardening
+20260913092952 revoke_direct_semantic_mutation_access
 ```
 
 Nama migration bersifat deskriptif dan tidak menggunakan label P3/P4/P5.
@@ -33,20 +34,39 @@ Implemented pada DEV:
 - `runtime_archive_knowledge`
 - internal `runtime_knowledge_transition`
 
-Confirmation dan operation tables menggunakan RLS dan direct grants untuk `anon`/`authenticated` telah dicabut.
+Confirmation dan operation tables menggunakan RLS dan direct mutation grants untuk `anon`/`authenticated` telah dicabut. Direct mutation grants pada `knowledge` dan `journey_events` juga telah dicabut untuk `public`/`anon`/`authenticated`.
 
 ## 3. Security Verification
 
 Actual function privilege verification menunjukkan seluruh public Knowledge lifecycle entry points:
 
 ```text
-anon         = EXECUTE false
+anon          = EXECUTE false
 authenticated = EXECUTE true
+public        = EXECUTE false
 ```
 
 Entry points menggunakan `SECURITY DEFINER` dengan fixed `search_path=public` dan authentication/ownership checks di implementation boundary.
 
-Internal `runtime_knowledge_transition` tidak diekspos ke `anon` atau `authenticated`.
+Internal `runtime_knowledge_transition` tidak diekspos ke `public`, `anon`, atau `authenticated`.
+
+Actual table privilege verification menunjukkan:
+
+```text
+knowledge:
+  anon/authenticated = SELECT + REFERENCES + TRIGGER
+  mutation           = revoked
+
+journey_events:
+  anon/authenticated = SELECT + REFERENCES + TRIGGER
+  mutation           = revoked
+
+knowledge_lifecycle_confirmations:
+  anon/authenticated = no direct table privileges
+
+knowledge_lifecycle_operations:
+  anon/authenticated = no direct table privileges
+```
 
 ## 4. Confirmation Authority
 
@@ -86,7 +106,7 @@ Logical idempotency scope pada database:
 account + SH + operation_key
 ```
 
-Existing operation dengan operation key yang sama diperiksa terhadap target Knowledge dan transition. Konflik target/transition ditolak.
+Database unique index menegakkan scope tersebut. Existing operation dengan operation key yang sama diperiksa terhadap target Knowledge dan transition. Konflik target/transition ditolak.
 
 ## 6. Transition Matrix Implemented
 
@@ -171,8 +191,8 @@ Karena itu belum boleh diklaim:
 
 ```text
 full authenticated E2E = VERIFIED
-cross-account E2E = VERIFIED
-concurrency E2E = VERIFIED
+cross-account E2E       = VERIFIED
+concurrency E2E         = VERIFIED
 runtime caller integration = VERIFIED
 ```
 
@@ -190,14 +210,15 @@ Runtime caller untuk explicit lifecycle operation masih merupakan integration wo
 
 ## 12. GitHub Reconciliation
 
-Migration history sudah direpresentasikan pada GitHub DEV sebagai:
+Migration history Supabase sekarang direpresentasikan pada GitHub DEV sebagai:
 
 ```text
 database/migrations/20260913092434_knowledge_lifecycle_authority_and_operations.sql
 database/migrations/20260913092503_knowledge_lifecycle_authority_exposure_hardening.sql
+database/migrations/20260913092952_revoke_direct_semantic_mutation_access.sql
 ```
 
-Actual GitHub DEV files telah diverifikasi setelah write.
+Actual GitHub DEV files telah diverifikasi setelah write. Migration `20260913092952` memiliki nama dan version yang sama dengan actual Supabase migration history.
 
 ## 13. Gate Result
 
@@ -206,14 +227,16 @@ Supabase schema capability        = IMPLEMENTED
 Confirmation authority            = IMPLEMENTED (DB boundary)
 Operation ledger                  = IMPLEMENTED
 Idempotency enforcement           = IMPLEMENTED
-Atomic transaction design        = IMPLEMENTED
+Atomic transaction design         = IMPLEMENTED
 Journey lifecycle projection      = IMPLEMENTED
-Security exposure                = VERIFIED STATIC
-Data preservation                = VERIFIED
+Security exposure                 = VERIFIED STATIC
+Direct semantic table mutation    = HARDENED / VERIFIED STATIC
+Data preservation                 = VERIFIED
 Authenticated behavioral E2E      = OPEN
 Cross-actor E2E                   = OPEN
 Concurrency E2E                   = OPEN
 Runtime caller integration        = OPEN
+SQLSTATE/error mapping            = OPEN
 
 OVERALL KNOWLEDGE LIFECYCLE GATE  = PARTIAL PASS
 ```
@@ -234,7 +257,8 @@ Required evidence:
 8. rollback when Journey projection fails;
 9. update/supersession integrity;
 10. terminal archive behavior;
-11. runtime caller authority and E2E integration.
+11. runtime caller authority and E2E integration;
+12. stable SQLSTATE/error mapping if required by the approved runtime contract.
 
 ## Change Boundary
 
