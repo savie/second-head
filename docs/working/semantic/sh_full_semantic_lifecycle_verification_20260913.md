@@ -2,9 +2,9 @@
 
 ## Status
 
-**WORKING — VERIFICATION RESULT / PARTIAL PASS / FULL LIFECYCLE NOT CLOSED**
+**WORKING — HASIL VERIFIKASI / PARTIAL PASS / FULL LIFECYCLE BELUM DITUTUP**
 
-This document records verification of the current semantic lifecycle across Memory, Knowledge, Experience, Journey, and lifecycle policy boundaries. It does not modify Canonical or Approved Contract authority.
+Dokumen ini mencatat hasil verifikasi siklus hidup semantik saat ini pada Memory, Knowledge, Experience, Journey, serta batas kebijakan lifecycle. Dokumen ini tidak mengubah otoritas Canonical atau Approved Contract.
 
 ## Authority
 
@@ -26,7 +26,7 @@ DEVICE / E2E EVIDENCE
 
 ## Scope
 
-Verify the current end-to-end semantic chain:
+Memverifikasi rantai end-to-end semantik saat ini:
 
 ```text
 User / Model signal
@@ -42,24 +42,24 @@ Lifecycle / policy metadata
 Retrieval / transfer eligibility boundary
 ```
 
-The verification explicitly includes Journey because Journey is the continuity/projection boundary and carries lifecycle-related visibility/transfer metadata.
+Verifikasi secara eksplisit mencakup Journey karena Journey merupakan batas continuity/projection dan membawa metadata visibility/transfer yang berkaitan dengan lifecycle.
 
 ## Evidence
 
 ### 1. Explicit user capture
 
-Current DEV contains positive records produced by `ai-runtime:explicit-user-request`:
+DEV saat ini memiliki record positif yang dihasilkan oleh `ai-runtime:explicit-user-request`:
 
 - Memory: 1 record
 - Knowledge: 1 record
 - Experience: 1 record
-- Journey: 3 corresponding events
+- Journey: 3 event terkait
 
-The Knowledge and Experience records are correlated to persisted user messages and runtime request IDs through the Conversation/runtime path.
+Record Knowledge dan Experience berkorelasi dengan user message yang tersimpan dan runtime request ID melalui path Conversation/runtime.
 
 ### 2. Current semantic record state
 
-For the tested SH:
+Untuk SH yang diuji:
 
 | Domain | Lifecycle | Scope | Visibility | Transfer policy | Source |
 |---|---|---|---|---|---|
@@ -67,11 +67,11 @@ For the tested SH:
 | Knowledge | CANDIDATE | PRIVATE | OWNER_ONLY | NON_TRANSFERABLE | ai-runtime:explicit-user-request |
 | Experience | ACTIVE | PRIVATE | OWNER_ONLY | NON_TRANSFERABLE | ai-runtime:explicit-user-request |
 
-This proves persistence and policy metadata exist, but does not by itself prove the complete lifecycle transition model.
+Hal ini membuktikan persistence dan metadata policy memang ada, tetapi belum dengan sendirinya membuktikan keseluruhan model transition lifecycle.
 
 ### 3. Journey projection
 
-Current DEV Journey events:
+Event Journey pada DEV saat ini:
 
 | Event | Domain reference | Continuity | Visibility | Transfer policy |
 |---|---|---|---|---|
@@ -79,19 +79,19 @@ Current DEV Journey events:
 | LEARNING | knowledge_id present | CONTINUOUS | PRIVATE | NON_TRANSFERABLE |
 | EXPERIENCE | experience_id present | CONTINUOUS | PRIVATE | NON_TRANSFERABLE |
 
-Journey therefore has deterministic references back to the semantic domain records for the tested capture path.
+Dengan demikian Journey memiliki referensi deterministik kembali ke record domain semantik untuk path capture yang diuji.
 
 ### 4. Journey policy boundary
 
-Current runtime function `runtime_get_journey_record_policy(event_id)` resolves the event only when the event belongs to the current account's active SH, then resolves the domain record and returns its scope, visibility, and transfer policy.
+Function runtime saat ini `runtime_get_journey_record_policy(event_id)` hanya me-resolve event jika event tersebut dimiliki oleh active SH pada account saat ini, kemudian me-resolve domain record dan mengembalikan scope, visibility, serta transfer policy.
 
-Current `runtime_classify_journey_event()` enforces authenticated ownership and validates Journey visibility/transfer-policy vocabulary.
+`runtime_classify_journey_event()` saat ini menegakkan authenticated ownership dan memvalidasi vocabulary visibility/transfer-policy Journey.
 
-Current transfer implementation requires lifecycle-specific authorization and rejects selections that are private, non-transferable, or incompatible with the required lifecycle policy.
+Implementasi transfer saat ini membutuhkan otorisasi yang sesuai lifecycle dan menolak selection yang private, non-transferable, atau tidak kompatibel dengan policy lifecycle yang diwajibkan.
 
 ### 5. Lifecycle policy boundary
 
-Current policy vocabulary for semantic records is:
+Vocabulary policy saat ini untuk semantic record adalah:
 
 ```text
 NON_TRANSFERABLE
@@ -100,16 +100,16 @@ SUCCESSION
 LEGACY
 ```
 
-`INHERITABLE` is normalized to `INHERITANCE` by the current policy function.
+`INHERITABLE` dinormalisasi menjadi `INHERITANCE` oleh policy function saat ini.
 
-Current lifecycle safeguards include:
+Safeguard lifecycle yang saat ini teramati mencakup:
 
-- deactivated/terminal SH cannot mutate record policy;
-- inherited records cannot have their policy rewritten by the target SH;
-- Succession requires an end-of-life/deactivated source SH and an active succession rule;
-- Inheritance requires an approved inheritance authorization;
-- Journey transfer requires explicit event selection and matching lifecycle eligibility;
-- transferred Journey records are materialized as PRIVATE / NON_TRANSFERABLE on the target and retain source provenance.
+- SH yang deactivated/terminal tidak dapat memutasi record policy;
+- record hasil inheritance tidak dapat policy-nya ditulis ulang oleh target SH;
+- Succession membutuhkan source SH yang end-of-life/deactivated dan succession rule yang aktif;
+- Inheritance membutuhkan inheritance authorization yang disetujui;
+- transfer Journey membutuhkan pemilihan event secara eksplisit dan lifecycle eligibility yang sesuai;
+- record Journey yang ditransfer dimaterialisasi sebagai PRIVATE / NON_TRANSFERABLE pada target dan tetap menyimpan provenance source.
 
 ## Verification Matrix
 
@@ -130,7 +130,7 @@ Current lifecycle safeguards include:
 
 ## Critical Finding
 
-The current runtime has two distinct semantic paths:
+Runtime saat ini memiliki dua jalur semantik yang berbeda:
 
 ### Explicit user path
 
@@ -144,7 +144,7 @@ Memory / Knowledge / Experience persistence
 Journey projection
 ```
 
-This path is verified for positive capture/projection evidence.
+Jalur ini telah diverifikasi untuk bukti capture/projection positif.
 
 ### Model-derived signal path
 
@@ -162,15 +162,15 @@ RUNTIME_MEMORY_DECISION audit
 persistence = not_performed
 ```
 
-The current `semantic_decision.ts` explicitly treats model output as a candidate and keeps persistence authority outside the decision function. Therefore model-derived semantic persistence is **not** proven by the current implementation.
+`semantic_decision.ts` saat ini secara eksplisit memperlakukan output model sebagai candidate dan menjaga otoritas persistence tetap berada di luar fungsi decision. Karena itu persistence semantik yang berasal dari model **belum terbukti** oleh implementasi saat ini.
 
-This is an implementation boundary finding, not a permission to redesign semantics in this verification pass.
+Temuan ini merupakan batas implementasi, bukan izin untuk mendesain ulang semantics dalam pass verifikasi ini.
 
 ## Decision
 
 **Full Semantic Lifecycle Verification: PARTIAL PASS — NOT CLOSED.**
 
-Closed for current tested scope:
+Sudah ditutup untuk scope yang saat ini diuji:
 
 ```text
 Explicit semantic capture
@@ -184,7 +184,7 @@ Journey retrieval policy boundary
 Lifecycle transfer-policy validation (static)
 ```
 
-Still open:
+Masih terbuka:
 
 ```text
 Model-derived signal → policy decision → persistence
@@ -197,9 +197,9 @@ Security/succession semantic harness
 
 ## Scope Boundary
 
-No database migration, Canonical change, or speculative semantic redesign is introduced by this verification.
+Tidak ada database migration, perubahan Canonical, atau speculative semantic redesign yang diperkenalkan oleh verifikasi ini.
 
-The next implementation decision, if requested, must first define the approved contract for model-derived persistence and the lifecycle transition matrix before adding runtime behavior.
+Jika diminta membuat keputusan implementasi berikutnya, terlebih dahulu harus didefinisikan approved contract untuk model-derived persistence dan transition matrix lifecycle sebelum menambahkan perilaku runtime.
 
 ## Verification Principle
 
