@@ -1,40 +1,40 @@
-# SECOND HEAD — Semantic Lifecycle Policy Contract
+# SECOND HEAD — Kontrak Kebijakan Siklus Hidup Semantik
 
 ## Status
 
-**WORKING CONTRACT DRAFT — POLICY GATE — NOT CANONICAL**
+**DRAF KONTRAK KERJA — GATE KEBIJAKAN — BUKAN CANONICAL**
 
-This document defines the proposed policy boundary required before implementing or extending model-derived semantic persistence and lifecycle transitions.
+Dokumen ini mendefinisikan batas kebijakan yang diusulkan dan diperlukan sebelum mengimplementasikan atau memperluas persistence semantik yang berasal dari model serta transition siklus hidup.
 
-It is a working engineering contract. It does **not** modify Canonical authority, Approved Contract authority, database schema, runtime behavior, or existing lifecycle semantics.
+Dokumen ini adalah kontrak kerja engineering. Dokumen ini **tidak** mengubah otoritas Canonical, otoritas Approved Contract, skema database, perilaku runtime, maupun semantik siklus hidup yang sudah ada.
 
-## Authority
+## Otoritas
 
 ```text
-OWNER / USER DECISION
+KEPUTUSAN OWNER / USER
         ↓
 CANONICAL
         ↓
 APPROVED CONTRACT
         ↓
-ARCHITECTURE / DESIGN
+ARSITEKTUR / DESAIN
         ↓
-THIS WORKING POLICY CONTRACT
+KONTRAK KEBIJAKAN KERJA INI
         ↓
-IMPLEMENTATION
+IMPLEMENTASI
         ↓
-RUNTIME / DATABASE EVIDENCE
+BUKTI RUNTIME / DATABASE
         ↓
-E2E VERIFICATION
+VERIFIKASI E2E
 ```
 
-If this document conflicts with Canonical or an Approved Contract, the higher-authority source wins and this document must be reconciled rather than silently merged.
+Jika dokumen ini bertentangan dengan Canonical atau Approved Contract, sumber dengan otoritas lebih tinggi yang berlaku dan dokumen ini harus direkonsiliasi, bukan digabung secara diam-diam.
 
-## 1. Purpose
+## 1. Tujuan
 
-Close the policy-definition gap identified by the Full Semantic Lifecycle Verification checkpoint.
+Menutup gap definisi kebijakan yang ditemukan pada checkpoint Full Semantic Lifecycle Verification.
 
-The contract establishes one explicit decision boundary for:
+Kontrak ini menetapkan satu batas keputusan eksplisit untuk:
 
 ```text
 MODEL SIGNAL
@@ -43,55 +43,55 @@ CANDIDATE
     ↓
 REJECT / CONFIRM / ACCEPT
     ↓
-PERSISTENCE ELIGIBILITY
+KELAYAKAN PERSISTENCE
     ↓
-LIFECYCLE STATE
+STATE SIKLUS HIDUP
     ↓
-JOURNEY PROJECTION
+PROYEKSI JOURNEY
     ↓
-VISIBILITY / CONTINUITY / TRANSFER POLICY
+KEBIJAKAN VISIBILITAS / KONTINUITAS / TRANSFER
     ↓
-TRANSFER ELIGIBILITY
+KELAYAKAN TRANSFER
 ```
 
-The contract deliberately separates:
+Kontrak ini sengaja memisahkan:
 
-- semantic inference from persistence authority;
-- candidate creation from lifecycle activation;
-- domain persistence from Journey projection;
-- lifecycle state from transfer policy;
-- policy eligibility from transfer execution.
+- inferensi semantik dari otoritas persistence;
+- pembuatan candidate dari aktivasi siklus hidup;
+- persistence domain dari proyeksi Journey;
+- state siklus hidup dari kebijakan transfer;
+- kelayakan kebijakan dari eksekusi transfer.
 
-## 2. Current Evidence Baseline
+## 2. Baseline Bukti Saat Ini
 
-The current DEV implementation already has a separate semantic decision function. `evaluateSemanticSignal()` accepts a `SemanticSignal` and returns `ACCEPT`, `REJECT`, or `CONFIRM`; model output is explicitly treated as a candidate and persistence authority remains outside that function.
+Implementasi DEV saat ini sudah memiliki fungsi keputusan semantik yang terpisah. `evaluateSemanticSignal()` menerima `SemanticSignal` dan mengembalikan `ACCEPT`, `REJECT`, atau `CONFIRM`; output model secara eksplisit diperlakukan sebagai candidate dan otoritas persistence berada di luar fungsi tersebut.
 
-The explicit-user path currently persists Memory, Knowledge, and Experience through database runtime functions and projects the tested records into Journey. The existing verification record classifies that path as PASS while leaving model-derived persistence and full lifecycle transitions OPEN.
+Path explicit-user saat ini melakukan persistence Memory, Knowledge, dan Experience melalui fungsi runtime database dan memproyeksikan record yang diuji ke Journey. Record verifikasi yang ada mengklasifikasikan path tersebut sebagai PASS, sementara persistence yang berasal dari model dan transition siklus hidup lengkap masih OPEN.
 
-Current database state also contains lifecycle and transfer-policy fields on Memory, Knowledge, Experience, and Journey records. Existing transfer functions enforce lifecycle-specific eligibility, but full Clone / Inheritance / Succession execution remains an E2E verification gap.
+State database saat ini juga memiliki field siklus hidup dan transfer-policy pada record Memory, Knowledge, Experience, dan Journey. Fungsi transfer yang ada menerapkan kelayakan yang spesifik terhadap siklus hidup, tetapi eksekusi Clone / Inheritance / Succession secara lengkap masih menjadi gap verifikasi E2E.
 
-Therefore this document defines policy before implementation rather than assuming the current implementation already satisfies the full contract.
+Karena itu dokumen ini mendefinisikan kebijakan sebelum implementasi, bukan mengasumsikan bahwa implementasi saat ini sudah memenuhi kontrak penuh.
 
-## 3. Non-Goals
+## 3. Bukan Tujuan Dokumen Ini
 
-This contract does not:
+Kontrak ini tidak:
 
-- redesign semantic domain definitions;
-- introduce a new semantic domain;
-- create a new persistent table;
-- create or alter a database migration;
-- change existing Journey continuity semantics;
-- authorize model output to write directly to durable memory;
-- change Canonical documents;
-- define provider-specific prompting;
-- define UI confirmation mechanics;
-- claim that model-derived persistence is currently implemented.
+- mendesain ulang definisi domain semantik;
+- memperkenalkan domain semantik baru;
+- membuat tabel persistent baru;
+- membuat atau mengubah migration database;
+- mengubah semantik continuity Journey yang sudah ada;
+- memberi otorisasi kepada output model untuk menulis langsung ke memory durable;
+- mengubah dokumen Canonical;
+- mendefinisikan prompting spesifik provider;
+- mendefinisikan mekanisme konfirmasi UI;
+- menyatakan bahwa persistence yang berasal dari model saat ini sudah terimplementasi.
 
-## 4. Core Principles
+## 4. Prinsip Inti
 
-### 4.1 Model output is not persistence authority
+### 4.1 Output model bukan otoritas persistence
 
-A model-generated signal is an inference candidate. It cannot directly create, mutate, activate, transfer, or supersede durable semantic records.
+Signal yang dihasilkan model adalah candidate hasil inferensi. Signal tersebut tidak boleh secara langsung membuat, mengubah, mengaktifkan, mentransfer, atau melakukan supersede terhadap record semantik durable.
 
 ```text
 MODEL
@@ -99,25 +99,25 @@ MODEL
 AUTHORITY
 ```
 
-### 4.2 Decision is policy input, not proof of persistence
+### 4.2 Decision adalah input kebijakan, bukan bukti persistence
 
-`ACCEPT`, `REJECT`, and `CONFIRM` are decision outcomes. A decision is not itself a durable state transition.
+`ACCEPT`, `REJECT`, dan `CONFIRM` adalah hasil keputusan. Decision itu sendiri bukan transition state durable.
 
-Persistence requires a separate authorized policy evaluation that considers identity, ownership, domain, lifecycle state, scope, visibility, transfer policy, provenance, and any required confirmation rule.
+Persistence membutuhkan evaluasi kebijakan terotorisasi yang terpisah dan mempertimbangkan identity, ownership, domain, state siklus hidup, scope, visibility, transfer policy, provenance, serta aturan confirmation yang diperlukan.
 
-### 4.3 User explicitness has higher capture authority than model inference
+### 4.3 Explicitness dari user memiliki otoritas capture lebih tinggi daripada inferensi model
 
-An explicit user request to persist semantic information may enter the persistence path according to the applicable domain contract.
+Permintaan eksplisit user untuk melakukan persistence informasi semantik dapat masuk ke path persistence sesuai kontrak domain yang berlaku.
 
-A model-derived signal may propose persistence, but cannot upgrade itself to explicit user authority.
+Signal yang berasal dari model dapat mengusulkan persistence, tetapi tidak dapat menaikkan dirinya sendiri menjadi otoritas eksplisit user.
 
-### 4.4 Lifecycle and Journey remain coupled at the policy boundary
+### 4.4 Siklus hidup dan Journey tetap terhubung pada batas kebijakan
 
-Every durable semantic record that is projected into Journey must preserve the domain-owned lifecycle and policy boundary. Journey must not become an alternate authority for semantic ownership or lifecycle state.
+Setiap record semantik durable yang diproyeksikan ke Journey harus mempertahankan batas siklus hidup dan kebijakan yang dimiliki domain. Journey tidak boleh menjadi otoritas alternatif untuk ownership semantik atau state siklus hidup.
 
-### 4.5 Transfer is a separate authorization boundary
+### 4.5 Transfer adalah batas otorisasi yang terpisah
 
-A record being persistent, active, or represented in Journey does not imply transfer eligibility.
+Record yang persistent, active, atau direpresentasikan di Journey tidak otomatis berarti memenuhi kelayakan transfer.
 
 ```text
 PERSISTED
@@ -125,42 +125,42 @@ PERSISTED
 TRANSFERABLE
 ```
 
-## 5. Semantic Signal Contract
+## 5. Kontrak Semantic Signal
 
-A semantic signal consists conceptually of:
+Secara konseptual, sebuah semantic signal terdiri dari:
 
-| Field | Meaning | Authority |
+| Field | Arti | Otoritas |
 |---|---|---|
-| domain | MEMORY / KNOWLEDGE / EXPERIENCE / JOURNEY | classifier output; validated against supported domains |
-| confidence | model/classifier confidence | evidence only; never sole authorization |
-| evidence | supporting model evidence | provenance/audit input |
-| source | MODEL or USER | security/policy discriminator |
+| domain | MEMORY / KNOWLEDGE / EXPERIENCE / JOURNEY | output classifier; divalidasi terhadap domain yang didukung |
+| confidence | tingkat keyakinan model/classifier | hanya evidence; tidak pernah menjadi satu-satunya otorisasi |
+| evidence | bukti pendukung dari model | input provenance/audit |
+| source | MODEL atau USER | pembeda security/policy |
 
-### 5.1 MODEL source
+### 5.1 Source MODEL
 
-`MODEL` means the signal originated from model/provider output or model-derived semantic extraction.
+`MODEL` berarti signal berasal dari output model/provider atau ekstraksi semantik yang diturunkan dari model.
 
-Required rule:
+Aturan wajib:
 
 ```text
 MODEL signal
     ↓
 CANDIDATE
     ↓
-policy evaluation
+evaluasi kebijakan
 ```
 
-It must not bypass policy because confidence is high.
+Signal tidak boleh melewati policy hanya karena confidence tinggi.
 
-### 5.2 USER source
+### 5.2 Source USER
 
-`USER` means the signal originated from an explicit user action/request recognized by the approved capture contract.
+`USER` berarti signal berasal dari tindakan/permintaan eksplisit user yang dikenali oleh approved capture contract.
 
-User source does not automatically authorize every operation. Ownership, authentication, domain rules, and lifecycle policy still apply.
+Source user tidak otomatis mengotorisasi semua operasi. Ownership, authentication, aturan domain, dan kebijakan siklus hidup tetap berlaku.
 
-## 6. Decision Contract
+## 6. Kontrak Decision
 
-The current decision vocabulary remains:
+Kosakata decision saat ini tetap:
 
 ```text
 ACCEPT
@@ -168,97 +168,97 @@ REJECT
 CONFIRM
 ```
 
-This contract does not redefine their current function implementation; it defines their required downstream semantics.
+Kontrak ini tidak mendefinisikan ulang implementasi fungsi saat ini; kontrak ini menetapkan semantik downstream yang diwajibkan.
 
 ### ACCEPT
 
-Means the signal satisfies the applicable acceptance policy for the current authority context.
+Berarti signal memenuhi kebijakan acceptance yang berlaku untuk konteks otoritas saat ini.
 
-Required downstream interpretation:
+Interpretasi downstream yang diwajibkan:
 
 ```text
 ACCEPT
-  → eligible for persistence evaluation
-  → does not by itself prove persistence
+  → memenuhi syarat untuk evaluasi persistence
+  → dengan sendirinya tidak membuktikan persistence
 ```
 
 ### REJECT
 
-Means the candidate must not become a durable semantic record through this decision path.
+Berarti candidate tidak boleh menjadi record semantik durable melalui path decision tersebut.
 
-Required downstream interpretation:
+Interpretasi downstream yang diwajibkan:
 
 ```text
 REJECT
-  → no semantic persistence
-  → no lifecycle activation
-  → no durable Journey projection for the rejected candidate
+  → tidak ada persistence semantik
+  → tidak ada aktivasi siklus hidup
+  → tidak ada proyeksi Journey durable untuk candidate yang ditolak
 ```
 
-An audit record may still exist where the existing runtime audit contract permits it.
+Record audit masih dapat ada jika kontrak audit runtime yang sudah ada mengizinkannya.
 
 ### CONFIRM
 
-Means the candidate requires an explicit confirmation boundary before durable persistence, unless a higher-authority approved contract explicitly defines an equivalent authorization path.
+Berarti candidate memerlukan batas konfirmasi eksplisit sebelum persistence durable, kecuali Approved Contract dengan otoritas lebih tinggi secara eksplisit mendefinisikan jalur otorisasi ekuivalen.
 
-Default working rule:
+Aturan kerja default:
 
 ```text
 CONFIRM
-  → candidate remains non-active
-  → no durable semantic activation
-  → await explicit confirmation
+  → candidate tetap non-active
+  → tidak ada aktivasi semantik durable
+  → menunggu konfirmasi eksplisit
 ```
 
-No automatic persistence is implied by `CONFIRM`.
+`CONFIRM` tidak berarti persistence otomatis.
 
-## 7. Persistence Eligibility
+## 7. Kelayakan Persistence
 
-Durable semantic persistence requires all applicable gates to pass:
+Persistence semantik durable membutuhkan seluruh gate yang berlaku untuk berhasil:
 
 ```text
-Authenticated actor
+Actor terautentikasi
       ↓
-Resolved account / SH ownership
+Account / ownership SH ter-resolve
       ↓
-Supported semantic domain
+Domain semantik didukung
       ↓
-Valid source authority
+Otoritas source valid
       ↓
-Decision allows persistence
+Decision mengizinkan persistence
       ↓
-Lifecycle transition is legal
+Transition siklus hidup legal
       ↓
-Scope / visibility are valid
+Scope / visibility valid
       ↓
-Transfer policy is valid
+Transfer policy valid
       ↓
-Provenance is recorded
+Provenance tercatat
       ↓
-Persist domain record
+Persist record domain
       ↓
-Project Journey when contractually required
+Proyeksikan Journey jika diwajibkan kontrak
 ```
 
-A failed gate is a real failure or rejection, not a successful persistence with degraded metadata.
+Gate yang gagal adalah failure atau rejection yang nyata, bukan persistence sukses dengan metadata yang diturunkan kualitasnya.
 
-## 8. Candidate State
+## 8. State Candidate
 
-`CANDIDATE` is a durable lifecycle state only where the domain implementation already supports it or an approved contract explicitly authorizes candidate persistence.
+`CANDIDATE` adalah state siklus hidup durable hanya jika implementasi domain memang sudah mendukungnya atau Approved Contract secara eksplisit mengizinkan persistence candidate.
 
-Candidate means:
+Candidate berarti:
 
-- discovered or captured but not fully activated;
-- not equivalent to trusted active semantic context;
-- not automatically retrievable as authoritative durable context;
-- not automatically transferable;
-- not eligible to mutate lifecycle policy merely because it exists.
+- ditemukan atau ditangkap tetapi belum sepenuhnya diaktifkan;
+- tidak setara dengan konteks semantik active yang dipercaya;
+- tidak otomatis dapat diambil sebagai konteks durable yang authoritative;
+- tidak otomatis transferable;
+- tidak berhak mengubah kebijakan siklus hidup hanya karena record tersebut ada.
 
-A candidate must preserve provenance sufficient to explain how it was created and why it has its current state.
+Candidate harus mempertahankan provenance yang cukup untuk menjelaskan bagaimana record dibuat dan mengapa state saat ini dimilikinya.
 
-## 9. Lifecycle State Model
+## 9. Model State Siklus Hidup
 
-The working lifecycle model is:
+Model siklus hidup kerja adalah:
 
 ```text
                 ┌──────────────┐
@@ -270,7 +270,7 @@ The working lifecycle model is:
           REJECT              ACCEPT / CONFIRM
              │                   │
              ▼                   ▼
-         TERMINAL          policy evaluation
+         TERMINAL          evaluasi kebijakan
                                  │
                                  ▼
                               ACTIVE
@@ -291,82 +291,82 @@ The working lifecycle model is:
                   CLONE      INHERITANCE   SUCCESSION
 ```
 
-This is a policy model, not evidence that every transition is currently implemented.
+Ini adalah model kebijakan, bukan bukti bahwa setiap transition saat ini sudah terimplementasi.
 
 ### 9.1 CANDIDATE → ACTIVE
 
-Allowed only through a domain-authorized transition.
+Hanya diperbolehkan melalui transition yang diotorisasi oleh domain.
 
-A model `ACCEPT` must not be treated as an unconditional `ACTIVE` write.
+Model `ACCEPT` tidak boleh diperlakukan sebagai write `ACTIVE` tanpa syarat.
 
-A `CONFIRM` outcome requires the defined confirmation authority before activation.
+Hasil `CONFIRM` membutuhkan otoritas konfirmasi yang telah ditentukan sebelum aktivasi.
 
 ### 9.2 CANDIDATE → REJECT / terminal
 
-A rejected candidate must not become active through retry, Journey replay, or transfer.
+Candidate yang ditolak tidak boleh menjadi active melalui retry, replay Journey, atau transfer.
 
 ### 9.3 ACTIVE → UPDATE
 
-Updates must preserve ownership, provenance, lifecycle legality, and semantic domain integrity.
+Update harus mempertahankan ownership, provenance, legalitas siklus hidup, dan integritas domain semantik.
 
 ### 9.4 ACTIVE → SUPERSEDE
 
-Supersession must preserve the relationship between old and new records and must not silently delete historical provenance.
+Supersession harus mempertahankan hubungan antara record lama dan baru dan tidak boleh menghapus provenance historis secara diam-diam.
 
-Existing `superseded_by` fields are evidence that this concept exists in the current schema; complete cross-domain transition behavior remains a verification target.
+Field `superseded_by` yang sudah ada merupakan evidence bahwa konsep ini ada di schema saat ini; perilaku transition lintas domain secara lengkap masih menjadi target verifikasi.
 
 ### 9.5 LEGACY / EOL
 
-Legacy/end-of-life is a lifecycle boundary, not merely a visibility flag.
+Legacy/end-of-life adalah batas siklus hidup, bukan sekadar flag visibility.
 
-A terminal source lifecycle may be a prerequisite for Succession according to the existing transfer policy.
+Lifecycle terminal pada source dapat menjadi prasyarat Succession sesuai transfer policy yang ada.
 
-## 10. Domain Policy Matrix
+## 10. Matriks Kebijakan Domain
 
-The following matrix is the minimum working policy boundary. Exact domain-specific values remain subject to the existing domain contracts and runtime implementation.
+Matriks berikut adalah batas minimum kebijakan kerja. Nilai spesifik per domain tetap tunduk pada kontrak domain yang ada dan implementasi runtime.
 
-| Domain | Model signal may propose | Default model outcome | Durable activation requirement | Journey |
+| Domain | Signal model boleh mengusulkan | Hasil default model | Syarat aktivasi durable | Journey |
 |---|---|---|---|---|
-| MEMORY | yes | CONFIRM unless accepted by explicit policy | authorized persistence + lifecycle transition | when required by domain contract |
-| KNOWLEDGE | yes | CONFIRM unless accepted by explicit policy | authorized persistence + lifecycle transition | when required by domain contract |
-| EXPERIENCE | yes | CONFIRM | explicit confirmation or higher-authority equivalent | when required by domain contract |
-| JOURNEY | no independent durable semantic authority | N/A | domain-owned projection only | projection/history boundary |
+| MEMORY | ya | CONFIRM kecuali diterima oleh policy eksplisit | persistence terotorisasi + transition siklus hidup | jika diwajibkan kontrak domain |
+| KNOWLEDGE | ya | CONFIRM kecuali diterima oleh policy eksplisit | persistence terotorisasi + transition siklus hidup | jika diwajibkan kontrak domain |
+| EXPERIENCE | ya | CONFIRM | konfirmasi eksplisit atau ekuivalen dengan otoritas lebih tinggi | jika diwajibkan kontrak domain |
+| JOURNEY | tidak memiliki otoritas semantik durable independen | N/A | hanya proyeksi yang dimiliki domain | batas proyeksi/history |
 
-The table does not authorize implementation by itself.
+Tabel ini dengan sendirinya tidak mengotorisasi implementasi.
 
-## 11. Journey Projection Contract
+## 11. Kontrak Proyeksi Journey
 
-Journey is a projection/continuity boundary for semantic lifecycle events.
+Journey adalah batas proyeksi/continuity untuk event siklus hidup semantik.
 
-For a durable semantic event that requires Journey projection:
+Untuk event semantik durable yang memerlukan proyeksi Journey:
 
 ```text
-Domain record
+Record domain
    ↓
-validated domain identity
+identity domain tervalidasi
    ↓
 Journey event
 ```
 
-The Journey event must retain or resolve:
+Journey event harus menyimpan atau dapat me-resolve:
 
-- owning account;
-- owning SH/context;
+- account pemilik;
+- SH/context pemilik;
 - domain;
 - source record ID;
-- continuity status;
+- status continuity;
 - visibility;
 - transfer policy;
 - provenance;
 - event type.
 
-Journey must not be used to manufacture an active semantic record from a rejected or unconfirmed candidate.
+Journey tidak boleh digunakan untuk membuat record semantik active dari candidate yang ditolak atau belum dikonfirmasi.
 
-## 12. Visibility / Scope Policy
+## 12. Kebijakan Visibility / Scope
 
-Visibility and scope are independent from lifecycle state.
+Visibility dan scope independen dari state siklus hidup.
 
-The minimum policy boundary remains:
+Batas minimum kebijakan tetap:
 
 ```text
 scope
@@ -376,11 +376,11 @@ transfer_policy
 provenance
 ```
 
-A record cannot gain transfer eligibility merely by changing visibility, and cannot gain ownership merely by being present in Journey.
+Record tidak dapat memperoleh kelayakan transfer hanya dengan mengubah visibility, dan tidak dapat memperoleh ownership hanya karena hadir di Journey.
 
-## 13. Transfer Policy Contract
+## 13. Kontrak Transfer Policy
 
-Existing policy vocabulary observed in DEV is:
+Kosakata policy yang teramati di DEV saat ini adalah:
 
 ```text
 NON_TRANSFERABLE
@@ -389,27 +389,27 @@ SUCCESSION
 LEGACY
 ```
 
-`INHERITABLE` normalization to `INHERITANCE` is an implementation detail already observed in the current policy boundary; it is not expanded here into a new vocabulary.
+Normalisasi `INHERITABLE` menjadi `INHERITANCE` adalah detail implementasi yang sudah teramati pada batas policy saat ini; dokumen ini tidak memperluasnya menjadi kosakata baru.
 
 ### 13.1 NON_TRANSFERABLE
 
-The record/event cannot be selected for lifecycle transfer.
+Record/event tidak dapat dipilih untuk transfer siklus hidup.
 
 ### 13.2 INHERITANCE
 
-Transfer is permitted only when the applicable inheritance authorization and source/target eligibility rules pass.
+Transfer hanya diizinkan jika otorisasi inheritance dan aturan kelayakan source/target yang berlaku semuanya terpenuhi.
 
 ### 13.3 SUCCESSION
 
-Transfer is permitted only when the applicable source end-of-life/deactivated and succession authorization requirements pass.
+Transfer hanya diizinkan jika persyaratan end-of-life/deactivated pada source dan persyaratan otorisasi succession yang berlaku terpenuhi.
 
 ### 13.4 LEGACY
 
-Indicates a lifecycle boundary requiring the applicable legacy semantics. It does not automatically mean transferable.
+Menunjukkan batas siklus hidup yang membutuhkan semantik legacy yang berlaku. Ini tidak otomatis berarti transferable.
 
-## 14. Transfer Operations
+## 14. Operasi Transfer
 
-The existing conceptual operations are:
+Operasi konseptual yang sudah ada adalah:
 
 ```text
 CLONE
@@ -417,87 +417,87 @@ INHERITANCE
 SUCCESSION
 ```
 
-For every operation:
+Untuk setiap operasi:
 
 ```text
-authenticate
+autentikasi
   ↓
-resolve source / target identity
+resolve identity source / target
   ↓
-verify ownership / authority
+verifikasi ownership / authority
   ↓
-resolve domain record from Journey event
+resolve record domain dari Journey event
   ↓
-validate lifecycle
+validasi lifecycle
   ↓
-validate visibility
+validasi visibility
   ↓
-validate transfer policy
+validasi transfer policy
   ↓
-validate operation-specific eligibility
+validasi kelayakan spesifik operasi
   ↓
-materialize target record/event
+materialisasi record/event target
   ↓
-retain source provenance
+pertahankan provenance source
   ↓
-verify target isolation
+verifikasi isolasi target
 ```
 
-A rejected transfer must not create a partial successful target record.
+Transfer yang ditolak tidak boleh menghasilkan record target yang hanya sebagian berhasil.
 
-## 15. Negative Security Requirements
+## 15. Persyaratan Security Negatif
 
-The policy contract is incomplete unless the following negative cases are explicitly verified:
+Kontrak policy tidak lengkap kecuali kasus negatif berikut diverifikasi secara eksplisit:
 
-1. Model output cannot directly persist durable semantic state.
-2. Rejected candidates cannot become active through Journey.
-3. Unconfirmed candidates cannot become active without the required authority.
-4. A user cannot transfer another actor's semantic record by guessing a record ID.
-5. A target SH cannot rewrite the lifecycle policy of an inherited record unless the approved contract explicitly permits it.
-6. Private / non-transferable records are rejected by transfer selection.
-7. A deactivated/terminal SH cannot mutate lifecycle policy where current policy forbids it.
-8. Succession cannot occur without source end-of-life and succession eligibility.
-9. Cross-account Journey events cannot be resolved as owned records.
-10. Failed persistence or transfer must not emit false success.
+1. Output model tidak dapat langsung melakukan persistence state semantik durable.
+2. Candidate yang ditolak tidak dapat menjadi active melalui Journey.
+3. Candidate yang belum dikonfirmasi tidak dapat menjadi active tanpa otoritas yang diwajibkan.
+4. User tidak dapat mentransfer record semantik actor lain hanya dengan menebak record ID.
+5. Target SH tidak dapat mengubah transfer policy record hasil inheritance kecuali Approved Contract secara eksplisit mengizinkannya.
+6. Record/event private atau non-transferable ditolak saat pemilihan transfer.
+7. SH yang deactivated/terminal tidak dapat mengubah policy siklus hidup jika policy saat ini melarangnya.
+8. Succession tidak dapat terjadi tanpa end-of-life source dan kelayakan succession.
+9. Journey event lintas account tidak dapat di-resolve sebagai record milik actor saat ini.
+10. Persistence atau transfer yang gagal tidak boleh menghasilkan false success.
 
-## 16. Atomicity / Failure Contract
+## 16. Kontrak Atomicity / Failure
 
-Semantic persistence and Journey projection should be treated as one logical operation where the existing database contract provides transactional atomicity.
+Persistence semantik dan proyeksi Journey harus diperlakukan sebagai satu operasi logis ketika kontrak database yang ada menyediakan atomicity transaksional.
 
-If the domain record is persisted but required Journey projection fails, the system must surface the operation as incomplete/failure according to the actual transaction boundary; it must not claim full lifecycle success.
+Jika record domain berhasil dipersist tetapi proyeksi Journey yang diwajibkan gagal, sistem harus menunjukkan operasi sebagai incomplete/failure sesuai transaction boundary aktual; sistem tidak boleh mengklaim full lifecycle success.
 
-If Journey is intentionally asynchronous in a future approved design, that asynchronous state must be explicit and observable rather than represented as completed lifecycle state.
+Jika pada desain approved di masa depan Journey memang asynchronous, state asynchronous tersebut harus eksplisit dan observable, bukan direpresentasikan sebagai lifecycle yang sudah selesai.
 
-## 17. Idempotency / Retry Contract
+## 17. Kontrak Idempotency / Retry
 
-Model-derived persistence must define idempotency before implementation.
+Persistence yang berasal dari model harus mendefinisikan idempotency sebelum implementasi.
 
-Repeated processing of the same signal/request must not silently create duplicate semantic records or duplicate Journey events when the contract requires one logical capture.
+Pemrosesan berulang terhadap signal/request yang sama tidak boleh secara diam-diam membuat duplicate semantic record atau duplicate Journey event ketika kontrak mensyaratkan satu logical capture.
 
-The implementation decision must identify the idempotency key or equivalent correlation boundary before runtime rollout.
+Keputusan implementasi harus mengidentifikasi idempotency key atau batas correlation yang ekuivalen sebelum runtime rollout.
 
-## 18. Provenance Contract
+## 18. Kontrak Provenance
 
-Every model-derived durable semantic record must preserve enough provenance to answer:
+Setiap record semantik durable yang berasal dari model harus mempertahankan provenance yang cukup untuk menjawab:
 
 ```text
-Who / what produced the signal?
-Which runtime request produced it?
-Which model/provider path produced it?
-What evidence supported it?
-Which decision was made?
-Which authorization/confirmation allowed persistence?
-When was it persisted?
-What Journey event represents it?
+Siapa / apa yang menghasilkan signal?
+Request runtime mana yang menghasilkan signal?
+Path model/provider mana yang menghasilkan signal?
+Evidence apa yang mendukungnya?
+Decision apa yang dibuat?
+Otorisasi/konfirmasi apa yang mengizinkan persistence?
+Kapan persistence terjadi?
+Journey event mana yang merepresentasikannya?
 ```
 
-Exact field names are implementation concerns and must be reconciled with the existing schema before coding.
+Nama field yang tepat adalah urusan implementasi dan harus direkonsiliasi dengan schema yang ada sebelum coding.
 
-## 19. Audit Contract
+## 19. Kontrak Audit
 
-Decision audit and semantic persistence are separate concerns.
+Audit decision dan persistence semantik adalah dua concern yang terpisah.
 
-Minimum conceptual audit states:
+State audit konseptual minimum:
 
 ```text
 SIGNAL_RECEIVED
@@ -514,96 +514,76 @@ TRANSFER_REJECTED
 TRANSFER_COMPLETED
 ```
 
-The existing runtime audit vocabulary must be inspected and reconciled before introducing any new audit values.
+Kosakata audit runtime yang sudah ada harus diinspeksi dan direkonsiliasi sebelum memperkenalkan nilai audit baru.
 
-## 20. Implementation Boundary
+## 20. Batas Implementasi
 
-No runtime or database implementation should begin until the following are resolved against actual DEV state:
+Implementasi runtime atau database tidak boleh dimulai sampai hal berikut diselesaikan terhadap state DEV aktual:
 
-- whether candidate rows are intentionally durable for each domain;
-- exact lifecycle transition functions available per domain;
-- exact confirmation authority and UX/runtime boundary;
-- idempotency/correlation mechanism;
-- model/provider provenance fields;
-- Journey projection transaction boundary;
-- retrieval treatment of CANDIDATE records;
-- exact transfer behavior for Clone / Inheritance / Succession;
-- negative security test harness.
+- apakah candidate row memang sengaja durable untuk setiap domain;
+- fungsi transition siklus hidup yang tersedia secara tepat untuk setiap domain;
+- otoritas konfirmasi yang tepat dan batas UX/runtime;
+- mekanisme idempotency/correlation;
+- field provenance model/provider;
+- transaction boundary proyeksi Journey;
+- perlakuan retrieval terhadap record `CANDIDATE`;
+- perilaku transfer yang tepat untuk Clone / Inheritance / Succession;
+- test harness security negatif.
 
-## 21. Verification Matrix
+## 21. Matriks Verifikasi
 
-| Gate | Expected | Evidence required | Current status |
+| Gate | Expected | Evidence yang diperlukan | Status saat ini |
 |---|---|---|---|
-| Model signal classification | MODEL remains candidate | runtime unit/static evidence | EXISTING |
-| REJECT | no durable activation | runtime + DB negative test | OPEN |
-| CONFIRM | explicit confirmation boundary | runtime + E2E | OPEN |
-| ACCEPT | persistence eligibility evaluated | runtime + DB | OPEN |
-| Candidate persistence | only where domain contract permits | DB + contract reconciliation | OPEN |
-| Candidate → Active | legal transition only | authenticated E2E | OPEN |
-| Active update | ownership/lifecycle preserved | authenticated E2E | OPEN |
-| Supersession | provenance preserved | DB + E2E | OPEN |
-| Journey projection | domain linkage preserved | DB + runtime E2E | PARTIAL PASS |
-| Journey visibility | enforced | negative E2E | PARTIAL PASS |
-| Transfer eligibility | lifecycle/policy enforced | DB/static + E2E | PARTIAL PASS |
-| Clone | authorized execution | authenticated E2E | OPEN |
-| Inheritance | authorized execution | authenticated E2E | OPEN |
-| Succession | authorized execution | authenticated E2E | OPEN |
-| Cross-actor isolation | unauthorized access rejected | security E2E | OPEN |
-| Idempotent retry | duplicate logical capture prevented | runtime + DB E2E | OPEN |
+| Klasifikasi model signal | MODEL tetap candidate | bukti runtime unit/static | EXISTING |
+| REJECT | tidak ada aktivasi durable | runtime + DB negative test | OPEN |
+| CONFIRM | batas konfirmasi eksplisit | runtime + E2E | OPEN |
+| ACCEPT | kelayakan persistence dievaluasi | runtime + DB | OPEN |
+| Candidate persistence | hanya jika kontrak domain mengizinkan | DB + rekonsiliasi kontrak | OPEN |
+| Candidate → Active | hanya transition legal | authenticated E2E | OPEN |
+| Active update | ownership/lifecycle dipertahankan | authenticated E2E | OPEN |
+| Supersession | provenance dipertahankan | DB + E2E | OPEN |
+| Proyeksi Journey | linkage domain dipertahankan | DB + runtime E2E | PARTIAL PASS |
+| Visibility Journey | diberlakukan | negative E2E | PARTIAL PASS |
+| Kelayakan transfer | lifecycle/policy diberlakukan | DB/static + E2E | PARTIAL PASS |
+| Clone | eksekusi terotorisasi | authenticated E2E | OPEN |
+| Inheritance | eksekusi terotorisasi | authenticated E2E | OPEN |
+| Succession | eksekusi terotorisasi | authenticated E2E | OPEN |
+| Isolasi cross-actor | akses tidak terotorisasi ditolak | security E2E | OPEN |
+| Retry idempotent | duplicate logical capture dicegah | runtime + DB E2E | OPEN |
 
-## 22. Definition of Done for This Policy Gate
+## 22. Definition of Done untuk Gate Policy Ini
 
-This policy gate is considered closed only when:
+Gate policy ini hanya dianggap tertutup jika:
 
-1. The contract is reconciled against Canonical/Approved Contract authority.
-2. Domain-specific lifecycle transition semantics are explicitly identified.
-3. Model-derived persistence authority is explicitly defined.
-4. `REJECT`, `CONFIRM`, and `ACCEPT` have unambiguous downstream behavior.
-5. Candidate retrieval semantics are defined.
-6. Journey projection semantics are defined for each durable domain transition.
-7. Transfer eligibility remains separated from persistence eligibility.
-8. Negative security requirements are mapped to executable tests.
-9. Idempotency and failure/atomicity boundaries are defined.
-10. No unresolved contradiction remains between policy, runtime, and current DB state.
+1. Kontrak direkonsiliasi terhadap otoritas Canonical/Approved Contract.
+2. Semantik transition siklus hidup spesifik domain diidentifikasi secara eksplisit.
+3. Otoritas persistence yang berasal dari model didefinisikan secara eksplisit.
+4. `REJECT`, `CONFIRM`, dan `ACCEPT` memiliki perilaku downstream yang tidak ambigu.
+5. Semantik retrieval candidate didefinisikan.
+6. Semantik proyeksi Journey didefinisikan untuk setiap transition domain durable.
+7. Kelayakan transfer tetap dipisahkan dari kelayakan persistence.
+8. Persyaratan security negatif dipetakan ke test yang dapat dieksekusi.
+9. Batas idempotency dan failure/atomicity didefinisikan.
+10. Tidak ada kontradiksi yang belum terselesaikan antara policy, runtime, dan state DB saat ini.
 
-## 23. Next Gate
+## 23. Gate Berikutnya
 
-Do **not** create a migration or change runtime behavior solely from this draft.
+**Jangan** membuat migration atau mengubah perilaku runtime hanya berdasarkan draft ini.
 
-The next engineering step is **Policy Reconciliation Audit**:
-
-```text
-THIS WORKING POLICY
-        ↓
-CANONICAL / APPROVED CONTRACT CHECK
-        ↓
-CURRENT RUNTIME CHECK
-        ↓
-CURRENT DATABASE FUNCTION CHECK
-        ↓
-CURRENT DATA STATE CHECK
-        ↓
-CONFLICT / GAP REGISTER
-        ↓
-APPROVED IMPLEMENTATION PLAN
-```
-
-Only after that reconciliation should implementation be proposed.
-
-## 24. Current Conclusion
+Langkah engineering berikutnya adalah **Policy Reconciliation Audit**:
 
 ```text
-SEMANTIC LIFECYCLE POLICY
-        │
-        ├── Explicit user capture → EXISTING / VERIFIED PATH
-        │
-        ├── Model signal → candidate → decision → persistence → OPEN
-        │
-        ├── Candidate → Active → OPEN
-        │
-        ├── Journey projection → EXISTING / PARTIAL VERIFIED
-        │
-        └── Transfer eligibility → EXISTING POLICY / E2E OPEN
+KEBIJAKAN KERJA INI
+        ↓
+PEMERIKSAAN CANONICAL / APPROVED CONTRACT
+        ↓
+PEMERIKSAAN RUNTIME SAAT INI
+        ↓
+PEMERIKSAAN FUNCTION DATABASE SAAT INI
+        ↓
+PEMERIKSAAN STATE DATA SAAT INI
+        ↓
+REGISTER CONFLICT / GAP
+        ↓
+RENCANA IMPLEMENTASI YANG DISETUJUI
 ```
-
-**Conclusion: POLICY GATE DRAFTED — IMPLEMENTATION NOT AUTHORIZED BY THIS DOCUMENT ALONE.**
