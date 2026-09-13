@@ -2,11 +2,11 @@
 
 ## Status
 
-**WORKING — POLICY RECONCILIATION RESULT / PARTIAL PASS / IMPLEMENTATION GATE NOT CLOSED**
+**WORKING — HASIL REKONSILIASI POLICY / PARTIAL PASS / IMPLEMENTATION GATE BELUM DITUTUP**
 
-This record reconciles the working Semantic Lifecycle Policy Contract against the current DEV Canonical baseline, runtime implementation, migration history, and current Supabase database function/schema surface.
+Catatan ini merekonsiliasi Semantic Lifecycle Policy Contract yang sedang digunakan dengan baseline Canonical DEV saat ini, implementasi runtime, riwayat migration, serta permukaan function/schema Supabase yang sedang berjalan.
 
-No Canonical document, approved contract, runtime code, or database migration is changed by this record.
+Tidak ada dokumen Canonical, approved contract, runtime code, atau database migration yang diubah oleh catatan ini.
 
 ## Authority
 
@@ -28,11 +28,11 @@ RUNTIME / DATABASE EVIDENCE
 E2E VERIFICATION
 ```
 
-Higher authority wins. No conflict is silently merged.
+Otoritas yang lebih tinggi selalu berlaku. Tidak ada conflict yang digabung secara diam-diam.
 
 ## 1. Reconciliation Scope
 
-Target policy chain:
+Rantai policy yang diperiksa:
 
 ```text
 MODEL SIGNAL
@@ -52,15 +52,15 @@ POLICY
 TRANSFER ELIGIBILITY
 ```
 
-Sources inspected:
+Sumber yang diperiksa:
 
 - `docs/working/semantic/sh_semantic_lifecycle_policy_contract.md`
 - `docs/working/semantic/sh_full_semantic_lifecycle_verification_20260913.md`
 - `docs/canonical/sh_foundation_blueprint.md`
 - `functions/ai-runtime/semantic_decision.ts`
 - `functions/ai-runtime/semantic_lifecycle.ts`
-- lifecycle/transfer migration history
-- current DEV Supabase function and schema surface
+- riwayat migration lifecycle/transfer
+- function dan schema surface Supabase DEV saat ini
 
 ## 2. Reconciliation Findings
 
@@ -68,53 +68,53 @@ Sources inspected:
 
 **Status: RECONCILED / PASS**
 
-Canonical foundation explicitly separates Model from SH Identity and states `Model ≠ Authority`. It also establishes privacy default-deny and explicit authorization for sharing.
+Canonical foundation secara eksplisit memisahkan Model dari SH Identity dan menyatakan `Model ≠ Authority`. Canonical juga menetapkan privacy default-deny dan authorization eksplisit untuk sharing.
 
-The current semantic decision implementation follows the same boundary: model output is a candidate and `evaluateSemanticSignal()` only returns `ACCEPT`, `REJECT`, or `CONFIRM`.
+Implementasi semantic decision saat ini mengikuti batas yang sama: output model diperlakukan sebagai candidate dan `evaluateSemanticSignal()` hanya mengembalikan `ACCEPT`, `REJECT`, atau `CONFIRM`.
 
-No evidence was found that model output is intended to directly become durable semantic authority.
+Tidak ditemukan evidence bahwa output model dimaksudkan untuk langsung menjadi authority semantik durable.
 
 ### 2.2 Explicit user capture authority
 
-**Status: RECONCILED / PASS for existing tested path**
+**Status: RECONCILED / PASS untuk path yang sudah diuji**
 
-The existing explicit capture runtime uses domain-specific persistence functions for Memory, Knowledge, and Experience and Journey projection.
+Runtime explicit capture yang ada menggunakan function persistence spesifik domain untuk Memory, Knowledge, dan Experience serta proyeksi Journey.
 
-This is consistent with the working policy principle that explicit user capture has higher capture authority than model inference, while ownership and domain authorization still apply.
+Hal ini konsisten dengan prinsip policy kerja bahwa explicit user capture memiliki capture authority lebih tinggi daripada model inference, sementara ownership dan domain authorization tetap berlaku.
 
 ### 2.3 Candidate semantics
 
 **Status: PARTIAL / OPEN**
 
-`CANDIDATE` exists in the current database lifecycle vocabulary and is used by current semantic capture and transfer code.
+`CANDIDATE` ada dalam vocabulary lifecycle database saat ini dan digunakan oleh code semantic capture serta transfer.
 
-However, current transfer implementations may materialize a source `CANDIDATE` as `ACTIVE` on authorized target operations. Therefore `CANDIDATE → ACTIVE` is not a generic universal transition contract; it is operation/domain specific.
+Namun implementasi transfer saat ini dapat mematerialisasi source `CANDIDATE` menjadi `ACTIVE` pada operasi target yang terotorisasi. Karena itu `CANDIDATE → ACTIVE` bukan generic universal transition contract; transition tersebut bergantung pada operasi dan domain.
 
-The policy contract must not be interpreted as authorizing a new universal activation function.
+Policy contract tidak boleh ditafsirkan sebagai otorisasi untuk membuat universal activation function baru.
 
 ### 2.4 Existing transfer lifecycle semantics
 
 **Status: EXISTING / PARTIALLY VERIFIED**
 
-Migration history demonstrates explicit lifecycle behavior for Clone, Inheritance, and Succession. Existing implementation promotes transferred candidate rows to active target rows in relevant transfer operations and preserves provenance.
+Riwayat migration menunjukkan perilaku lifecycle eksplisit untuk Clone, Inheritance, dan Succession. Implementasi yang ada mempromosikan row candidate hasil transfer menjadi active pada target untuk operasi transfer yang relevan dan mempertahankan provenance.
 
-This confirms that lifecycle transfer is already a real database behavior, not merely a conceptual design.
+Ini membuktikan bahwa lifecycle transfer sudah menjadi perilaku database nyata, bukan hanya desain konseptual.
 
-Full authenticated E2E execution remains OPEN.
+Full authenticated E2E execution masih OPEN.
 
 ### 2.5 Journey as projection boundary
 
-**Status: RECONCILED / PASS for tested path**
+**Status: RECONCILED / PASS untuk path yang diuji**
 
-Current Journey records contain domain linkage and policy metadata. The current policy resolver resolves the domain record through the current account/SH ownership boundary.
+Journey record saat ini berisi domain linkage dan policy metadata. Policy resolver saat ini me-resolve domain record melalui batas ownership account/SH saat ini.
 
-Journey therefore remains a projection/continuity boundary rather than an independent semantic ownership authority.
+Dengan demikian Journey tetap menjadi batas projection/continuity, bukan authority ownership semantik yang berdiri sendiri.
 
 ### 2.6 Transfer policy vocabulary
 
 **Status: RECONCILED / PASS**
 
-Current DEV evidence supports:
+Evidence DEV saat ini mendukung:
 
 ```text
 NON_TRANSFERABLE
@@ -123,45 +123,45 @@ SUCCESSION
 LEGACY
 ```
 
-The working contract does not introduce a new transfer vocabulary.
+Working contract tidak memperkenalkan vocabulary transfer baru.
 
 ### 2.7 Model-derived persistence
 
 **Status: OPEN / IMPLEMENTATION GAP**
 
-The current model-derived path reaches semantic decision/audit but current verification evidence does not prove durable persistence following `ACCEPT` or `CONFIRM`.
+Path model-derived saat ini mencapai semantic decision/audit, tetapi evidence verifikasi saat ini belum membuktikan persistence durable setelah `ACCEPT` atau `CONFIRM`.
 
-The policy contract correctly keeps this boundary closed pending an implementation decision.
+Policy contract memang sengaja menjaga boundary ini tetap tertutup sampai ada keputusan implementasi yang sah.
 
 ### 2.8 Confirmation authority
 
 **Status: UNKNOWN / EVIDENCE GAP**
 
-The policy contract requires explicit confirmation for `CONFIRM` by default, but the current repository evidence inspected here does not establish the complete user/runtime confirmation mechanism.
+Policy contract secara default membutuhkan explicit confirmation untuk `CONFIRM`, tetapi evidence repository yang diperiksa pada gate ini belum menetapkan mekanisme confirmation user/runtime secara lengkap.
 
-No runtime implementation is authorized from this gap alone.
+Tidak ada implementasi runtime yang diotorisasi hanya karena gap ini ditemukan.
 
 ### 2.9 Idempotency
 
 **Status: OPEN / EVIDENCE GAP**
 
-The policy contract requires duplicate logical semantic capture to be controlled, but the current inspected evidence does not establish a complete model-signal idempotency key and enforcement path.
+Policy contract mengharuskan duplicate logical semantic capture dikendalikan, tetapi evidence yang diperiksa belum menetapkan idempotency key dan enforcement path lengkap untuk model signal.
 
-This must be resolved before model-derived persistence implementation.
+Hal ini harus diselesaikan sebelum model-derived persistence diimplementasikan.
 
 ### 2.10 Candidate retrieval semantics
 
 **Status: OPEN / EVIDENCE GAP**
 
-The policy contract states that candidates are not automatically authoritative durable context. Current repository/database evidence inspected in this gate does not yet prove the complete retrieval exclusion/inclusion behavior for every semantic domain.
+Policy contract menyatakan bahwa candidate tidak otomatis menjadi authoritative durable context. Evidence repository/database yang diperiksa pada gate ini belum membuktikan secara lengkap perilaku inclusion/exclusion retrieval untuk setiap semantic domain.
 
-A retrieval-specific verification gate is required before claiming this behavior.
+Verification gate khusus retrieval diperlukan sebelum perilaku tersebut dapat dinyatakan terverifikasi.
 
 ## 3. Conflict Register
 
-No direct Canonical-vs-policy conflict was identified in the inspected material.
+Tidak ditemukan direct conflict antara Canonical dan policy pada material yang diperiksa.
 
-One **semantic ambiguity** remains:
+Satu **semantic ambiguity** masih ada:
 
 ```text
 Working policy model:
@@ -173,26 +173,26 @@ CANDIDATE may become ACTIVE during authorized Clone/Inheritance/Succession mater
 
 Resolution:
 
-These are not treated as the same transition. Transfer materialization is an operation-specific lifecycle transition with its own authorization boundary. It must not be generalized into model-derived activation.
+Keduanya tidak diperlakukan sebagai transition yang sama. Transfer materialization adalah lifecycle transition spesifik operasi dengan authorization boundary tersendiri. Transition tersebut tidak boleh digeneralisasi menjadi model-derived activation.
 
 ## 4. Implementation Authorization Result
 
-The reconciliation gate does **not** authorize implementation of model-derived persistence yet.
+Reconciliation gate ini **belum mengotorisasi** implementasi model-derived persistence.
 
 Blocking items:
 
 1. confirmation authority/runtime boundary;
 2. model-signal idempotency/correlation key;
 3. candidate retrieval semantics;
-4. domain-specific lifecycle transition API/function availability for model-derived acceptance;
+4. domain-specific lifecycle transition API/function untuk model-derived acceptance;
 5. authenticated negative security tests;
 6. complete Journey projection transaction boundary.
 
 ## 5. Required Next Gate
 
-Next gate is **Runtime Lifecycle Transition Capability Audit**, not coding.
+Gate berikutnya adalah **Runtime Lifecycle Transition Capability Audit**, bukan coding.
 
-Audit each domain independently:
+Audit setiap domain secara terpisah:
 
 ```text
 MEMORY
@@ -211,7 +211,7 @@ EXPERIENCE
   ACTIVE → SUPERSEDE
 ```
 
-For every transition identify:
+Untuk setiap transition identifikasi:
 
 ```text
 function / RPC
@@ -232,11 +232,11 @@ E2E verification status
 
 **Semantic Lifecycle Policy Reconciliation: PARTIAL PASS.**
 
-The working policy is materially aligned with the current foundation and implementation boundaries, but the implementation gate remains OPEN because several runtime capabilities required to safely realize model-derived persistence are not yet proven.
+Working policy secara material selaras dengan foundation dan batas implementasi saat ini, tetapi implementation gate tetap OPEN karena beberapa capability runtime yang diperlukan untuk mewujudkan model-derived persistence secara aman belum terbukti.
 
-No migration is justified by this gate.
+Tidak ada migration yang dibenarkan oleh gate ini.
 
-No runtime code change is justified by this gate.
+Tidak ada perubahan runtime code yang dibenarkan oleh gate ini.
 
 ## 7. Evidence Principle
 
