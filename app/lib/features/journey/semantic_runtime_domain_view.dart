@@ -65,7 +65,7 @@ class _SemanticRuntimeDomainViewState extends State<SemanticRuntimeDomainView> {
         case ShSemanticDomain.knowledge:
           await _runtime.createKnowledgeCandidate(shId: shId, content: draft.content, scope: draft.scope, visibility: draft.visibility);
         case ShSemanticDomain.experience:
-          final result = await backendClient.rpc('runtime_record_experience', params: {
+          final result = await backendClient.rpc('runtime_record_experience_with_journey', params: {
             'p_sh_id': shId,
             'p_experience_type': 'EXPLICIT_USER_REQUEST',
             'p_content': draft.content,
@@ -77,14 +77,6 @@ class _SemanticRuntimeDomainViewState extends State<SemanticRuntimeDomainView> {
             'p_occurred_at': DateTime.now().toUtc().toIso8601String(),
           });
           if (result == null) throw StateError('Experience creation returned no identifier.');
-          await backendClient.rpc('runtime_record_journey_event', params: {
-            'p_sh_id': shId,
-            'p_event_type': 'EXPERIENCE',
-            'p_occurred_at': DateTime.now().toUtc().toIso8601String(),
-            'p_continuity_status': 'CONTINUOUS',
-            'p_payload': {'experience_id': result, 'content': draft.content},
-            'p_source_ref': 'journey-ui',
-          });
       }
       await _load();
     } catch (e) { _showError(e.toString()); }
