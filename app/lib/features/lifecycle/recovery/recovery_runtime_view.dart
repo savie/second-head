@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/state/sh_profile_state.dart';
-import '../../core/theme/sh_theme.dart';
-import '../journey/journey_runtime_service.dart';
+import '../../../core/state/sh_profile_state.dart';
+import '../../../core/theme/sh_theme.dart';
+import '../../journey/journey_runtime_service.dart';
 import '../lifecycle_runtime_read_service.dart';
 
 class RecoveryRuntimeView extends StatefulWidget {
@@ -26,10 +26,12 @@ class _RecoveryRuntimeViewState extends State<RecoveryRuntimeView> {
   }
 
   Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       final rows = await _read.listRecoverySnapshots();
       if (!mounted) return;
@@ -133,7 +135,12 @@ class _RecoveryRuntimeViewState extends State<RecoveryRuntimeView> {
             ),
             const SizedBox(height: 16),
             if (_loading)
-              const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              )
             else if (_error != null)
               Text('Recovery read failed: $_error')
             else if (_snapshots.isEmpty)
@@ -147,7 +154,6 @@ class _RecoveryRuntimeViewState extends State<RecoveryRuntimeView> {
                   child: ListTile(
                     title: Text(row['snapshot_kind']?.toString() ?? 'FULL'),
                     subtitle: Text(_date(row['created_at'])),
-                    isThreeLine: true,
                     trailing: IconButton(
                       tooltip: 'Restore',
                       icon: const Icon(Icons.restore),
