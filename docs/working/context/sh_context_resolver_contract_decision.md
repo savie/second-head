@@ -1,7 +1,7 @@
 # SH Context Resolver Contract Decision
 
 **Status:** WORKING document  
-**Scope:** Context Runtime contract preparation
+**Scope:** Persiapan contract Context Runtime
 
 ## Authority
 
@@ -29,10 +29,10 @@ Dokumen ini tidak mengubah Canonical dan tidak membuat contract baru.
 
 Hasil reconciliation:
 
-- Memory runtime foundation exists.
-- Knowledge runtime foundation exists.
-- Experience runtime foundation exists.
-- Journey runtime foundation exists.
+- Fondasi runtime Memory sudah ada.
+- Fondasi runtime Knowledge sudah ada.
+- Fondasi runtime Experience sudah ada.
+- Fondasi runtime Journey sudah ada.
 
 Context Resolver Integration Layer sudah melalui implementation verification.
 
@@ -40,7 +40,7 @@ Context Resolver Integration Layer sudah melalui implementation verification.
 
 # Current Context Runtime
 
-Existing:
+Yang sudah ada:
 
 - actor resolution
 - conversation resolution
@@ -74,9 +74,9 @@ Alasan:
 
 - Context Runtime memiliki satu boundary output.
 - Domain resolver tetap menjaga ownership semantic masing-masing.
-- Tidak membuat consumer harus memahami banyak payload terpisah.
+- Consumer tidak perlu memahami banyak payload yang terpisah.
 
-Resolver internal tetap dapat berasal dari domain berbeda.
+Resolver internal tetap dapat berasal dari domain yang berbeda.
 
 ---
 
@@ -102,7 +102,7 @@ journey
 
 Catatan:
 
-Ordering ini adalah contract assembly order, bukan ranking importance.
+Ordering ini adalah urutan assembly contract, bukan ranking importance.
 
 ---
 
@@ -115,7 +115,7 @@ Context Resolver wajib mempertahankan:
 - ownership boundary;
 - lifecycle boundary.
 
-Tidak semua data domain otomatis masuk Context Package.
+Tidak semua data domain otomatis masuk ke Context Package.
 
 ---
 
@@ -125,7 +125,7 @@ Decision:
 
 Context Resolver tidak boleh bypass domain security.
 
-Resolver harus menggunakan boundary existing:
+Resolver harus menggunakan boundary yang sudah ada:
 
 - Memory boundary;
 - Knowledge boundary;
@@ -156,7 +156,7 @@ runtime_get_context_package()
 
 # Runtime Verification Result
 
-Verified flow:
+Flow yang sudah diverifikasi:
 
 ```
 runtime_get_context_package()
@@ -172,7 +172,7 @@ Experience retrieval
 Journey retrieval
 ```
 
-Verification status:
+Status verification:
 
 ```
 Resolver runtime:
@@ -192,7 +192,7 @@ PRESERVED
 
 # Resolver Contract Decision Gate Result
 
-Review classification:
+Klasifikasi review:
 
 ```
 Resolver Output:
@@ -211,7 +211,7 @@ Output Contract Direction:
 DECIDED
 ```
 
-Unresolved ambiguity:
+Ambiguitas yang belum terselesaikan:
 
 ```
 NONE IDENTIFIED
