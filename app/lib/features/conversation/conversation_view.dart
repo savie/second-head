@@ -315,13 +315,9 @@ class ConversationViewState extends State<ConversationView> {
       _processFrontendSemantic(text);
       _scrollToLatest();
 
-      await Future<void>.delayed(const Duration(milliseconds: 650));
       if (!mounted) return;
 
-      const reply =
-          'Got it. SH menerima pesan ini dan jalur respons aktif. Respons dinamis akan terhubung ke model AI nanti.';
-
-      final assistant = await _runtime.recordAssistant(reply);
+      final assistant = await _runtime.recordAssistant();
 
       if (!mounted) return;
 
@@ -695,20 +691,46 @@ class ConversationViewState extends State<ConversationView> {
     }
 
     if (action == 'Regenerate') {
-      const regenerated = 'Regenerated response — ready to continue.';
       try {
-        if (message.runtimeRecordId != null) {
-          await _runtime.updateMessage(
-            messageId: message.runtimeRecordId!,
-            createdAt: message.createdAt ?? DateTime.now(),
-            role: 'assistant',
-            oldContent: message.text,
-            newContent: regenerated,
+        if (message.runtimeRecordId == null || message.threadId == null) {
+          throw const InvalidMessageAppError(
+            'Assistant message is missing runtime identity.',
           );
         }
+
+        final userIndex = index - 1;
+        final hasPrecedingUser = userIndex >= 0 &&
+            !_messages[userIndex].assistant &&
+            _messages[userIndex].threadId == message.threadId &&
+            _messages[userIndex].runtimeRecordId != null;
+
+        if (!hasPrecedingUser) {
+          throw const InvalidMessageAppError(
+            'Unable to resolve the user message for regeneration.',
+          );
+        }
+
+        final user = _messages[userIndex];
+
+        final response = await _runtime.generateAssistant(
+          input: user.text,
+          conversationId: message.threadId!,
+          userMessageId: user.runtimeRecordId!,
+        );
+
+        await _runtime.updateMessage(
+          messageId: message.runtimeRecordId!,
+          createdAt: message.createdAt ?? DateTime.now(),
+          role: 'assistant',
+          oldContent: message.text,
+          newContent: response.output,
+        );
+
         if (!mounted) return;
-        setState(() => message.text = regenerated);
+
+        setState(() => message.text = response.output);
         await _persistConversation();
+        _scrollToLatest();
       } catch (_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -744,19 +766,103 @@ class ConversationViewState extends State<ConversationView> {
     );
 
     if (!mounted || value == null || value.isEmpty) return;
+
+    final oldText = message.text;
+    ConversationMessage? editedAssistant;
+    String? oldAssistantText;
+
     try {
-      if (message.runtimeRecordId != null) {
-        await _runtime.updateMessage(
-          messageId: message.runtimeRecordId!,
-          createdAt: message.createdAt ?? DateTime.now(),
-          role: message.assistant ? 'assistant' : 'user',
-          oldContent: message.text,
-          newContent: value,
+      if (message.runtimeRecordId == null || message.threadId == null) {
+        throw const InvalidMessageAppError(
+          'Edited message is missing runtime identity.',
         );
       }
-      if (!mounted) return;
-      setState(() => message.text = value);
-      await _persistConversation();
+
+      await _runtime.updateMessage(
+        messageId: message.runtimeRecordId!,
+        createdAt: message.createdAt ?? DateTime.now(),
+        role: message.assistant ? 'assistant' : 'user',
+        oldContent: oldText,
+        newContent: value,
+      );
+
+      try {
+        if (!message.assistant) {
+          final assistantIndex = index + 1;
+          final hasFollowingAssistant = assistantIndex < _messages.length &&
+              _messages[assistantIndex].assistant &&
+              _messages[assistantIndex].threadId == message.threadId;
+
+          if (hasFollowingAssistant) {
+            final assistant = _messages[assistantIndex];
+            editedAssistant = assistant;
+            oldAssistantText = assistant.text;
+
+            if (assistant.runtimeRecordId == null) {
+              throw const InvalidMessageAppError(
+                'Assistant response is missing runtime identity.',
+              );
+            }
+
+            final response = await _runtime.generateAssistant(
+              input: value,
+              conversationId: message.threadId!,
+              userMessageId: message.runtimeRecordId!,
+            );
+
+            await _runtime.updateMessage(
+              messageId: assistant.runtimeRecordId!,
+              createdAt: assistant.createdAt ?? DateTime.now(),
+              role: 'assistant',
+              oldContent: assistant.text,
+              newContent: response.output,
+            );
+
+            if (!mounted) return;
+
+            setState(() {
+              message.text = value;
+              assistant.text = response.output;
+            });
+          } else {
+            if (!mounted) return;
+            setState(() => message.text = value);
+          }
+        } else {
+          if (!mounted) return;
+          setState(() => message.text = value);
+        }
+
+        await _persistConversation();
+        _scrollToLatest();
+      } catch (error) {
+        if (editedAssistant?.runtimeRecordId != null &&
+            oldAssistantText != null &&
+            editedAssistant!.text != oldAssistantText) {
+          try {
+            await _runtime.updateMessage(
+              messageId: editedAssistant!.runtimeRecordId!,
+              createdAt:
+                  editedAssistant!.createdAt ?? DateTime.now(),
+              role: 'assistant',
+              oldContent: editedAssistant!.text,
+              newContent: oldAssistantText!,
+            );
+          } catch (_) {}
+        }
+
+        try {
+          await _runtime.updateMessage(
+            messageId: message.runtimeRecordId!,
+            createdAt: message.createdAt ?? DateTime.now(),
+            role: message.assistant ? 'assistant' : 'user',
+            oldContent: value,
+            newContent: oldText,
+          );
+        } catch (_) {}
+
+        rethrow;
+      }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

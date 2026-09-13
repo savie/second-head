@@ -9,11 +9,18 @@ final class RuntimeRequest {
     required this.input,
     required this.conversationId,
     required this.userMessageId,
+    this.mode = RuntimeExecutionMode.normal,
   });
 
   final String input;
   final String conversationId;
   final String userMessageId;
+  final RuntimeExecutionMode mode;
+}
+
+enum RuntimeExecutionMode {
+  normal,
+  generateOnly,
 }
 
 final class RuntimeResponse {

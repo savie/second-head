@@ -66,7 +66,7 @@ class ConversationRuntimeBridge {
     return record;
   }
 
-  Future<ConversationRecord> recordAssistant(String _fallbackContent) async {
+  Future<ConversationRecord> recordAssistant() async {
     final pending = _pendingRuntimeMessage;
     _pendingRuntimeMessage = null;
 
@@ -79,22 +79,54 @@ class ConversationRuntimeBridge {
         input: pending.input,
         conversationId: pending.conversationId,
         userMessageId: pending.userMessageId,
+        mode: RuntimeExecutionMode.normal,
       ),
     );
+
+    final response = switch (runtimeResult) {
+      AppSuccess<RuntimeResponse>(value: final value) => value,
+      AppFailure<RuntimeResponse>(error: final error) => throw error,
+    };
+
+    return _service.record(
+      role: 'assistant',
+      content: response.output,
+      metadata: {
+        'runtime_request_id': response.requestId,
+        'runtime_provider': response.provider,
+        'runtime_user_message_id': pending.userMessageId,
+        'runtime_conversation_id': pending.conversationId,
+      },
+    );
+  }
+
+  Future<RuntimeResponse> generateAssistant({
+    required String input,
+    required String conversationId,
+    required String userMessageId,
+  }) async {
+    if (input.trim().isEmpty) {
+      throw const InvalidMessageAppError('AI runtime input is missing.');
+    }
+    if (conversationId.trim().isEmpty) {
+      throw const InvalidMessageAppError('AI runtime conversation is missing.');
+    }
+    if (userMessageId.trim().isEmpty) {
+      throw const InvalidMessageAppError('AI runtime user message is missing.');
+    }
+
+    final runtimeResult = await const AIRuntimeClient().send(
+      RuntimeRequest(
+        input: input,
+        conversationId: conversationId,
+        userMessageId: userMessageId,
+        mode: RuntimeExecutionMode.generateOnly,
+      ),
+    );
+
     return switch (runtimeResult) {
-      AppSuccess<RuntimeResponse>(value: final response) =>
-        _service.record(
-          role: 'assistant',
-          content: response.output,
-          metadata: {
-            'runtime_request_id': response.requestId,
-            'runtime_provider': response.provider,
-            'runtime_user_message_id': pending.userMessageId,
-            'runtime_conversation_id': pending.conversationId,
-          },
-        ),
-      AppFailure<RuntimeResponse>(error: final error) =>
-        throw error,
+      AppSuccess<RuntimeResponse>(value: final response) => response,
+      AppFailure<RuntimeResponse>(error: final error) => throw error,
     };
   }
 
