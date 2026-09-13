@@ -1,5 +1,7 @@
-import '../../profile/integrations/integration_authorization_store.dart';
 import '../../journey/journey_data.dart';
+import '../../journey/journey_runtime_service.dart';
+import '../../profile/integrations/integration_authorization_store.dart';
+import '../../../core/state/sh_profile_state.dart';
 import '../../../core/storage/recovery_snapshot_store.dart';
 import 'eol_state.dart';
 
@@ -8,20 +10,23 @@ abstract interface class EolService {
   Future<void> executeFrontendClosure();
 }
 
-/// Frontend-only implementation.
+/// Runtime-backed EOL implementation.
 ///
-/// This deliberately does not mutate Supabase or reinterpret lifecycle
-/// semantics. It prepares an impact snapshot from existing local stores and
-/// completes only the local frontend flow until a backend contract is wired.
+/// Impact preparation remains non-destructive and uses existing local stores
+/// for the review UI. Terminal execution is delegated to the backend runtime
+/// authority; the UI acknowledgement is the explicit user confirmation gate.
 class LocalEolService implements EolService {
   LocalEolService({
     RecoverySnapshotStore? snapshots,
     IntegrationAuthorizationStore? integrations,
+    JourneyRuntimeService? runtime,
   })  : _snapshots = snapshots ?? RecoverySnapshotStore.instance,
-        _integrations = integrations ?? IntegrationAuthorizationStore.instance;
+        _integrations = integrations ?? IntegrationAuthorizationStore.instance,
+        _runtime = runtime ?? const JourneyRuntimeService();
 
   final RecoverySnapshotStore _snapshots;
   final IntegrationAuthorizationStore _integrations;
+  final JourneyRuntimeService _runtime;
 
   @override
   Future<EolImpact> prepareImpact() async {
@@ -40,8 +45,13 @@ class LocalEolService implements EolService {
 
   @override
   Future<void> executeFrontendClosure() async {
-    // Intentionally no destructive storage operation here.
-    // EOL is not equivalent to Delete Data, and backend terminal lifecycle
-    // execution belongs behind this service boundary.
+    final shId = profileShId.value.trim();
+    if (shId.isEmpty) {
+      throw StateError('Active SH identity is unavailable.');
+    }
+    await _runtime.endOfLife(
+      shId: shId,
+      reason: 'Explicit user-confirmed EOL request',
+    );
   }
 }
