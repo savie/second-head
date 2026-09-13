@@ -14,17 +14,17 @@ RETIREMENT CANDIDATE — LEGACY / REFERENCE-ONLY
 - Current Flutter transport invokes `ai-runtime`; no current Flutter source invocation of `runtime-p4a-001` was found in the inspected DEV source.
 - GitHub inspection found no current source consumer or issue/PR dependency for `runtime-p4a-001`.
 - Supabase audit evidence shows legacy `RUNTIME_REQUEST` traffic through `2026-09-05 15:16:58.150014+00`, with no later legacy request observed in the inspected audit trail.
-- `runtime-p4a-001` is therefore not treated as a dependency of the current runtime execution path.
+- Karena itu `runtime-p4a-001` tidak diperlakukan sebagai dependency dari current runtime execution path.
 
 ## Residual Risk
 
-- Source and audit inspection cannot prove absence of arbitrary external callers outside the inspected SH codebase and audit trail.
-- Administrative disable/delete must not be performed speculatively without an operational reference check or explicit retirement authority.
+- Source dan audit inspection tidak dapat membuktikan absence of arbitrary external callers di luar inspected SH codebase dan audit trail.
+- Administrative disable/delete tidak boleh dilakukan secara speculative tanpa operational reference check atau explicit retirement authority.
 
 ## Decision
 
-`runtime-p4a-001` is legacy/reference-only and is not a prerequisite for current `ai-runtime` operation.
+`runtime-p4a-001` adalah legacy/reference-only dan bukan prerequisite untuk current `ai-runtime` operation.
 
-Proceed to operational retirement only after the final external-consumer check is satisfied and the Edge Function administrative operation is available.
+Operational retirement baru boleh dilanjutkan setelah final external-consumer check terpenuhi dan Edge Function administrative operation tersedia.
 
-No canonical architecture is changed by this record.
+Record ini tidak mengubah canonical architecture.
