@@ -12,7 +12,7 @@ Mendokumentasikan boundary retrieval Journey yang digunakan oleh Context Package
 
 Urutan authority:
 
-```
+```text
 Owner/User Decision
 ↓
 Canonical
@@ -26,14 +26,14 @@ Current Implementation
 Historical evidence
 ```
 
-Dokumen ini adalah WORKING document.
+Dokumen ini adalah dokumen WORKING.
 
 Dokumen ini:
 
 - tidak mengubah Canonical;
 - tidak menggantikan Approved Contract;
 - tidak membuat contract baru;
-- mendokumentasikan hasil reconciliation contract dan implementation Journey Context Retrieval.
+- mendokumentasikan hasil rekonsiliasi contract dan implementation Journey Context Retrieval.
 
 ---
 
@@ -43,17 +43,17 @@ Foundation runtime Journey sudah tersedia.
 
 Foundation yang sudah diverifikasi:
 
-- journey_events;
+- `journey_events`;
 - continuity model;
 - lifecycle boundary;
-- runtime_record_journey_event();
-- runtime_classify_journey_event();
-- runtime_get_journey_record_policy();
-- runtime_journey_event_is_shared().
+- `runtime_record_journey_event()`;
+- `runtime_classify_journey_event()`;
+- `runtime_get_journey_record_policy()`;
+- `runtime_journey_event_is_shared()`.
 
 Classification:
 
-```
+```text
 Journey Event Runtime:
 VERIFIED
 ```
@@ -68,7 +68,7 @@ Journey Context Retrieval sudah memiliki keputusan contract melalui Context Reso
 
 Decision:
 
-```
+```text
 Journey INCLUDED in semantic_context
 ```
 
@@ -78,7 +78,7 @@ Journey retrieval merupakan bagian dari unified semantic context package.
 
 Decision:
 
-```
+```text
 unified semantic context package
 ```
 
@@ -88,7 +88,7 @@ Journey tetap menjadi domain-owned retrieval boundary di dalam Context Resolver.
 
 Decision:
 
-```
+```text
 actor
  ↓
 conversation
@@ -104,7 +104,7 @@ experience
 journey
 ```
 
-Ordering adalah contract assembly order, bukan ranking importance.
+Ordering adalah urutan assembly contract, bukan ranking importance.
 
 ## 4. Inclusion Policy
 
@@ -123,7 +123,7 @@ Context Resolver tidak boleh bypass Journey domain boundary.
 
 Journey retrieval menggunakan existing Journey retrieval boundary:
 
-```
+```text
 runtime_get_journey_context()
 ```
 
@@ -131,9 +131,9 @@ runtime_get_journey_context()
 
 # Implementation Evidence
 
-Flow runtime yang sudah diverifikasi:
+Alur runtime yang sudah diverifikasi:
 
-```
+```text
 runtime_get_context_package()
 ↓
 assemble_context()
@@ -149,11 +149,11 @@ Journey retrieval
 
 Journey retrieval terhubung melalui:
 
-```
+```text
 runtime_get_journey_context()
 ```
 
-Dengan demikian implementasi saat ini sudah selaras dengan Context Resolver contract yang telah diputuskan.
+Dengan demikian implementation saat ini sudah selaras dengan Context Resolver contract yang telah diputuskan.
 
 ---
 
@@ -163,13 +163,13 @@ Journey UI dapat mengambil data Journey melalui retrieval boundary Journey untuk
 
 Journey service pada FE saat ini me-resolve identity SH yang terautentikasi melalui:
 
-```
+```text
 resolve_identity()
 ```
 
 kemudian mengambil Journey context melalui:
 
-```
+```text
 runtime_get_journey_context()
 ```
 
@@ -179,7 +179,7 @@ Projection FE ini tidak mendefinisikan ulang atau melewati Context Resolver cont
 
 # Current Status
 
-```
+```text
 Journey Event Runtime:
 VERIFIED
 
