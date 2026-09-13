@@ -1,32 +1,32 @@
-# SECOND HEAD — Lifecycle Transition Capability Contract
+# SECOND HEAD — Kontrak Capability Transition Siklus Hidup
 
 ## Status
-WORKING CONTRACT — DESIGN GATE — NOT CANONICAL
+**KONTRAK KERJA — GATE DESAIN — BUKAN CANONICAL**
 
-## Purpose
+## Tujuan
 
-Define the runtime/database capability contract required before implementing model-derived semantic lifecycle transitions.
+Mendefinisikan kontrak capability runtime/database yang diperlukan sebelum mengimplementasikan transition siklus hidup semantik yang berasal dari model.
 
-This document does not change Canonical, Approved Contracts, schema, runtime behavior, grants, or migrations.
+Dokumen ini tidak mengubah Canonical, Approved Contracts, schema, perilaku runtime, grants, maupun migration.
 
-## Authority
+## Otoritas
 
-Higher authority wins:
+Otoritas yang lebih tinggi selalu berlaku:
 
 ```text
-OWNER / USER DECISION
+KEPUTUSAN OWNER / USER
 → CANONICAL
 → APPROVED CONTRACT
-→ ARCHITECTURE / DESIGN
-→ THIS WORKING CONTRACT
-→ IMPLEMENTATION
-→ RUNTIME / DATABASE EVIDENCE
-→ E2E VERIFICATION
+→ ARSITEKTUR / DESAIN
+→ KONTRAK KERJA INI
+→ IMPLEMENTASI
+→ BUKTI RUNTIME / DATABASE
+→ VERIFIKASI E2E
 ```
 
-## 1. Core Rule
+## 1. Aturan Inti
 
-A semantic lifecycle transition is an **authorized state transition**, not a field update.
+Transition siklus hidup semantik adalah **state transition yang terotorisasi**, bukan sekadar perubahan field.
 
 ```text
 REQUEST
@@ -42,81 +42,81 @@ REQUEST
 → RETURN OBSERVABLE RESULT
 ```
 
-Model output never supplies transition authority by itself.
+Output model tidak pernah menyediakan otoritas transition dengan sendirinya.
 
-## 2. Transition Matrix
+## 2. Matriks Transition
 
-| Domain | CANDIDATE→ACTIVE | ACTIVE→UPDATE | ACTIVE→SUPERSEDE | Current evidence |
+| Domain | CANDIDATE→ACTIVE | ACTIVE→UPDATE | ACTIVE→SUPERSEDE | Bukti saat ini |
 |---|---|---|---|---|
-| Memory | dedicated transition required | domain-specific replacement exists | replacement exists via `superseded_by` | PARTIAL |
-| Knowledge | dedicated transition required | not established | not established | OPEN |
-| Experience | candidate state not established | not established | not established | OPEN |
+| Memory | transition khusus diperlukan | replacement spesifik domain tersedia | replacement tersedia melalui `superseded_by` | PARTIAL |
+| Knowledge | transition khusus diperlukan | belum ditetapkan | belum ditetapkan | OPEN |
+| Experience | state candidate belum ditetapkan | belum ditetapkan | belum ditetapkan | OPEN |
 
-`runtime_replace_memory` is a concrete Memory replacement operation, not a generic lifecycle engine.
+`runtime_replace_memory` adalah operasi replacement Memory yang konkret, bukan generic lifecycle engine.
 
 ## 3. CANDIDATE → ACTIVE
 
-### Preconditions
+### Prasyarat
 
-All must pass:
+Semuanya harus berhasil:
 
-- authenticated actor;
-- current account resolved;
-- target SH belongs to current account and is active;
-- record belongs to target SH/account;
-- record is currently `CANDIDATE`;
-- semantic domain matches the requested transition;
-- source authority is valid;
-- decision outcome permits activation;
-- confirmation authority is satisfied where required;
-- scope/visibility are valid;
-- transfer policy is valid;
-- provenance is sufficient;
-- idempotency key/correlation semantics are satisfied.
+- actor terautentikasi;
+- account saat ini berhasil di-resolve;
+- target SH milik account saat ini dan aktif;
+- record milik target SH/account;
+- record saat ini berstatus `CANDIDATE`;
+- domain semantik sesuai dengan transition yang diminta;
+- otoritas source valid;
+- hasil decision mengizinkan aktivasi;
+- otoritas konfirmasi terpenuhi jika diwajibkan;
+- scope/visibility valid;
+- transfer policy valid;
+- provenance memadai;
+- semantics idempotency key/correlation terpenuhi.
 
-### Prohibited
+### Dilarang
 
-- direct activation from model output;
-- activation through Journey replay;
-- activation by guessed record ID from another actor;
-- activation of an already terminal/superseded record;
-- activation merely because confidence is high;
-- activation without required confirmation.
+- aktivasi langsung dari output model;
+- aktivasi melalui replay Journey;
+- aktivasi menggunakan record ID actor lain yang ditebak;
+- aktivasi terhadap record yang sudah terminal/superseded;
+- aktivasi hanya karena confidence tinggi;
+- aktivasi tanpa confirmation yang diwajibkan.
 
 ## 4. ACTIVE → UPDATE
 
-An update must preserve:
+Update harus mempertahankan:
 
 - identity;
-- account/SH ownership;
-- domain type;
-- lifecycle legality;
+- ownership account/SH;
+- tipe domain;
+- legalitas lifecycle;
 - provenance/history;
-- scope/visibility policy;
-- transfer policy unless an approved policy explicitly allows mutation;
-- Journey linkage where required.
+- policy scope/visibility;
+- transfer policy kecuali approved policy secara eksplisit mengizinkan mutation;
+- linkage Journey jika diwajibkan.
 
-A mutation that destroys the historical value of the previous state should use versioning/supersession rather than silent overwrite where the domain contract requires history.
+Mutation yang menghancurkan nilai historis state sebelumnya seharusnya menggunakan versioning/supersession, bukan silent overwrite, jika kontrak domain mewajibkan history.
 
 ## 5. ACTIVE → SUPERSEDE
 
-Supersession must:
+Supersession harus:
 
-1. authenticate and authorize the actor;
-2. resolve exactly one valid current source record;
-3. create or identify the successor;
-4. preserve the old record as historical state;
-5. establish `old.superseded_by = successor` or the domain-equivalent relationship;
-6. preserve provenance;
-7. prevent the old record from remaining falsely active/current;
-8. project the lifecycle relationship to Journey where required;
-9. be atomic or explicitly observable as incomplete.
+1. mengautentikasi dan mengotorisasi actor;
+2. me-resolve tepat satu source record current yang valid;
+3. membuat atau mengidentifikasi successor;
+4. mempertahankan record lama sebagai state historis;
+5. menetapkan `old.superseded_by = successor` atau hubungan ekuivalen pada domain;
+6. mempertahankan provenance;
+7. mencegah record lama tetap secara keliru dianggap active/current;
+8. memproyeksikan hubungan lifecycle ke Journey jika diwajibkan;
+9. bersifat atomic atau secara eksplisit observable sebagai incomplete.
 
-## 6. Domain-Specific Rules
+## 6. Aturan Spesifik Domain
 
 ### Memory
 
-Existing `runtime_replace_memory` is the current reference capability:
+`runtime_replace_memory` adalah capability referensi saat ini:
 
 ```text
 current CANDIDATE/ACTIVE
@@ -125,27 +125,27 @@ current CANDIDATE/ACTIVE
 → MEMORY Journey event
 ```
 
-It must not be generalized into automatic activation of the new candidate.
+Capability ini tidak boleh digeneralisasi menjadi aktivasi otomatis terhadap candidate baru.
 
 ### Knowledge
 
-Existing candidate capture is supported. A future activation/update/supersession capability must be explicitly designed and authorized rather than implemented by direct table mutation.
+Capture candidate yang ada sudah didukung. Capability activation/update/supersession di masa depan harus didesain dan diotorisasi secara eksplisit, bukan diimplementasikan melalui direct table mutation.
 
 ### Experience
 
-Current `runtime_record_experience` creates `ACTIVE`. A future candidate workflow requires an explicit contract decision first; do not infer candidate semantics from Memory/Knowledge.
+`runtime_record_experience` saat ini membuat `ACTIVE`. Workflow candidate di masa depan membutuhkan keputusan kontrak eksplisit terlebih dahulu; jangan mengasumsikan semantik candidate dari Memory/Knowledge.
 
-## 7. Journey Contract
+## 7. Kontrak Journey
 
-Journey is a projection/history boundary, not lifecycle authority.
+Journey adalah batas projection/history, bukan otoritas lifecycle.
 
-A Journey event may reference a domain record, but replaying or editing the event must not manufacture lifecycle authority.
+Journey event boleh mereferensikan record domain, tetapi replay atau edit event tidak boleh membuat otoritas lifecycle.
 
-Where domain persistence and Journey projection are required to represent one logical operation, the transaction boundary must be explicit and verified.
+Jika persistence domain dan proyeksi Journey harus merepresentasikan satu operasi logis, transaction boundary harus eksplisit dan diverifikasi.
 
-## 8. Security Contract
+## 8. Kontrak Security
 
-Every transition must enforce:
+Setiap transition harus menerapkan:
 
 ```text
 auth.uid()
@@ -157,82 +157,82 @@ auth.uid()
 → operation authority
 ```
 
-Required negative tests:
+Test negatif yang diwajibkan:
 
-- unauthenticated actor rejected;
-- cross-account SH rejected;
-- cross-actor record ID rejected;
-- wrong lifecycle rejected;
-- superseded record rejected;
-- terminal SH rejected where applicable;
-- invalid scope/visibility rejected;
-- invalid transfer policy rejected;
-- model-only authority rejected;
-- Journey-only replay rejected.
+- actor unauthenticated ditolak;
+- SH lintas account ditolak;
+- record ID lintas actor ditolak;
+- lifecycle yang salah ditolak;
+- record superseded ditolak;
+- SH terminal ditolak jika berlaku;
+- scope/visibility tidak valid ditolak;
+- transfer policy tidak valid ditolak;
+- authority model-only ditolak;
+- replay Journey-only ditolak.
 
-## 9. Idempotency Contract
+## 9. Kontrak Idempotency
 
-Before model-derived transitions are enabled, every externally retryable transition must define a stable logical operation key.
+Sebelum transition yang berasal dari model diaktifkan, setiap transition yang dapat di-retry dari luar harus mendefinisikan stable logical operation key.
 
-Minimum conceptual identity:
+Identity konseptual minimum:
 
 ```text
 actor/account + SH + domain + source_record + transition + decision/request correlation
 ```
 
-Repeated execution of the same logical operation must not create duplicate successor records or duplicate lifecycle Journey events when the contract requires one operation.
+Eksekusi berulang atas logical operation yang sama tidak boleh membuat duplicate successor record atau duplicate lifecycle Journey event ketika kontrak mensyaratkan satu operasi.
 
-Content matching alone is not sufficient proof of request-level idempotency.
+Content matching saja bukan bukti idempotency request-level.
 
-## 10. Provenance Contract
+## 10. Kontrak Provenance
 
-A transition must be auditable to:
+Sebuah transition harus dapat diaudit sampai ke:
 
 - actor/account;
 - SH;
 - source record;
 - source signal;
-- model/provider when applicable;
+- model/provider jika berlaku;
 - decision;
 - confirmation/authorization;
 - transition;
 - timestamp;
 - resulting record;
-- Journey event when applicable.
+- Journey event jika berlaku.
 
-## 11. Failure Contract
+## 11. Kontrak Failure
 
-No false success.
+Tidak boleh ada false success.
 
 ```text
-DB mutation fails
-→ operation fails
-→ required Journey success is not claimed
+DB mutation gagal
+→ operasi gagal
+→ keberhasilan Journey yang diwajibkan tidak boleh diklaim
 ```
 
-If the domain write and Journey write are not transactionally atomic, the system must expose the intermediate state and recovery/reconciliation path.
+Jika domain write dan Journey write tidak atomic secara transaksional, sistem harus mengekspos intermediate state serta jalur recovery/reconciliation.
 
-## 12. Implementation Gate
+## 12. Gate Implementasi
 
-Runtime/database implementation remains **CLOSED** until the following are evidenced on DEV:
+Implementasi runtime/database tetap **CLOSED** sampai hal berikut memiliki evidence di DEV:
 
-1. confirmation authority;
-2. candidate retrieval semantics;
-3. transition API/function per domain;
-4. idempotency/correlation mechanism;
-5. provenance contract;
-6. Journey transaction boundary;
+1. otoritas confirmation;
+2. semantik retrieval candidate;
+3. API/function transition per domain;
+4. mekanisme idempotency/correlation;
+5. kontrak provenance;
+6. transaction boundary Journey;
 7. authenticated positive E2E;
 8. authenticated negative/cross-actor E2E;
-9. transfer E2E where transition interacts with transfer policy.
+9. transfer E2E jika transition berinteraksi dengan transfer policy.
 
-## 13. Required Next Audit
+## 13. Audit Berikutnya
 
-Next engineering action is **Transition Capability Evidence Audit**, focused on actual callable behavior and grants for any proposed transition mechanism. No speculative migration or runtime implementation should be created until this audit closes the capability contract.
+Langkah engineering berikutnya adalah **Transition Capability Evidence Audit**, dengan fokus pada perilaku callable aktual dan grants untuk mekanisme transition yang diusulkan. Tidak boleh dibuat migration atau implementasi runtime spekulatif sampai audit ini menutup capability contract.
 
-## 14. Decision
+## 14. Keputusan
 
-Current result:
+Hasil saat ini:
 
 ```text
 POLICY CONTRACT       = RECONCILED
