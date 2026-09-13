@@ -125,7 +125,11 @@ export async function recordExplicitSemanticLifecycle(
       p_provenance: { source_message: userMessage.trim(), capture_mode: "EXPLICIT_USER_REQUEST" },
     });
     if (error) throw new Error(`EXPERIENCE_PERSISTENCE_FAILED: ${error.message}`);
-    const eventId = await recordJourney(supabase, shId, "EXPERIENCE", { experience_id: data, capture_mode: "EXPLICIT_USER_REQUEST" });
+    const eventId = await recordJourney(supabase, shId, "EXPERIENCE", {
+      experience_id: data,
+      capture_mode: "EXPLICIT_USER_REQUEST",
+      content,
+    });
     result.experience = { experience_id: data, content };
     result.journey = { event_id: eventId, event_type: "EXPERIENCE" };
     return result;
