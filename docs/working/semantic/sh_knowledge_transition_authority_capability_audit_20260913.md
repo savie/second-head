@@ -1,66 +1,52 @@
-# SECOND HEAD — Knowledge Transition Authority Capability Audit
+# SECOND HEAD — Audit Otoritas Transisi Knowledge
 
 ## Status
-WORKING AUDIT RECORD — PARTIAL PASS — IMPLEMENTATION GATE CLOSED
 
-## Authority
+**CATATAN AUDIT WORKING — PARTIAL PASS — GATE IMPLEMENTASI TERTUTUP**
 
-This document is a working audit record only.
+## Otoritas
 
-It does not modify or supersede Canonical architecture, approved contracts, or historical design authority.
+Dokumen ini hanya catatan audit working. Dokumen ini tidak mengubah atau menggantikan arsitektur Canonical, Approved Contract, atau otoritas desain historis.
 
-Authority order applied:
-
-```text
-Canonical → Approved Contract → Architecture → Implementation → Runtime/Database Evidence → History → Inference → Proposal
-```
-
-## Audit Goal
-
-Verify whether the current SECOND HEAD DEV system has an evidenced runtime authority for each Knowledge lifecycle transition defined by the historical Knowledge design:
+Urutan otoritas yang digunakan:
 
 ```text
-CANDIDATE
-  → ACCEPTED
-  → INDEXED
-  → ACTIVE
-  → UPDATED
-  → DEPRECATED
-  → ARCHIVED
+Canonical → Approved Contract → Architecture → Implementation → Evidence Runtime/Database → History → Inference → Proposal
 ```
 
-The audit specifically distinguishes lifecycle vocabulary/schema support from an actual authorized runtime transition capability.
+## Tujuan Audit
 
-## Evidence Scope
+Memverifikasi apakah sistem SECOND HEAD DEV saat ini memiliki otoritas runtime yang terbukti untuk setiap transisi lifecycle Knowledge yang didefinisikan oleh desain Knowledge historis:
+
+```text
+CANDIDATE → ACCEPTED → INDEXED → ACTIVE → UPDATED → DEPRECATED → ARCHIVED
+```
+
+Audit membedakan dukungan vocabulary/schema lifecycle dari kemampuan runtime yang benar-benar berwenang melakukan transisi.
+
+## Ruang Lingkup Evidence
 
 - GitHub DEV branch: `dev`
 - GitHub historical branch: `dev_old`
 - Supabase DEV project: `pkhkgvsrqeupvwoqjwmd`
-- Current database function definitions queried directly from Supabase DEV.
-- Historical P3D Knowledge design inspected from `dev_old`.
+- Definisi fungsi database saat ini diperiksa langsung dari Supabase DEV.
+- Desain Knowledge historis diperiksa dari `dev_old`.
 
-## 1. Historical Lifecycle Authority
+## 1. Otoritas Lifecycle Historis
 
-Historical `dev_old/docs/design/P3D_KNOWLEDGE_SCHEMA_v1.0.md` defines the intended Knowledge lifecycle as:
+`dev_old/docs/design/P3D_KNOWLEDGE_SCHEMA_v1.0.md` mendefinisikan lifecycle:
 
 ```text
-Candidate
-  → Validation
-  → Accepted
-  → Indexed
-  → Active
-  → Updated
-  → Deprecated
-  → Archived
+Candidate → Validation → Accepted → Indexed → Active → Updated → Deprecated → Archived
 ```
 
-The same artifact explicitly states that the schema design itself did not implement lifecycle behavior; lifecycle implementation remained a later backlog item. It also states that `knowledge_candidate = true` is not equivalent to automatic creation of a Knowledge record.
+Artefak historis tersebut juga menyatakan bahwa schema design tidak mengimplementasikan perilaku lifecycle; implementasinya merupakan pekerjaan lanjutan. `knowledge_candidate = true` juga bukan berarti pembuatan Knowledge record secara otomatis.
 
-Therefore the historical design establishes lifecycle intent, but does not by itself prove current runtime transition authority.
+Kesimpulan: desain historis membuktikan **intent lifecycle**, bukan otoritas transisi runtime saat ini.
 
-## 2. Current DEV Schema Evidence
+## 2. Evidence Schema DEV Saat Ini
 
-The current DEV `public.knowledge` lifecycle constraint permits exactly these lifecycle values:
+Constraint lifecycle `public.knowledge` saat ini mengizinkan:
 
 ```text
 CANDIDATE
@@ -72,344 +58,216 @@ DEPRECATED
 ARCHIVED
 ```
 
-The table also contains versioning and supersession fields:
+Field versioning/supersession yang tersedia:
 
 ```text
 version
 superseded_by
 ```
 
-This proves storage vocabulary and representation support only. It does not prove that authorized runtime transitions exist.
+Ini membuktikan vocabulary dan representasi storage, bukan otoritas runtime untuk melakukan transisi.
 
-## 3. Current DEV Knowledge Runtime Capability Inventory
+## 3. Inventaris Kapabilitas Runtime Knowledge
 
-Current public Knowledge-related functions observed in Supabase DEV include:
+Fungsi Knowledge yang saat ini terbukti antara lain:
 
 - `runtime_record_knowledge_candidate`
 - `runtime_record_knowledge_with_journey`
 - `retrieve_knowledge_bounded`
-- `authorized_read_retrieve_bounded`
-- `global_search_bounded`
-- transfer/recovery functions that materialize Knowledge as part of another lifecycle operation.
+- fungsi transfer/recovery yang dapat melakukan materialisasi Knowledge sebagai bagian dari operasi lifecycle lain.
 
-No dedicated current function named:
+Tidak terbukti adanya fungsi runtime khusus untuk seluruh rantai transisi Knowledge.
 
-```text
-runtime_activate_knowledge_candidate
-```
+`runtime_record_knowledge_candidate` adalah boundary akuisisi kandidat, bukan authority aktivasi.
 
-was evidenced.
-
-No dedicated runtime transition function was evidenced for the full Knowledge lifecycle chain.
-
-## 4. Transition-by-Transition Audit
+## 4. Audit Per Transisi
 
 ### 4.1 CANDIDATE → ACCEPTED
 
-**Status: OPEN / NOT EVIDENCED**
+**Status: OPEN / BELUM TERBUKTI**
 
-Evidence:
-
-- `runtime_record_knowledge_candidate` creates or updates a record only in `CANDIDATE`.
-- Current DEV function definition contains no authorized transition from `CANDIDATE` to `ACCEPTED`.
-- Historical design identifies `Accepted` as the next lifecycle state after validation, but leaves lifecycle implementation outside the schema artifact.
-
-Conclusion:
+Evidence menunjukkan `runtime_record_knowledge_candidate` hanya membuat atau memperbarui record pada `CANDIDATE`. Tidak terbukti adanya otoritas runtime yang mengubah `CANDIDATE` menjadi `ACCEPTED`.
 
 ```text
 Storage state: EXISTS
 Historical intent: EXISTS
-Runtime transition authority: NOT EVIDENCED
-Authorization contract: OPEN
-Journey projection: OPEN
-Operation identity/idempotency: OPEN
+Otoritas transisi runtime: NOT EVIDENCED
+Kontrak otorisasi: OPEN
+Proyeksi Journey: OPEN
+Identitas operasi/idempotensi: OPEN
 ```
 
 ### 4.2 ACCEPTED → INDEXED
 
-**Status: HISTORICAL/TEST EVIDENCE ONLY — RUNTIME AUTHORITY OPEN**
+**Status: EVIDENCE HISTORIS/TEST SAJA — OTORITAS RUNTIME OPEN**
 
-Migration `20260811180222_p3d_007_knowledge_indexing_verification.sql` creates a synthetic `ACCEPTED` record and directly updates it to `INDEXED`, then verifies the resulting value.
+Migration `20260811180222_p3d_007_knowledge_indexing_verification.sql` pernah membuat record sintetis `ACCEPTED`, melakukan update langsung ke `INDEXED`, lalu memverifikasi hasilnya.
 
-This proves that the schema accepts the state transition at SQL level in a verification migration.
-
-It does **not** prove an authorized production runtime transition API. The migration performs direct table mutation and is a verification artifact.
-
-Conclusion:
+Ini membuktikan schema menerima transisi pada level SQL dalam artefak verifikasi. Ini **bukan** bukti adanya API runtime production yang berwenang.
 
 ```text
 Storage state: EXISTS
-Direct SQL verification: EXISTS
-Runtime transition authority: NOT EVIDENCED
-Authorization contract: OPEN
-Journey projection: OPEN
-Operation identity/idempotency: OPEN
+Verifikasi SQL langsung: EXISTS
+Otoritas transisi runtime: NOT EVIDENCED
+Kontrak otorisasi: OPEN
+Proyeksi Journey: OPEN
+Identitas operasi/idempotensi: OPEN
 ```
 
 ### 4.3 INDEXED → ACTIVE
 
-**Status: OPEN / NOT EVIDENCED**
+**Status: OPEN / BELUM TERBUKTI**
 
-`retrieve_knowledge_bounded` treats both `INDEXED` and `ACTIVE` as retrieval-eligible states for GENERAL/SHARED Knowledge.
-
-This proves retrieval semantics, not a required or authorized transition from `INDEXED` to `ACTIVE`.
-
-No current dedicated transition function was evidenced.
-
-Conclusion:
+`retrieve_knowledge_bounded` memperlakukan `INDEXED` dan `ACTIVE` sebagai state yang dapat diambil untuk Knowledge GENERAL/SHARED. Itu membuktikan semantics retrieval, bukan otoritas aktivasi.
 
 ```text
-Retrieval eligibility: EXISTS
+Kelayakan retrieval: EXISTS
 Storage state: EXISTS
-Runtime transition authority: NOT EVIDENCED
-Authorization contract: OPEN
-Journey projection: OPEN
-Operation identity/idempotency: OPEN
+Otoritas transisi runtime: NOT EVIDENCED
+Kontrak otorisasi: OPEN
+Proyeksi Journey: OPEN
+Identitas operasi/idempotensi: OPEN
 ```
 
 ### 4.4 ACTIVE → UPDATED / SUPERSEDED
 
-**Status: OPEN / NOT EVIDENCED AS KNOWLEDGE LIFECYCLE TRANSITION**
+**Status: OPEN / BELUM TERBUKTI SEBAGAI TRANSISI LIFECYCLE KNOWLEDGE**
 
-`public.knowledge` contains both `UPDATED` lifecycle vocabulary and `superseded_by`.
+Schema memiliki `UPDATED` dan `superseded_by`, tetapi tidak terbukti ada authority runtime khusus untuk update/supersession Knowledge.
 
-Current DEV runtime functions inspected do not expose a dedicated Knowledge update/supersession transition authority.
-
-Transfer functions can materialize Knowledge records on another SH and may preserve or transform lifecycle in transfer-specific behavior, but transfer materialization is not a generic Knowledge lifecycle update/supersede API.
-
-Conclusion:
+Materialisasi melalui transfer bukan pengganti API lifecycle update/supersede generik.
 
 ```text
-Storage representation: EXISTS
-Version/supersession fields: EXISTS
-Generic runtime update authority: NOT EVIDENCED
-Generic runtime supersede authority: NOT EVIDENCED
+Representasi storage: EXISTS
+Field version/supersession: EXISTS
+Otoritas update runtime generik: NOT EVIDENCED
+Otoritas supersede runtime generik: NOT EVIDENCED
 Atomic Journey linkage: OPEN
-Operation identity/idempotency: OPEN
+Identitas operasi/idempotensi: OPEN
 ```
 
 ### 4.5 ACTIVE → DEPRECATED
 
-**Status: OPEN / NOT EVIDENCED**
+**Status: OPEN / BELUM TERBUKTI**
 
-The lifecycle enum permits `DEPRECATED`, but no dedicated current runtime transition function was evidenced.
-
-No verified authorization, transition guard, Journey projection, provenance contract, or idempotency contract for this transition was found.
-
-Conclusion:
-
-```text
-Storage state: EXISTS
-Runtime transition authority: NOT EVIDENCED
-Authorization contract: OPEN
-Journey projection: OPEN
-Operation identity/idempotency: OPEN
-```
+Enum mengizinkan `DEPRECATED`, tetapi tidak terbukti ada fungsi transisi runtime khusus beserta otorisasi, guard, Journey, provenance, dan idempotensinya.
 
 ### 4.6 DEPRECATED → ARCHIVED
 
-**Status: OPEN / NOT EVIDENCED**
+**Status: OPEN / BELUM TERBUKTI**
 
-The lifecycle enum permits `ARCHIVED`, but no dedicated current runtime transition function was evidenced.
+Enum mengizinkan `ARCHIVED`, tetapi tidak terbukti ada fungsi transisi runtime khusus beserta otorisasi, semantics terminal, Journey, provenance, dan idempotensinya.
 
-No verified authorization, terminal-state semantics, Journey projection, provenance contract, or idempotency contract for this transition was found.
+## 5. Boundary Akuisisi Kandidat
 
-Conclusion:
+`runtime_record_knowledge_candidate` terbukti sebagai kapabilitas akuisisi kandidat. Definisi saat ini melakukan pemeriksaan authentication, kepemilikan SH/account, content/source/origin, kombinasi scope/visibility, confidence, dan menyimpan Knowledge baru sebagai `CANDIDATE`.
 
-```text
-Storage state: EXISTS
-Runtime transition authority: NOT EVIDENCED
-Authorization contract: OPEN
-Journey projection: OPEN
-Operation identity/idempotency: OPEN
-```
+Ini konsisten dengan boundary akuisisi historis dan tidak membuktikan promotion authority.
 
-## 5. Candidate Capture Boundary
+## 6. Boundary Journey
 
-Current `runtime_record_knowledge_candidate` is a candidate acquisition capability, not an activation capability.
+`runtime_record_knowledge_with_journey` dapat membuat/memperbarui Knowledge candidate dan menghasilkan event Journey `LEARNING`.
 
-Current DEV definition verifies:
+Journey mereferensikan Knowledge record, tetapi **Journey bukan otoritas aktivasi**. Tidak ada evidence bahwa replay/edit Journey dapat mempromosikan Knowledge melalui lifecycle.
 
-- authentication is required;
-- the supplied SH must belong to the current account and be active;
-- content/source/origin are validated;
-- scope/visibility combinations are validated;
-- confidence is range-checked;
-- existing candidate content can be updated in place;
-- new Knowledge is inserted as `CANDIDATE`.
+Atomic transition domain + Journey juga belum terbukti karena belum ada API transisi Knowledge generik yang terverifikasi.
 
-This is consistent with the historical acquisition boundary and does not establish lifecycle promotion authority.
+## 7. Otoritas Konfirmasi
 
-## 6. Journey Boundary
-
-`runtime_record_knowledge_with_journey` creates/updates a Knowledge candidate and emits a `LEARNING` Journey event.
-
-The Journey event references the Knowledge record, but Journey is not an activation authority.
-
-No evidence was found that replaying or editing a Journey event can legitimately promote Knowledge through the lifecycle.
-
-However, no complete atomic transition transaction exists because no generic Knowledge transition API was evidenced.
-
-## 7. Confirmation Authority
-
-Current DEV has `runtime_high_risk_confirmations` and related confirmation functions.
-
-The current confirmation infrastructure is explicitly domain-limited to `RECOVERY_RESTORE` execution.
-
-Therefore:
+DEV memiliki `runtime_high_risk_confirmations` dan fungsi terkait. Infrastruktur tersebut secara eksplisit dibatasi untuk eksekusi `RECOVERY_RESTORE`.
 
 ```text
-Confirmation infrastructure: EXISTS
-Knowledge lifecycle confirmation authority: NOT CONTRACTED / NOT EVIDENCED
+Infrastruktur konfirmasi: EXISTS
+Otoritas konfirmasi lifecycle Knowledge: BELUM DIKONTRAKKAN / BELUM TERBUKTI
 ```
 
-The existing recovery confirmation mechanism must not be silently reused as Knowledge lifecycle authority.
+Mekanisme konfirmasi recovery tidak boleh digunakan diam-diam sebagai authority lifecycle Knowledge.
 
 ## 8. Security / Exposure
 
-Current Knowledge candidate write functions are `SECURITY DEFINER` and exposed to the `authenticated` role with explicit authentication and SH ownership checks in the current definitions.
+Fungsi write candidate Knowledge saat ini menggunakan `SECURITY DEFINER` dan memiliki pemeriksaan authentication serta kepemilikan SH/account.
 
-No dedicated lifecycle transition function exists whose SECURITY DEFINER exposure, grants, search_path, ownership checks, lifecycle guards, and SQLSTATE contract can be audited.
+Belum ada fungsi transisi lifecycle khusus yang dapat diaudit untuk exposure, grant, `search_path`, ownership check, lifecycle guard, dan SQLSTATE.
 
-Therefore the security gate for lifecycle transitions remains OPEN.
+Gate security untuk transisi lifecycle tetap OPEN.
 
-## 9. Operation Identity / Idempotency
+## 9. Identitas Operasi / Idempotensi
 
-No dedicated Knowledge lifecycle operation ledger or stable transition operation key was evidenced for these transitions.
+Belum terbukti adanya operation ledger khusus lifecycle Knowledge atau stable operation key untuk transisi tersebut.
 
-Content-based candidate deduplication is not equivalent to request-level transition idempotency.
+Deduplication berbasis content tidak sama dengan idempotensi request-level.
 
-Required logical identity remains:
+Identitas logis yang dibutuhkan:
 
 ```text
-actor/account
-+ SH
-+ domain
-+ source record
-+ transition
-+ operation key
+actor/account + SH + domain + source record + transition + operation key
 ```
-
-This is not currently proven for Knowledge lifecycle transitions.
 
 ## 10. Provenance / Audit
 
-Knowledge has `source` and `provenance` fields, and runtime audit infrastructure exists.
+Knowledge memiliki `source` dan `provenance`, dan infrastructure audit runtime tersedia. Namun belum terbukti ada implementasi transisi lifecycle yang secara atomik mencatat actor, account, SH, source record/signal, model/provider bila relevan, decision, authorization/confirmation, transition, operation key, timestamp, resulting record, dan Journey.
 
-However, no dedicated lifecycle transition implementation was evidenced that atomically records:
-
-```text
-actor
-account
-SH
-source record
-source signal
-model/provider
-semantic decision
-authorization/confirmation
-transition
-operation key
-timestamp
-resulting record
-Journey event
-```
-
-Therefore lifecycle provenance/audit completeness is OPEN.
+Karena itu kelengkapan provenance/audit lifecycle masih OPEN.
 
 ## 11. Concurrency / Atomicity
 
-Current candidate acquisition uses row locking for an existing candidate during content-based deduplication.
+Candidate acquisition menggunakan row locking untuk deduplication candidate yang sudah ada. Ini bukan bukti keamanan concurrency untuk transisi lifecycle.
 
-That is not proof of lifecycle transition concurrency safety.
-
-No current Knowledge transition function was evidenced that atomically performs:
+Belum terbukti fungsi transisi Knowledge yang secara atomik menjalankan:
 
 ```text
 AUTH → LOCK → VERIFY CURRENT STATE → VERIFY AUTHORITY → MUTATE → PROVENANCE/AUDIT → JOURNEY → COMMIT
 ```
 
-Therefore concurrency and domain+Journey atomicity remain OPEN.
+## 12. Pengecualian Khusus Transfer
 
-## 12. Transfer-Specific Exception
+Clone / Inheritance / Succession dapat melakukan materialisasi Knowledge dan, sesuai kontrak transfer tertentu, dapat menghasilkan target `ACTIVE` dari source `CANDIDATE`.
 
-Existing Clone / Inheritance / Succession paths can materialize Knowledge records and may convert a source `CANDIDATE` to target `ACTIVE` as part of transfer materialization.
-
-This is an important domain-specific capability, but it must not be interpreted as evidence of a generic Knowledge lifecycle promotion API.
-
-The distinction is:
+Itu adalah capability khusus transfer dan **bukan** bukti adanya generic Knowledge lifecycle promotion.
 
 ```text
-Transfer materialization → target record lifecycle behavior
-Generic lifecycle transition → source Knowledge state authority
+Transfer materialization ≠ Generic source Knowledge lifecycle transition
 ```
 
-These are separate contracts.
+## 13. Evidence Data DEV Saat Ini
 
-## 13. Current DEV Data Evidence
-
-Current Supabase DEV Knowledge data contains:
+Pada saat audit, Knowledge DEV yang teramati:
 
 ```text
 CANDIDATE: 1
 ```
 
-No current DEV rows were observed for `ACCEPTED`, `INDEXED`, `ACTIVE`, `UPDATED`, `DEPRECATED`, or `ARCHIVED` at audit time.
+Tidak teramati row untuk `ACCEPTED`, `INDEXED`, `ACTIVE`, `UPDATED`, `DEPRECATED`, atau `ARCHIVED`. Ini hanya evidence state data saat audit, bukan bukti bahwa state tersebut mustahil.
 
-This is runtime-state evidence of current data, not proof that the states are impossible.
+## 14. Hasil Gate
 
-## 14. Gate Result
+**PARTIAL PASS — GATE IMPLEMENTASI TERTUTUP**
 
-Overall result:
+Terbukti:
 
-**PARTIAL PASS — IMPLEMENTATION GATE CLOSED**
+- vocabulary lifecycle Knowledge ada di storage;
+- intent lifecycle historis ada;
+- candidate acquisition ada dan ter-scope ke SH/account;
+- retrieval membedakan `INDEXED` dan `ACTIVE`;
+- verifikasi SQL historis menunjukkan schema menerima `ACCEPTED → INDEXED`;
+- transfer dapat melakukan materialisasi Knowledge dengan semantics khusus transfer.
 
-What is proven:
+Belum terbukti:
 
-- Knowledge lifecycle vocabulary exists in current storage.
-- Historical lifecycle intent exists.
-- Candidate acquisition exists and is authenticated/SH-scoped.
-- Retrieval semantics distinguish `INDEXED` and `ACTIVE` as eligible states.
-- Direct SQL verification demonstrated `ACCEPTED → INDEXED` at storage level.
-- Transfer operations can materialize Knowledge with transfer-specific lifecycle behavior.
+- otoritas runtime `CANDIDATE → ACCEPTED`;
+- otoritas production runtime `ACCEPTED → INDEXED`;
+- otoritas `INDEXED → ACTIVE`;
+- otoritas `ACTIVE → UPDATED/SUPERSEDED`;
+- otoritas `ACTIVE → DEPRECATED`;
+- otoritas `DEPRECATED → ARCHIVED`;
+- confirmation authority khusus Knowledge;
+- operation identity/idempotency lifecycle;
+- atomic Knowledge + Journey transaction;
+- provenance/audit lifecycle yang lengkap;
+- security exposure dan SQLSTATE contract transisi;
+- positive/negative/cross-actor/concurrency E2E.
 
-What is not proven:
-
-- `CANDIDATE → ACCEPTED` runtime authority.
-- `ACCEPTED → INDEXED` production runtime authority.
-- `INDEXED → ACTIVE` runtime authority.
-- `ACTIVE → UPDATED/SUPERSEDED` runtime authority.
-- `ACTIVE → DEPRECATED` runtime authority.
-- `DEPRECATED → ARCHIVED` runtime authority.
-- Knowledge-specific confirmation authority.
-- Stable lifecycle operation identity/idempotency.
-- Atomic Knowledge + Journey transition transaction.
-- Complete lifecycle provenance/audit contract.
-- Lifecycle transition SECURITY DEFINER exposure and SQLSTATE contract.
-- Positive/negative/cross-actor/concurrency E2E verification.
-
-## 15. Required Next Gate
-
-The implementation gate remains CLOSED.
-
-Next gate:
-
-**Knowledge Transition Authority Design + Contract Reconciliation**
-
-Required before implementation:
-
-1. Reconcile historical lifecycle intent with current DEV lifecycle vocabulary.
-2. Decide which lifecycle states are actual persisted states versus process boundaries.
-3. Establish authoritative transition rules for every supported transition.
-4. Establish Knowledge-specific decision/validation/confirmation authority.
-5. Define exact runtime transition APIs/functions.
-6. Define stable operation identity and idempotency semantics.
-7. Define atomic domain + Journey transaction boundary.
-8. Define provenance/audit schema and required fields.
-9. Define SECURITY DEFINER exposure, grants, search_path, ownership checks, and SQLSTATE.
-10. Define positive, negative, cross-actor, terminal-state, and concurrency E2E verification.
-11. Reconcile transfer materialization semantics with generic lifecycle semantics without silently merging the contracts.
-
-## 16. Change Record
+## 15. Catatan Perubahan
 
 ```text
 Runtime code changes: NONE
@@ -417,7 +275,7 @@ Database schema changes: NONE
 Database data changes: NONE
 Migration changes: NONE
 Canonical changes: NONE
-Working documentation: CREATED
+Working documentation: UPDATED
 Implementation: BLOCKED
 Verification: AUDIT-LEVEL ONLY
 ```
