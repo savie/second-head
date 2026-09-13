@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/state/sh_profile_state.dart';
 import '../../../core/theme/sh_theme.dart';
 import '../../journey/journey_runtime_service.dart';
+import '../../journey/journey_service.dart';
 import '../lifecycle_runtime_read_service.dart';
 
 class LegacyRuntimeView extends StatefulWidget {
@@ -17,10 +18,13 @@ class LegacyRuntimeView extends StatefulWidget {
 class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
   final _read = const LifecycleRuntimeReadService();
   final _runtime = const JourneyRuntimeService();
+  final _journey = const JourneyService();
   List<Map<String, dynamic>> _records = const [];
+  List<JourneyBackendRecord> _journeyRecords = const [];
+  final Set<String> _selectedEventIds = <String>{};
   bool _loading = true;
+  bool _preserving = false;
   String? _error;
-  String _type = 'JOURNEY';
   final _retentionController = TextEditingController();
 
   @override
@@ -43,10 +47,17 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
       });
     }
     try {
-      final rows = await _read.listLegacyRecords();
+      final results = await Future.wait([
+        _read.listLegacyRecords(),
+        _journey.load(limit: 100),
+      ]);
       if (!mounted) return;
       setState(() {
-        _records = rows;
+        _records = results[0] as List<Map<String, dynamic>>;
+        _journeyRecords = results[1] as List<JourneyBackendRecord>;
+        _selectedEventIds.removeWhere(
+          (id) => !_journeyRecords.any((record) => record.eventId == id),
+        );
         _loading = false;
       });
     } catch (error) {
@@ -58,10 +69,14 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
     }
   }
 
-  Future<void> _preserveLegacy() async {
+  Future<void> _preserveSelectedLegacy() async {
     final shId = profileShId.value.trim();
     if (shId.isEmpty) {
       _show('Legacy blocked: active SH identity is unavailable.');
+      return;
+    }
+    if (_selectedEventIds.isEmpty) {
+      _show('Select at least one concrete Journey item to preserve.');
       return;
     }
 
@@ -75,21 +90,44 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
       }
     }
 
+    final memoryIds = <String>{};
+    final knowledgeIds = <String>{};
+    final experienceIds = <String>{};
+    for (final record in _journeyRecords) {
+      if (!_selectedEventIds.contains(record.eventId)) continue;
+      final payload = record.payload;
+      final memoryId = payload['memory_id']?.toString().trim() ?? '';
+      final knowledgeId = payload['knowledge_id']?.toString().trim() ?? '';
+      final experienceId = payload['experience_id']?.toString().trim() ?? '';
+      if (memoryId.isNotEmpty) memoryIds.add(memoryId);
+      if (knowledgeId.isNotEmpty) knowledgeIds.add(knowledgeId);
+      if (experienceId.isNotEmpty) experienceIds.add(experienceId);
+    }
+
+    final scope = <String, dynamic>{
+      'memory_ids': memoryIds.toList(),
+      'knowledge_ids': knowledgeIds.toList(),
+      'experience_ids': experienceIds.toList(),
+      'journey_event_ids': _selectedEventIds.toList(),
+      'retention_until': retention?.toUtc().toIso8601String(),
+    };
+
+    setState(() => _preserving = true);
     try {
-      await _runtime.recordLegacy(
+      await _runtime.preserveSelectedTransferAsLegacy(
         sourceShId: shId,
-        legacyType: _type,
-        payload: const {
-          'capture_mode': 'LIFECYCLE_UI',
-        },
-        provenance: const {
-          'source': 'lifecycle-legacy-ui',
-        },
-        retentionUntil: retention,
+        scope: scope,
       );
+      if (!mounted) return;
+      setState(() {
+        _selectedEventIds.clear();
+        _preserving = false;
+      });
       await _load();
-      _show('Legacy record preserved canonically.');
+      _show('Selected Journey items preserved canonically as legacy.');
     } catch (error) {
+      if (!mounted) return;
+      setState(() => _preserving = false);
       _show('Legacy preservation failed: $error');
     }
   }
@@ -113,6 +151,13 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
     }
   }
 
+  String _journeyLabel(JourneyBackendRecord record) {
+    final type = record.eventType.toUpperCase();
+    final payload = record.payload;
+    final id = payload['memory_id'] ?? payload['knowledge_id'] ?? payload['experience_id'];
+    return id == null ? type : '$type · $id';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,27 +173,10 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Legacy records are preserved by the runtime authority after the source SH reaches its required lifecycle state.',
+              'Legacy preservation is bound to concrete Journey selections and enforced by runtime transfer-policy authority after end-of-life.',
               style: TextStyle(color: shMuted, height: 1.4),
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: _type,
-              decoration: const InputDecoration(labelText: 'Legacy type'),
-              items: const [
-                'MEMORY',
-                'KNOWLEDGE',
-                'EXPERIENCE',
-                'JOURNEY',
-                'HISTORY',
-                'VALUE',
-                'REFERENCE',
-              ].map((value) => DropdownMenuItem(value: value, child: Text(value))).toList(),
-              onChanged: (value) {
-                if (value != null) setState(() => _type = value);
-              },
-            ),
-            const SizedBox(height: 12),
             TextField(
               controller: _retentionController,
               decoration: const InputDecoration(
@@ -158,11 +186,16 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
             ),
             const SizedBox(height: 12),
             FilledButton.icon(
-              onPressed: _loading ? null : _preserveLegacy,
+              onPressed: _loading || _preserving ? null : _preserveSelectedLegacy,
               icon: const Icon(Icons.archive_outlined),
-              label: const Text('Preserve legacy record'),
+              label: Text(_preserving ? 'Preserving…' : 'Preserve selected items'),
             ),
             const SizedBox(height: 16),
+            const Text(
+              'Select Journey items',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
             if (_loading)
               const Center(
                 child: Padding(
@@ -171,8 +204,40 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
                 ),
               )
             else if (_error != null)
-              Text('Legacy read failed: $_error')
-            else if (_records.isEmpty)
+              Text('Legacy/Journey read failed: $_error')
+            else if (_journeyRecords.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text('No Journey items available for selection.'),
+              )
+            else
+              for (final record in _journeyRecords)
+                CheckboxListTile(
+                  value: _selectedEventIds.contains(record.eventId),
+                  onChanged: _preserving
+                      ? null
+                      : (selected) {
+                          setState(() {
+                            if (selected == true) {
+                              _selectedEventIds.add(record.eventId);
+                            } else {
+                              _selectedEventIds.remove(record.eventId);
+                            }
+                          });
+                        },
+                  title: Text(_journeyLabel(record)),
+                  subtitle: Text(
+                    '${_date(record.occurredAt)} · ${record.continuityStatus}',
+                  ),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+            const SizedBox(height: 16),
+            const Text(
+              'Existing canonical legacy records',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            if (!_loading && _records.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(24),
                 child: Text('No canonical legacy records found.'),
