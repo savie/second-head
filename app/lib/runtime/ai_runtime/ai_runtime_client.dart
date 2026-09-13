@@ -20,6 +20,10 @@ final class AIRuntimeClient implements RuntimeClient {
         input: request.input,
         conversationId: request.conversationId,
         userMessageId: request.userMessageId,
+        mode: switch (request.mode) {
+          RuntimeExecutionMode.normal => 'normal',
+          RuntimeExecutionMode.generateOnly => 'generate_only',
+        },
       ),
     );
 

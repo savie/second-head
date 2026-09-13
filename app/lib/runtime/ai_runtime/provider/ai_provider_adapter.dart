@@ -13,11 +13,13 @@ final class AIProviderRequest {
     required this.input,
     required this.conversationId,
     required this.userMessageId,
+    this.mode = 'normal',
   });
 
   final String input;
   final String conversationId;
   final String userMessageId;
+  final String mode;
 }
 
 final class AIProviderResponse {
