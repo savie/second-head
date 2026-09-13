@@ -22,7 +22,7 @@ class _SemanticRuntimeDomainViewState extends State<SemanticRuntimeDomainView> {
 
   String get _eventType => switch (widget.domain) {
         ShSemanticDomain.memory => 'MEMORY',
-        ShSemanticDomain.knowledge => 'KNOWLEDGE',
+        ShSemanticDomain.knowledge => 'LEARNING',
         ShSemanticDomain.experience => 'EXPERIENCE',
       };
 
@@ -34,7 +34,16 @@ class _SemanticRuntimeDomainViewState extends State<SemanticRuntimeDomainView> {
     try {
       final records = await const JourneyService().load(limit: 100);
       if (!mounted) return;
-      setState(() { _records = records.where((r) => r.eventType.toUpperCase() == _eventType).toList(); _loading = false; });
+      setState(() {
+        _records = records.where((r) {
+          if (r.eventType.toUpperCase() != _eventType) return false;
+          if (widget.domain == ShSemanticDomain.knowledge) {
+            return r.payload['knowledge_id']?.toString().trim().isNotEmpty == true;
+          }
+          return true;
+        }).toList();
+        _loading = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() { _loading = false; _error = e.toString(); });
