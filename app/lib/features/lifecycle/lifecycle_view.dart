@@ -9,7 +9,7 @@ import 'inheritance/inheritance_view.dart';
 import 'succession/succession_view.dart';
 import 'legacy/legacy_view.dart';
 import 'lifecycle_stage.dart';
-import 'lifecycle_widgets.dart';
+import 'lifecycle_widgets.dart' as lifecycle_widgets;
 
 class LifecycleView extends StatefulWidget {
   const LifecycleView({super.key});
@@ -85,14 +85,13 @@ class LifecycleViewState extends State<LifecycleView> {
     );
   }
 
-  LifecycleStage _sharedStageFromMapStage(Object stage) {
-    final title = stage.toString();
-    return switch (title) {
-      _ when title.endsWith('Clone') => LifecycleStage.clone,
-      _ when title.endsWith('Recovery') => LifecycleStage.recovery,
-      _ when title.endsWith('Inheritance') => LifecycleStage.inheritance,
-      _ when title.endsWith('Succession') => LifecycleStage.succession,
-      _ when title.endsWith('Legacy') => LifecycleStage.legacy,
+  LifecycleStage _sharedStageFromMapStage(lifecycle_widgets.LifecycleStage stage) {
+    return switch (stage.title) {
+      'Clone' => LifecycleStage.clone,
+      'Recovery' => LifecycleStage.recovery,
+      'Inheritance' => LifecycleStage.inheritance,
+      'Succession' => LifecycleStage.succession,
+      'Legacy' => LifecycleStage.legacy,
       _ => LifecycleStage.eol,
     };
   }
@@ -108,7 +107,7 @@ class LifecycleViewState extends State<LifecycleView> {
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(10, 2, 10, 18),
-            child: LifecycleMap(
+            child: lifecycle_widgets.LifecycleMap(
               query: query,
               onStageTap: (stage) =>
                   _showDetail(context, _sharedStageFromMapStage(stage)),
