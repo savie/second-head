@@ -308,7 +308,7 @@ class JourneyRuntimeService {
       params: {
         'p_source_sh_id': sourceShId,
         'p_legacy_type': legacyType,
-        'p_payload': provenance,
+        'p_payload': payload,
         'p_provenance': provenance,
         'p_retention_until': retentionUntil?.toUtc().toIso8601String(),
       },
