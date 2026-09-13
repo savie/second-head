@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../lifecycle_models.dart';
-import '../lifecycle_widgets.dart';
+
+import 'recovery_runtime_view.dart';
 
 class RecoveryView extends StatelessWidget {
   const RecoveryView({super.key, this.incomingItems = const []});
 
-  final List<JourneyLifecyclePayload> incomingItems;
+  final List<dynamic> incomingItems;
 
   @override
-  Widget build(BuildContext context) => LifecycleDetailView(stage: LifecycleStage.recovery, incomingItems: incomingItems);
+  Widget build(BuildContext context) => const RecoveryRuntimeView();
 }
