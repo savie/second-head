@@ -1,25 +1,25 @@
-# SECOND HEAD — Knowledge Transition Implementation Contract + Full-Write Plan — 2026-09-13
+# SECOND HEAD — Kontrak Implementasi Transisi Knowledge — 2026-09-13
 
 ## Status
 
-**WORKING IMPLEMENTATION CONTRACT — PARTIAL PASS — IMPLEMENTATION GATE CLOSED**
+**KONTRAK IMPLEMENTASI WORKING — PARTIAL PASS — GATE IMPLEMENTASI TERTUTUP**
 
-This document converts the reconciled Knowledge lifecycle design into an implementation contract and full-write plan. It does not authorize database mutation by itself.
+Dokumen ini menerjemahkan desain lifecycle Knowledge yang telah direkonsiliasi menjadi kontrak implementasi. Dokumen ini sendiri tidak mengotorisasi mutation database.
 
-## 1. Operating Rules
+## 1. Aturan Dasar
 
-- Supabase DEV is the database/runtime authority.
-- For database implementation: **Supabase DEV → verify actual state → migration history → GitHub reconciliation**.
-- Migration names are descriptive history names only; do not use P3/P4/P5 program labels.
-- No speculative, empty, duplicate, placeholder, or destructive migration.
-- Full-write means the implementation is complete across all required layers in one controlled change: schema/constraints/indexes, authorization/RLS, functions, grants/exposure, runtime dependency, provenance/audit, Journey, idempotency, error contract, tests, and verification as required by the final design.
-- If a safe full-write cannot be completed, preserve the last known baseline. Do not push a partial implementation. Provide a precise chat patch and proposed commit name for manual push if necessary.
-- New files are **baseline + narrowly scoped patch** and must not silently alter unrelated content.
-- Canonical is untouched unless explicitly authorized.
+- Supabase DEV adalah authority database/runtime.
+- Urutan implementasi database: **Supabase DEV → verifikasi state aktual → migration history → rekonsiliasi GitHub**.
+- Nama migration hanya nama deskriptif berdasarkan riwayat perubahan; jangan memakai label P3/P4/P5.
+- Tidak boleh ada migration speculative, kosong, duplicate, placeholder, atau destructive.
+- Full-write adalah **aturan teknis eksekusi perubahan**. Ketika implementasi diizinkan, seluruh dependency yang diperlukan harus ditangani dalam satu perubahan yang dapat diverifikasi secara utuh. Full-write bukan jenis dokumen dan bukan artefak tersendiri.
+- Jika perubahan lengkap tidak dapat dilakukan dengan aman, baseline terakhir dipertahankan dan partial implementation tidak dipush.
+- File baru/perbaikan harus berupa baseline + patch yang sempit dan tidak mengubah material yang tidak terkait.
+- Canonical tidak disentuh tanpa otorisasi eksplisit.
 
-## 2. Authority Baseline
+## 2. Baseline Authority
 
-Historical Knowledge lifecycle intent is reconciled as:
+Lifecycle Knowledge yang telah direkonsiliasi:
 
 ```text
 ACQUISITION
@@ -44,9 +44,9 @@ DEPRECATED
 ARCHIVED
 ```
 
-`VALIDATION` is a process boundary, not a new database lifecycle enum.
+`VALIDATION` adalah process boundary, bukan enum lifecycle database baru.
 
-Current DEV lifecycle vocabulary is:
+Vocabulary DEV saat ini:
 
 ```text
 CANDIDATE
@@ -58,26 +58,26 @@ DEPRECATED
 ARCHIVED
 ```
 
-No `SUPERSEDED` enum is introduced by this contract.
+Tidak ada `SUPERSEDED` enum baru yang diotorisasi oleh kontrak ini.
 
-## 3. Supported Transition Matrix
+## 3. Matriks Transisi
 
-| Transition | Runtime capability | Current authority | Implementation status |
+| Transisi | Kapabilitas runtime | Otoritas | Status implementasi |
 |---|---|---|---|
-| CANDIDATE → ACCEPTED | `runtime_accept_knowledge` | authorized validation/acceptance decision | CONTRACTED / NOT IMPLEMENTED |
-| ACCEPTED → INDEXED | `runtime_index_knowledge` | authorized indexing operation | CONTRACTED / NOT IMPLEMENTED |
-| INDEXED → ACTIVE | `runtime_activate_knowledge` | authorized activation decision | CONTRACTED / NOT IMPLEMENTED |
-| ACTIVE → UPDATED + successor | `runtime_update_knowledge` | authorized version/update operation | CONTRACTED / NOT IMPLEMENTED |
-| ACTIVE → DEPRECATED | `runtime_deprecate_knowledge` | authorized deprecation operation | CONTRACTED / NOT IMPLEMENTED |
-| DEPRECATED → ARCHIVED | `runtime_archive_knowledge` | authorized archive operation | CONTRACTED / NOT IMPLEMENTED |
+| CANDIDATE → ACCEPTED | `runtime_accept_knowledge` | keputusan validation/acceptance yang berwenang | DIKONTRAKKAN / BELUM DIIMPLEMENTASIKAN |
+| ACCEPTED → INDEXED | `runtime_index_knowledge` | operasi indexing yang berwenang | DIKONTRAKKAN / BELUM DIIMPLEMENTASIKAN |
+| INDEXED → ACTIVE | `runtime_activate_knowledge` | keputusan activation yang berwenang | DIKONTRAKKAN / BELUM DIIMPLEMENTASIKAN |
+| ACTIVE → UPDATED + successor | `runtime_update_knowledge` | operasi version/update yang berwenang | DIKONTRAKKAN / BELUM DIIMPLEMENTASIKAN |
+| ACTIVE → DEPRECATED | `runtime_deprecate_knowledge` | operasi deprecation yang berwenang | DIKONTRAKKAN / BELUM DIIMPLEMENTASIKAN |
+| DEPRECATED → ARCHIVED | `runtime_archive_knowledge` | operasi archive yang berwenang | DIKONTRAKKAN / BELUM DIIMPLEMENTASIKAN |
 
-These names are contract targets only. Their database existence must not be assumed until implemented and verified in Supabase DEV.
+Nama tersebut adalah target kontrak. Keberadaan database object tidak boleh diasumsikan sebelum dibuat dan diverifikasi di Supabase DEV.
 
-## 4. General Function Boundary
+## 4. Boundary Fungsi Umum
 
-Every transition function must derive authority server-side. Caller-supplied account IDs, actor IDs, ownership claims, or lifecycle authority are not trusted.
+Setiap fungsi transisi harus mengambil authority dari server. Caller-supplied account ID, actor ID, ownership claim, atau lifecycle authority tidak boleh dipercaya.
 
-Required sequence:
+Urutan wajib:
 
 ```text
 AUTHENTICATE
@@ -97,9 +97,9 @@ AUTHENTICATE
 → RETURN OBSERVABLE RESULT
 ```
 
-## 5. Exact Input Direction
+## 5. Arah Input API
 
-The implementation contract uses explicit transition-specific inputs rather than a generic `lifecycle` mutation endpoint.
+Kontrak menggunakan input spesifik per transisi, bukan endpoint mutation `lifecycle` generik.
 
 ### Acceptance
 
@@ -114,7 +114,7 @@ runtime_accept_knowledge(
 )
 ```
 
-Required expected lifecycle: `CANDIDATE`.
+Expected lifecycle: `CANDIDATE`.
 
 ### Indexing
 
@@ -128,7 +128,7 @@ runtime_index_knowledge(
 )
 ```
 
-Required expected lifecycle: `ACCEPTED`.
+Expected lifecycle: `ACCEPTED`.
 
 ### Activation
 
@@ -143,7 +143,7 @@ runtime_activate_knowledge(
 )
 ```
 
-Required expected lifecycle: `INDEXED`.
+Expected lifecycle: `INDEXED`.
 
 ### Update / Supersession
 
@@ -159,9 +159,9 @@ runtime_update_knowledge(
 )
 ```
 
-Required expected lifecycle: `ACTIVE`.
+Expected lifecycle: `ACTIVE`.
 
-The old record remains historical with `lifecycle = UPDATED` and `superseded_by = successor_id` where the update is a superseding version.
+Jika update merupakan superseding version, record lama menjadi `UPDATED` dan `superseded_by = successor_id`.
 
 ### Deprecation
 
@@ -176,7 +176,7 @@ runtime_deprecate_knowledge(
 )
 ```
 
-Required expected lifecycle: `ACTIVE`.
+Expected lifecycle: `ACTIVE`.
 
 ### Archive
 
@@ -191,15 +191,13 @@ runtime_archive_knowledge(
 )
 ```
 
-Required expected lifecycle: `DEPRECATED`.
+Expected lifecycle: `DEPRECATED`.
 
-These signatures remain implementation targets and may only be adjusted after evidence-based DB/runtime review identifies a concrete incompatibility.
+Signature hanya dapat diubah jika review evidence DB/runtime menemukan incompatibility konkret.
 
-## 6. Output Contract
+## 6. Kontrak Output
 
-Each transition returns the resulting Knowledge record ID for a successful mutation.
-
-The implementation must also expose machine-classifiable result semantics:
+Transition yang berhasil harus mengembalikan ID Knowledge hasil mutation dan semantics yang dapat diklasifikasikan mesin:
 
 ```text
 SUCCESS
@@ -208,41 +206,41 @@ REJECTED
 FAILED
 ```
 
-`ALREADY_APPLIED` is valid only when the persisted operation identity matches the same account/SH/domain/source/transition/operation key.
+`ALREADY_APPLIED` hanya valid jika operation identity tersimpan cocok dengan account/SH/domain/source/transition/operation key yang sama.
 
-A reused operation key against a different target or transition is a conflict and must be rejected.
+Operation key yang sama untuk target atau transisi berbeda adalah conflict dan harus ditolak.
 
-## 7. Transition-Specific Authority
+## 7. Authority Per Transisi
 
 ### CANDIDATE → ACCEPTED
 
-Requires a validation/acceptance decision. Model output or confidence cannot itself authorize acceptance.
+Memerlukan validation/acceptance decision. Model output atau confidence tidak dapat menjadi authority acceptance dengan sendirinya.
 
 ### ACCEPTED → INDEXED
 
-Requires an indexing operation that has actually completed its required indexing/storage work. This transition must not silently activate the Knowledge record.
+Memerlukan operasi indexing yang benar-benar menyelesaikan pekerjaan indexing/storage yang diwajibkan. Tidak boleh sekaligus mengaktifkan Knowledge.
 
 ### INDEXED → ACTIVE
 
-Requires an authorized activation decision. Retrieval, search ranking, model confidence, or Journey replay cannot activate Knowledge.
+Memerlukan activation decision yang berwenang. Retrieval, search ranking, model confidence, atau Journey replay tidak dapat mengaktifkan Knowledge.
 
 ### ACTIVE → UPDATED
 
-Requires an authorized version/update operation. Preferred behavior is successor creation plus old-record supersession metadata rather than destructive overwrite.
+Memerlukan version/update operation. Preferred behavior adalah successor + metadata supersession, bukan overwrite destruktif.
 
 ### ACTIVE → DEPRECATED
 
-Requires explicit deprecation authority. Deprecation does not silently archive.
+Memerlukan deprecation authority eksplisit. Deprecation tidak otomatis archive.
 
 ### DEPRECATED → ARCHIVED
 
-Requires explicit archive authority. `ARCHIVED` is terminal for the normal lifecycle path.
+Memerlukan archive authority eksplisit. `ARCHIVED` terminal untuk jalur normal.
 
-## 8. Confirmation Contract
+## 8. Kontrak Confirmation
 
-Current DEV confirmation infrastructure is recovery-specific (`RECOVERY_RESTORE`) and must not be reused implicitly.
+Infrastructure DEV saat ini bersifat recovery-specific (`RECOVERY_RESTORE`) dan tidak boleh digunakan secara implisit.
 
-Before any Knowledge transition requiring confirmation is implemented, semantic confirmation must have an explicit authority contract binding:
+Sebelum transition Knowledge yang membutuhkan confirmation diimplementasikan, authority confirmation semantic harus secara eksplisit mengikat:
 
 ```text
 actor
@@ -258,40 +256,36 @@ execution authority
 audit/provenance
 ```
 
-No Knowledge function may treat an arbitrary recovery confirmation reference as lifecycle authorization.
+Reference confirmation recovery tidak boleh dianggap sebagai lifecycle authorization Knowledge.
 
-If no transition is classified as confirmation-required by the final approved policy, `p_confirmation_ref` must not become a bypass channel and may be rejected/ignored according to the final API decision.
+Jika final policy tidak mewajibkan confirmation untuk suatu transisi, `p_confirmation_ref` tidak boleh menjadi bypass channel.
 
-## 9. Operation Identity / Idempotency
+## 9. Identitas Operasi / Idempotensi
 
-Every externally retryable transition requires a stable operation key.
+Setiap transition yang dapat di-retry dari luar membutuhkan operation key stabil.
 
-Logical identity:
+Identitas logis:
 
 ```text
-account
-+ SH
-+ knowledge_id
-+ transition
-+ operation_key
+account + SH + knowledge_id + transition + operation_key
 ```
 
-The persisted operation record must make the result observable before a retry is treated as already applied.
+Operation record harus membuat hasil dapat diamati sebelum retry dianggap sudah diterapkan.
 
-Required concurrency semantics:
+Semantics concurrency:
 
 ```text
 request A → SUCCESS
-request B same logical operation → ALREADY_APPLIED or equivalent safe idempotent result
+request B dengan logical operation sama → ALREADY_APPLIED atau hasil idempotent aman
 ```
 
-A concurrent request with a different logical operation must re-evaluate the locked current state and cannot bypass lifecycle guards.
+Request bersamaan dengan logical operation berbeda harus mengevaluasi ulang current state yang terkunci dan tidak boleh melewati lifecycle guard.
 
-Content-based deduplication is not a substitute for operation identity.
+Content deduplication bukan pengganti operation identity.
 
 ## 10. Provenance / Audit
 
-Every successful transition must retain enough information to trace:
+Setiap transition sukses harus dapat ditelusuri melalui:
 
 ```text
 actor
@@ -299,26 +293,26 @@ account
 SH
 source Knowledge record
 source signal/input
-model/provider when applicable
-validation result when applicable
+model/provider bila relevan
+validation result bila relevan
 decision
-confirmation/authorization when applicable
+confirmation/authorization bila relevan
 transition
 operation key
 timestamp
 resulting Knowledge record
-Journey event when applicable
+Journey event bila relevan
 ```
 
-Existing `knowledge.provenance` and `audit_events` may be reused if their actual schema and security behavior can represent this information without weakening isolation.
+`knowledge.provenance` dan `audit_events` boleh digunakan jika schema/security aktual benar-benar dapat menampung evidence tersebut tanpa melemahkan isolation.
 
-No new audit table should be created merely because an existing structure has not yet been fully reviewed.
+Jangan membuat audit table baru hanya karena struktur yang ada belum diperiksa secara lengkap.
 
-## 11. Journey Contract
+## 11. Kontrak Journey
 
-Journey remains projection/history, never lifecycle authority.
+Journey tetap projection/history, bukan lifecycle authority.
 
-For transitions requiring Journey projection, the event must reference the Knowledge transition and preserve at minimum:
+Untuk transition yang memerlukan Journey, event minimal mereferensikan:
 
 ```text
 source Knowledge record
@@ -327,14 +321,14 @@ new lifecycle
 transition
 operation key
 provenance reference
-resulting record where applicable
+resulting record bila relevan
 ```
 
-The exact Journey event type/payload must be reconciled against current DEV conventions before implementation.
+Event type/payload final harus direkonsiliasi dengan convention DEV sebelum implementasi.
 
-Replay or editing a Journey event must not cause lifecycle mutation.
+Replay atau edit Journey tidak boleh menyebabkan lifecycle mutation.
 
-## 12. Atomic Transaction Contract
+## 12. Kontrak Transaksi Atomik
 
 Preferred single PostgreSQL transaction:
 
@@ -353,18 +347,18 @@ BEGIN
 COMMIT
 ```
 
-No false success.
+Tidak boleh false success.
 
-If an atomic domain + Journey boundary cannot be implemented, the implementation must stop rather than silently ship a partially successful lifecycle operation, unless a separately approved intermediate-state/reconciliation design exists.
+Jika boundary domain + Journey tidak dapat dibuat atomik, implementasi harus berhenti daripada mengirim lifecycle operation yang hanya sebagian berhasil, kecuali ada desain intermediate/reconciliation yang telah disetujui terpisah.
 
-## 13. Security / Exposure Contract
+## 13. Kontrak Security / Exposure
 
-Before creating any `SECURITY DEFINER` transition function, verify whether `SECURITY INVOKER` can satisfy the contract.
+Sebelum membuat fungsi `SECURITY DEFINER`, verifikasi dahulu apakah `SECURITY INVOKER` sudah cukup.
 
-If `SECURITY DEFINER` is necessary, implementation must explicitly establish:
+Jika `SECURITY DEFINER` diperlukan, wajib menetapkan:
 
 - owner;
-- safe `search_path`;
+- `search_path` aman;
 - authentication guard;
 - current-account resolution;
 - active SH ownership;
@@ -375,14 +369,14 @@ If `SECURITY DEFINER` is necessary, implementation must explicitly establish:
 - operation identity guard;
 - exact `EXECUTE` grants;
 - anonymous rejection;
-- RLS interaction;
-- error leakage boundaries.
+- interaksi RLS;
+- batas kebocoran error.
 
-`SECURITY DEFINER` must never be added merely to bypass a permission error.
+`SECURITY DEFINER` tidak boleh ditambahkan sekadar untuk melewati permission error.
 
-## 14. Error Contract
+## 14. Kontrak Error
 
-Minimum machine-classifiable categories:
+Kategori minimum:
 
 ```text
 UNAUTHENTICATED
@@ -405,83 +399,75 @@ JOURNEY_PROJECTION_FAILED
 INTERNAL_FAILURE
 ```
 
-Exact SQLSTATE mapping must be finalized from the actual Postgres implementation and tested against Supabase DEV. No invented SQLSTATE values are authorized by this document.
+SQLSTATE final harus ditentukan dari implementasi PostgreSQL aktual dan diuji di Supabase DEV. Tidak boleh mengarang mapping SQLSTATE.
 
-## 15. Full-Write Scope
+## 15. Scope Full-Write Teknis
 
-When implementation is authorized, the change must be assessed across all required layers before any partial push:
+Ketika implementasi diotorisasi, dependency harus dinilai sebelum partial push:
 
 ```text
-1. Existing schema/state inspection
-2. Required schema/constraints/indexes only
-3. Authorization/RLS boundary
-4. Transition functions/RPCs
-5. Function ownership/search_path
+1. Inspeksi schema/state yang ada
+2. Schema/constraint/index yang benar-benar diperlukan
+3. Boundary authorization/RLS
+4. Transition functions/RPC
+5. Function owner/search_path
 6. EXECUTE grants/exposure
-7. Operation identity persistence
-8. Provenance/audit persistence
+7. Persistence operation identity
+8. Persistence provenance/audit
 9. Journey projection
-10. Runtime caller dependency
+10. Dependency caller runtime
 11. Error contract
 12. Positive tests
 13. Negative/cross-actor tests
 14. Concurrency/idempotency tests
-15. Actual Supabase verification
-16. Migration history generation
-17. GitHub reconciliation
+15. Verifikasi Supabase aktual
+16. Migration history
+17. Rekonsiliasi GitHub
 ```
 
-No item is silently skipped if it is a dependency of the implemented transition.
+Daftar ini adalah **checklist teknis execution**, bukan artefak dokumentasi tambahan.
 
-## 16. Supabase-First Implementation Protocol
+## 16. Protokol Implementasi Supabase-First
 
-When the gate eventually opens:
+Saat gate benar-benar dibuka:
 
 ```text
-INSPECT CURRENT SUPABASE DEV
+INSPEKSI SUPABASE DEV
         ↓
-PLAN MINIMAL SAFE CHANGE
+RENCANAKAN PERUBAHAN MINIMAL YANG AMAN
         ↓
-APPLY TO SUPABASE DEV
+TERAPKAN KE SUPABASE DEV
         ↓
-RUN IMMEDIATE DB TESTS
+JALANKAN TEST DATABASE
         ↓
-VERIFY ACTUAL DB STATE
+VERIFIKASI STATE DATABASE AKTUAL
         ↓
-VERIFY FUNCTION SECURITY / GRANTS
+VERIFIKASI SECURITY / GRANTS FUNGSI
         ↓
-VERIFY POSITIVE + NEGATIVE + CONCURRENCY
+VERIFIKASI POSITIVE + NEGATIVE + CONCURRENCY
         ↓
-RECONCILE DB STATE
+REKONSILIASI STATE DATABASE
         ↓
-GENERATE CLEAN DESCRIPTIVE MIGRATION HISTORY
+BUAT MIGRATION HISTORY DESKRIPTIF
         ↓
-RECONCILE MIGRATION ↔ SUPABASE
+REKONSILIASI MIGRATION ↔ SUPABASE
         ↓
-RECONCILE GITHUB DEV
+REKONSILIASI GITHUB DEV
 ```
 
-The migration is a record of the verified DB change, not the authority that precedes the DB change.
+Migration adalah catatan perubahan DB yang sudah diverifikasi, bukan authority yang mendahului perubahan DB.
 
 ## 17. Rollback / Recovery
 
-Before applying implementation changes, define:
+Sebelum implementasi, definisikan object terdampak, behavior schema/data yang reversible, replacement/drop function, restoration grant, consistency Journey, consistency operation identity, dan recovery path jika transition hanya sebagian diterapkan.
 
-- exact affected objects;
-- reversible schema/data behavior;
-- function replacement/drop behavior;
-- grant restoration;
-- Journey consistency behavior;
-- operation ledger consistency;
-- recovery path if the transition is only partially applied.
+Rollback tidak boleh diklaim aman jika domain dan Journey tidak dapat dipulihkan secara konsisten.
 
-A rollback plan must not claim safety if domain and Journey cannot be restored consistently.
-
-## 18. Verification Matrix
+## 18. Matriks Verifikasi
 
 ### Positive
 
-For every implemented transition:
+Untuk setiap transition:
 
 ```text
 correct authenticated owner
@@ -492,11 +478,11 @@ correct authenticated owner
 → expected resulting lifecycle
 ```
 
-Verify resulting row, provenance, audit, Journey, and operation identity.
+Verifikasi row hasil, provenance, audit, Journey, dan operation identity.
 
 ### Negative
 
-Verify rejection for:
+Uji penolakan untuk:
 
 ```text
 unauthenticated
@@ -512,50 +498,50 @@ model-only authority
 Journey-only replay
 operation-key conflict
 terminal lifecycle
-terminal SH where applicable
+terminal SH bila relevan
 ```
 
 ### Concurrency
 
-At minimum, two concurrent attempts against the same Knowledge record must not produce duplicate successors, inconsistent lifecycle, or duplicate logical Journey history.
+Minimal dua attempt bersamaan terhadap Knowledge record yang sama tidak boleh menghasilkan duplicate successor, lifecycle tidak konsisten, atau duplicate logical Journey history.
 
-## 19. Implementation Gate Result
+## 19. Hasil Gate Implementasi
 
 ```text
-Lifecycle reconciliation       = PASS
-Transition matrix              = PASS
-Per-transition authority       = DEFINED
-API direction                  = DEFINED
-Security boundary              = DEFINED
-Idempotency                    = DEFINED
-Provenance                     = DEFINED
-Journey boundary               = DEFINED / exact payload OPEN
-Atomicity                      = REQUIRED / RUNTIME PROOF OPEN
-Confirmation authority         = OPEN
-Operation ledger implementation= OPEN
-SECURITY DEFINER review        = OPEN
-SQLSTATE mapping               = OPEN
-Runtime implementation         = OPEN
-E2E verification               = OPEN
+Lifecycle reconciliation = PASS
+Transition matrix = PASS
+Per-transition authority = DEFINED
+API direction = DEFINED
+Security boundary = DEFINED
+Idempotency = DEFINED
+Provenance = DEFINED
+Journey boundary = DEFINED / exact payload OPEN
+Atomicity = REQUIRED / runtime proof OPEN
+Confirmation authority = OPEN
+Operation ledger implementation = OPEN
+SECURITY DEFINER review = OPEN
+SQLSTATE mapping = OPEN
+Runtime implementation = OPEN
+E2E verification = OPEN
 
 IMPLEMENTATION GATE = CLOSED
 ```
 
-## 20. Why Implementation Is Still Blocked
+## 20. Mengapa Implementasi Masih Terblokir
 
-The contract is now specific enough to prevent speculative implementation, but current DEV evidence still lacks:
+Evidence DEV masih belum menutup:
 
-1. a semantic Knowledge confirmation authority;
-2. a persisted lifecycle operation ledger/idempotency mechanism;
-3. proven atomic Knowledge + Journey transition capability;
+1. authority confirmation semantic Knowledge;
+2. persisted lifecycle operation ledger/idempotency;
+3. proof atomic Knowledge + Journey transition;
 4. exact Journey lifecycle event vocabulary/payload;
-5. final SECURITY DEFINER/INVOKER decision per function;
-6. tested SQLSTATE mapping;
-7. runtime caller integration and E2E proof.
+5. keputusan final `SECURITY DEFINER`/`INVOKER` per fungsi;
+6. SQLSTATE mapping yang sudah diuji;
+7. integrasi caller runtime dan E2E proof.
 
-Creating functions before these dependencies are resolved would produce a partial system and violate the full-write rule.
+Membuat fungsi sebelum dependency tersebut selesai akan menghasilkan sistem partial.
 
-## 21. No-Change Record
+## 21. Catatan Perubahan
 
 ```text
 Supabase schema = UNCHANGED
@@ -563,20 +549,20 @@ Supabase data = UNCHANGED
 Runtime = UNCHANGED
 Migration = UNCHANGED
 Canonical = UNCHANGED
-Working documentation = CREATED
+Working documentation = UPDATED
 Baseline = PRESERVED
 ```
 
-## 22. Next Gate
+## 22. Gate Berikutnya
 
-**Knowledge Transition Security / Operation Ledger / Atomicity Closure**
+**Penutupan Security / Operation Identity / Atomicity Transisi Knowledge**
 
-Focus:
+Fokus:
 
-1. determine whether existing `audit_events` can safely serve operation identity or whether a dedicated operation ledger is actually required;
-2. inspect existing Journey event contract and transaction capabilities;
-3. finalize semantic confirmation authority without coupling it to recovery;
-4. decide SECURITY INVOKER vs SECURITY DEFINER per transition;
-5. finalize exact SQLSTATE mapping from implementation constraints;
-6. verify runtime caller dependency;
-7. close implementation blockers before any Supabase mutation.
+1. tentukan apakah `audit_events` dapat secara aman melayani operation identity atau memang diperlukan ledger khusus;
+2. inspeksi kontrak Journey dan kemampuan transaksi yang ada;
+3. finalisasi confirmation authority semantic tanpa mengikatnya ke recovery;
+4. putuskan `SECURITY INVOKER` vs `SECURITY DEFINER` per transition;
+5. finalisasi SQLSTATE berdasarkan constraint implementasi aktual;
+6. verifikasi dependency caller runtime;
+7. tutup blocker sebelum mutation Supabase apa pun.
