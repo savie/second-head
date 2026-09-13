@@ -196,18 +196,17 @@ class JourneyRuntimeService {
         },
       );
 
-  Future<String> deleteRecordWithJourney({
+  Future<void> deleteRecordWithJourney({
     required String domain,
     required String recordId,
   }) async {
-    final result = await backendClient.rpc(
+    await backendClient.rpc(
       'runtime_delete_record_with_journey',
       params: {
         'p_domain': domain,
         'p_record_id': recordId,
       },
     );
-    return result?.toString() ?? '';
   }
 
   Future<void> classifyJourneyEvent({
@@ -309,7 +308,7 @@ class JourneyRuntimeService {
       params: {
         'p_source_sh_id': sourceShId,
         'p_legacy_type': legacyType,
-        'p_payload': payload,
+        'p_payload': provenance,
         'p_provenance': provenance,
         'p_retention_until': retentionUntil?.toUtc().toIso8601String(),
       },
@@ -348,8 +347,14 @@ class JourneyRuntimeService {
         'p_scope': scope,
       },
     );
-    if (result is Map<String, dynamic>) return result['authorization_id']?.toString() ?? '';
-    return result?.toString() ?? '';
+    if (result is List && result.isNotEmpty && result.first is Map) {
+      final row = Map<String, dynamic>.from(result.first as Map);
+      return _uuid(row['authorization_id'], 'Inheritance authorization creation');
+    }
+    if (result is Map) {
+      return _uuid(result['authorization_id'], 'Inheritance authorization creation');
+    }
+    return _uuid(result, 'Inheritance authorization creation');
   }
 
   Future<String> createKnowledgeLifecycleConfirmation({
