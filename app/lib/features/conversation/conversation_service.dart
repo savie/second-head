@@ -146,11 +146,22 @@ class ConversationService {
         sizeBytes: pending.bytes.length,
         localPath: pending.localPath,
       );
-      persisted.add(await const ConversationAttachmentService().uploadAndFinalize(
-        attachment: created,
-        bytes: pending.bytes,
-        messageId: recordResult.messageId,
-      ));
+      try {
+        persisted.add(await const ConversationAttachmentService().uploadAndFinalize(
+          attachment: created,
+          bytes: pending.bytes,
+          messageId: recordResult.messageId,
+        ));
+      } catch (_) {
+        // The message already exists and the attachment has a stable identity.
+        // Preserve that identity locally so Retry can finalize the same row
+        // instead of creating a new attachment/message pair.
+        persisted.add(created.copyWith(
+          messageId: recordResult.messageId,
+          status: 'FAILED',
+          localPath: pending.localPath,
+        ));
+      }
     }
     return recordResult.copyWith(attachments: persisted);
   }
@@ -225,7 +236,7 @@ class ProjectSummary {
     final name = row['name']?.toString();
     final created = DateTime.tryParse(row['created_at']?.toString() ?? '');
     final updated = DateTime.tryParse(row['updated_at']?.toString() ?? '');
-    if (id == null || name == null || created == null || updated == null) throw StateError('Conversation runtime returned an incomplete project summary.');
+    if (id == null || name == null || created == null || updated == null) throw StateError('Conversation runtime returned an incomplete project.');
     return ProjectSummary(projectId: id, name: name, createdAt: created, updatedAt: updated);
   }
 }
