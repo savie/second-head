@@ -4,7 +4,7 @@
 
 **WORKING AUDIT / DESIGN REVIEW — PARTIAL PASS — IMPLEMENTATION GATE CLOSED**
 
-This record captures the current DEV evidence for the semantic lifecycle transition boundary. It does not authorize runtime implementation, migration, or Canonical change.
+Dokumen ini mencatat evidence DEV saat ini untuk semantic lifecycle transition boundary. Dokumen ini tidak mengotorisasi runtime implementation, migration, atau perubahan Canonical.
 
 ## Authority
 
@@ -27,7 +27,7 @@ Review target:
 - SECURITY DEFINER/INVOKER and grants;
 - concurrency and error mapping.
 
-No implementation changes were made by this review.
+Tidak ada implementation changes yang dibuat oleh review ini.
 
 ## 2. Current DEV Database Evidence
 
@@ -62,15 +62,15 @@ DEPRECATED
 ARCHIVED
 ```
 
-Current DEV data contains only `CANDIDATE` Knowledge rows at the time of review. This does not prove that the complete lifecycle transition chain is implemented.
+Current DEV data contains only `CANDIDATE` Knowledge rows at the time of review. Ini tidak membuktikan bahwa complete lifecycle transition chain sudah implemented.
 
 ### Confirmation
 
-`public.runtime_high_risk_confirmations` exists with durable action identity and status fields. `action_id` is unique. The current confirmation mechanism is domain-limited: existing runtime confirmation execution is for `RECOVERY_RESTORE`; it is not evidence of generic semantic lifecycle confirmation authority.
+`public.runtime_high_risk_confirmations` exists with durable action identity and status fields. `action_id` is unique. Current confirmation mechanism is domain-limited: existing runtime confirmation execution is for `RECOVERY_RESTORE`; ini bukan evidence generic semantic lifecycle confirmation authority.
 
 ### Audit
 
-`public.audit_events` exists with `account_id`, `sh_id`, `event_type`, `status`, `metadata`, and timestamps. It is suitable as an audit boundary, but current evidence does not establish a complete semantic transition operation ledger.
+`public.audit_events` exists with `account_id`, `sh_id`, `event_type`, `status`, `metadata`, and timestamps. Ini dapat digunakan sebagai audit boundary, tetapi current evidence belum menetapkan complete semantic transition operation ledger.
 
 ## 3. Current Knowledge Runtime Functions
 
@@ -80,35 +80,35 @@ DEV exposes:
 - `runtime_record_knowledge_candidate` — SECURITY DEFINER;
 - `runtime_record_knowledge_with_journey` — SECURITY DEFINER.
 
-Both candidate-write functions explicitly require authenticated identity and active SH ownership through `current_account_id()`, validate content/source/origin/scope/visibility/confidence, and persist `CANDIDATE` lifecycle.
+Kedua candidate-write functions secara eksplisit memerlukan authenticated identity dan active SH ownership melalui `current_account_id()`, memvalidasi content/source/origin/scope/visibility/confidence, dan menyimpan lifecycle `CANDIDATE`.
 
 No current dedicated `runtime_activate_knowledge_candidate` function was evidenced.
 
 ## 4. Critical Reconciliation — Knowledge Lifecycle
 
-The earlier transition contract specified:
+Earlier transition contract specified:
 
 ```text
 CANDIDATE → ACTIVE
 ```
 
-The actual DEV schema permits intermediate states:
+Actual DEV schema permits intermediate states:
 
 ```text
 CANDIDATE → ACCEPTED → INDEXED → ACTIVE
 ```
 
-However, the current runtime evidence does not establish that this exact chain is the authoritative operational path, nor does it prove which function/actor is authorized for each transition.
+Namun current runtime evidence belum menetapkan bahwa exact chain ini adalah authoritative operational path, dan belum membuktikan actor/function yang berwenang untuk setiap transition.
 
-Therefore the direct `CANDIDATE → ACTIVE` transition must be treated as **CONTRACT CONFLICT / RECONCILIATION REQUIRED**, not silently assumed legal.
+Karena itu direct `CANDIDATE → ACTIVE` harus diperlakukan sebagai **CONTRACT CONFLICT / RECONCILIATION REQUIRED**, bukan diasumsikan legal secara diam-diam.
 
-No implementation should be created until the Knowledge lifecycle authority and transition chain are reconciled against migration/history and existing retrieval/indexing semantics.
+Tidak boleh membuat implementation sampai Knowledge lifecycle authority dan transition chain direkonsiliasi terhadap migration/history dan existing retrieval/indexing semantics.
 
 ## 5. Confirmation Authority
 
-Correction to prior working-contract wording:
+Correction terhadap prior working-contract wording:
 
-The system DOES have a durable confirmation mechanism.
+System memang memiliki durable confirmation mechanism.
 
 Current evidence establishes:
 
@@ -120,7 +120,7 @@ action_id UNIQUE
 PENDING → CONFIRMED → EXECUTED / CANCELLED / EXPIRED
 ```
 
-But the current mechanism is scoped to high-risk recovery execution. It cannot be reused for semantic activation merely by passing a confirmation reference. A semantic lifecycle confirmation contract must explicitly define:
+Namun current mechanism scoped to high-risk recovery execution. Mekanisme ini tidak boleh digunakan kembali untuk semantic activation hanya dengan memberikan confirmation reference. Semantic lifecycle confirmation contract harus secara eksplisit mendefinisikan:
 
 - operation type;
 - target domain/record;
@@ -167,15 +167,15 @@ AUTH
 → COMMIT
 ```
 
-Current semantic runtime contains separate domain and Journey RPC paths in existing capture flows; therefore whole-path atomicity is **NOT PROVEN**.
+Current semantic runtime contains separate domain and Journey RPC paths in existing capture flows; karena itu whole-path atomicity **NOT PROVEN**.
 
-For activation, a single DB transaction is the preferred correctness boundary. If Journey cannot be included atomically, the contract must define intermediate state and reconciliation rather than returning false success.
+Untuk activation, satu DB transaction merupakan preferred correctness boundary. Jika Journey tidak dapat dimasukkan secara atomic, contract harus mendefinisikan intermediate state dan reconciliation, bukan mengembalikan false success.
 
 ## 8. Concurrency
 
-The candidate write path uses `FOR UPDATE` when resolving an existing candidate, which is useful precedent for row locking, but this is not proof of activation concurrency safety.
+Candidate write path menggunakan `FOR UPDATE` ketika me-resolve existing candidate, yang menjadi useful precedent untuk row locking, tetapi ini bukan proof activation concurrency safety.
 
-Activation must lock the target candidate and establish operation identity before mutation so that concurrent requests cannot create duplicate activation history.
+Activation harus lock target candidate dan menetapkan operation identity sebelum mutation sehingga concurrent requests tidak menghasilkan duplicate activation history.
 
 Required verification:
 
@@ -184,19 +184,19 @@ A → SUCCESS
 B → ALREADY_APPLIED or REJECTED
 ```
 
-No duplicate unintended transition/Journey records.
+Tidak boleh ada duplicate unintended transition/Journey records.
 
 ## 9. Operation Identity
 
-Existing confirmation infrastructure provides a unique `action_id` pattern. This is useful precedent but is not yet a semantic lifecycle operation ledger.
+Existing confirmation infrastructure menyediakan unique `action_id` pattern. Ini merupakan useful precedent, tetapi belum menjadi semantic lifecycle operation ledger.
 
-Transition activation still requires a stable logical operation key bound to actor/account + SH + domain + source record + transition.
+Transition activation tetap membutuhkan stable logical operation key yang terikat pada actor/account + SH + domain + source record + transition.
 
-Content-based deduplication is not sufficient for retry safety.
+Content-based deduplication tidak cukup untuk retry safety.
 
 ## 10. Provenance / Audit
 
-Knowledge already has mandatory `provenance` JSONB. Audit events provide account/SH/event/status/metadata. The transition contract must bind these to:
+Knowledge already has mandatory `provenance` JSONB. Audit events menyediakan account/SH/event/status/metadata. Transition contract harus mengikatnya dengan:
 
 - source signal/ref;
 - model/provider when applicable;
@@ -212,7 +212,7 @@ Knowledge already has mandatory `provenance` JSONB. Audit events provide account
 
 Existing Knowledge write functions are SECURITY DEFINER with `search_path = public` and explicit authentication/ownership guards.
 
-This is a reference pattern only. It does not authorize copying the pattern without reviewing:
+Ini hanya reference pattern. Pattern tersebut tidak mengotorisasi copy tanpa review terhadap:
 
 - function owner;
 - exact `search_path`;
@@ -223,11 +223,11 @@ This is a reference pattern only. It does not authorize copying the pattern with
 - input validation;
 - error leakage.
 
-`SECURITY DEFINER` must never be introduced merely to bypass a permission problem.
+`SECURITY DEFINER` tidak boleh diperkenalkan hanya untuk bypass permission problem.
 
 ## 12. Error Contract
 
-Exact SQLSTATE/error-code mapping remains open. The implementation must distinguish rejected authorization/policy/lifecycle requests from runtime/database failures and must never return false success.
+Exact SQLSTATE/error-code mapping remains open. Implementation harus membedakan rejected authorization/policy/lifecycle requests dari runtime/database failures dan tidak boleh mengembalikan false success.
 
 ## 13. Decision Matrix
 
@@ -254,9 +254,9 @@ Exact SQLSTATE/error-code mapping remains open. The implementation must distingu
 
 **SECURITY + DATABASE TRANSITION DESIGN REVIEW = PARTIAL PASS**
 
-The security boundary and database primitives are sufficiently understood to define the implementation constraints, but implementation remains blocked.
+Security boundary dan database primitives sudah cukup dipahami untuk mendefinisikan implementation constraints, tetapi implementation tetap blocked.
 
-The highest-priority reconciliation is Knowledge lifecycle authority. The existing confirmation mechanism must also be explicitly extended/contracted for semantic lifecycle if confirmation is required; recovery confirmation cannot be treated as generic authorization.
+Prioritas reconciliation tertinggi adalah Knowledge lifecycle authority. Existing confirmation mechanism juga harus secara eksplisit diperluas/dikontrakkan untuk semantic lifecycle jika confirmation memang diperlukan; recovery confirmation tidak boleh diperlakukan sebagai generic authorization.
 
 ## 15. Required Next Gate
 
