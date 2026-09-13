@@ -8,6 +8,7 @@ import 'recovery/recovery_view.dart';
 import 'inheritance/inheritance_view.dart';
 import 'succession/succession_view.dart';
 import 'legacy/legacy_view.dart';
+import 'lifecycle_stage.dart';
 import 'lifecycle_widgets.dart';
 
 class LifecycleView extends StatefulWidget {
@@ -76,15 +77,24 @@ class LifecycleViewState extends State<LifecycleView> {
       'Inheritance' => InheritanceView(incomingItems: _sharedJourneyPayloads),
       'Succession' => SuccessionView(incomingItems: _sharedJourneyPayloads),
       'Legacy' => LegacyView(incomingItems: _sharedJourneyPayloads),
-      _ => LifecycleDetailView(
-          stage: stage,
-          incomingItems: _sharedJourneyPayloads,
-        ),
+      _ => const SizedBox.shrink(),
     };
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => destination),
     );
+  }
+
+  LifecycleStage _sharedStageFromMapStage(Object stage) {
+    final title = stage.toString();
+    return switch (title) {
+      _ when title.endsWith('Clone') => LifecycleStage.clone,
+      _ when title.endsWith('Recovery') => LifecycleStage.recovery,
+      _ when title.endsWith('Inheritance') => LifecycleStage.inheritance,
+      _ when title.endsWith('Succession') => LifecycleStage.succession,
+      _ when title.endsWith('Legacy') => LifecycleStage.legacy,
+      _ => LifecycleStage.eol,
+    };
   }
 
   @override
@@ -100,7 +110,8 @@ class LifecycleViewState extends State<LifecycleView> {
             padding: const EdgeInsets.fromLTRB(10, 2, 10, 18),
             child: LifecycleMap(
               query: query,
-              onStageTap: (stage) => _showDetail(context, stage),
+              onStageTap: (stage) =>
+                  _showDetail(context, _sharedStageFromMapStage(stage)),
             ),
           ),
         ),
