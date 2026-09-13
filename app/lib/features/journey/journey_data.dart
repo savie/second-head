@@ -36,11 +36,16 @@ class JourneyItem {
         (json['title'] as String?) ?? '',
         (json['subtitle'] as String?) ?? '',
         (json['date'] as String?) ?? '',
-        (json['type'] as String?) ?? 'Memory',
+        _normalizeType((json['type'] as String?) ?? 'Memory'),
         (json['content'] as String?) ?? '',
         json['is_private'] != false,
         semanticSourceId: json['semantic_source_id'] as String?,
       );
+
+  static String _normalizeType(String type) {
+    if (type.toUpperCase() == 'LEARNING') return 'Knowledge';
+    return type;
+  }
 }
 
 List<JourneyItem> shJourneyItems = [];
