@@ -32,10 +32,68 @@ class JourneyService {
     final rawEvents = result['events'];
     if (rawEvents is! List) return const [];
 
-    return [
+    final records = [
       for (final raw in rawEvents)
         if (raw is Map) _parse(raw),
     ];
+
+    final experienceIds = <String>{
+      for (final record in records)
+        if (record.eventType.toUpperCase() == 'EXPERIENCE')
+          if (record.payload['experience_id']?.toString().isNotEmpty == true)
+            record.payload['experience_id'].toString(),
+    };
+    if (experienceIds.isEmpty) return records;
+
+    final experiences = await _loadExperiences();
+    final byId = <String, Map<String, dynamic>>{
+      for (final experience in experiences)
+        if (experience['experience_id']?.toString().isNotEmpty == true)
+          experience['experience_id'].toString(): experience,
+    };
+
+    return [
+      for (final record in records)
+        if (record.eventType.toUpperCase() == 'EXPERIENCE')
+          _withExperienceContent(record, byId[record.payload['experience_id']?.toString()])
+        else
+          record,
+    ];
+  }
+
+  Future<List<Map<String, dynamic>>> _loadExperiences() async {
+    final result = await backendClient.rpc(
+      'list_experiences',
+      params: {
+        'p_sh_id': await _resolveShId(),
+        'p_limit': 100,
+      },
+    );
+    if (result is! List) return const [];
+    return [
+      for (final raw in result)
+        if (raw is Map) Map<String, dynamic>.from(raw),
+    ];
+  }
+
+  JourneyBackendRecord _withExperienceContent(
+    JourneyBackendRecord record,
+    Map<String, dynamic>? experience,
+  ) {
+    final existingContent = record.payload['content']?.toString().trim() ?? '';
+    if (existingContent.isNotEmpty || experience == null) return record;
+
+    return JourneyBackendRecord(
+      eventId: record.eventId,
+      eventType: record.eventType,
+      occurredAt: record.occurredAt,
+      continuityStatus: record.continuityStatus,
+      payload: {
+        ...record.payload,
+        'content': experience['content']?.toString() ?? '',
+        'visibility': experience['visibility'],
+      },
+    );
   }
 
   Future<String> _resolveShId() async {
