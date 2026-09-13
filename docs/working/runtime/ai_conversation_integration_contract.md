@@ -45,9 +45,9 @@ ConversationService Message Persistence
 
 ## 2. Current Evidence
 
-Current frontend memiliki `activeConversationId` dan `ConversationService` memiliki thread-scoped context loader melalui `runtime_load_conversation_context_for_thread`.
+Frontend saat ini memiliki `activeConversationId` dan `ConversationService` memiliki thread-scoped context loader melalui `runtime_load_conversation_context_for_thread`.
 
-Current implementation membawa:
+Implementation saat ini membawa:
 
 ```text
 user_message
@@ -55,7 +55,7 @@ conversation_id
 user_message_id
 ```
 
-AI Runtime tetap menyelesaikan actor melalui `resolve_identity()`, kemudian mengambil existing Context Runtime Package dan melakukan thread-scoped Conversation retrieval melalui `runtime_load_conversation_context_for_thread`.
+AI Runtime tetap menyelesaikan actor melalui `resolve_identity()`, kemudian mengambil Context Runtime Package yang sudah ada dan melakukan Conversation retrieval berbasis thread melalui `runtime_load_conversation_context_for_thread`.
 
 Fresh client E2E pada build CI #637 telah memverifikasi:
 
@@ -63,11 +63,11 @@ Fresh client E2E pada build CI #637 telah memverifikasi:
 - Conversation B mempertahankan context B;
 - Account 2 tidak memperoleh secret Conversation A melalui conversation/context path;
 - setelah session switch kembali ke Account 1, Conversation A tetap mengembalikan context A;
-- runtime request/response correlation dan active-thread scope tercatat di Supabase.
+- correlation request/response runtime dan active-thread scope tercatat di Supabase.
 
 Kesimpulan:
 
-**Conversation-aware runtime path telah melalui fresh client E2E verification untuk isolation dan continuity.**
+**Jalur runtime yang terikat pada Conversation telah melalui fresh client E2E verification untuk isolation dan continuity.**
 
 ---
 
@@ -93,11 +93,11 @@ Owner untuk:
 - provider execution/fallback;
 - runtime audit;
 - semantic runtime lifecycle;
-- returning model response metadata.
+- mengembalikan metadata respons model.
 
 ### Context Runtime Package
 
-Tetap menjadi orchestration boundary yang ada.
+Tetap menjadi orchestration boundary yang sudah ada.
 
 Perubahan consumer integration tidak boleh bypass `resolve_identity()` atau membuat Context Runtime membaca Conversation yang tidak dimiliki actor.
 
@@ -117,7 +117,7 @@ user_message_id
 
 `user_message_id` menjadi correlation reference antara Message persistence dan runtime audit.
 
-Runtime-generated `request_id` menjadi correlation ID eksekusi runtime.
+Runtime-generated `request_id` menjadi correlation ID untuk execution runtime.
 
 Assistant Message menyimpan metadata correlation:
 
@@ -146,7 +146,7 @@ assistant Message metadata.runtime_request_id
 
 AI Runtime tidak menggunakan Conversation context global berdasarkan SH sebagai context utama apabila request memiliki target Conversation.
 
-Current implementation:
+Implementation saat ini:
 
 ```text
 request.conversation_id
@@ -168,7 +168,7 @@ AI Runtime menggabungkan hasil thread-scoped Conversation retrieval ke execution
 conversation_context_scope = active-thread
 ```
 
-Ini adalah implementation terhadap working contract, bukan perubahan Canonical.
+Ini merupakan implementation terhadap working contract, bukan perubahan Canonical.
 
 Fresh E2E dan Supabase audit telah memverifikasi penggunaan `active-thread` pada runtime request yang diuji.
 
@@ -198,7 +198,7 @@ record assistant Message + runtime correlation metadata
 
 Content string tidak digunakan sebagai satu-satunya correlation mechanism.
 
-Fresh E2E dan Supabase audit telah memverifikasi bahwa user/assistant message berada pada Conversation target dan dapat ditelusuri melalui runtime correlation metadata.
+Fresh E2E dan Supabase audit telah memverifikasi bahwa user/assistant Message berada pada Conversation target dan dapat ditelusuri melalui runtime correlation metadata.
 
 ---
 
@@ -206,7 +206,7 @@ Fresh E2E dan Supabase audit telah memverifikasi bahwa user/assistant message be
 
 AI Runtime failure bukan assistant success.
 
-Current behavior:
+Behavior saat ini:
 
 ```text
 AI Runtime SUCCESS
@@ -219,7 +219,7 @@ AI Runtime FAILURE
 
 Static fallback assistant response pada dynamic AI path telah dihapus.
 
-Frontend sekarang mempertahankan typed backend/runtime failure classification sampai UI boundary, tanpa membuat fake assistant message pada runtime failure path.
+Frontend sekarang mempertahankan typed backend/runtime failure classification sampai UI boundary, tanpa membuat fake assistant Message pada runtime failure path.
 
 ---
 
@@ -245,11 +245,11 @@ conversation ownership check
 thread context
 ```
 
-Frontend tidak menjadi source of truth untuk authority.
+Frontend bukan source of truth untuk authority.
 
 Cross-actor database negative execution telah diverifikasi: actor kedua tidak dapat membaca maupun menulis Conversation milik actor lain dan menerima `CONVERSATION_ACCESS_DENIED`.
 
-Full authenticated HTTP/Edge execution dengan foreign `conversation_id` belum dilakukan karena belum tersedia second-session JWT yang dapat digunakan untuk direct request. Ini dicatat sebagai **OPTIONAL FINAL VERIFICATION**, bukan sebagai blocker terhadap current client/runtime integration evidence.
+Full authenticated HTTP/Edge execution dengan foreign `conversation_id` belum dilakukan karena belum tersedia second-session JWT yang dapat digunakan untuk direct request. Hal ini dicatat sebagai **OPTIONAL FINAL VERIFICATION**, bukan blocker terhadap current client/runtime integration evidence.
 
 ---
 
@@ -319,42 +319,42 @@ cross-actor HTTP E2E               OPTIONAL / OPEN
 
 **Current client/runtime integration gate: READY / VERIFIED.**
 
-The remaining HTTP/Edge foreign-conversation check is intentionally retained as an optional final verification and does not block the current integration status.
+Pemeriksaan HTTP/Edge foreign-conversation yang tersisa sengaja dipertahankan sebagai optional final verification dan tidak memblokir status integration saat ini.
 
 ---
 
 ## 12. Implementation Record
 
-Current relevant DEV implementation:
+Implementation DEV yang relevan saat ini:
 
-- `5c94943f9326899975e93deeda12b2eaa78957b0` — frontend backend-error classification and runtime failure presentation boundary.
-- `f8d591578692a8ae5cbf46e19dd259fe4359a463` — preserve typed runtime failures through Conversation bridge.
-- `1516009fbc7ce067b618969110bba14dd58fccf6` — classify AI transport failures.
-- `3ea510f09f2b78bf66dbf54558ce06ac0f9bdd6f` — remove duplicate conversation persistence from AI Runtime.
-- `31e350b89397eb3540a65b5b77a5ee110e1dd548` — current provider prompt/context correction.
+- `5c94943f9326899975e93deeda12b2eaa78957b0` — frontend backend-error classification dan runtime failure presentation boundary.
+- `f8d591578692a8ae5cbf46e19dd259fe4359a463` — mempertahankan typed runtime failures melalui Conversation bridge.
+- `1516009fbc7ce067b618969110bba14dd58fccf6` — mengklasifikasikan AI transport failures.
+- `3ea510f09f2b78bf66dbf54558ce06ac0f9bdd6f` — menghapus duplicate conversation persistence dari AI Runtime.
+- `31e350b89397eb3540a65b5b77a5ee110e1dd548` — correction provider prompt/context saat ini.
 
-Frontend CI #637 for `5c94943f9326899975e93deeda12b2eaa78957b0` completed successfully. The generated artifact is `second-head-debug-apk-637`.
+Frontend CI #637 untuk `5c94943f9326899975e93deeda12b2eaa78957b0` selesai dengan sukses. Artifact yang dihasilkan adalah `second-head-debug-apk-637`.
 
 Supabase DEV runtime:
 
 - `ai-runtime` deployment version **11**;
 - `verify_jwt=true`;
-- authenticated runtime path active.
+- authenticated runtime path aktif.
 
 Relevant Supabase migrations:
 
-- `20260911233846_restore_authenticated_runtime_conversation_execute` — restores authenticated execution of `runtime_record_conversation`.
-- `20260912033617_ensure_sh_state_on_sh_creation` — enforces the SH lifecycle invariant that every newly materialized `sh_instances` row receives an initial `sh_states` row.
+- `20260911233846_restore_authenticated_runtime_conversation_execute` — memulihkan authenticated execution untuk `runtime_record_conversation`.
+- `20260912033617_ensure_sh_state_on_sh_creation` — menegakkan invariant lifecycle SH bahwa setiap row `sh_instances` yang baru dimaterialisasi memperoleh initial `sh_states` row.
 
-GitHub DEV migration synchronization for these runtime changes has been verified.
+Sinkronisasi migration GitHub DEV untuk perubahan runtime ini telah diverifikasi.
 
 ---
 
 ## 13. Next Execution
 
-The original fresh-E2E sequence is complete and must not be repeated.
+Urutan fresh-E2E awal sudah selesai dan tidak boleh diulang.
 
-Current state:
+Status saat ini:
 
 ```text
 Implementation
@@ -376,7 +376,7 @@ Cross-actor DB authorization  PASS
 CURRENT GATE READY
 ```
 
-Optional only:
+Hanya optional:
 
 ```text
 Second authenticated HTTP/Edge session
@@ -386,4 +386,4 @@ foreign conversation_id
 CONVERSATION_ACCESS_DENIED
 ```
 
-No repeat of already-passed Conversation A/B client testing is required unless a later code, database, runtime, or contract change invalidates the evidence.
+Tidak diperlukan pengulangan testing Conversation A/B yang sudah PASS, kecuali perubahan code, database, runtime, atau contract berikutnya membuat evidence tersebut tidak lagi berlaku.
