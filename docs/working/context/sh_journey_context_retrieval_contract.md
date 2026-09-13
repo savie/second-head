@@ -39,9 +39,9 @@ Dokumen ini:
 
 # Current Finding
 
-Journey runtime foundation exists.
+Foundation runtime Journey sudah tersedia.
 
-Verified foundation:
+Foundation yang sudah diverifikasi:
 
 - journey_events;
 - continuity model;
@@ -62,7 +62,7 @@ VERIFIED
 
 # Retrieval Contract Decision
 
-Journey Context Retrieval telah memiliki keputusan contract melalui Context Resolver Contract Decision.
+Journey Context Retrieval sudah memiliki keputusan contract melalui Context Resolver Contract Decision.
 
 ## 1. Semantic Context Inclusion
 
@@ -131,7 +131,7 @@ runtime_get_journey_context()
 
 # Implementation Evidence
 
-Verified runtime flow:
+Flow runtime yang sudah diverifikasi:
 
 ```
 runtime_get_context_package()
@@ -147,33 +147,33 @@ Experience retrieval
 Journey retrieval
 ```
 
-Journey retrieval is connected through:
+Journey retrieval terhubung melalui:
 
 ```
 runtime_get_journey_context()
 ```
 
-Current implementation therefore reconciles with the resolved Context Resolver contract.
+Dengan demikian implementasi saat ini sudah selaras dengan Context Resolver contract yang telah diputuskan.
 
 ---
 
 # FE Projection Boundary
 
-Journey UI may retrieve Journey data through the Journey retrieval boundary for presentation.
+Journey UI dapat mengambil data Journey melalui retrieval boundary Journey untuk kebutuhan presentation.
 
-Current FE Journey service resolves the authenticated SH identity through:
+Journey service pada FE saat ini me-resolve identity SH yang terautentikasi melalui:
 
 ```
 resolve_identity()
 ```
 
-and then retrieves Journey context through:
+kemudian mengambil Journey context melalui:
 
 ```
 runtime_get_journey_context()
 ```
 
-This FE projection does not redefine or bypass the Context Resolver contract.
+Projection FE ini tidak mendefinisikan ulang atau melewati Context Resolver contract.
 
 ---
 
