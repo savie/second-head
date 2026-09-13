@@ -27,10 +27,7 @@ final class AIRuntimeTransportAdapter implements AIProviderAdapter {
           'user_message': request.input,
           'conversation_id': request.conversationId,
           'user_message_id': request.userMessageId,
-          'mode': switch (request.mode) {
-            RuntimeExecutionMode.normal => 'normal',
-            RuntimeExecutionMode.generateOnly => 'generate_only',
-          },
+          'mode': request.mode,
         },
       );
       final data = response.data;
