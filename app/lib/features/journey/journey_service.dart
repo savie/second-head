@@ -7,6 +7,8 @@ class JourneyBackendRecord {
     required this.occurredAt,
     required this.continuityStatus,
     required this.payload,
+    required this.visibility,
+    required this.transferPolicy,
   });
 
   final String eventId;
@@ -14,6 +16,8 @@ class JourneyBackendRecord {
   final DateTime occurredAt;
   final String continuityStatus;
   final Map<String, dynamic> payload;
+  final String visibility;
+  final String transferPolicy;
 }
 
 class JourneyService {
@@ -93,6 +97,8 @@ class JourneyService {
         'content': experience['content']?.toString() ?? '',
         'visibility': experience['visibility'],
       },
+      visibility: record.visibility,
+      transferPolicy: record.transferPolicy,
     );
   }
 
@@ -125,6 +131,8 @@ class JourneyService {
       payload: payload is Map
           ? Map<String, dynamic>.from(payload)
           : const <String, dynamic>{},
+      visibility: raw['visibility']?.toString().toUpperCase() ?? 'PRIVATE',
+      transferPolicy: raw['transfer_policy']?.toString().toUpperCase() ?? 'NON_TRANSFERABLE',
     );
   }
 }
