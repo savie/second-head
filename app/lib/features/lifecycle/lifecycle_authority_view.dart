@@ -52,32 +52,25 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
       final journeyRecords = rows[1] as List<JourneyBackendRecord>;
       final incoming = [
         for (final record in journeyRecords)
-          if (record.eventId.isNotEmpty && record.eventType.isNotEmpty &&
-              (record.visibility == 'SHARED' || record.visibility == 'PUBLIC'))
+          if (record.eventId.isNotEmpty &&
+              record.eventType.isNotEmpty &&
+              (record.visibility == 'SHARED' || record.visibility == 'PUBLIC') &&
+              const {'MEMORY', 'KNOWLEDGE', 'LEARNING', 'EXPERIENCE'}.contains(record.eventType.toUpperCase()))
             JourneyLifecyclePayload(
-              title: record.payload['title']?.toString().trim().isNotEmpty == true
-                  ? record.payload['title'].toString()
-                  : record.eventType,
+              title: record.payload['title']?.toString().trim().isNotEmpty == true ? record.payload['title'].toString() : record.eventType,
               type: switch (record.eventType.toUpperCase()) {
                 'EXPERIENCE' => 'Experience',
                 'KNOWLEDGE' || 'LEARNING' => 'Knowledge',
                 'MEMORY' => 'Memory',
-                'LEGACY' => 'Legacy',
                 _ => record.eventType,
               },
               content: record.payload['content']?.toString() ?? '',
               isPrivate: false,
               date: record.occurredAt.toLocal().toString(),
-              semanticSourceId: record.payload['memory_id']?.toString()
-                  ?? record.payload['knowledge_id']?.toString()
-                  ?? record.payload['experience_id']?.toString()
-                  ?? record.eventId,
+              semanticSourceId: record.payload['memory_id']?.toString() ?? record.payload['knowledge_id']?.toString() ?? record.payload['experience_id']?.toString() ?? record.eventId,
             ),
       ];
-      if (mounted) setState(() {
-        _records = rows[0] as List<Map<String, dynamic>>;
-        _journeyItems = incoming;
-      });
+      if (mounted) setState(() { _records = rows[0] as List<Map<String, dynamic>>; _journeyItems = incoming; });
     } catch (error) { if (mounted) _show(error); }
   }
 
@@ -147,35 +140,12 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
 
   int _count(String type) => _journeyItems.where((item) => item.type.toLowerCase() == type.toLowerCase()).length;
 
-  @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(leading: const BackButton(), title: Text(widget.stage.title)), body: RefreshIndicator(onRefresh: _load, child: ListView(padding: const EdgeInsets.fromLTRB(18, 18, 18, 28), children: [_card(_hero()), const SizedBox(height: 18), _card(_target()), const SizedBox(height: 18), _card(_history())])));
-
+  @override Widget build(BuildContext context) => Scaffold(appBar: AppBar(leading: const BackButton(), title: Text(widget.stage.title)), body: RefreshIndicator(onRefresh: _load, child: ListView(padding: const EdgeInsets.fromLTRB(18, 18, 18, 28), children: [_card(_hero()), const SizedBox(height: 18), _card(_target()), const SizedBox(height: 18), _card(_history())])));
   Widget _card(Widget child) => Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: shSurface.withValues(alpha: .72), borderRadius: BorderRadius.circular(24), border: Border.all(color: widget.stage.accent.withValues(alpha: .24))), child: child);
-
   Widget _hero() => Row(children: [_StageIcon(stage: widget.stage), const SizedBox(width: 18), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(widget.stage.title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500, height: 1.1)), const SizedBox(height: 9), Text(widget.stage.subtitle, style: const TextStyle(fontSize: 13, color: shMuted, height: 1.45))]))]);
-
-  Widget _target() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Text(_isClone ? 'Target & Journey' : 'Target & Incoming from Journey', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18),
-    for (var i = 0; i < _targets.length; i++) ...[
-      Text('Target ${i + 1}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)), const SizedBox(height: 9), const Text('Email', style: TextStyle(fontSize: 12, color: shMuted)), const SizedBox(height: 6),
-      TextField(controller: _targets[i].email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(prefixIcon: Icon(Icons.mail_outline_rounded), hintText: 'Enter target email')),
-      if (_hasJourneyChecklist) ...[
-        const SizedBox(height: 15), Text(_isClone ? 'Shared Journey' : 'Incoming from Journey', style: const TextStyle(fontSize: 12, color: shMuted)), const SizedBox(height: 6),
-        if (_journeyItems.isEmpty) const Text('No shared Journey data available.', style: TextStyle(fontSize: 13, color: shMuted))
-        else for (final item in _journeyItems) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _isClone ? true : _targets[i].selected.contains(item.semanticSourceId ?? '${item.type}|${item.title}'), onChanged: _busy || _isClone ? null : (_) => _toggle(i, item), title: Text(item.title, style: const TextStyle(fontSize: 14)), subtitle: Text('${item.type} · ${item.date}', style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
-      ],
-      if (!_isClone && _targets.length > 1) Align(alignment: Alignment.centerRight, child: TextButton.icon(onPressed: _busy ? null : () => _removeTarget(i), icon: const Icon(Icons.remove_circle_outline, size: 18), label: const Text('Remove target'))),
-      if (i != _targets.length - 1) const SizedBox(height: 15),
-    ],
-    if (!_isClone) ...[const SizedBox(height: 9), OutlinedButton.icon(onPressed: _busy ? null : _addTarget, icon: const Icon(Icons.add_rounded, size: 18), label: const Text('Add Target'))],
-    const SizedBox(height: 15), Text(_isClone ? 'Target email is used for the clone authorization flow. Authorization is handled by Integrations.' : 'Request ${widget.stage.title.toLowerCase()} using selected shared Journey context.', style: const TextStyle(fontSize: 13, color: shMuted, height: 1.4)), const SizedBox(height: 15),
-    SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _busy ? null : _submit, icon: Icon(_isClone ? Icons.copy_all_outlined : Icons.send_rounded, size: 18), label: Text(_busy ? 'Submitting…' : _isClone ? 'Create Clone' : 'Request ${widget.stage.title}', style: const TextStyle(fontSize: 14)))), const SizedBox(height: 18),
-    _summaryRow(),
-  ]);
-
+  Widget _target() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_isClone ? 'Target & Journey' : 'Target & Incoming from Journey', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18), for (var i = 0; i < _targets.length; i++) ...[Text('Target ${i + 1}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)), const SizedBox(height: 9), const Text('Email', style: TextStyle(fontSize: 12, color: shMuted)), const SizedBox(height: 6), TextField(controller: _targets[i].email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(prefixIcon: Icon(Icons.mail_outline_rounded), hintText: 'Enter target email')), if (_hasJourneyChecklist) ...[const SizedBox(height: 15), Text(_isClone ? 'Shared Journey' : 'Incoming from Journey', style: const TextStyle(fontSize: 12, color: shMuted)), const SizedBox(height: 6), if (_journeyItems.isEmpty) const Text('No shared Journey data available.', style: TextStyle(fontSize: 13, color: shMuted)) else for (final item in _journeyItems) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _isClone ? true : _targets[i].selected.contains(item.semanticSourceId ?? '${item.type}|${item.title}'), onChanged: _busy || _isClone ? null : (_) => _toggle(i, item), title: Text(item.title, style: const TextStyle(fontSize: 14)), subtitle: Text('${item.type} · ${item.date}', style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading)], if (!_isClone && _targets.length > 1) Align(alignment: Alignment.centerRight, child: TextButton.icon(onPressed: _busy ? null : () => _removeTarget(i), icon: const Icon(Icons.remove_circle_outline, size: 18), label: const Text('Remove target'))), if (i != _targets.length - 1) const SizedBox(height: 15)], if (!_isClone) ...[const SizedBox(height: 9), OutlinedButton.icon(onPressed: _busy ? null : _addTarget, icon: const Icon(Icons.add_rounded, size: 18), label: const Text('Add Target'))], const SizedBox(height: 15), Text(_isClone ? 'Target email is used for the clone authorization flow. Authorization is handled by Integrations.' : 'Request ${widget.stage.title.toLowerCase()} using selected shared Journey context.', style: const TextStyle(fontSize: 13, color: shMuted, height: 1.4)), const SizedBox(height: 15), SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _busy ? null : _submit, icon: Icon(_isClone ? Icons.copy_all_outlined : Icons.send_rounded, size: 18), label: Text(_busy ? 'Submitting…' : _isClone ? 'Create Clone' : 'Request ${widget.stage.title}', style: const TextStyle(fontSize: 14)))), const SizedBox(height: 18), _summaryRow()]);
   Widget _summaryRow() => Container(padding: const EdgeInsets.fromLTRB(18, 16, 18, 14), decoration: BoxDecoration(color: shBackground.withValues(alpha: .48), borderRadius: BorderRadius.circular(18), border: Border.all(color: shBorder)), child: Row(children: [_summary('Memory', _count('Memory')), _summary('Knowledge', _count('Knowledge')), _summary('Experience', _count('Experience'))]));
   Widget _summary(String label, int value) => Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('$value', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)), const SizedBox(height: 3), Text(label, style: const TextStyle(fontSize: 12, color: shMuted))]));
-
   Widget _history() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_isClone ? 'Clone Result' : 'Decision History', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18), if (_records.isEmpty) Text(_isClone ? 'No clone results yet.' : 'No decisions yet.', style: const TextStyle(color: shMuted, fontSize: 13)) else for (final r in _records) Card(child: ListTile(title: Text(r['status']?.toString() ?? 'UNKNOWN', style: const TextStyle(fontSize: 14)), subtitle: Text(r['created_at']?.toString() ?? '', style: const TextStyle(fontSize: 11, color: shMuted)), trailing: ((_isClone || widget.stage.title == 'Inheritance') ? r['status']?.toString().toUpperCase() == 'APPROVED' : r['status']?.toString().toUpperCase() == 'ACTIVE') ? IconButton(icon: const Icon(Icons.play_arrow_rounded, size: 20), onPressed: _busy ? null : () => _execute(r)) : null))]);
 }
 
