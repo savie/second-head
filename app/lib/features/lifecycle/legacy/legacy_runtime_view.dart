@@ -79,7 +79,25 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
         ],
         const SizedBox(height: 10), const Text('Incoming from Journey', style: TextStyle(color: shMuted)), const SizedBox(height: 8),
         if (_loading || _journeyRecords.isEmpty) const Text('No shared Journey data available.', style: TextStyle(color: shMuted))
-        else for (final r in _journeyRecords) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(r.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)), title: Text(r.eventType), subtitle: Text(_date(r.occurredAt)), controlAffinity: ListTileControlAffinity.leading),
+        else for (final r in _journeyRecords)
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _selected.contains(r.eventId),
+            onChanged: _busy
+                ? null
+                : (v) {
+                    setState(() {
+                      if (v == true) {
+                        _selected.add(r.eventId);
+                      } else {
+                        _selected.remove(r.eventId);
+                      }
+                    });
+                  },
+            title: Text(r.eventType),
+            subtitle: Text(_date(r.occurredAt)),
+            controlAffinity: ListTileControlAffinity.leading,
+          ),
         const SizedBox(height: 12), OutlinedButton.icon(onPressed: _busy ? null : _addTarget, icon: const Icon(Icons.add_rounded), label: const Text('Add Target')),
         const SizedBox(height: 20), const Text('Request legacy handling for selected shared Journey context.', style: TextStyle(color: shMuted, height: 1.4)), const SizedBox(height: 18),
         SizedBox(width: double.infinity, height: 68, child: FilledButton.icon(onPressed: _busy ? null : _preserve, icon: const Icon(Icons.send_rounded), label: Text(_busy ? 'Submitting…' : 'Request Legacy'))), const SizedBox(height: 12), const Text('Authentication is handled by Integrations.', style: TextStyle(color: shMuted)),
