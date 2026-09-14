@@ -8,8 +8,7 @@ import '../lifecycle_runtime_read_service.dart';
 
 class RecoveryRuntimeView extends StatefulWidget {
   const RecoveryRuntimeView({super.key});
-  @override
-  State<RecoveryRuntimeView> createState() => _RecoveryRuntimeViewState();
+  @override State<RecoveryRuntimeView> createState() => _RecoveryRuntimeViewState();
 }
 
 class _RecoveryRuntimeViewState extends State<RecoveryRuntimeView> {
@@ -18,8 +17,7 @@ class _RecoveryRuntimeViewState extends State<RecoveryRuntimeView> {
   List<Map<String, dynamic>> _snapshots = const [];
   bool _loading = true;
 
-  @override
-  void initState() { super.initState(); _load(); }
+  @override void initState() { super.initState(); _load(); }
 
   Future<void> _load() async {
     try {
@@ -63,66 +61,33 @@ class _RecoveryRuntimeViewState extends State<RecoveryRuntimeView> {
     } catch (error) { _show('Restore failed: $error'); }
   }
 
-  void _show(Object message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message.toString())));
-  }
-
-  String _date(dynamic value) {
-    final parsed = DateTime.tryParse(value?.toString() ?? '');
-    return parsed == null ? '—' : parsed.toLocal().toString();
-  }
+  void _show(Object message) { if (!mounted) return; ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message.toString()))); }
+  String _date(dynamic value) { final parsed = DateTime.tryParse(value?.toString() ?? ''); return parsed == null ? '—' : parsed.toLocal().toString(); }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(leading: const BackButton(), title: const Text('Recovery')),
-        body: RefreshIndicator(
-          onRefresh: _load,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(30, 16, 30, 28),
-            children: [
-              _card(LifecycleStage.recovery.accent, Row(children: [
-                _Icon(), const SizedBox(width: 24),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Recovery', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 16),
-                  Text(LifecycleStage.recovery.subtitle, style: const TextStyle(fontSize: 16, color: shMuted, height: 1.45)),
-                ])),
-              ])),
-              const SizedBox(height: 24),
-              _card(LifecycleStage.recovery.accent, Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Full SH Snapshot', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 18),
-                const Text('Recovery uses a FULL snapshot of the current SH. No target or per-item selection is required.', style: TextStyle(color: shMuted, height: 1.45)),
-                const SizedBox(height: 24),
-                SizedBox(width: double.infinity, height: 68, child: FilledButton.icon(onPressed: _loading ? null : _createSnapshot, icon: const Icon(Icons.camera_alt_outlined), label: const Text('Create Snapshot'))),
-              ])),
-              const SizedBox(height: 24),
-              _card(LifecycleStage.recovery.accent, Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Recovery History', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 22),
-                if (_loading) const Center(child: Padding(padding: EdgeInsets.all(18), child: CircularProgressIndicator()))
-                else if (_snapshots.isEmpty) const Text('No recovery history yet.', style: TextStyle(color: shMuted, fontSize: 16))
-                else for (final row in _snapshots) Card(child: ListTile(title: Text(row['snapshot_kind']?.toString() ?? 'FULL'), subtitle: Text(_date(row['created_at'])), trailing: IconButton(icon: const Icon(Icons.restore_rounded), onPressed: () => _restore(row)))),
-              ])),
-            ],
-          ),
-        ),
-      );
+    appBar: AppBar(leading: const BackButton(), title: const Text('Recovery')),
+    body: RefreshIndicator(onRefresh: _load, child: ListView(padding: const EdgeInsets.fromLTRB(18, 18, 18, 28), children: [
+      _card(Row(children: [_Icon(), const SizedBox(width: 18), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Recovery', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500, height: 1.1)), const SizedBox(height: 9), Text(LifecycleStage.recovery.subtitle, style: const TextStyle(fontSize: 13, color: shMuted, height: 1.45))]))])),
+      const SizedBox(height: 18),
+      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('Full SH Snapshot', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 15),
+        const Text('Recovery uses a FULL snapshot of the current SH. No target or per-item selection is required.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 18),
+        SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _loading ? null : _createSnapshot, icon: const Icon(Icons.camera_alt_outlined, size: 18), label: const Text('Create Snapshot', style: TextStyle(fontSize: 14)))),
+      ])),
+      const SizedBox(height: 18),
+      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('Recovery History', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18),
+        if (_loading) const Center(child: Padding(padding: EdgeInsets.all(18), child: CircularProgressIndicator()))
+        else if (_snapshots.isEmpty) const Text('No recovery history yet.', style: TextStyle(color: shMuted, fontSize: 13))
+        else for (final row in _snapshots) Card(child: ListTile(title: Text(row['snapshot_kind']?.toString() ?? 'FULL', style: const TextStyle(fontSize: 14)), subtitle: Text(_date(row['created_at']), style: const TextStyle(fontSize: 11, color: shMuted)), trailing: IconButton(icon: const Icon(Icons.restore_rounded, size: 20), onPressed: () => _restore(row)))),
+      ])),
+    ])),
+  );
 
-  Widget _card(Color accent, Widget child) => Container(
-        padding: const EdgeInsets.fromLTRB(32, 28, 32, 30),
-        decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(30), border: Border.all(color: accent.withValues(alpha: .22), width: 1.2), boxShadow: [BoxShadow(color: accent.withValues(alpha: .07), blurRadius: 24)]),
-        child: child,
-      );
+  Widget _card(Widget child) => Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: shSurface.withValues(alpha: .72), borderRadius: BorderRadius.circular(24), border: Border.all(color: LifecycleStage.recovery.accent.withValues(alpha: .24))), child: child);
 }
 
 class _Icon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => Container(
-        width: 88, height: 88,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: shBackground.withValues(alpha: .78), border: Border.all(color: LifecycleStage.recovery.accent.withValues(alpha: .55), width: 1.6), boxShadow: [BoxShadow(color: LifecycleStage.recovery.accent.withValues(alpha: .16), blurRadius: 22, spreadRadius: 2)]),
-        alignment: Alignment.center,
-        child: Icon(LifecycleStage.recovery.icon, size: 42, color: LifecycleStage.recovery.accent),
-      );
+  @override Widget build(BuildContext context) => Container(width: 76, height: 76, decoration: BoxDecoration(shape: BoxShape.circle, color: shBackground, border: Border.all(color: LifecycleStage.recovery.accent.withValues(alpha: .42), width: 1.5), boxShadow: [BoxShadow(color: LifecycleStage.recovery.accent.withValues(alpha: .13), blurRadius: 28, spreadRadius: 4)]), alignment: Alignment.center, child: Icon(LifecycleStage.recovery.icon, size: 34, color: LifecycleStage.recovery.accent));
 }
