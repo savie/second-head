@@ -9,5 +9,5 @@ class LegacyView extends StatelessWidget {
   final List<JourneyLifecyclePayload> incomingItems;
 
   @override
-  Widget build(BuildContext context) => const LegacyRuntimeView();
+  Widget build(BuildContext context) => LegacyRuntimeView(incomingItems: incomingItems);
 }
