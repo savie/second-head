@@ -3,8 +3,8 @@ import '../../core/state/sh_profile_state.dart';
 
 /// Canonical request bridge for lifecycle authorization records.
 ///
-/// Request creation is intentionally performed against the canonical tables
-/// protected by RLS. Execution remains behind runtime SECURITY DEFINER RPCs.
+/// The user-facing contract is email-based. Account/SH UUID resolution stays
+/// inside the trusted runtime boundary and is never required from the UI.
 class LifecycleRuntimeRequestService {
   const LifecycleRuntimeRequestService();
 
@@ -14,8 +14,7 @@ class LifecycleRuntimeRequestService {
   }) async {
     final sourceAccountId = _required(profileAccountId.value, 'account');
     final sourceShId = _required(profileShId.value, 'SH');
-    final email = targetEmail.trim();
-    if (email.isEmpty) throw StateError('Target email is required.');
+    final email = _requiredEmail(targetEmail);
 
     final row = await backendClient
         .from('clone_agreements')
@@ -31,20 +30,14 @@ class LifecycleRuntimeRequestService {
   }
 
   Future<Map<String, dynamic>> createInheritanceAuthorization({
-    required String targetShId,
-    required String targetAccountId,
+    required String targetEmail,
     Map<String, dynamic> scope = const <String, dynamic>{},
   }) async {
-    final sourceAccountId = _required(profileAccountId.value, 'account');
-    final sourceShId = _required(profileShId.value, 'SH');
-
+    final email = _requiredEmail(targetEmail);
     final row = await backendClient.rpc(
-      'runtime_create_inheritance_authorization',
+      'runtime_create_inheritance_authorization_by_email',
       params: {
-        'p_source_sh_id': sourceShId,
-        'p_target_sh_id': _required(targetShId, 'target SH'),
-        'p_source_account_id': sourceAccountId,
-        'p_target_account_id': _required(targetAccountId, 'target account'),
+        'p_target_email': email,
         'p_scope': scope,
       },
     );
@@ -52,22 +45,26 @@ class LifecycleRuntimeRequestService {
   }
 
   Future<Map<String, dynamic>> createSuccessionRule({
-    required String successorAccountId,
+    required String targetEmail,
     Map<String, dynamic> scope = const <String, dynamic>{},
   }) async {
-    final sourceShId = _required(profileShId.value, 'SH');
-    final successor = _required(successorAccountId, 'successor account');
+    final email = _requiredEmail(targetEmail);
+    final row = await backendClient.rpc(
+      'runtime_create_succession_rule_by_email',
+      params: {
+        'p_target_email': email,
+        'p_scope': scope,
+      },
+    );
+    return _singleMap(row);
+  }
 
-    final row = await backendClient
-        .from('succession_rules')
-        .insert({
-          'source_sh_id': sourceShId,
-          'successor_account_id': successor,
-          'scope': scope,
-        })
-        .select('succession_id,source_sh_id,successor_account_id,status,scope,created_at,revoked_at')
-        .single();
-    return Map<String, dynamic>.from(row);
+  String _requiredEmail(String value) {
+    final email = value.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      throw const FormatException('Enter a valid target email.');
+    }
+    return email;
   }
 
   String _required(String value, String label) {
