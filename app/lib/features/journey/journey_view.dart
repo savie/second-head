@@ -15,10 +15,7 @@ Future<JourneyDraft?> showJourneyEditor(BuildContext context, {required String t
   return Navigator.of(context).push<JourneyDraft>(MaterialPageRoute<JourneyDraft>(builder: (_) => Scaffold(backgroundColor: shBackground, body: SafeArea(child: JourneyEditorSheet(title: title, initialTitle: initialTitle, initialContent: initialContent, initialPrivate: initialPrivate))));
 }
 
-class JourneyView extends StatefulWidget {
-  const JourneyView({super.key});
-  @override State<JourneyView> createState() => JourneyViewState();
-}
+class JourneyView extends StatefulWidget { const JourneyView({super.key}); @override State<JourneyView> createState() => JourneyViewState(); }
 
 class JourneyViewState extends State<JourneyView> {
   String filter = 'All';
@@ -36,13 +33,11 @@ class JourneyViewState extends State<JourneyView> {
         if (content.isEmpty) continue;
         final type = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType};
         final canonicalId = switch (type) {'Memory' => record.payload['memory_id']?.toString(), 'Knowledge' => record.payload['knowledge_id']?.toString(), 'Experience' => record.payload['experience_id']?.toString(), _ => null};
-        additions.add(JourneyItem(content, record.continuityStatus.isEmpty ? 'Backend Journey event' : record.continuityStatus, _formatJourneyDate(record.occurredAt), type, content, record.visibility == 'PRIVATE' || record.visibility == 'OWNER_ONLY', semanticSourceId: canonicalId ?? record.eventId));
+        additions.add(JourneyItem(content, record.continuityStatus.isEmpty ? 'Backend Journey event' : record.continuityStatus, _formatJourneyDate(record.occurredAt), type, content, record.visibility == 'PRIVATE' || record.visibility == 'OWNER_ONLY', semanticSourceId: canonicalId));
       }
       shJourneyItems = [...additions, ...localOnly];
       await JourneyStore.persist();
-    } catch (_) {
-      // Keep local Journey usable when backend retrieval is temporarily unavailable.
-    }
+    } catch (_) {}
     if (mounted) setState(() {});
   }
 
@@ -58,13 +53,10 @@ class JourneyViewState extends State<JourneyView> {
     if (additions.isNotEmpty) { setState(() => items.insertAll(0, additions)); JourneyStore.persist(); }
   }
 
-  @override
-  void initState() { super.initState(); shSemanticRecords.addListener(_syncSemanticRecords); _loadJourney(); WidgetsBinding.instance.addPostFrameCallback((_) => _syncSemanticRecords()); }
-  @override
-  void dispose() { shSemanticRecords.removeListener(_syncSemanticRecords); super.dispose(); }
+  @override void initState() { super.initState(); shSemanticRecords.addListener(_syncSemanticRecords); _loadJourney(); WidgetsBinding.instance.addPostFrameCallback((_) => _syncSemanticRecords()); }
+  @override void dispose() { shSemanticRecords.removeListener(_syncSemanticRecords); super.dispose(); }
 
-  @override
-  Widget build(BuildContext context) {
+  @override Widget build(BuildContext context) {
     final visible = [for (var i = 0; i < items.length; i++) if (filter == 'All' || items[i].type == filter) i];
     return Stack(children: [Column(children: [ShTopBar(title: 'Journey', onSearch: () => _search(context), actions: [IconButton(tooltip: 'Domains', onPressed: () => _openDomain(context), icon: const Icon(Icons.hub_outlined, size: 26))]), JourneyFilters(value: filter, onChanged: (value) => setState(() => filter = value)), Expanded(child: GridView.builder(padding: const EdgeInsets.fromLTRB(12, 8, 12, 88), itemCount: visible.length, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, mainAxisExtent: 142), itemBuilder: (_, index) { final itemIndex = visible[index]; return JourneyCard(item: items[itemIndex], onTap: () => _openDetail(context, itemIndex)); }))]), Positioned(right: 18, bottom: 18, child: FloatingActionButton(heroTag: 'journey-add', onPressed: () => _create(context), child: const Icon(Icons.add))) ]);
   }
@@ -90,10 +82,7 @@ class JourneyViewState extends State<JourneyView> {
     final isCanonical = sourceId != null && _isUuid(sourceId);
     if (isCanonical) {
       final domain = switch (item.type) {'Memory' => 'MEMORY', 'Knowledge' => 'KNOWLEDGE', 'Experience' => 'EXPERIENCE', _ => null};
-      if (domain != null) {
-        Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RuntimeJourneyDetail(domain: domain, recordId: sourceId, title: item.title, content: item.content, isPrivate: item.isPrivate, onChanged: _loadJourney)));
-        return;
-      }
+      if (domain != null) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RuntimeJourneyDetail(domain: domain, recordId: sourceId, title: item.title, content: item.content, isPrivate: item.isPrivate, onChanged: _loadJourney))); return; }
     }
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => JourneyDetail(item: item, onChanged: () => setState(() {}), onDelete: () { if (itemIndex < 0 || itemIndex >= items.length) return; setState(() => items.removeAt(itemIndex)); JourneyStore.persist(); Navigator.of(context).pop(); })));
   }
