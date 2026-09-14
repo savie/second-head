@@ -9,6 +9,7 @@ import 'experience/experience_view.dart';
 import 'semantic_hook.dart';
 import 'journey_data.dart';
 import 'journey_service.dart';
+import 'journey_runtime_service.dart';
 import 'runtime_journey_detail.dart';
 
 Future<JourneyDraft?> showJourneyEditor(BuildContext context, {required String title, String initialTitle = '', String initialContent = '', bool initialPrivate = true}) {
@@ -24,8 +25,28 @@ class JourneyViewState extends State<JourneyView> {
   Future<void> _loadJourney() async {
     await JourneyStore.refreshFromDisk();
     try {
-      final records = await const JourneyService().load(limit: 100);
+      final runtime = const JourneyRuntimeService();
+      var records = await const JourneyService().load(limit: 100);
       final localOnly = items.where((item) => item.semanticSourceId == null).toList();
+      var reconciledLegacyPolicy = false;
+      for (final local in localOnly.where((item) => !item.isPrivate)) {
+        final match = records.where((record) {
+          final recordType = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType};
+          return recordType == local.type && (record.payload['content']?.toString().trim() ?? '') == local.content.trim();
+        }).firstOrNull;
+        if (match == null) continue;
+        final id = switch (local.type) {'Memory' => match.payload['memory_id']?.toString(), 'Knowledge' => match.payload['knowledge_id']?.toString(), 'Experience' => match.payload['experience_id']?.toString(), _ => null};
+        if (id == null || id.isEmpty) continue;
+        try {
+          switch (local.type) {
+            case 'Memory': await runtime.classifyMemory(memoryId: id, scope: 'GENERAL', visibility: 'SHARED');
+            case 'Knowledge': await runtime.classifyKnowledge(knowledgeId: id, scope: 'GENERAL', visibility: 'SHARED');
+            case 'Experience': await runtime.classifyExperience(experienceId: id, scope: 'GENERAL', visibility: 'SHARED');
+          }
+          reconciledLegacyPolicy = true;
+        } catch (_) {}
+      }
+      if (reconciledLegacyPolicy) records = await const JourneyService().load(limit: 100);
       final additions = <JourneyItem>[];
       for (final record in records) {
         if (record.eventId.isEmpty) continue;
@@ -35,7 +56,7 @@ class JourneyViewState extends State<JourneyView> {
         final canonicalId = switch (type) {'Memory' => record.payload['memory_id']?.toString(), 'Knowledge' => record.payload['knowledge_id']?.toString(), 'Experience' => record.payload['experience_id']?.toString(), _ => null};
         additions.add(JourneyItem(content, record.continuityStatus.isEmpty ? 'Backend Journey event' : record.continuityStatus, _formatJourneyDate(record.occurredAt), type, content, record.visibility == 'PRIVATE' || record.visibility == 'OWNER_ONLY', semanticSourceId: canonicalId));
       }
-      shJourneyItems = [...additions, ...localOnly];
+      shJourneyItems = [...additions, ...localOnly.where((item) => item.isPrivate)];
       await JourneyStore.persist();
     } catch (_) {}
     if (mounted) setState(() {});
