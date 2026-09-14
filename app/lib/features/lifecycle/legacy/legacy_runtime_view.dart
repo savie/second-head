@@ -51,16 +51,6 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
     try {
       for (final email in emails) {
         final scope = <String, dynamic>{'target_email': email, 'journey_event_ids': _selected.toList()};
-        for (final record in _journeyRecords) {
-          if (!_selected.contains(record.eventId)) continue;
-          final p = record.payload;
-          final m = p['memory_id']?.toString().trim() ?? '';
-          final k = p['knowledge_id']?.toString().trim() ?? '';
-          final x = p['experience_id']?.toString().trim() ?? '';
-          if (m.isNotEmpty) (scope['memory_ids'] ??= <String>[]).add(m);
-          if (k.isNotEmpty) (scope['knowledge_ids'] ??= <String>[]).add(k);
-          if (x.isNotEmpty) (scope['experience_ids'] ??= <String>[]).add(x);
-        }
         await _runtime.preserveSelectedTransferAsLegacy(sourceShId: profileShId.value.trim(), scope: scope);
       }
       for (final t in _targets) t.email.clear();
