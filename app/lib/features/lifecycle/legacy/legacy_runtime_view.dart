@@ -13,7 +13,7 @@ class LegacyRuntimeView extends StatefulWidget {
   @override State<LegacyRuntimeView> createState() => _LegacyRuntimeViewState();
 }
 
-class LegacyRuntimeViewState extends State<LegacyRuntimeView> {
+class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
   final _read = const LifecycleRuntimeReadService();
   final _runtime = const JourneyRuntimeService();
   final _journey = const JourneyService();
@@ -42,10 +42,7 @@ class LegacyRuntimeViewState extends State<LegacyRuntimeView> {
     if (shId.isEmpty) { _show('Legacy blocked: active SH identity is unavailable.'); return; }
     setState(() => _busy = true);
     try {
-      await _runtime.preserveSelectedTransferAsLegacy(
-        sourceShId: shId,
-        scope: <String, dynamic>{'journey_event_ids': _selected.toList()},
-      );
+      await _runtime.preserveSelectedTransferAsLegacy(sourceShId: shId, scope: <String, dynamic>{'journey_event_ids': _selected.toList()});
       _selected.clear();
       await _load();
       _show('Legacy preserved for all SH.');
@@ -57,9 +54,10 @@ class LegacyRuntimeViewState extends State<LegacyRuntimeView> {
   String _date(dynamic v) { final d = DateTime.tryParse(v?.toString() ?? ''); return d == null ? '—' : d.toLocal().toString(); }
   List<JourneyBackendRecord> get _sharedRecords => [
     for (final record in _journeyRecords)
-      if (record.visibility == 'SHARED' || record.visibility == 'PUBLIC') record,
+      if ((record.visibility == 'SHARED' || record.visibility == 'PUBLIC') &&
+          const {'MEMORY', 'KNOWLEDGE', 'LEARNING', 'EXPERIENCE'}.contains(record.eventType.toUpperCase())) record,
   ];
-  int _count(String type) => _sharedRecords.where((record) => record.eventType.toUpperCase() == type.toUpperCase()).length;
+  int _count(String type) => _sharedRecords.where((record) => record.eventType.toUpperCase() == type.toUpperCase() || (type == 'Knowledge' && record.eventType.toUpperCase() == 'LEARNING')).length;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -72,17 +70,9 @@ class LegacyRuntimeViewState extends State<LegacyRuntimeView> {
         const Text('Select shared Journey context to preserve as Legacy. Legacy has no target actor and is distributed across all SH.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 15),
         if (_loading || _sharedRecords.isEmpty) const Text('No shared Journey data available.', style: TextStyle(fontSize: 13, color: shMuted))
         else for (final r in _sharedRecords)
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            value: _selected.contains(r.eventId),
-            onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)),
-            title: Text(r.eventType, style: const TextStyle(fontSize: 14)),
-            subtitle: Text(_date(r.occurredAt), style: const TextStyle(fontSize: 11, color: shMuted)),
-            controlAffinity: ListTileControlAffinity.leading,
-          ),
+          CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(r.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)), title: Text(r.eventType.toUpperCase() == 'LEARNING' ? 'Knowledge' : r.eventType, style: const TextStyle(fontSize: 14)), subtitle: Text(_date(r.occurredAt), style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
         const SizedBox(height: 15),
-        _summaryRow(),
-        const SizedBox(height: 18),
+        _summaryRow(), const SizedBox(height: 18),
         SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _busy ? null : _preserve, icon: const Icon(Icons.auto_awesome_outlined, size: 18), label: Text(_busy ? 'Preserving…' : 'Preserve Legacy', style: const TextStyle(fontSize: 14)))),
         const SizedBox(height: 12), const Text('Legacy is a shared heritage state, not a target-specific transfer request.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.4)),
       ])),
