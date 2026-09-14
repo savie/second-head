@@ -8,5 +8,8 @@ class SuccessionView extends StatelessWidget {
   final List<JourneyLifecyclePayload> incomingItems;
 
   @override
-  Widget build(BuildContext context) => const LifecycleAuthorityView(stage: LifecycleStage.succession);
+  Widget build(BuildContext context) => LifecycleAuthorityView(
+        stage: LifecycleStage.succession,
+        incomingItems: incomingItems,
+      );
 }
