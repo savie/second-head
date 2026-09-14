@@ -70,7 +70,7 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
     for (final target in _targets) {
       final email = target.email.text.trim();
       if (email.isEmpty || !email.contains('@')) { _show(FormatException('Enter a valid target email.')); return; }
-      if (_isTransfer && target.selected.isEmpty) { _show(const StateError('Select at least one shared Journey item.')); return; }
+      if (_isTransfer && target.selected.isEmpty) { _show(StateError('Select at least one shared Journey item.')); return; }
     }
     setState(() => _busy = true);
     try {
