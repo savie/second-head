@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/sh_theme.dart';
 import '../journey/journey_runtime_service.dart';
+import '../journey/journey_service.dart';
 import 'lifecycle_models.dart';
 import 'lifecycle_runtime_read_service.dart';
 import 'lifecycle_runtime_request_service.dart';
@@ -25,24 +26,55 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
   final _read = const LifecycleRuntimeReadService();
   final _request = const LifecycleRuntimeRequestService();
   final _runtime = const JourneyRuntimeService();
+  final _journey = const JourneyService();
   final _targets = <_TargetDraft>[_TargetDraft()];
   List<Map<String, dynamic>> _records = const [];
+  List<JourneyLifecyclePayload> _journeyItems = const [];
   bool _busy = false;
   bool get _isClone => widget.stage.title == 'Clone';
   bool get _isTransfer => widget.stage.title == 'Inheritance' || widget.stage.title == 'Succession';
+  bool get _hasJourneyChecklist => _isClone || _isTransfer;
 
   @override void initState() { super.initState(); _load(); }
   @override void dispose() { for (final t in _targets) t.dispose(); super.dispose(); }
 
   Future<void> _load() async {
     try {
-      final rows = switch (widget.stage.title) {
-        'Clone' => await _read.listCloneAgreements(),
-        'Inheritance' => await _read.listInheritanceAuthorizations(),
-        'Succession' => await _read.listSuccessionRules(),
-        _ => const <Map<String, dynamic>>[],
-      };
-      if (mounted) setState(() => _records = rows);
+      final rows = await Future.wait([
+        switch (widget.stage.title) {
+          'Clone' => _read.listCloneAgreements(),
+          'Inheritance' => _read.listInheritanceAuthorizations(),
+          'Succession' => _read.listSuccessionRules(),
+          _ => const <Map<String, dynamic>>[],
+        },
+        _journey.load(limit: 100),
+      ]);
+      final journeyRecords = rows[1] as List<JourneyBackendRecord>;
+      final incoming = widget.incomingItems.isNotEmpty
+          ? widget.incomingItems
+          : [
+              for (final record in journeyRecords)
+                if (record.eventId.isNotEmpty && record.eventType.isNotEmpty)
+                  JourneyLifecyclePayload(
+                    title: record.payload['title']?.toString().trim().isNotEmpty == true
+                        ? record.payload['title'].toString()
+                        : record.eventType,
+                    type: switch (record.eventType.toUpperCase()) {
+                      'EXPERIENCE' => 'Experience',
+                      'KNOWLEDGE' => 'Knowledge',
+                      'MEMORY' => 'Memory',
+                      _ => record.eventType,
+                    },
+                    content: record.payload['content']?.toString() ?? '',
+                    isPrivate: record.payload['visibility']?.toString().toUpperCase() == 'PRIVATE',
+                    date: record.occurredAt.toLocal().toString(),
+                    semanticSourceId: record.payload['memory_id']?.toString()
+                        ?? record.payload['knowledge_id']?.toString()
+                        ?? record.payload['experience_id']?.toString()
+                        ?? record.eventId,
+                  ),
+            ];
+      if (mounted) setState(() { _records = rows[0] as List<Map<String, dynamic>>; _journeyItems = incoming; });
     } catch (error) { if (mounted) _show(error); }
   }
 
@@ -56,7 +88,7 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
 
   Map<String, dynamic> _scope(_TargetDraft target) {
     final out = <String, List<String>>{};
-    for (final item in widget.incomingItems) {
+    for (final item in _journeyItems) {
       final key = item.semanticSourceId ?? '${item.type}|${item.title}';
       if (!target.selected.contains(key)) continue;
       final name = switch (item.type.toLowerCase()) {'memory' => 'memory_ids', 'knowledge' => 'knowledge_ids', 'experience' => 'experience_ids', _ => 'journey_event_ids'};
@@ -110,7 +142,7 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
     finally { if (mounted) setState(() => _busy = false); }
   }
 
-  int _count(String type) => widget.incomingItems.where((item) => item.type.toLowerCase() == type).length;
+  int _count(String type) => _journeyItems.where((item) => item.type.toLowerCase() == type).length;
 
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(leading: const BackButton(), title: Text(widget.stage.title)), body: RefreshIndicator(onRefresh: _load, child: ListView(padding: const EdgeInsets.fromLTRB(30, 16, 30, 28), children: [_card(_hero()), const SizedBox(height: 24), _card(_target()), const SizedBox(height: 24), _card(_history())])));
@@ -120,11 +152,15 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
   Widget _hero() => Row(children: [_StageIcon(stage: widget.stage), const SizedBox(width: 24), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(widget.stage.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)), const SizedBox(height: 16), Text(widget.stage.subtitle, style: const TextStyle(fontSize: 16, color: shMuted, height: 1.45))]))]);
 
   Widget _target() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Text(_isClone ? 'Target' : 'Target & Incoming from Journey', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)), const SizedBox(height: 24),
+    Text(_isClone ? 'Target & Journey' : 'Target & Incoming from Journey', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)), const SizedBox(height: 24),
     for (var i = 0; i < _targets.length; i++) ...[
       Text('Target ${i + 1}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)), const SizedBox(height: 12), const Text('Email', style: TextStyle(color: shMuted)), const SizedBox(height: 8),
       TextField(controller: _targets[i].email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(prefixIcon: Icon(Icons.mail_outline_rounded), hintText: 'Enter target email')),
-      if (_isTransfer) ...[const SizedBox(height: 18), const Text('Incoming from Journey', style: TextStyle(color: shMuted)), const SizedBox(height: 8), if (widget.incomingItems.isEmpty) const Text('No shared Journey data available.', style: TextStyle(color: shMuted)) else for (final item in widget.incomingItems) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _targets[i].selected.contains(item.semanticSourceId ?? '${item.type}|${item.title}'), onChanged: _busy ? null : (_) => _toggle(i, item), title: Text(item.title), subtitle: Text('${item.type} · ${item.date}'), controlAffinity: ListTileControlAffinity.leading)],
+      if (_hasJourneyChecklist) ...[
+        const SizedBox(height: 18), Text(_isClone ? 'Shared Journey' : 'Incoming from Journey', style: const TextStyle(color: shMuted)), const SizedBox(height: 8),
+        if (_journeyItems.isEmpty) const Text('No shared Journey data available.', style: TextStyle(color: shMuted))
+        else for (final item in _journeyItems) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _isClone ? true : _targets[i].selected.contains(item.semanticSourceId ?? '${item.type}|${item.title}'), onChanged: _busy || _isClone ? null : (_) => _toggle(i, item), title: Text(item.title), subtitle: Text('${item.type} · ${item.date}'), controlAffinity: ListTileControlAffinity.leading),
+      ],
       if (!_isClone && _targets.length > 1) Align(alignment: Alignment.centerRight, child: TextButton.icon(onPressed: _busy ? null : () => _removeTarget(i), icon: const Icon(Icons.remove_circle_outline), label: const Text('Remove target'))),
       if (i != _targets.length - 1) const SizedBox(height: 18),
     ],
