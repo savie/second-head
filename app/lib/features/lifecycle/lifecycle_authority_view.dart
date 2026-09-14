@@ -40,47 +40,34 @@ class _LifecycleAuthorityViewState extends State<LifecycleAuthorityView> {
 
   Future<void> _load() async {
     try {
-      final rows = await Future.wait([
-        switch (widget.stage.title) {
-          'Clone' => _read.listCloneAgreements(),
-          'Inheritance' => _read.listInheritanceAuthorizations(),
-          'Succession' => _read.listSuccessionRules(),
-          _ => const <Map<String, dynamic>>[],
-        },
-        _journey.load(limit: 100),
-      ]);
-      final journeyRecords = rows[1] as List<JourneyBackendRecord>;
+      late final List<Map<String, dynamic>> requestRows;
+      switch (widget.stage.title) {
+        case 'Clone': requestRows = await _read.listCloneAgreements(); break;
+        case 'Inheritance': requestRows = await _read.listInheritanceAuthorizations(); break;
+        case 'Succession': requestRows = await _read.listSuccessionRules(); break;
+        default: requestRows = const <Map<String, dynamic>>[];
+      }
+      final journeyRecords = await _journey.load(limit: 100);
       final incoming = [
         for (final record in journeyRecords)
-          if (record.eventId.isNotEmpty &&
-              record.eventType.isNotEmpty &&
-              (record.visibility == 'SHARED' || record.visibility == 'PUBLIC') &&
-              const {'MEMORY', 'KNOWLEDGE', 'LEARNING', 'EXPERIENCE'}.contains(record.eventType.toUpperCase()))
+          if (record.eventId.isNotEmpty && record.eventType.isNotEmpty && (record.visibility == 'SHARED' || record.visibility == 'PUBLIC') && const {'MEMORY', 'KNOWLEDGE', 'LEARNING', 'EXPERIENCE'}.contains(record.eventType.toUpperCase()))
             JourneyLifecyclePayload(
               title: record.payload['title']?.toString().trim().isNotEmpty == true ? record.payload['title'].toString() : record.eventType,
-              type: switch (record.eventType.toUpperCase()) {
-                'EXPERIENCE' => 'Experience',
-                'KNOWLEDGE' || 'LEARNING' => 'Knowledge',
-                'MEMORY' => 'Memory',
-                _ => record.eventType,
-              },
+              type: switch (record.eventType.toUpperCase()) {'EXPERIENCE' => 'Experience', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'MEMORY' => 'Memory', _ => record.eventType},
               content: record.payload['content']?.toString() ?? '',
               isPrivate: false,
               date: record.occurredAt.toLocal().toString(),
               semanticSourceId: record.payload['memory_id']?.toString() ?? record.payload['knowledge_id']?.toString() ?? record.payload['experience_id']?.toString() ?? record.eventId,
             ),
       ];
-      if (mounted) setState(() { _records = rows[0] as List<Map<String, dynamic>>; _journeyItems = incoming; });
+      if (mounted) setState(() { _records = requestRows; _journeyItems = incoming; });
     } catch (error) { if (mounted) _show(error); }
   }
 
   void _show(Object value) => ScaffoldMessenger.of(context).showSnackBar(value is SnackBar ? value : SnackBar(content: Text(value.toString())));
   void _addTarget() => setState(() => _targets.add(_TargetDraft()));
   void _removeTarget(int i) { if (_targets.length == 1) return; final t = _targets.removeAt(i); t.dispose(); setState(() {}); }
-  void _toggle(int i, JourneyLifecyclePayload item) {
-    final key = item.semanticSourceId ?? '${item.type}|${item.title}';
-    setState(() => _targets[i].selected.contains(key) ? _targets[i].selected.remove(key) : _targets[i].selected.add(key));
-  }
+  void _toggle(int i, JourneyLifecyclePayload item) { final key = item.semanticSourceId ?? '${item.type}|${item.title}'; setState(() => _targets[i].selected.contains(key) ? _targets[i].selected.remove(key) : _targets[i].selected.add(key)); }
 
   Map<String, dynamic> _scope(_TargetDraft target) {
     final out = <String, List<String>>{};
