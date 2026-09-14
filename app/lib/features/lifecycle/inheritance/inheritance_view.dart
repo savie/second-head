@@ -8,5 +8,8 @@ class InheritanceView extends StatelessWidget {
   final List<JourneyLifecyclePayload> incomingItems;
 
   @override
-  Widget build(BuildContext context) => const LifecycleAuthorityView(stage: LifecycleStage.inheritance);
+  Widget build(BuildContext context) => LifecycleAuthorityView(
+        stage: LifecycleStage.inheritance,
+        incomingItems: incomingItems,
+      );
 }
