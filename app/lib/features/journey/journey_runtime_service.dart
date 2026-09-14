@@ -12,26 +12,22 @@ class JourneyRuntimeService {
     final result = await backendClient.rpc('runtime_record_memory_with_journey', params: {'p_sh_id': shId, 'p_content': content, 'p_memory_type': memoryType, 'p_source': source, 'p_confidence': confidence, 'p_scope': scope, 'p_visibility': visibility, 'p_lifecycle': lifecycle});
     return _uuid(result, 'Memory creation');
   }
-
   Future<String> replaceMemory({required String shId, required String newContent, required String oldPattern, String source = 'journey-ui', String scope = 'PRIVATE', String visibility = 'OWNER_ONLY'}) async {
     final result = await backendClient.rpc('runtime_replace_memory', params: {'p_sh_id': shId, 'p_new_content': newContent, 'p_old_pattern': oldPattern, 'p_source': source, 'p_scope': scope, 'p_visibility': visibility});
     return _uuid(result, 'Memory replacement');
   }
-
-  Future<String> classifyMemory({required String memoryId, required String scope, required String visibility}) async => _uuid(await backendClient.rpc('runtime_classify_memory', params: {'p_memory_id': memoryId, 'p_scope': scope, 'p_visibility': visibility}), 'Memory classification');
+  Future<void> classifyMemory({required String memoryId, required String scope, required String visibility}) async { await backendClient.rpc('runtime_classify_memory', params: {'p_memory_id': memoryId, 'p_scope': scope, 'p_visibility': visibility}); }
 
   Future<String> createKnowledgeCandidate({required String shId, required String content, String source = 'journey-ui', String origin = 'EXPLICIT_TEACHING', Map<String, dynamic> provenance = const {}, String scope = 'PRIVATE', String visibility = 'OWNER_ONLY', double confidence = 1}) async {
     final result = await backendClient.rpc('runtime_record_knowledge_with_journey', params: {'p_sh_id': shId, 'p_content': content, 'p_source': source, 'p_origin': origin, 'p_provenance': provenance, 'p_scope': scope, 'p_visibility': visibility, 'p_confidence': confidence});
     return _uuid(result, 'Knowledge creation');
   }
-
-  Future<String> classifyKnowledge({required String knowledgeId, required String scope, required String visibility}) async => _uuid(await backendClient.rpc('runtime_classify_knowledge', params: {'p_knowledge_id': knowledgeId, 'p_scope': scope, 'p_visibility': visibility}), 'Knowledge classification');
+  Future<void> classifyKnowledge({required String knowledgeId, required String scope, required String visibility}) async { await backendClient.rpc('runtime_classify_knowledge', params: {'p_knowledge_id': knowledgeId, 'p_scope': scope, 'p_visibility': visibility}); }
 
   Future<String> createExperience({required String shId, required String content, String experienceType = 'EXPLICIT_USER_REQUEST', String scope = 'PRIVATE', String visibility = 'OWNER_ONLY', String transferPolicy = 'NON_TRANSFERABLE', String sourceRef = 'journey-ui', Map<String, dynamic> provenance = const {'capture_mode': 'JOURNEY_UI'}, DateTime? occurredAt}) async {
     final result = await backendClient.rpc('runtime_record_experience_with_journey', params: {'p_sh_id': shId, 'p_experience_type': experienceType, 'p_content': content, 'p_scope': scope, 'p_visibility': visibility, 'p_transfer_policy': transferPolicy, 'p_source_ref': sourceRef, 'p_provenance': provenance, 'p_occurred_at': (occurredAt ?? DateTime.now()).toUtc().toIso8601String()});
     return _uuid(result, 'Experience creation');
   }
-
   Future<String> classifyExperience({required String experienceId, required String scope, required String visibility}) async => _uuid(await backendClient.rpc('runtime_classify_experience', params: {'p_experience_id': experienceId, 'p_scope': scope, 'p_visibility': visibility}), 'Experience classification');
 
   Future<Map<String, dynamic>> acceptKnowledge({required String knowledgeId, String expectedLifecycle = 'CANDIDATE', required String operationKey, required String decisionRef, required String validationRef, Map<String, dynamic> provenance = const {}}) => _jsonRpc('runtime_accept_knowledge', {'p_knowledge_id': knowledgeId, 'p_expected_lifecycle': expectedLifecycle, 'p_operation_key': operationKey, 'p_decision_ref': decisionRef, 'p_validation_ref': validationRef, 'p_provenance': provenance});
@@ -62,7 +58,6 @@ class JourneyRuntimeService {
     if (result is Map) return Map<String, dynamic>.from(result);
     throw StateError('$function returned a non-object result.');
   }
-
   String _uuid(dynamic result, String operation) {
     final value = result?.toString().trim() ?? '';
     if (value.isEmpty) throw StateError('$operation returned no identifier.');
