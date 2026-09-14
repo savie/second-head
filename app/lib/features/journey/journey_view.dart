@@ -9,7 +9,6 @@ import 'experience/experience_view.dart';
 import 'semantic_hook.dart';
 import 'journey_data.dart';
 import 'journey_service.dart';
-import 'journey_runtime_service.dart';
 import 'runtime_journey_detail.dart';
 
 Future<JourneyDraft?> showJourneyEditor(BuildContext context, {required String title, String initialTitle = '', String initialContent = '', bool initialPrivate = true}) {
@@ -35,18 +34,8 @@ class JourneyViewState extends State<JourneyView> {
         if (record.eventId.isEmpty) continue;
         final content = record.payload['content']?.toString().trim() ?? '';
         if (content.isEmpty) continue;
-        final type = switch (record.eventType.toUpperCase()) {
-          'MEMORY' => 'Memory',
-          'KNOWLEDGE' || 'LEARNING' => 'Knowledge',
-          'EXPERIENCE' => 'Experience',
-          _ => record.eventType,
-        };
-        final canonicalId = switch (type) {
-          'Memory' => record.payload['memory_id']?.toString(),
-          'Knowledge' => record.payload['knowledge_id']?.toString(),
-          'Experience' => record.payload['experience_id']?.toString(),
-          _ => null,
-        };
+        final type = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType};
+        final canonicalId = switch (type) {'Memory' => record.payload['memory_id']?.toString(), 'Knowledge' => record.payload['knowledge_id']?.toString(), 'Experience' => record.payload['experience_id']?.toString(), _ => null};
         additions.add(JourneyItem(content, record.continuityStatus.isEmpty ? 'Backend Journey event' : record.continuityStatus, _formatJourneyDate(record.occurredAt), type, content, record.visibility == 'PRIVATE' || record.visibility == 'OWNER_ONLY', semanticSourceId: canonicalId ?? record.eventId));
       }
       shJourneyItems = [...additions, ...localOnly];
@@ -57,10 +46,7 @@ class JourneyViewState extends State<JourneyView> {
     if (mounted) setState(() {});
   }
 
-  String _formatJourneyDate(DateTime value) {
-    final local = value.toLocal();
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')} ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-  }
+  String _formatJourneyDate(DateTime value) { final local = value.toLocal(); return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')} ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}'; }
 
   void _syncSemanticRecords() {
     final existingSources = items.map((item) => item.semanticSourceId).whereType<String>().toSet();
@@ -69,34 +55,18 @@ class JourneyViewState extends State<JourneyView> {
       if (existingSources.contains(record.sourceId + '|' + record.content)) continue;
       additions.add(JourneyItem(record.content, 'Created from explicit Conversation command', 'Just now', record.domain.label, record.content, true, semanticSourceId: record.sourceId + '|' + record.content));
     }
-    if (additions.isNotEmpty) {
-      setState(() => items.insertAll(0, additions));
-      JourneyStore.persist();
-    }
+    if (additions.isNotEmpty) { setState(() => items.insertAll(0, additions)); JourneyStore.persist(); }
   }
 
   @override
-  void initState() {
-    super.initState();
-    shSemanticRecords.addListener(_syncSemanticRecords);
-    _loadJourney();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncSemanticRecords());
-  }
-
+  void initState() { super.initState(); shSemanticRecords.addListener(_syncSemanticRecords); _loadJourney(); WidgetsBinding.instance.addPostFrameCallback((_) => _syncSemanticRecords()); }
   @override
   void dispose() { shSemanticRecords.removeListener(_syncSemanticRecords); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
     final visible = [for (var i = 0; i < items.length; i++) if (filter == 'All' || items[i].type == filter) i];
-    return Stack(children: [
-      Column(children: [
-        ShTopBar(title: 'Journey', onSearch: () => _search(context), actions: [IconButton(tooltip: 'Domains', onPressed: () => _openDomain(context), icon: const Icon(Icons.hub_outlined, size: 26))]),
-        JourneyFilters(value: filter, onChanged: (value) => setState(() => filter = value)),
-        Expanded(child: GridView.builder(padding: const EdgeInsets.fromLTRB(12, 8, 12, 88), itemCount: visible.length, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, mainAxisExtent: 142), itemBuilder: (_, index) { final itemIndex = visible[index]; return JourneyCard(item: items[itemIndex], onTap: () => _openDetail(context, itemIndex)); })),
-      ]),
-      Positioned(right: 18, bottom: 18, child: FloatingActionButton(heroTag: 'journey-add', onPressed: () => _create(context), child: const Icon(Icons.add))),
-    ]);
+    return Stack(children: [Column(children: [ShTopBar(title: 'Journey', onSearch: () => _search(context), actions: [IconButton(tooltip: 'Domains', onPressed: () => _openDomain(context), icon: const Icon(Icons.hub_outlined, size: 26))]), JourneyFilters(value: filter, onChanged: (value) => setState(() => filter = value)), Expanded(child: GridView.builder(padding: const EdgeInsets.fromLTRB(12, 8, 12, 88), itemCount: visible.length, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, mainAxisExtent: 142), itemBuilder: (_, index) { final itemIndex = visible[index]; return JourneyCard(item: items[itemIndex], onTap: () => _openDetail(context, itemIndex)); }))]), Positioned(right: 18, bottom: 18, child: FloatingActionButton(heroTag: 'journey-add', onPressed: () => _create(context), child: const Icon(Icons.add))) ]);
   }
 
   Future<void> _openDomain(BuildContext context) async {
@@ -111,14 +81,17 @@ class JourneyViewState extends State<JourneyView> {
     _openDetail(context, result);
   }
 
+  bool _isUuid(String value) => RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$').hasMatch(value);
+
   void _openDetail(BuildContext context, int itemIndex) {
     if (itemIndex < 0 || itemIndex >= items.length) return;
     final item = items[itemIndex];
-    final isCanonical = item.semanticSourceId != null && item.semanticSourceId!.isNotEmpty;
+    final sourceId = item.semanticSourceId;
+    final isCanonical = sourceId != null && _isUuid(sourceId);
     if (isCanonical) {
-      final domain = switch (item.type) { 'Memory' => 'MEMORY', 'Knowledge' => 'KNOWLEDGE', 'Experience' => 'EXPERIENCE', _ => null };
+      final domain = switch (item.type) {'Memory' => 'MEMORY', 'Knowledge' => 'KNOWLEDGE', 'Experience' => 'EXPERIENCE', _ => null};
       if (domain != null) {
-        Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RuntimeJourneyDetail(domain: domain, recordId: item.semanticSourceId!, title: item.title, content: item.content, isPrivate: item.isPrivate, onChanged: _loadJourney)));
+        Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RuntimeJourneyDetail(domain: domain, recordId: sourceId, title: item.title, content: item.content, isPrivate: item.isPrivate, onChanged: _loadJourney)));
         return;
       }
     }
