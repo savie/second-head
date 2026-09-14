@@ -8,5 +8,8 @@ class CloneView extends StatelessWidget {
   final List<JourneyLifecyclePayload> incomingItems;
 
   @override
-  Widget build(BuildContext context) => const LifecycleAuthorityView(stage: LifecycleStage.clone);
+  Widget build(BuildContext context) => LifecycleAuthorityView(
+        stage: LifecycleStage.clone,
+        incomingItems: incomingItems,
+      );
 }
