@@ -44,7 +44,8 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
     for (final target in _targets) {
       final email = target.email.text.trim();
       if (email.isEmpty || !email.contains('@')) { _show('Enter a valid target email.'); return; }
-      if (!emails.add(email.toLowerCase())) { _show('Each target email must be unique.'); return; }
+      if (emails.contains(email.toLowerCase())) { _show('Each target email must be unique.'); return; }
+      emails.add(email.toLowerCase());
     }
     if (_selected.isEmpty) { _show('Select at least one shared Journey item.'); return; }
     setState(() => _busy = true);
