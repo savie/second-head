@@ -93,8 +93,8 @@ class JourneyRuntimeService {
 
   Future<void> deleteRecordWithJourney({required String domain, required String recordId}) async => backendClient.rpc('runtime_delete_record_with_journey', params: {'p_domain': domain, 'p_record_id': recordId});
   Future<void> classifyJourneyEvent({required String eventId, required String visibility, required String transferPolicy, Map<String, dynamic> provenance = const {}}) async => backendClient.rpc('runtime_classify_journey_event', params: {'p_event_id': eventId, 'p_visibility': visibility, 'p_transfer_policy': transferPolicy, 'p_provenance': provenance});
-  Future<String> createRecoverySnapshot({required String shId}) async => _uuid(await backendClient.rpc('runtime_create_recovery_snapshot', params: {'p_sh_id': shId}), 'Recovery snapshot creation');
-  Future<String> restoreRecoverySnapshot({required String snapshotId}) async => _uuid(await backendClient.rpc('runtime_restore_recovery_snapshot', params: {'p_snapshot_id': snapshotId}), 'Recovery restore');
+  Future<String> createRecoverySnapshot({required String shId}) async => _uuid(await backendClient.rpc('runtime_create_full_recovery_snapshot', params: {'p_sh_id': shId}), 'Recovery snapshot creation');
+  Future<String> restoreRecoverySnapshot({required String snapshotId}) async => _uuid(await backendClient.rpc('runtime_restore_full_recovery_snapshot', params: {'p_snapshot_id': snapshotId}), 'Recovery restore');
   Future<String> materializeRegisteredClone() async => _uuid(await backendClient.rpc('runtime_materialize_registered_clone'), 'Clone materialization');
   Future<String> createClone({required String agreementId, required String cloneName}) async => _uuid(await backendClient.rpc('runtime_create_clone', params: {'p_agreement_id': agreementId, 'p_clone_name': cloneName}), 'Clone creation');
   Future<String> recordInheritance({required String authorizationId, Map<String, dynamic> payload = const {}, Map<String, dynamic> provenance = const {}}) async => _uuid(await backendClient.rpc('runtime_record_inheritance', params: {'p_authorization_id': authorizationId, 'p_payload': payload, 'p_provenance': provenance}), 'Inheritance recording');
