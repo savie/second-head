@@ -62,6 +62,7 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
 
   void _show(Object m) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m.toString()))); }
   String _date(dynamic v) { final d = DateTime.tryParse(v?.toString() ?? ''); return d == null ? '—' : d.toLocal().toString(); }
+  int _count(String type) => _journeyRecords.where((record) => record.eventType.toUpperCase() == type.toUpperCase()).length;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -101,11 +102,16 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
           ),
         const SizedBox(height: 12), OutlinedButton.icon(onPressed: _busy ? null : _addTarget, icon: const Icon(Icons.add_rounded), label: const Text('Add Target')),
         const SizedBox(height: 20), const Text('Request legacy handling for selected shared Journey context.', style: TextStyle(color: shMuted, height: 1.4)), const SizedBox(height: 18),
-        SizedBox(width: double.infinity, height: 68, child: FilledButton.icon(onPressed: _busy ? null : _preserve, icon: const Icon(Icons.send_rounded), label: Text(_busy ? 'Submitting…' : 'Request Legacy'))), const SizedBox(height: 12), const Text('Authentication is handled by Integrations.', style: TextStyle(color: shMuted)),
+        SizedBox(width: double.infinity, height: 68, child: FilledButton.icon(onPressed: _busy ? null : _preserve, icon: const Icon(Icons.send_rounded), label: Text(_busy ? 'Submitting…' : 'Request Legacy')),
+        const SizedBox(height: 22),
+        Container(padding: const EdgeInsets.fromLTRB(24, 20, 24, 18), decoration: BoxDecoration(color: shBackground.withValues(alpha: .48), borderRadius: BorderRadius.circular(22), border: Border.all(color: shBorder)), child: Row(children: [_summary('Memory', _count('MEMORY')), _summary('Knowledge', _count('KNOWLEDGE')), _summary('Experience', _count('EXPERIENCE'))])),
+        const SizedBox(height: 12), const Text('Authentication is handled by Integrations.', style: TextStyle(color: shMuted)),
       ])),
       const SizedBox(height: 24), _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Decision History', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)), const SizedBox(height: 22), if (_loading) const Center(child: CircularProgressIndicator()) else if (_records.isEmpty) const Text('No decisions yet.', style: TextStyle(color: shMuted, fontSize: 16)) else for (final r in _records) Card(child: ListTile(title: Text(r['legacy_type']?.toString() ?? 'LEGACY'), subtitle: Text('${r['status'] ?? 'ACTIVE'} · ${_date(r['created_at'])}')))])),
     ])),
   );
+
+  Widget _summary(String label, int value) => Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('$value', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600)), const SizedBox(height: 4), Text(label, style: const TextStyle(color: shMuted))]));
 
   Widget _card(Widget child) => Container(padding: const EdgeInsets.fromLTRB(32, 28, 32, 30), decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(30), border: Border.all(color: LifecycleStage.legacy.accent.withValues(alpha: .22), width: 1.2), boxShadow: [BoxShadow(color: LifecycleStage.legacy.accent.withValues(alpha: .07), blurRadius: 24)]), child: child);
 }
