@@ -1,238 +1,105 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import '../../../core/state/sh_profile_state.dart';
 import '../../../core/theme/sh_theme.dart';
 import '../../journey/journey_runtime_service.dart';
 import '../../journey/journey_service.dart';
+import '../lifecycle_models.dart';
+import '../lifecycle_stage.dart';
 import '../lifecycle_runtime_read_service.dart';
 
 class LegacyRuntimeView extends StatefulWidget {
-  const LegacyRuntimeView({super.key});
-
-  @override
-  State<LegacyRuntimeView> createState() => _LegacyRuntimeViewState();
+  const LegacyRuntimeView({super.key, this.incomingItems = const []});
+  final List<JourneyLifecyclePayload> incomingItems;
+  @override State<LegacyRuntimeView> createState() => _LegacyRuntimeViewState();
 }
 
 class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
   final _read = const LifecycleRuntimeReadService();
   final _runtime = const JourneyRuntimeService();
   final _journey = const JourneyService();
+  final _targetEmail = TextEditingController();
   List<Map<String, dynamic>> _records = const [];
   List<JourneyBackendRecord> _journeyRecords = const [];
-  final Set<String> _selectedEventIds = <String>{};
+  final _selected = <String>{};
   bool _loading = true;
-  bool _preserving = false;
-  String? _error;
+  bool _busy = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
+  @override void initState() { super.initState(); _load(); }
+  @override void dispose() { _targetEmail.dispose(); super.dispose(); }
 
   Future<void> _load() async {
-    if (mounted) {
-      setState(() {
-        _loading = true;
-        _error = null;
-      });
-    }
     try {
-      final results = await Future.wait([
-        _read.listLegacyRecords(),
-        _journey.load(limit: 100),
-      ]);
+      final result = await Future.wait([_read.listLegacyRecords(), _journey.load(limit: 100)]);
       if (!mounted) return;
-      setState(() {
-        _records = results[0] as List<Map<String, dynamic>>;
-        _journeyRecords = results[1] as List<JourneyBackendRecord>;
-        _selectedEventIds.removeWhere(
-          (id) => !_journeyRecords.any((record) => record.eventId == id),
-        );
-        _loading = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _error = error.toString();
-        _loading = false;
-      });
-    }
+      setState(() { _records = result[0] as List<Map<String, dynamic>>; _journeyRecords = result[1] as List<JourneyBackendRecord>; _loading = false; });
+    } catch (error) { if (mounted) setState(() => _loading = false); _show(error); }
   }
 
-  Future<void> _preserveSelectedLegacy() async {
-    final shId = profileShId.value.trim();
-    if (shId.isEmpty) {
-      _show('Legacy blocked: active SH identity is unavailable.');
-      return;
-    }
-    if (_selectedEventIds.isEmpty) {
-      _show('Select at least one concrete Journey item to preserve.');
-      return;
-    }
-
-    final memoryIds = <String>{};
-    final knowledgeIds = <String>{};
-    final experienceIds = <String>{};
+  Future<void> _preserve() async {
+    final email = _targetEmail.text.trim();
+    if (email.isEmpty || !email.contains('@')) { _show('Enter a valid target email.'); return; }
+    if (_selected.isEmpty) { _show('Select at least one shared Journey item.'); return; }
+    final scope = <String, dynamic>{'target_email': email, 'journey_event_ids': _selected.toList()};
     for (final record in _journeyRecords) {
-      if (!_selectedEventIds.contains(record.eventId)) continue;
-      final payload = record.payload;
-      final memoryId = payload['memory_id']?.toString().trim() ?? '';
-      final knowledgeId = payload['knowledge_id']?.toString().trim() ?? '';
-      final experienceId = payload['experience_id']?.toString().trim() ?? '';
-      if (memoryId.isNotEmpty) memoryIds.add(memoryId);
-      if (knowledgeId.isNotEmpty) knowledgeIds.add(knowledgeId);
-      if (experienceId.isNotEmpty) experienceIds.add(experienceId);
+      if (!_selected.contains(record.eventId)) continue;
+      final p = record.payload;
+      final memoryId = p['memory_id']?.toString().trim() ?? '';
+      final knowledgeId = p['knowledge_id']?.toString().trim() ?? '';
+      final experienceId = p['experience_id']?.toString().trim() ?? '';
+      if (memoryId.isNotEmpty) (scope['memory_ids'] ??= <String>[]).add(memoryId);
+      if (knowledgeId.isNotEmpty) (scope['knowledge_ids'] ??= <String>[]).add(knowledgeId);
+      if (experienceId.isNotEmpty) (scope['experience_ids'] ??= <String>[]).add(experienceId);
     }
-
-    final scope = <String, dynamic>{
-      'memory_ids': memoryIds.toList(),
-      'knowledge_ids': knowledgeIds.toList(),
-      'experience_ids': experienceIds.toList(),
-      'journey_event_ids': _selectedEventIds.toList(),
-    };
-
-    setState(() => _preserving = true);
+    setState(() => _busy = true);
     try {
-      await _runtime.preserveSelectedTransferAsLegacy(
-        sourceShId: shId,
-        scope: scope,
-      );
-      if (!mounted) return;
-      setState(() {
-        _selectedEventIds.clear();
-        _preserving = false;
-      });
-      await _load();
-      _show('Selected Journey items preserved canonically as legacy.');
-    } catch (error) {
-      if (!mounted) return;
-      setState(() => _preserving = false);
-      _show('Legacy preservation failed: $error');
-    }
+      await _runtime.preserveSelectedTransferAsLegacy(sourceShId: profileShId.value.trim(), scope: scope);
+      _targetEmail.clear(); _selected.clear(); await _load(); _show('Legacy request completed.');
+    } catch (error) { _show('Legacy request failed: $error'); }
+    finally { if (mounted) setState(() => _busy = false); }
   }
 
-  void _show(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  String _date(dynamic value) {
-    final parsed = DateTime.tryParse(value?.toString() ?? '');
-    return parsed == null ? '—' : parsed.toLocal().toString();
-  }
-
-  String _payload(dynamic value) {
-    if (value == null) return '{}';
-    try {
-      return const JsonEncoder.withIndent('  ').convert(value);
-    } catch (_) {
-      return value.toString();
-    }
-  }
-
-  String _journeyLabel(JourneyBackendRecord record) {
-    final type = record.eventType.toUpperCase();
-    final payload = record.payload;
-    final id = payload['memory_id'] ?? payload['knowledge_id'] ?? payload['experience_id'];
-    return id == null ? type : '$type · $id';
-  }
+  void _show(Object message) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message.toString()))); }
+  String _date(dynamic value) { final parsed = DateTime.tryParse(value?.toString() ?? ''); return parsed == null ? '—' : parsed.toLocal().toString(); }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Legacy')),
-      body: RefreshIndicator(
-        onRefresh: _load,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          children: [
-            const Text(
-              'Canonical Legacy',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Legacy preservation is bound to concrete Journey selections and enforced by runtime transfer-policy authority after end-of-life.',
-              style: TextStyle(color: shMuted, height: 1.4),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _loading || _preserving ? null : _preserveSelectedLegacy,
-              icon: const Icon(Icons.archive_outlined),
-              label: Text(_preserving ? 'Preserving…' : 'Preserve selected items'),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Select Journey items',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            if (_loading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else if (_error != null)
-              Text('Legacy/Journey read failed: $_error')
-            else if (_journeyRecords.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(24),
-                child: Text('No Journey items available for selection.'),
-              )
-            else
-              for (final record in _journeyRecords)
-                CheckboxListTile(
-                  value: _selectedEventIds.contains(record.eventId),
-                  onChanged: _preserving
-                      ? null
-                      : (selected) {
-                          setState(() {
-                            if (selected == true) {
-                              _selectedEventIds.add(record.eventId);
-                            } else {
-                              _selectedEventIds.remove(record.eventId);
-                            }
-                          });
-                        },
-                  title: Text(_journeyLabel(record)),
-                  subtitle: Text(
-                    '${_date(record.occurredAt)} · ${record.continuityStatus}',
-                  ),
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-            const SizedBox(height: 16),
-            const Text(
-              'Existing canonical legacy records',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            if (!_loading && _records.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(24),
-                child: Text('No canonical legacy records found.'),
-              )
-            else
-              for (final row in _records)
-                Card(
-                  child: ExpansionTile(
-                    title: Text(row['legacy_type']?.toString() ?? 'UNKNOWN'),
-                    subtitle: Text(
-                      '${row['status']?.toString() ?? 'UNKNOWN'} · ${_date(row['created_at'])}',
-                    ),
-                    childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    children: [
-                      SelectableText(_payload(row['payload'])),
-                    ],
-                  ),
-                ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(leading: const BackButton(), title: const Text('Legacy')),
+    body: RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(padding: const EdgeInsets.fromLTRB(30, 16, 30, 28), children: [
+        _card(Row(children: [_Icon(), const SizedBox(width: 24), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Legacy', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)), const SizedBox(height: 16),
+          Text(LifecycleStage.legacy.subtitle, style: const TextStyle(fontSize: 16, color: shMuted, height: 1.45)),
+        ]))])),
+        const SizedBox(height: 24),
+        _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Target & Incoming from Journey', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)), const SizedBox(height: 24),
+          const Text('Target 1', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)), const SizedBox(height: 12),
+          const Text('Email', style: TextStyle(color: shMuted)), const SizedBox(height: 8),
+          TextField(controller: _targetEmail, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(prefixIcon: Icon(Icons.mail_outline_rounded), hintText: 'Enter target email')),
+          const SizedBox(height: 18), const Text('Incoming from Journey', style: TextStyle(color: shMuted)), const SizedBox(height: 8),
+          if (_loading || _journeyRecords.isEmpty) const Text('No shared Journey data available.', style: TextStyle(color: shMuted))
+          else for (final record in _journeyRecords) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(record.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(record.eventId) : _selected.remove(record.eventId)), title: Text(record.eventType), subtitle: Text(_date(record.occurredAt)), controlAffinity: ListTileControlAffinity.leading),
+          const SizedBox(height: 12), OutlinedButton.icon(onPressed: _busy ? null : () => _show('Target uses email as the recipient identifier.'), icon: const Icon(Icons.add_rounded), label: const Text('Add Target')),
+          const SizedBox(height: 20), const Text('Request legacy handling for selected shared Journey context.', style: TextStyle(color: shMuted, height: 1.4)), const SizedBox(height: 18),
+          SizedBox(width: double.infinity, height: 68, child: FilledButton.icon(onPressed: _busy ? null : _preserve, icon: const Icon(Icons.send_rounded), label: Text(_busy ? 'Submitting…' : 'Request Legacy'))),
+          const SizedBox(height: 12), const Text('Authentication is handled by Integrations.', style: TextStyle(color: shMuted)),
+        ])),
+        const SizedBox(height: 24),
+        _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Decision History', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)), const SizedBox(height: 22),
+          if (_loading) const Center(child: CircularProgressIndicator())
+          else if (_records.isEmpty) const Text('No decisions yet.', style: TextStyle(color: shMuted, fontSize: 16))
+          else for (final row in _records) Card(child: ListTile(title: Text(row['legacy_type']?.toString() ?? 'LEGACY'), subtitle: Text('${row['status'] ?? 'ACTIVE'} · ${_date(row['created_at'])}'))),
+        ])),
+      ]),
+    ),
+  );
+
+  Widget _card(Widget child) => Container(padding: const EdgeInsets.fromLTRB(32, 28, 32, 30), decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(30), border: Border.all(color: LifecycleStage.legacy.accent.withValues(alpha: .22), width: 1.2), boxShadow: [BoxShadow(color: LifecycleStage.legacy.accent.withValues(alpha: .07), blurRadius: 24)]), child: child);
+}
+
+class _Icon extends StatelessWidget {
+  @override Widget build(BuildContext context) => Container(width: 88, height: 88, decoration: BoxDecoration(shape: BoxShape.circle, color: shBackground.withValues(alpha: .78), border: Border.all(color: LifecycleStage.legacy.accent.withValues(alpha: .55), width: 1.6), boxShadow: [BoxShadow(color: LifecycleStage.legacy.accent.withValues(alpha: .16), blurRadius: 22, spreadRadius: 2)]), alignment: Alignment.center, child: Icon(LifecycleStage.legacy.icon, size: 42, color: LifecycleStage.legacy.accent));
 }
