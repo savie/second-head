@@ -34,15 +34,32 @@ class JourneyViewState extends State<JourneyView> {
       final runtime = const JourneyRuntimeService();
       var records = await const JourneyService().load(limit: 100);
       final localOnly = items.where((item) => item.semanticSourceId == null).toList();
+      final migratedLocalKeys = <String>{};
       var reconciledLegacyPolicy = false;
-      for (final local in localOnly.where((item) => !item.isPrivate)) {
-        JourneyBackendRecord? match;
-        for (final record in records) {
-          final recordType = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType};
-          if (recordType == local.type && (record.payload['content']?.toString().trim() ?? '') == local.content.trim()) { match = record; break; }
+
+      String localKey(JourneyItem item) => '${item.type}|${item.content.trim()}';
+      JourneyBackendRecord? findBackendMatch(JourneyItem local, List<JourneyBackendRecord> source) {
+        for (final record in source) {
+          final recordType = switch (record.eventType.toUpperCase()) {
+            'MEMORY' => 'Memory',
+            'KNOWLEDGE' || 'LEARNING' => 'Knowledge',
+            'EXPERIENCE' => 'Experience',
+            _ => record.eventType,
+          };
+          if (recordType == local.type && (record.payload['content']?.toString().trim() ?? '') == local.content.trim()) return record;
         }
+        return null;
+      }
+
+      for (final local in localOnly.where((item) => !item.isPrivate)) {
+        final match = findBackendMatch(local, records);
         if (match == null) continue;
-        final id = switch (local.type) {'Memory' => match.payload['memory_id']?.toString(), 'Knowledge' => match.payload['knowledge_id']?.toString(), 'Experience' => match.payload['experience_id']?.toString(), _ => null};
+        final id = switch (local.type) {
+          'Memory' => match.payload['memory_id']?.toString(),
+          'Knowledge' => match.payload['knowledge_id']?.toString(),
+          'Experience' => match.payload['experience_id']?.toString(),
+          _ => null,
+        };
         if (id == null || id.isEmpty) continue;
         try {
           switch (local.type) {
@@ -50,20 +67,56 @@ class JourneyViewState extends State<JourneyView> {
             case 'Knowledge': await runtime.classifyKnowledge(knowledgeId: id, scope: 'GENERAL', visibility: 'SHARED');
             case 'Experience': await runtime.classifyExperience(experienceId: id, scope: 'GENERAL', visibility: 'SHARED');
           }
+          migratedLocalKeys.add(localKey(local));
           reconciledLegacyPolicy = true;
         } catch (_) {}
       }
       if (reconciledLegacyPolicy) records = await const JourneyService().load(limit: 100);
+
+      var createdLegacyBackendRecord = false;
+      for (final local in localOnly) {
+        if (migratedLocalKeys.contains(localKey(local))) continue;
+        if (findBackendMatch(local, records) != null) {
+          migratedLocalKeys.add(localKey(local));
+          continue;
+        }
+        try {
+          switch (local.type) {
+            case 'Memory':
+              await runtime.createMemory(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED');
+            case 'Knowledge':
+              await runtime.createKnowledgeCandidate(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED');
+            case 'Experience':
+              await runtime.createExperience(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED');
+            default:
+              continue;
+          }
+          migratedLocalKeys.add(localKey(local));
+          createdLegacyBackendRecord = true;
+        } catch (_) {}
+      }
+      if (createdLegacyBackendRecord) records = await const JourneyService().load(limit: 100);
+
       final additions = <JourneyItem>[];
       for (final record in records) {
         if (record.eventId.isEmpty) continue;
         final content = record.payload['content']?.toString().trim() ?? '';
         if (content.isEmpty) continue;
-        final type = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType};
-        final canonicalId = switch (type) {'Memory' => record.payload['memory_id']?.toString(), 'Knowledge' => record.payload['knowledge_id']?.toString(), 'Experience' => record.payload['experience_id']?.toString(), _ => null};
+        final type = switch (record.eventType.toUpperCase()) {
+          'MEMORY' => 'Memory',
+          'KNOWLEDGE' || 'LEARNING' => 'Knowledge',
+          'EXPERIENCE' => 'Experience',
+          _ => record.eventType,
+        };
+        final canonicalId = switch (type) {
+          'Memory' => record.payload['memory_id']?.toString(),
+          'Knowledge' => record.payload['knowledge_id']?.toString(),
+          'Experience' => record.payload['experience_id']?.toString(),
+          _ => null,
+        };
         additions.add(JourneyItem(content, record.continuityStatus.isEmpty ? 'Backend Journey event' : record.continuityStatus, _formatJourneyDate(record.occurredAt), type, content, record.visibility == 'PRIVATE' || record.visibility == 'OWNER_ONLY', semanticSourceId: canonicalId));
       }
-      shJourneyItems = [...additions, ...localOnly.where((item) => item.isPrivate)];
+      shJourneyItems = [...additions, ...localOnly.where((item) => !migratedLocalKeys.contains(localKey(item)))];
       await JourneyStore.persist();
     } catch (_) {}
     if (mounted) setState(() {});
