@@ -33,7 +33,7 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
   }
 
   Future<void> _prepare() async {
-    if (_selected.isEmpty) { _show('Select at least one shared Journey item.'); return; }
+    if (_selected.isEmpty) { _show('Select at least one Legacy-eligible Journey item.'); return; }
     final shId = profileShId.value.trim();
     if (shId.isEmpty) { _show('Legacy preparation blocked: active SH identity is unavailable.'); return; }
     setState(() => _busy = true);
@@ -48,7 +48,7 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
 
   void _show(Object m) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m.toString()))); }
   String _date(dynamic v) { final d = DateTime.tryParse(v?.toString() ?? ''); return d == null ? '—' : d.toLocal().toString(); }
-  List<JourneyBackendRecord> get _sharedRecords => [for (final record in _journeyRecords) if ((record.visibility == 'SHARED' || record.visibility == 'PUBLIC') && const {'MEMORY', 'KNOWLEDGE', 'LEARNING', 'EXPERIENCE'}.contains(record.eventType.toUpperCase())) record];
+  List<JourneyBackendRecord> get _sharedRecords => [for (final record in _journeyRecords) if ((record.visibility == 'SHARED' || record.visibility == 'PUBLIC') && record.transferPolicy == 'LEGACY' && const {'MEMORY', 'KNOWLEDGE', 'LEARNING', 'EXPERIENCE'}.contains(record.eventType.toUpperCase())) record];
   int _count(String type) => _sharedRecords.where((record) => record.eventType.toUpperCase() == type.toUpperCase() || (type == 'KNOWLEDGE' && record.eventType.toUpperCase() == 'LEARNING')).length;
 
   @override
@@ -59,9 +59,9 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
       const SizedBox(height: 18),
       _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Journey Heritage', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18),
-        const Text('Prepare shared Journey context for Legacy before end-of-life. Legacy has no target actor and is activated automatically when the source SH reaches end-of-life.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 15),
-        if (_loading || _sharedRecords.isEmpty) const Text('No shared Journey data available.', style: TextStyle(fontSize: 13, color: shMuted))
-        else for (final r in _sharedRecords) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(r.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)), title: Text(r.eventType.toUpperCase() == 'LEARNING' ? 'Knowledge' : r.eventType, style: const TextStyle(fontSize: 14)), subtitle: Text(_date(r.occurredAt), style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
+        const Text('Prepare selected Legacy-eligible Journey context before end-of-life. Legacy has no target actor and is activated automatically when the source SH reaches end-of-life.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 15),
+        if (_loading || _sharedRecords.isEmpty) const Text('No Legacy-eligible shared Journey data available. Open a Journey item and set Transfer Policy to LEGACY first.', style: TextStyle(fontSize: 13, color: shMuted))
+        else for (final r in _sharedRecords) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(r.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)), title: Text(r.eventType.toUpperCase() == 'LEARNING' ? 'Knowledge' : r.eventType, style: const TextStyle(fontSize: 14)), subtitle: Text('${_date(r.occurredAt)} · LEGACY', style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
         const SizedBox(height: 15), _summaryRow(), const SizedBox(height: 18),
         SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _busy ? null : _prepare, icon: const Icon(Icons.bookmark_add_outlined, size: 18), label: Text(_busy ? 'Preparing…' : 'Prepare Legacy', style: const TextStyle(fontSize: 14)))),
         const SizedBox(height: 12), const Text('Preparation is allowed while the SH is active. Activation is a terminal EOL operation and does not require login after deactivation.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.4)),
