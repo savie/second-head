@@ -140,6 +140,10 @@ class AuthService {
       throw const AuthBackendError('No authenticated session.');
     }
     try {
+      // Clone recipients are intentionally provisioned without a normal SH.
+      // Materialize the reserved Clone first so actor resolution can then see
+      // the newly-created Clone PRIMARY SH.
+      await _backend.materializeRegisteredClone();
       final context = await _backend.resolveActorContext();
       if (context == null) {
         throw const AuthBackendError('Unable to resolve the authenticated actor context.');
