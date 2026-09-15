@@ -2,59 +2,32 @@
 
 ## Status
 
-**WORKING RECONCILIATION RECORD — AUTHORITY DECISION RECEIVED — STAGED LIFECYCLE SELECTED**
+**WORKING RECONCILIATION RECORD — AUTHORITY RESOLVED / IMPLEMENTATION RECONCILED**
 
-Dokumen ini mencatat conflict antar working contracts yang ditemukan saat finalisasi authority transisi Knowledge dan keputusan authority yang kemudian diberikan.
+## 1. Authority Decision
 
-Dokumen ini tidak mengubah Canonical.
-
-## 1. Evidence
-
-Supabase DEV membuktikan vocabulary `public.knowledge`:
+The selected lifecycle authority is the staged Knowledge lifecycle:
 
 ```text
-CANDIDATE
-ACCEPTED
-INDEXED
-ACTIVE
-UPDATED
-DEPRECATED
-ARCHIVED
+CANDIDATE → ACCEPTED → INDEXED → ACTIVE
+ACTIVE → UPDATED + successor
+ACTIVE → DEPRECATED → ARCHIVED
 ```
 
-Sebelum keputusan ini tidak ditemukan RPC runtime khusus yang membuktikan acceptance, indexing, activation, update/supersession, deprecation, atau archive sebagai authority production.
+`VALIDATION` remains a process boundary, not a lifecycle enum.
 
-## 2. Conflict Yang Direkonsiliasi
+## 2. Conflict Resolution
 
-Dua working documents pada tanggal yang sama membawa kontrak berbeda:
-
-### Contract A — Transition API Contract Finalization
-
-`docs/working/semantic/sh_transition_api_contract_finalization_20260913.md`
-
-Mendefinisikan activation langsung:
+The earlier direct-activation contract:
 
 ```text
 CANDIDATE → ACTIVE
-```
-
-melalui target:
-
-```text
 runtime_activate_knowledge_candidate
 ```
 
-### Contract B — Knowledge Transition Implementation Contract
+is no longer the current implementation direction.
 
-`docs/working/semantic/sh_knowledge_transition_implementation_contract_20260913.md`
-
-Mendefinisikan lifecycle bertahap:
-
-```text
-CANDIDATE → ACCEPTED → INDEXED → ACTIVE → UPDATED / DEPRECATED → ARCHIVED
-```
-
-Dengan target:
+The staged contract is the current reconciled direction and is implemented by:
 
 ```text
 runtime_accept_knowledge
@@ -65,129 +38,47 @@ runtime_deprecate_knowledge
 runtime_archive_knowledge
 ```
 
-## 3. Authority Decision
+No silent conflict remains between the two working directions: the staged lifecycle is the active implementation boundary.
 
-User authority decision pada 2026-09-13:
+## 3. Engineering Dependencies — NOW CLOSED NON-E2E
 
-**STAGED LIFECYCLE = SELECTED.**
+The following dependencies are implemented and verified at source/DB level:
 
-Authority lifecycle yang digunakan untuk implementation planning adalah:
+- semantic Knowledge confirmation authority;
+- operation ledger and idempotency boundary;
+- Knowledge row locking and lifecycle guard;
+- atomic Knowledge mutation + operation ledger + Journey projection within one PostgreSQL function transaction;
+- exact `LIFECYCLE` Journey projection convention;
+- SECURITY DEFINER/search_path/grant exposure;
+- stable application SQLSTATE-style error mapping.
+
+## 4. Current Gate
 
 ```text
-CANDIDATE
-  ↓
-ACCEPTED
-  ↓
-INDEXED
-  ↓
-ACTIVE
-  ├──→ UPDATED + superseded_by successor
-  ↓
-DEPRECATED
-  ↓
-ARCHIVED
+Lifecycle authority conflict   = RESOLVED
+Staged lifecycle               = IMPLEMENTED
+Confirmation authority         = IMPLEMENTED
+Operation ledger               = IMPLEMENTED
+Atomicity boundary             = IMPLEMENTED
+Journey projection             = IMPLEMENTED
+Security exposure              = VERIFIED
+Error mapping                  = IMPLEMENTED
+Implementation gate            = OPEN / VERIFIED
+E2E verification               = OPEN — E2E ONLY
 ```
 
-`VALIDATION` tetap process boundary, bukan lifecycle enum.
+## 5. Remaining Boundary
 
-Acceptance dan indexing menjadi production lifecycle boundaries yang wajib dilewati sebelum activation.
+The remaining proof is runtime/E2E execution of the implemented lifecycle, including positive, negative/cross-actor, retry/idempotency, and concurrency behavior.
 
-Contract A tidak lagi menjadi lifecycle direction untuk implementation. Dokumen tersebut tetap historical/working material sampai direkonsiliasi secara eksplisit pada tahap berikutnya; tidak ada silent rewrite terhadap dokumen authority lain.
+This document must not be used to reopen the already-resolved non-E2E implementation blocker.
 
-## 4. Impact Yang Sekarang Sudah Terselesaikan
-
-Keputusan staged lifecycle menetapkan:
-
-- lifecycle transition graph;
-- acceptance sebagai transition authority;
-- indexing sebagai transition authority;
-- activation hanya dari `INDEXED`;
-- target function naming untuk enam transition;
-- operation ledger transition taxonomy dasar;
-- E2E transition ordering.
-
-Hal berikut masih membutuhkan engineering finalization sebelum runtime mutation:
-
-- semantic confirmation authority;
-- operation ledger schema/atomicity;
-- exact Journey lifecycle event convention;
-- per-function SECURITY INVOKER/DEFINER decision;
-- SQLSTATE mapping berdasarkan implementation aktual;
-- runtime caller integration;
-- E2E positive/negative/concurrency verification.
-
-## 5. Safe Boundary
-
-Boundary yang tetap berlaku:
+## 6. Change Boundary
 
 ```text
-AUTHENTICATE
-→ RESOLVE ACCOUNT / SH
-→ VERIFY OWNERSHIP
-→ VERIFY CURRENT LIFECYCLE
-→ VERIFY LEGAL TRANSITION
-→ VERIFY DOMAIN AUTHORITY
-→ VERIFY POLICY / CONFIRMATION
-→ VERIFY OPERATION IDENTITY
-→ ATOMIC MUTATION
-→ OPERATION LEDGER
-→ JOURNEY PROJECTION
-→ OBSERVABLE RESULT
-```
-
-Tidak ada lifecycle authority dari model output, confidence, atau Journey replay.
-
-## 6. Current Gate
-
-```text
-Lifecycle authority conflict = RESOLVED
-Staged lifecycle decision = PASS
-Transition graph = PASS
-Function naming direction = PASS
-Operation ledger architecture = OPEN
-Confirmation authority = OPEN
-Journey exact convention = OPEN
-Security exposure review = OPEN
-SQLSTATE mapping = OPEN
-Runtime implementation = OPEN
-E2E verification = OPEN
-
-IMPLEMENTATION GATE = CLOSED
-```
-
-Gate tetap CLOSED hanya karena dependency engineering yang belum dibuktikan, bukan karena lifecycle decision masih ambigu.
-
-## 7. Change Boundary
-
-```text
-Supabase DEV schema = UNCHANGED
-Supabase DEV data   = UNCHANGED
-Runtime code        = UNCHANGED
-Migration           = UNCHANGED
-Canonical           = UNCHANGED
-GitHub              = RECONCILIATION RECORD UPDATED
-```
-
-## 8. Next Engineering Sequence
-
-```text
-SECURITY / CONFIRMATION DESIGN
-        ↓
-OPERATION LEDGER + ATOMICITY DESIGN
-        ↓
-JOURNEY CONTRACT FINALIZATION
-        ↓
-SQL CONTRACT / ERROR MAPPING
-        ↓
-SUPABASE-FIRST IMPLEMENTATION
-        ↓
-DATABASE TEST + SECURITY TEST
-        ↓
-MIGRATION HISTORY
-        ↓
-GITHUB RECONCILIATION
-        ↓
-RUNTIME INTEGRATION
-        ↓
-E2E VERIFICATION
+GitHub DEV docs          = RECONCILED
+Supabase DEV schema      = EXISTING / VERIFIED
+Supabase DEV data        = UNCHANGED BY THIS DOC UPDATE
+Migration history        = EXISTING / VERIFIED
+Canonical                = UNCHANGED
 ```
