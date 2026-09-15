@@ -20,7 +20,12 @@ class _IntegrationsViewState extends State<IntegrationsView> {
   void initState() {
     super.initState();
     store.addListener(_refresh);
-    store.refreshFromDisk();
+    _load();
+  }
+
+  Future<void> _load() async {
+    await store.refreshFromDisk();
+    await store.refreshFromBackend();
   }
 
   @override
