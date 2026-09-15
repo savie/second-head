@@ -2,21 +2,21 @@
 
 ## Status
 
-**WORKING — STATIC CONTRACT AUDIT PASS / DEVICE E2E OPEN**
+**WORKING — STATIC CONTRACT AUDIT PASS / DEVICE E2E PASS — OWNER-REPORTED**
 
 Dokumen ini adalah catatan audit working. Dokumen ini tidak mengubah otoritas Canonical atau Approved Contract.
 
 ## Scope
 
-Hanya alignment adapter untuk `update` dan `delete` pada individual Conversation Message.
+Alignment adapter untuk `update` dan `delete` pada individual Conversation Message.
 
 Di luar scope:
 
-- Conversation create/delete E2E
-- Project mutation
-- Attachment retry/idempotency
-- Regenerate Assistant
-- refactor Conversation yang lebih luas
+- Conversation create/delete E2E sebagai flow terpisah;
+- Project mutation;
+- Attachment retry/idempotency;
+- Regenerate Assistant;
+- refactor Conversation yang lebih luas.
 
 ## Evidence
 
@@ -55,72 +55,70 @@ Jadi contract function dibatasi oleh actor/ownership, bukan hanya berdasarkan ID
 
 ### Flutter adapter
 
-`ConversationService` saat ini memetakan:
+`ConversationService` memetakan:
 
 ```dart
-updateMessage(
-  messageId,
-  oldContent,
-  newContent,
-)
-    → runtime_update_conversation_message_v2
-       p_message_id
-       p_old_content
-       p_new_content
+updateMessage(messageId, oldContent, newContent)
+  → runtime_update_conversation_message_v2
+     p_message_id
+     p_old_content
+     p_new_content
 ```
-
-dan:
 
 ```dart
- deleteMessage(messageId)
-    → runtime_delete_conversation_message_v2
-       p_message_id
+deleteMessage(messageId)
+  → runtime_delete_conversation_message_v2
+     p_message_id
 ```
 
-Mapping ini sesuai dengan signature dan nama parameter backend saat ini.
+Mapping sesuai dengan signature dan nama parameter backend saat ini.
 
 ## Result
 
 ```text
-Backend signature alignment       PASS
-Flutter parameter mapping        PASS
-SECURITY DEFINER boundary        PASS
-Authenticated EXECUTE            PASS
-Anonymous EXECUTE denied          PASS
-Ownership-scoped backend logic    PASS
-Static adapter contract           PASS
+Backend signature alignment        PASS
+Flutter parameter mapping         PASS
+SECURITY DEFINER boundary         PASS
+Authenticated EXECUTE             PASS
+Anonymous EXECUTE denied           PASS
+Ownership-scoped backend logic     PASS
+Static adapter contract            PASS
+Edit Message E2E                   PASS — OWNER-REPORTED
+Delete Conversation/Message E2E   PASS — OWNER-REPORTED
 ```
 
-## Remaining verification gap
+### Latest owner-reported E2E evidence
 
-E2E device/runtime aktual belum digunakan sebagai evidence untuk:
+Edit dan delete sudah digunakan dalam recovery test nyata. Data yang telah diedit pada Project / Conversation / Message / Memory / Knowledge / Experience tetap benar, kemudian Conversation dihapus dan full snapshot/restore dijalankan. Conversation dan data terkait berhasil kembali dengan state yang tetap benar.
+
+Dengan evidence tersebut, status lama `DEVICE E2E OPEN` pada dokumen ini sudah stale dan direkonsiliasi menjadi `DEVICE E2E PASS — OWNER-REPORTED`.
+
+## Remaining verification boundary
+
+Pass di atas menutup mutation behavior yang benar-benar sudah diuji. Ini **tidak otomatis menutup seluruh Conversation verification**, khususnya local serialization round-trip dan attachment retry/idempotency.
+
+Required separate gate:
 
 ```text
-Edit Message
-→ content berubah dan tersimpan
-→ reload/navigation tetap mempertahankan perubahan
-
-Delete Message
-→ message terhapus
-→ reload/navigation tetap menunjukkan message sudah tidak ada
+serialize → persist → read → deserialize
 ```
 
-Jangan menyatakan full Message CRUD E2E PASS sebelum kedua tindakan ini diuji secara independen.
+untuk semantic Message fields tetap berada pada `E2E Master Verification Matrix`.
 
 ## Next verification
 
-Gunakan Conversation Message test/disposable di device DEV:
+Tidak perlu mengulang edit/delete sebagai blocker hanya karena dokumen lama belum diperbarui.
 
-1. Kirim user message normal.
-2. Edit message tersebut dan verifikasi content yang berubah tetap tersimpan setelah reload/navigation.
-3. Hapus test message lain dan verifikasi message hilang serta tetap tidak muncul setelah reload/navigation.
-4. Jangan menggunakan attachment retry sebagai evidence untuk mutation mana pun.
+Fokus berikutnya adalah gate yang benar-benar belum ditutup pada E2E Master Verification Matrix.
 
-Expected:
+## Change Control
 
-```text
-Edit E2E        PASS / FAIL
-Delete E2E      PASS / FAIL
-```
+Perubahan dokumen ini hanya merekonsiliasi status verification berdasarkan latest owner-reported execution evidence.
 
-Hanya hasil yang benar-benar diuji yang boleh dipromosikan ke master inventory.
+Tidak ada perubahan pada:
+
+- Canonical;
+- Approved Contract;
+- backend schema;
+- migration;
+- runtime semantics.
