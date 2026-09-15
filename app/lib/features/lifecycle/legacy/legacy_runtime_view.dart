@@ -45,6 +45,8 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
   }
   void _show(Object m) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m.toString()))); }
   String _date(dynamic v) { final d = DateTime.tryParse(v?.toString() ?? ''); return d == null ? '—' : d.toLocal().toString(); }
+  String _itemTitle(JourneyBackendRecord record) => record.eventType.toUpperCase();
+  String _itemType(JourneyBackendRecord record) => record.eventType.toUpperCase() == 'LEARNING' ? 'Knowledge' : record.eventType;
   List<JourneyBackendRecord> get _sharedRecords => [for (final record in _journeyRecords) if ((record.visibility == 'SHARED' || record.visibility == 'PUBLIC') && record.transferPolicy == 'NON_TRANSFERABLE' && const {'MEMORY', 'KNOWLEDGE', 'LEARNING', 'EXPERIENCE'}.contains(record.eventType.toUpperCase())) record];
   int _count(String type) => _sharedRecords.where((record) => record.eventType.toUpperCase() == type.toUpperCase() || (type == 'KNOWLEDGE' && record.eventType.toUpperCase() == 'LEARNING')).length;
 
@@ -55,9 +57,9 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
       const SizedBox(height: 18),
       _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Journey Heritage', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18),
-        const Text('Select Shared Journey context to activate LEGACY. Legacy has no target actor and is activated automatically when the source SH reaches end-of-life.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 15),
-        if (_loading || _sharedRecords.isEmpty) const Text('No Shared Journey data available. Shared Journey items start as NON_TRANSFERABLE; select one here to activate LEGACY.', style: TextStyle(fontSize: 13, color: shMuted))
-        else for (final r in _sharedRecords) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(r.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)), title: Text(r.eventType.toUpperCase() == 'LEARNING' ? 'Knowledge' : r.eventType, style: const TextStyle(fontSize: 14)), subtitle: Text('${_date(r.occurredAt)} · SHARED · NON_TRANSFERABLE', style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
+        const Text('Shared Journey — selecting here activates LEGACY for the selected item. Legacy has no target actor and activates automatically when the source SH reaches end-of-life.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 15),
+        if (_loading || _sharedRecords.isEmpty) const Text('No shared Journey data available.', style: TextStyle(fontSize: 13, color: shMuted))
+        else for (final r in _sharedRecords) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(r.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)), title: Text(_itemTitle(r), style: const TextStyle(fontSize: 14)), subtitle: Text('${_itemType(r)} · ${_date(r.occurredAt)}', style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
         const SizedBox(height: 15), _summaryRow(), const SizedBox(height: 18),
         SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _busy ? null : _prepare, icon: const Icon(Icons.bookmark_add_outlined, size: 18), label: Text(_busy ? 'Preparing…' : 'Prepare Legacy', style: const TextStyle(fontSize: 14)))),
         const SizedBox(height: 12), const Text('Preparation is the policy activation step. It is allowed while the SH is active; activation is terminal at end-of-life.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.4)),
