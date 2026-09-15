@@ -55,6 +55,34 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
         final dbStatus = row['status']?.toString().toUpperCase() ?? 'ACTIVE';
         backendItems.add(_backendItem(type: 'Succession', id: row['succession_id']?.toString() ?? '', sourceShId: row['source_sh_id']?.toString() ?? '', targetAccountId: row['successor_account_id']?.toString() ?? '', status: dbStatus == 'REVOKED' ? 'REVOKED' : dbStatus == 'CONSUMED' ? 'APPROVED' : 'APPROVED', scope: row['scope'], createdAt: row['created_at'], incoming: row['successor_account_id']?.toString() == currentAccount));
       }
+      final legacyRows = await backendClient.from('legacy_records').select('legacy_id,source_sh_id,legacy_type,payload,provenance,status,created_at').order('created_at', ascending: false);
+      for (final raw in legacyRows.whereType<Map>()) {
+        final row = Map<String, dynamic>.from(raw);
+        final dbStatus = row['status']?.toString().toUpperCase() ?? 'PREPARED';
+        if (dbStatus == 'RELEASED' || dbStatus == 'PURGED') continue;
+        final scope = <String, List<String>>{};
+        final payload = row['payload'];
+        if (payload is Map) {
+          final journey = payload['journey'];
+          if (journey is List) {
+            final ids = <String>[];
+            for (final entry in journey) {
+              if (entry is Map && entry['event_id'] != null) ids.add(entry['event_id'].toString());
+            }
+            if (ids.isNotEmpty) scope['journey_event_ids'] = ids;
+          }
+        }
+        backendItems.add(IntegrationAuthorization(
+          id: row['legacy_id']?.toString() ?? '',
+          type: 'Legacy',
+          sourceShId: row['source_sh_id']?.toString() ?? '',
+          targetAccountId: 'ALL SH',
+          scope: scope,
+          createdAt: DateTime.tryParse(row['created_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0),
+          status: IntegrationAuthorizationStatus.approved,
+          incoming: false,
+        ));
+      }
       _items..clear()..addAll(backendItems);
       await _persist();
       notifyListeners();
