@@ -5,7 +5,6 @@ import 'journey_runtime_service.dart';
 
 class RuntimeJourneyDetail extends StatefulWidget {
   const RuntimeJourneyDetail({super.key, required this.domain, required this.recordId, required this.title, required this.content, required this.isPrivate, this.transferPolicy = 'NON_TRANSFERABLE', required this.onChanged});
-
   final String domain;
   final String recordId;
   final String title;
@@ -13,23 +12,14 @@ class RuntimeJourneyDetail extends StatefulWidget {
   final bool isPrivate;
   final String transferPolicy;
   final VoidCallback onChanged;
-
-  @override
-  State<RuntimeJourneyDetail> createState() => _RuntimeJourneyDetailState();
+  @override State<RuntimeJourneyDetail> createState() => _RuntimeJourneyDetailState();
 }
 
 class _RuntimeJourneyDetailState extends State<RuntimeJourneyDetail> {
   final _runtime = const JourneyRuntimeService();
   late bool _isPrivate;
-  late String _transferPolicy;
   bool _busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _isPrivate = widget.isPrivate;
-    _transferPolicy = widget.transferPolicy.toUpperCase();
-  }
+  @override void initState() { super.initState(); _isPrivate = widget.isPrivate; }
 
   Future<void> _setVisibility(bool privateOnly) async {
     if (_busy || _isPrivate == privateOnly) return;
@@ -54,24 +44,7 @@ class _RuntimeJourneyDetailState extends State<RuntimeJourneyDetail> {
     }
   }
 
-  Future<void> _setTransferPolicy(String policy) async {
-    if (_busy || _transferPolicy == policy) return;
-    setState(() => _busy = true);
-    try {
-      await _runtime.setTransferPolicy(domain: widget.domain, recordId: widget.recordId, transferPolicy: policy);
-      if (!mounted) return;
-      setState(() => _transferPolicy = policy);
-      widget.onChanged();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transfer policy changed to $policy.')));
-    } catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transfer policy update failed: $error')));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
+  @override Widget build(BuildContext context) => Scaffold(
     backgroundColor: shBackground,
     body: Column(children: [
       AppBar(leading: const BackButton(), title: Text(widget.domain == 'LEARNING' ? 'Knowledge' : widget.domain.substring(0, 1) + widget.domain.substring(1).toLowerCase())),
@@ -87,15 +60,8 @@ class _RuntimeJourneyDetailState extends State<RuntimeJourneyDetail> {
           const SizedBox(width: 10),
           Expanded(child: _PolicyOption(label: 'Shared', icon: Icons.public, selected: !_isPrivate, enabled: !_busy, onTap: () => _setVisibility(false))),
         ]),
-        const SizedBox(height: 20),
-        const Text('Transfer Policy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 8),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final policy in const ['NON_TRANSFERABLE', 'INHERITANCE', 'SUCCESSION', 'LEGACY'])
-            _TransferOption(label: policy, selected: _transferPolicy == policy, enabled: !_busy, onTap: () => _setTransferPolicy(policy)),
-        ]),
-        const SizedBox(height: 8),
-        const Text('Inheritance, Succession, and Legacy require the record to be GENERAL + SHARED. Selection does not override NON_TRANSFERABLE.', style: TextStyle(fontSize: 11, color: shMuted, height: 1.4)),
+        const SizedBox(height: 14),
+        const Text('Transfer policy is selected in Lifecycle, not administered from Journey.', style: TextStyle(fontSize: 11, color: shMuted, height: 1.4)),
       ]))),
     ]),
   );
@@ -108,16 +74,5 @@ class _PolicyOption extends StatelessWidget {
   final bool selected;
   final bool enabled;
   final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => InkWell(onTap: enabled ? onTap : null, borderRadius: BorderRadius.circular(14), child: Container(padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12), decoration: BoxDecoration(color: selected ? shPurple.withValues(alpha: .13) : shSurface, borderRadius: BorderRadius.circular(14), border: Border.all(color: selected ? shPurple : shBorder)), child: Row(children: [Icon(icon, size: 19), const SizedBox(width: 8), Expanded(child: Text(label, style: const TextStyle(fontSize: 12))), if (selected) const Icon(Icons.check_rounded, size: 17)])));
-}
-
-class _TransferOption extends StatelessWidget {
-  const _TransferOption({required this.label, required this.selected, required this.enabled, required this.onTap});
-  final String label;
-  final bool selected;
-  final bool enabled;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => InkWell(onTap: enabled ? onTap : null, borderRadius: BorderRadius.circular(12), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), decoration: BoxDecoration(color: selected ? shPurple.withValues(alpha: .13) : shSurface, borderRadius: BorderRadius.circular(12), border: Border.all(color: selected ? shPurple : shBorder)), child: Row(mainAxisSize: MainAxisSize.min, children: [Text(label, style: const TextStyle(fontSize: 11)), if (selected) ...[const SizedBox(width: 6), const Icon(Icons.check_rounded, size: 15)]])));
+  @override Widget build(BuildContext context) => InkWell(onTap: enabled ? onTap : null, borderRadius: BorderRadius.circular(14), child: Container(padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12), decoration: BoxDecoration(color: selected ? shPurple.withValues(alpha: .13) : shSurface, borderRadius: BorderRadius.circular(14), border: Border.all(color: selected ? shPurple : shBorder)), child: Row(children: [Icon(icon, size: 19), const SizedBox(width: 8), Expanded(child: Text(label, style: const TextStyle(fontSize: 12))), if (selected) const Icon(Icons.check_rounded, size: 17)])));
 }
