@@ -4,13 +4,14 @@ import '../../core/theme/sh_theme.dart';
 import 'journey_runtime_service.dart';
 
 class RuntimeJourneyDetail extends StatefulWidget {
-  const RuntimeJourneyDetail({super.key, required this.domain, required this.recordId, required this.title, required this.content, required this.isPrivate, required this.onChanged});
+  const RuntimeJourneyDetail({super.key, required this.domain, required this.recordId, required this.title, required this.content, required this.isPrivate, this.transferPolicy = 'NON_TRANSFERABLE', required this.onChanged});
 
   final String domain;
   final String recordId;
   final String title;
   final String content;
   final bool isPrivate;
+  final String transferPolicy;
   final VoidCallback onChanged;
 
   @override
@@ -20,36 +21,50 @@ class RuntimeJourneyDetail extends StatefulWidget {
 class _RuntimeJourneyDetailState extends State<RuntimeJourneyDetail> {
   final _runtime = const JourneyRuntimeService();
   late bool _isPrivate;
+  late String _transferPolicy;
   bool _busy = false;
 
   @override
   void initState() {
     super.initState();
     _isPrivate = widget.isPrivate;
+    _transferPolicy = widget.transferPolicy.toUpperCase();
   }
 
-  Future<void> _setPolicy(bool privateOnly) async {
+  Future<void> _setVisibility(bool privateOnly) async {
     if (_busy || _isPrivate == privateOnly) return;
     setState(() => _busy = true);
     try {
       final scope = privateOnly ? 'PRIVATE' : 'GENERAL';
       final visibility = privateOnly ? 'OWNER_ONLY' : 'SHARED';
       switch (widget.domain) {
-        case 'MEMORY':
-          await _runtime.classifyMemory(memoryId: widget.recordId, scope: scope, visibility: visibility);
-        case 'KNOWLEDGE':
-          await _runtime.classifyKnowledge(knowledgeId: widget.recordId, scope: scope, visibility: visibility);
-        case 'EXPERIENCE':
-          await _runtime.classifyExperience(experienceId: widget.recordId, scope: scope, visibility: visibility);
-        default:
-          throw StateError('Unsupported canonical Journey domain: ${widget.domain}');
+        case 'MEMORY': await _runtime.classifyMemory(memoryId: widget.recordId, scope: scope, visibility: visibility);
+        case 'KNOWLEDGE': await _runtime.classifyKnowledge(knowledgeId: widget.recordId, scope: scope, visibility: visibility);
+        case 'EXPERIENCE': await _runtime.classifyExperience(experienceId: widget.recordId, scope: scope, visibility: visibility);
+        default: throw StateError('Unsupported canonical Journey domain: ${widget.domain}');
       }
       if (!mounted) return;
       setState(() => _isPrivate = privateOnly);
       widget.onChanged();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(privateOnly ? 'Policy changed to Owner Only.' : 'Policy changed to Shared.')));
     } catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Policy update failed: $error')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Visibility update failed: $error')));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _setTransferPolicy(String policy) async {
+    if (_busy || _transferPolicy == policy) return;
+    setState(() => _busy = true);
+    try {
+      await _runtime.setTransferPolicy(domain: widget.domain, recordId: widget.recordId, transferPolicy: policy);
+      if (!mounted) return;
+      setState(() => _transferPolicy = policy);
+      widget.onChanged();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transfer policy changed to $policy.')));
+    } catch (error) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transfer policy update failed: $error')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -65,13 +80,22 @@ class _RuntimeJourneyDetailState extends State<RuntimeJourneyDetail> {
         const SizedBox(height: 14),
         Container(width: double.infinity, padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(16), border: Border.all(color: shBorder)), child: Text(widget.content, style: const TextStyle(fontSize: 12, height: 1.5))),
         const SizedBox(height: 20),
-        const Text('Policy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+        const Text('Visibility', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
         Row(children: [
-          Expanded(child: _PolicyOption(label: 'Owner Only', icon: Icons.lock_outline, selected: _isPrivate, enabled: !_busy, onTap: () => _setPolicy(true))),
+          Expanded(child: _PolicyOption(label: 'Owner Only', icon: Icons.lock_outline, selected: _isPrivate, enabled: !_busy, onTap: () => _setVisibility(true))),
           const SizedBox(width: 10),
-          Expanded(child: _PolicyOption(label: 'Shared', icon: Icons.public, selected: !_isPrivate, enabled: !_busy, onTap: () => _setPolicy(false))),
+          Expanded(child: _PolicyOption(label: 'Shared', icon: Icons.public, selected: !_isPrivate, enabled: !_busy, onTap: () => _setVisibility(false))),
         ]),
+        const SizedBox(height: 20),
+        const Text('Transfer Policy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final policy in const ['NON_TRANSFERABLE', 'INHERITANCE', 'SUCCESSION', 'LEGACY'])
+            _TransferOption(label: policy, selected: _transferPolicy == policy, enabled: !_busy, onTap: () => _setTransferPolicy(policy)),
+        ]),
+        const SizedBox(height: 8),
+        const Text('Inheritance, Succession, and Legacy require the record to be GENERAL + SHARED. Selection does not override NON_TRANSFERABLE.', style: TextStyle(fontSize: 11, color: shMuted, height: 1.4)),
       ]))),
     ]),
   );
@@ -84,15 +108,16 @@ class _PolicyOption extends StatelessWidget {
   final bool selected;
   final bool enabled;
   final VoidCallback onTap;
-
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: enabled ? onTap : null,
-    borderRadius: BorderRadius.circular(14),
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
-      decoration: BoxDecoration(color: selected ? shPurple.withValues(alpha: .13) : shSurface, borderRadius: BorderRadius.circular(14), border: Border.all(color: selected ? shPurple : shBorder)),
-      child: Row(children: [Icon(icon, size: 19), const SizedBox(width: 8), Expanded(child: Text(label, style: const TextStyle(fontSize: 12))), if (selected) const Icon(Icons.check_rounded, size: 17)]),
-    ),
-  );
+  Widget build(BuildContext context) => InkWell(onTap: enabled ? onTap : null, borderRadius: BorderRadius.circular(14), child: Container(padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12), decoration: BoxDecoration(color: selected ? shPurple.withValues(alpha: .13) : shSurface, borderRadius: BorderRadius.circular(14), border: Border.all(color: selected ? shPurple : shBorder)), child: Row(children: [Icon(icon, size: 19), const SizedBox(width: 8), Expanded(child: Text(label, style: const TextStyle(fontSize: 12))), if (selected) const Icon(Icons.check_rounded, size: 17)])));
+}
+
+class _TransferOption extends StatelessWidget {
+  const _TransferOption({required this.label, required this.selected, required this.enabled, required this.onTap});
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => InkWell(onTap: enabled ? onTap : null, borderRadius: BorderRadius.circular(12), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), decoration: BoxDecoration(color: selected ? shPurple.withValues(alpha: .13) : shSurface, borderRadius: BorderRadius.circular(12), border: Border.all(color: selected ? shPurple : shBorder)), child: Row(mainAxisSize: MainAxisSize.min, children: [Text(label, style: const TextStyle(fontSize: 11)), if (selected) ...[const SizedBox(width: 6), const Icon(Icons.check_rounded, size: 15)]])));
 }
