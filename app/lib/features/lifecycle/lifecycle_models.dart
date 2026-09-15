@@ -6,6 +6,7 @@ class JourneyLifecyclePayload {
     required this.isPrivate,
     required this.date,
     this.semanticSourceId,
+    this.transferPolicy = 'NON_TRANSFERABLE',
   });
 
   final String title;
@@ -14,4 +15,5 @@ class JourneyLifecyclePayload {
   final bool isPrivate;
   final String date;
   final String? semanticSourceId;
+  final String transferPolicy;
 }
