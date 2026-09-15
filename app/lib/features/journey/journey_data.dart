@@ -13,6 +13,7 @@ class JourneyItem {
     this.isPrivate, {
     this.semanticSourceId,
     this.transferPolicy = 'NON_TRANSFERABLE',
+    this.readOnly = false,
   });
 
   String title;
@@ -23,6 +24,7 @@ class JourneyItem {
   bool isPrivate;
   final String? semanticSourceId;
   String transferPolicy;
+  bool readOnly;
 
   Map<String, dynamic> toJson() => {
         'title': title,
@@ -33,6 +35,7 @@ class JourneyItem {
         'is_private': isPrivate,
         'semantic_source_id': semanticSourceId,
         'transfer_policy': transferPolicy,
+        'read_only': readOnly,
       };
 
   factory JourneyItem.fromJson(Map<String, dynamic> json) => JourneyItem(
@@ -44,6 +47,7 @@ class JourneyItem {
         json['is_private'] != false,
         semanticSourceId: json['semantic_source_id'] as String?,
         transferPolicy: (json['transfer_policy'] as String?)?.toUpperCase() ?? 'NON_TRANSFERABLE',
+        readOnly: json['read_only'] == true,
       );
 
   static String _normalizeType(String type) {
@@ -110,7 +114,7 @@ class JourneyStore {
 
     final file = await StorageService.journeyItemsFile(accountId: accountId);
     await file.writeAsString(
-      jsonEncode([for (final item in shJourneyItems) item.toJson()]),
+      jsonEncode([for (final item in shJourneyItems] item.toJson()]),
       flush: true,
     );
     if (_accountId == accountId) {
