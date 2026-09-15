@@ -41,8 +41,8 @@ Future<void> saveProfileName(String name) async {
 final ValueNotifier<String> profileEmail = ValueNotifier<String>('');
 final ValueNotifier<String> profileAccountId = ValueNotifier<String>('');
 final ValueNotifier<String> profileShId = ValueNotifier<String>('');
-final ValueNotifier<DateTime?> profileAccountCreatedAt =
-    ValueNotifier<DateTime?>(null);
+final ValueNotifier<DateTime?> profileAccountCreatedAt = ValueNotifier<DateTime?>(null);
+final ValueNotifier<bool> profileIsClone = ValueNotifier<bool>(false);
 
 void refreshProfileEmail() {
   final email = Supabase.instance.client.auth.currentUser?.email?.trim() ?? '';
@@ -56,8 +56,25 @@ void refreshProfileIdentity(ShIdentity identity) {
   profileAccountId.value = identity.accountId;
   profileShId.value = identity.shId;
   final createdAt = Supabase.instance.client.auth.currentUser?.createdAt;
-  profileAccountCreatedAt.value =
-      createdAt == null ? null : DateTime.tryParse(createdAt)?.toLocal();
+  profileAccountCreatedAt.value = createdAt == null ? null : DateTime.tryParse(createdAt)?.toLocal();
+  _loadProfileCloneStatus(identity.shId);
+}
+
+Future<void> _loadProfileCloneStatus(String shId) async {
+  if (shId.trim().isEmpty) {
+    profileIsClone.value = false;
+    return;
+  }
+  try {
+    final rows = await Supabase.instance.client
+        .from('sh_clones')
+        .select('clone_sh_id,status')
+        .eq('clone_sh_id', shId)
+        .limit(1);
+    profileIsClone.value = rows is List && rows.isNotEmpty;
+  } catch (_) {
+    profileIsClone.value = false;
+  }
 }
 
 void clearProfileIdentity() {
@@ -65,6 +82,7 @@ void clearProfileIdentity() {
   profileAccountId.value = '';
   profileShId.value = '';
   profileAccountCreatedAt.value = null;
+  profileIsClone.value = false;
 }
 
 class ShProfileMark extends StatelessWidget {
