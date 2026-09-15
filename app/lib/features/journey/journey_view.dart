@@ -12,144 +12,39 @@ import 'semantic_hook.dart';
 import 'journey_data.dart';
 import 'journey_service.dart';
 import 'journey_runtime_service.dart';
-import 'runtime_journey_detail.dart';
+import 'runtime_journey_visibility_detail.dart';
 
-Future<JourneyDraft?> showJourneyEditor(BuildContext context, {required String title, String initialTitle = '', String initialContent = '', bool initialPrivate = true}) {
-  return Navigator.of(context).push<JourneyDraft?>(MaterialPageRoute<JourneyDraft?>(builder: (_) => Scaffold(backgroundColor: shBackground, body: SafeArea(child: JourneyEditorSheet(title: title, initialTitle: initialTitle, initialContent: initialContent, initialPrivate: initialPrivate)))));
-}
+Future<JourneyDraft?> showJourneyEditor(BuildContext context, {required String title, String initialTitle = '', String initialContent = '', bool initialPrivate = true}) => Navigator.of(context).push<JourneyDraft?>(MaterialPageRoute<JourneyDraft?>(builder: (_) => Scaffold(backgroundColor: shBackground, body: SafeArea(child: JourneyEditorSheet(title: title, initialTitle: initialTitle, initialContent: initialContent, initialPrivate: initialPrivate)))));
 
-class JourneyView extends StatefulWidget {
-  const JourneyView({super.key});
-  @override State<JourneyView> createState() => JourneyViewState();
-}
-
+class JourneyView extends StatefulWidget { const JourneyView({super.key}); @override State<JourneyView> createState() => JourneyViewState(); }
 class JourneyViewState extends State<JourneyView> {
   String filter = 'All';
   List<JourneyItem> get items => shJourneyItems;
-
   Future<void> _loadJourney() async {
     await JourneyStore.refreshFromDisk();
     try {
-      final runtime = const JourneyRuntimeService();
-      var records = await const JourneyService().load(limit: 100);
-      final localOnly = items.where((item) => item.semanticSourceId == null).toList();
-      final migratedLocalKeys = <String>{};
-      var reconciledLegacyPolicy = false;
+      final runtime = const JourneyRuntimeService(); var records = await const JourneyService().load(limit: 100);
+      final localOnly = items.where((item) => item.semanticSourceId == null).toList(); final migratedLocalKeys = <String>{}; var reconciledLegacyPolicy = false;
       String localKey(JourneyItem item) => '${item.type}|${item.content.trim()}';
-      JourneyBackendRecord? findBackendMatch(JourneyItem local, List<JourneyBackendRecord> source) {
-        for (final record in source) {
-          final recordType = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType};
-          if (recordType == local.type && (record.payload['content']?.toString().trim() ?? '') == local.content.trim()) return record;
-        }
-        return null;
-      }
-      for (final local in localOnly.where((item) => !item.isPrivate)) {
-        final match = findBackendMatch(local, records);
-        if (match == null) continue;
-        final id = switch (local.type) {'Memory' => match.payload['memory_id']?.toString(), 'Knowledge' => match.payload['knowledge_id']?.toString(), 'Experience' => match.payload['experience_id']?.toString(), _ => null};
-        if (id == null || id.isEmpty) continue;
-        try {
-          switch (local.type) {
-            case 'Memory': await runtime.classifyMemory(memoryId: id, scope: 'GENERAL', visibility: 'SHARED');
-            case 'Knowledge': await runtime.classifyKnowledge(knowledgeId: id, scope: 'GENERAL', visibility: 'SHARED');
-            case 'Experience': await runtime.classifyExperience(experienceId: id, scope: 'GENERAL', visibility: 'SHARED');
-          }
-          migratedLocalKeys.add(localKey(local));
-          reconciledLegacyPolicy = true;
-        } catch (_) {}
-      }
+      JourneyBackendRecord? findBackendMatch(JourneyItem local, List<JourneyBackendRecord> source) { for (final record in source) { final recordType = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType}; if (recordType == local.type && (record.payload['content']?.toString().trim() ?? '') == local.content.trim()) return record; } return null; }
+      for (final local in localOnly.where((item) => !item.isPrivate)) { final match = findBackendMatch(local, records); if (match == null) continue; final id = switch (local.type) {'Memory' => match.payload['memory_id']?.toString(), 'Knowledge' => match.payload['knowledge_id']?.toString(), 'Experience' => match.payload['experience_id']?.toString(), _ => null}; if (id == null || id.isEmpty) continue; try { switch (local.type) { case 'Memory': await runtime.classifyMemory(memoryId: id, scope: 'GENERAL', visibility: 'SHARED'); case 'Knowledge': await runtime.classifyKnowledge(knowledgeId: id, scope: 'GENERAL', visibility: 'SHARED'); case 'Experience': await runtime.classifyExperience(experienceId: id, scope: 'GENERAL', visibility: 'SHARED'); } migratedLocalKeys.add(localKey(local)); reconciledLegacyPolicy = true; } catch (_) {} }
       if (reconciledLegacyPolicy) records = await const JourneyService().load(limit: 100);
       var createdLegacyBackendRecord = false;
-      for (final local in localOnly) {
-        if (migratedLocalKeys.contains(localKey(local))) continue;
-        if (findBackendMatch(local, records) != null) { migratedLocalKeys.add(localKey(local)); continue; }
-        try {
-          switch (local.type) {
-            case 'Memory': await runtime.createMemory(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED');
-            case 'Knowledge': await runtime.createKnowledgeCandidate(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED');
-            case 'Experience': await runtime.createExperience(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED');
-            default: continue;
-          }
-          migratedLocalKeys.add(localKey(local));
-          createdLegacyBackendRecord = true;
-        } catch (_) {}
-      }
+      for (final local in localOnly) { if (migratedLocalKeys.contains(localKey(local))) continue; if (findBackendMatch(local, records) != null) { migratedLocalKeys.add(localKey(local)); continue; } try { switch (local.type) { case 'Memory': await runtime.createMemory(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED'); case 'Knowledge': await runtime.createKnowledgeCandidate(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED'); case 'Experience': await runtime.createExperience(shId: profileShId.value.trim(), content: local.content, scope: local.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: local.isPrivate ? 'OWNER_ONLY' : 'SHARED'); default: continue; } migratedLocalKeys.add(localKey(local)); createdLegacyBackendRecord = true; } catch (_) {} }
       if (createdLegacyBackendRecord) records = await const JourneyService().load(limit: 100);
       final additions = <JourneyItem>[];
-      for (final record in records) {
-        if (record.eventId.isEmpty) continue;
-        final content = record.payload['content']?.toString().trim() ?? '';
-        if (content.isEmpty) continue;
-        final type = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType};
-        final canonicalId = switch (type) {'Memory' => record.payload['memory_id']?.toString(), 'Knowledge' => record.payload['knowledge_id']?.toString(), 'Experience' => record.payload['experience_id']?.toString(), _ => null};
-        additions.add(JourneyItem(content, record.continuityStatus.isEmpty ? 'Backend Journey event' : record.continuityStatus, _formatJourneyDate(record.occurredAt), type, content, record.visibility == 'PRIVATE' || record.visibility == 'OWNER_ONLY', semanticSourceId: canonicalId, transferPolicy: record.transferPolicy));
-      }
-      shJourneyItems = [...additions, ...localOnly.where((item) => !migratedLocalKeys.contains(localKey(item)))];
-      await JourneyStore.persist();
-    } catch (_) {}
-    if (mounted) setState(() {});
+      for (final record in records) { if (record.eventId.isEmpty) continue; final content = record.payload['content']?.toString().trim() ?? ''; if (content.isEmpty) continue; final type = switch (record.eventType.toUpperCase()) {'MEMORY' => 'Memory', 'KNOWLEDGE' || 'LEARNING' => 'Knowledge', 'EXPERIENCE' => 'Experience', _ => record.eventType}; final canonicalId = switch (type) {'Memory' => record.payload['memory_id']?.toString(), 'Knowledge' => record.payload['knowledge_id']?.toString(), 'Experience' => record.payload['experience_id']?.toString(), _ => null}; additions.add(JourneyItem(content, record.continuityStatus.isEmpty ? 'Backend Journey event' : record.continuityStatus, _formatJourneyDate(record.occurredAt), type, content, record.visibility == 'PRIVATE' || record.visibility == 'OWNER_ONLY', semanticSourceId: canonicalId)); }
+      shJourneyItems = [...additions, ...localOnly.where((item) => !migratedLocalKeys.contains(localKey(item)))]; await JourneyStore.persist();
+    } catch (_) {} if (mounted) setState(() {});
   }
-
   String _formatJourneyDate(DateTime value) { final local = value.toLocal(); return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')} ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}'; }
-
-  void _syncSemanticRecords() {
-    final existingSources = items.map((item) => item.semanticSourceId).whereType<String>().toSet();
-    final additions = <JourneyItem>[];
-    for (final record in shSemanticRecords.value) {
-      if (existingSources.contains(record.sourceId + '|' + record.content)) continue;
-      additions.add(JourneyItem(record.content, 'Created from explicit Conversation command', 'Just now', record.domain.label, record.content, true, semanticSourceId: record.sourceId + '|' + record.content));
-    }
-    if (additions.isNotEmpty) { setState(() => items.insertAll(0, additions)); JourneyStore.persist(); }
-  }
-
+  void _syncSemanticRecords() { final existingSources = items.map((item) => item.semanticSourceId).whereType<String>().toSet(); final additions = <JourneyItem>[]; for (final record in shSemanticRecords.value) { if (existingSources.contains(record.sourceId + '|' + record.content)) continue; additions.add(JourneyItem(record.content, 'Created from explicit Conversation command', 'Just now', record.domain.label, record.content, true, semanticSourceId: record.sourceId + '|' + record.content)); } if (additions.isNotEmpty) { setState(() => items.insertAll(0, additions)); JourneyStore.persist(); } }
   @override void initState() { super.initState(); shSemanticRecords.addListener(_syncSemanticRecords); _loadJourney(); WidgetsBinding.instance.addPostFrameCallback((_) => _syncSemanticRecords()); }
   @override void dispose() { shSemanticRecords.removeListener(_syncSemanticRecords); super.dispose(); }
-
-  @override
-  Widget build(BuildContext context) {
-    final visible = [for (var i = 0; i < items.length; i++) if (filter == 'All' || items[i].type == filter) i];
-    return Stack(children: [Column(children: [ShTopBar(title: 'Journey', onSearch: () => _search(context), actions: [IconButton(tooltip: 'Domains', onPressed: () => _openDomain(context), icon: const Icon(Icons.hub_outlined, size: 26))]), JourneyFilters(value: filter, onChanged: (value) => setState(() => filter = value)), Expanded(child: GridView.builder(padding: const EdgeInsets.fromLTRB(12, 8, 12, 88), itemCount: visible.length, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, mainAxisExtent: 142), itemBuilder: (_, index) { final itemIndex = visible[index]; return JourneyCard(item: items[itemIndex], onTap: () => _openDetail(context, itemIndex)); }))]), Positioned(right: 18, bottom: 18, child: FloatingActionButton(heroTag: 'journey-add', onPressed: () => _create(context), child: const Icon(Icons.add))) ]);
-  }
-
-  Future<void> _openDomain(BuildContext context) async {
-    final domain = await showModalBottomSheet<ShSemanticDomain>(context: context, backgroundColor: shSurface, showDragHandle: true, builder: (sheet) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(18, 8, 18, 18), child: Column(mainAxisSize: MainAxisSize.min, children: [const Text('Explore domains', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)), const SizedBox(height: 10), for (final domain in ShSemanticDomain.values) ListTile(leading: Icon(domain.icon, color: shPurple), title: Text(domain.label), trailing: const Icon(Icons.chevron_right_outlined), onTap: () => Navigator.pop(sheet, domain))]))));
-    if (!mounted || domain == null) return;
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => switch (domain) { ShSemanticDomain.memory => const MemoryView(), ShSemanticDomain.knowledge => const KnowledgeView(), ShSemanticDomain.experience => const ExperienceView() }));
-  }
-
-  Future<void> _search(BuildContext context) async {
-    final result = await showShInternalSearch<int>(context: context, hintText: 'Search Journey', search: (query) => [for (var i = 0; i < items.length; i++) if (query.isEmpty || [items[i].title, items[i].subtitle, items[i].content, items[i].type].any((value) => value.toLowerCase().contains(query))) ShSearchResult<int>(value: i, title: items[i].title, subtitle: items[i].type)]);
-    if (!mounted || result == null || result < 0 || result >= items.length) return;
-    _openDetail(context, result);
-  }
-
+  @override Widget build(BuildContext context) { final visible = [for (var i = 0; i < items.length; i++) if (filter == 'All' || items[i].type == filter) i]; return Stack(children: [Column(children: [ShTopBar(title: 'Journey', onSearch: () => _search(context), actions: [IconButton(tooltip: 'Domains', onPressed: () => _openDomain(context), icon: const Icon(Icons.hub_outlined, size: 26))]), JourneyFilters(value: filter, onChanged: (value) => setState(() => filter = value)), Expanded(child: GridView.builder(padding: const EdgeInsets.fromLTRB(12, 8, 12, 88), itemCount: visible.length, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, mainAxisExtent: 142), itemBuilder: (_, index) { final itemIndex = visible[index]; return JourneyCard(item: items[itemIndex], onTap: () => _openDetail(context, itemIndex)); }))]), Positioned(right: 18, bottom: 18, child: FloatingActionButton(heroTag: 'journey-add', onPressed: () => _create(context), child: const Icon(Icons.add))) ]); }
+  Future<void> _openDomain(BuildContext context) async { final domain = await showModalBottomSheet<ShSemanticDomain>(context: context, backgroundColor: shSurface, showDragHandle: true, builder: (sheet) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(18, 8, 18, 18), child: Column(mainAxisSize: MainAxisSize.min, children: [const Text('Explore domains', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)), const SizedBox(height: 10), for (final domain in ShSemanticDomain.values) ListTile(leading: Icon(domain.icon, color: shPurple), title: Text(domain.label), trailing: const Icon(Icons.chevron_right_outlined), onTap: () => Navigator.pop(sheet, domain))])))); if (!mounted || domain == null) return; Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => switch (domain) { ShSemanticDomain.memory => const MemoryView(), ShSemanticDomain.knowledge => const KnowledgeView(), ShSemanticDomain.experience => const ExperienceView() })); }
+  Future<void> _search(BuildContext context) async { final result = await showShInternalSearch<int>(context: context, hintText: 'Search Journey', search: (query) => [for (var i = 0; i < items.length; i++) if (query.isEmpty || [items[i].title, items[i].subtitle, items[i].content, items[i].type].any((value) => value.toLowerCase().contains(query))) ShSearchResult<int>(value: i, title: items[i].title, subtitle: items[i].type)]); if (!mounted || result == null || result < 0 || result >= items.length) return; _openDetail(context, result); }
   bool _isUuid(String value) => RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$').hasMatch(value);
-
-  void _openDetail(BuildContext context, int itemIndex) {
-    if (itemIndex < 0 || itemIndex >= items.length) return;
-    final item = items[itemIndex]; final sourceId = item.semanticSourceId; final isCanonical = sourceId != null && _isUuid(sourceId);
-    if (isCanonical) {
-      final domain = switch (item.type) {'Memory' => 'MEMORY', 'Knowledge' => 'KNOWLEDGE', 'Experience' => 'EXPERIENCE', _ => null};
-      if (domain != null) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RuntimeJourneyDetail(domain: domain, recordId: sourceId, title: item.title, content: item.content, isPrivate: item.isPrivate, transferPolicy: item.transferPolicy, onChanged: _loadJourney))); return; }
-    }
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => JourneyDetail(item: item, onChanged: () => setState(() {}), onDelete: () { if (itemIndex < 0 || itemIndex >= items.length) return; setState(() => items.removeAt(itemIndex)); JourneyStore.persist(); Navigator.of(context).pop(); })));
-  }
-
-  Future<void> _create(BuildContext context) async {
-    final type = await showModalBottomSheet<String>(context: context, backgroundColor: shSurface, showDragHandle: true, isScrollControlled: true, builder: (sheet) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(18, 8, 18, 18), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [JourneyCreateAction(icon: Icons.psychology_outlined, label: 'Memory', onTap: () => Navigator.of(sheet).pop('Memory')), JourneyCreateAction(icon: Icons.menu_book_outlined, label: 'Knowledge', onTap: () => Navigator.of(sheet).pop('Knowledge')), JourneyCreateAction(icon: Icons.auto_awesome_outlined, label: 'Experience', onTap: () => Navigator.of(sheet).pop('Experience'))]))));
-    if (!mounted || type == null) return;
-    final draft = await showJourneyEditor(context, title: 'Create $type');
-    if (!mounted || draft == null) return;
-    final shId = profileShId.value.trim();
-    if (shId.isEmpty) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Active SH identity is unavailable.'))); return; }
-    try {
-      final runtime = const JourneyRuntimeService();
-      switch (type) {
-        case 'Memory': await runtime.createMemory(shId: shId, content: draft.content, scope: draft.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: draft.isPrivate ? 'OWNER_ONLY' : 'SHARED');
-        case 'Knowledge': await runtime.createKnowledgeCandidate(shId: shId, content: draft.content, scope: draft.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: draft.isPrivate ? 'OWNER_ONLY' : 'SHARED');
-        case 'Experience': await runtime.createExperience(shId: shId, content: draft.content, scope: draft.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: draft.isPrivate ? 'OWNER_ONLY' : 'SHARED');
-      }
-      await _loadJourney();
-    } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Journey create failed: $e'))); }
-  }
+  void _openDetail(BuildContext context, int itemIndex) { if (itemIndex < 0 || itemIndex >= items.length) return; final item = items[itemIndex]; final sourceId = item.semanticSourceId; final isCanonical = sourceId != null && _isUuid(sourceId); if (isCanonical) { final domain = switch (item.type) {'Memory' => 'MEMORY', 'Knowledge' => 'KNOWLEDGE', 'Experience' => 'EXPERIENCE', _ => null}; if (domain != null) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RuntimeJourneyVisibilityDetail(domain: domain, recordId: sourceId, title: item.title, content: item.content, isPrivate: item.isPrivate, onChanged: _loadJourney))); return; } } Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => JourneyDetail(item: item, onChanged: () => setState(() {}), onDelete: () { if (itemIndex < 0 || itemIndex >= items.length) return; setState(() => items.removeAt(itemIndex)); JourneyStore.persist(); Navigator.of(context).pop(); }))); }
+  Future<void> _create(BuildContext context) async { final type = await showModalBottomSheet<String>(context: context, backgroundColor: shSurface, showDragHandle: true, isScrollControlled: true, builder: (sheet) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(18, 8, 18, 18), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [JourneyCreateAction(icon: Icons.psychology_outlined, label: 'Memory', onTap: () => Navigator.of(sheet).pop('Memory')), JourneyCreateAction(icon: Icons.menu_book_outlined, label: 'Knowledge', onTap: () => Navigator.of(sheet).pop('Knowledge')), JourneyCreateAction(icon: Icons.auto_awesome_outlined, label: 'Experience', onTap: () => Navigator.of(sheet).pop('Experience'))])))); if (!mounted || type == null) return; final draft = await showJourneyEditor(context, title: 'Create $type'); if (!mounted || draft == null) return; final shId = profileShId.value.trim(); if (shId.isEmpty) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Active SH identity is unavailable.'))); return; } try { final runtime = const JourneyRuntimeService(); switch (type) { case 'Memory': await runtime.createMemory(shId: shId, content: draft.content, scope: draft.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: draft.isPrivate ? 'OWNER_ONLY' : 'SHARED'); case 'Knowledge': await runtime.createKnowledgeCandidate(shId: shId, content: draft.content, scope: draft.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: draft.isPrivate ? 'OWNER_ONLY' : 'SHARED'); case 'Experience': await runtime.createExperience(shId: shId, content: draft.content, scope: draft.isPrivate ? 'PRIVATE' : 'GENERAL', visibility: draft.isPrivate ? 'OWNER_ONLY' : 'SHARED'); } await _loadJourney(); } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Journey create failed: $e'))); } }
 }
