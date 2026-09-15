@@ -1,87 +1,38 @@
 # SECOND HEAD — SH CORE INVENTORY & RECONCILIATION
 
 **Project:** SECOND HEAD (SH)  
-**Status:** Living Working Document — CURRENT CHECKPOINT RECONCILIATED  
+**Status:** Living Working Document — CURRENT E2E CHECKPOINT RECONCILIATED  
 **Bahasa:** Indonesia  
-**Scope:** Identity, State, Conversation, Attachment, Memory, Knowledge, Experience, Journey, Lifecycle/EOL, Clone, Inheritance, Succession, Recovery, Governance/Runtime, capability/application evidence  
 **Authority Level:** Working / Reconciliation — bukan Canonical  
 **Database Source of Truth:** Supabase DEV  
 **Current Code:** branch `dev`  
-**Historical Evidence:** `dev_old`
 
-## 1. Tujuan
+## Current E2E checkpoint
 
-Dokumen ini adalah living inventory untuk menjaga satu current-state reference antara `docs/`, current `dev`, Supabase DEV, frontend, backend/runtime, CI, dan device/E2E evidence.
+Latest owner-reported device/runtime testing confirms that Project, Conversation, Message, Memory, Knowledge, and Experience edit flows are working, and that full snapshot/restore was executed with Conversation included. A Conversation was deleted and successfully restored from the full snapshot. The edited state remained correct after restore.
 
-Dokumen ini bukan Canonical, bukan Approved Contract, dan bukan feature wish-list.
+These are recorded as **OWNER-REPORTED E2E PASS**. They supersede stale working-document claims that Conversation edit/delete and full Recovery E2E were still open/blocked.
 
-## 2. Authority & Reconciliation Rule
-
-```text
-OWNER / USER DECISION
-        ↓
-CANONICAL
-        ↓
-APPROVED CONTRACT
-        ↓
-ARCHITECTURE / DESIGN
-        ↓
-CURRENT IMPLEMENTATION
-        ↓
-RUNTIME / DATABASE EVIDENCE
-        ↓
-DEVICE / E2E EVIDENCE
-        ↓
-HISTORICAL / dev_old
-```
-
-Evidence mendahului claim. `Source exists ≠ runtime works`, `Migration exists ≠ database changed`, `Deployed ≠ verified`, dan `Test pass ≠ whole system correct`.
-
-`dev_old` hanya historical reference. Ia tidak menggantikan current DEV.
-
-## 3. Current Domain Checkpoint
+## Domain Checkpoint
 
 | Domain | Current classification | Verification |
 |---|---|---|
-| Identity / Actor | CURRENT IMPLEMENTATION | VALIDATED untuk scope yang diuji |
-| State | CURRENT BACKEND IMPLEMENTATION | verification mengikuti State contract |
-| Project | CURRENT IMPLEMENTATION | current runtime/FE path |
-| Conversation / Message | CURRENT IMPLEMENTATION | happy-path/runtime/device verified; adapter audit tetap open |
-| Conversation Attachment | CURRENT IMPLEMENTATION | happy-path E2E verified |
-| Memory | CURRENT IMPLEMENTATION | tested persistence/projection verified |
-| Knowledge | CURRENT IMPLEMENTATION / DOMAIN PRESENT | positive semantic E2E OPEN; 0 rows at checkpoint |
-| Experience | CURRENT IMPLEMENTATION / DOMAIN PRESENT | positive semantic E2E OPEN; 0 rows at checkpoint |
-| Journey | CURRENT IMPLEMENTATION | persistence/retrieval/FE/account isolation verified |
+| Identity / Actor | CURRENT IMPLEMENTATION | VALIDATED untuk tested scope |
+| State | CURRENT BACKEND IMPLEMENTATION | verify by contract |
+| Project | CURRENT IMPLEMENTATION | **E2E PASS — OWNER-REPORTED** |
+| Conversation / Message | CURRENT IMPLEMENTATION | **E2E PASS — OWNER-REPORTED** for tested edit/delete/recovery flow |
+| Conversation Attachment | CURRENT IMPLEMENTATION | HAPPY-PATH E2E VERIFIED; retry/idempotency OPEN |
+| Memory | CURRENT IMPLEMENTATION | **E2E PASS — OWNER-REPORTED** for tested edit/recovery flow |
+| Knowledge | CURRENT IMPLEMENTATION / DOMAIN PRESENT | **E2E PASS — OWNER-REPORTED** for tested edit/recovery flow; broader semantic lifecycle remains separate |
+| Experience | CURRENT IMPLEMENTATION / DOMAIN PRESENT | **E2E PASS — OWNER-REPORTED** for tested edit/recovery flow; broader semantic lifecycle remains separate |
+| Journey | CURRENT IMPLEMENTATION | persistence/retrieval/FE/account isolation VERIFIED |
 | Context Resolver | IMPLEMENTED / RECONCILED | runtime/contract verified for current scope |
-| Lifecycle / EOL | CURRENT SURFACE / DEPTH VARIES | semantic/E2E open |
-| Clone / Inheritance / Succession | CURRENT SURFACE / BACKEND DEPTH VARIES | semantic/security verification open where applicable |
-| Recovery | CURRENT BACKEND LINEAGE | full restore E2E open |
+| Lifecycle / EOL | CURRENT SURFACE / DEPTH VARIES | semantic E2E OPEN |
+| Clone / Inheritance / Succession | CURRENT SURFACE / BACKEND DEPTH VARIES | semantic/security E2E OPEN |
+| Recovery | CURRENT BACKEND LINEAGE | **FULL SNAPSHOT/RESTORE E2E PASS — OWNER-REPORTED** |
 | Tools / External | PARTIAL / OPEN | capability-specific verification required |
 
-## 4. Identity / Actor Resolution
-
-Canonical actor semantics tetap:
-
-- `1 EMAIL = 1 ACCOUNT = 1 PRIMARY SH`;
-- `Account_ID ≠ SH_ID`;
-- Runtime ≠ SH Identity;
-- Model ≠ SH Identity;
-- Creator Authority ≠ Private Data Access;
-- SH-000 Core Authority ≠ Private Data Access;
-- Runtime Access ≠ Ownership.
-
-Current DEV memiliki trusted actor/identity resolution dan FE consumer. Current tested Creator/SH-000 dan ordinary account classifications sudah tervalidasi.
-
-**Status:** VALIDATED / CURRENT IMPLEMENTATION.  
-`SYSTEM_RUNTIME` technical mechanism tetap OPEN dan tidak disamakan dengan actor resolution.
-
-## 5. State
-
-Current DEV memiliki dedicated `public.sh_states` beserta runtime/recovery lineage. `sh_instances.metadata` bukan State authority.
-
-**Status:** CURRENT BACKEND IMPLEMENTATION; detail semantic/E2E mengikuti contract masing-masing.
-
-## 6. Project / Conversation / Message
+## Project / Conversation / Message
 
 Current hierarchy:
 
@@ -95,255 +46,93 @@ Conversation Thread
 Message
 ```
 
-Current runtime/FE paths tersedia untuk Project/Conversation management, Message load/record/update/delete, context loading, search, loading/error/empty states, dan destructive confirmations.
+Current runtime/FE paths support Project/Conversation management and Message load/record/update/delete. Latest owner-reported E2E testing confirms edit behavior and deletion behavior in the real recovery flow. Full snapshot/restore restored the deleted Conversation and related state successfully.
 
-Current runtime path juga sudah terhubung ke dynamic AI runtime pada tested conversation flow.
+**Status:** CURRENT IMPLEMENTATION / E2E PASS — OWNER-REPORTED FOR TESTED PATH.
 
-**Status:** CURRENT IMPLEMENTATION / RUNTIME VERIFIED FOR TESTED PATH.
+## Conversation Attachment
 
-**OPEN:** adapter update/delete message parameter contract tetap harus diaudit secara eksplisit sebelum ditutup. Jangan menganggap attachment E2E sebagai bukti parameter contract CRUD.
+Attachment happy path remains E2E VERIFIED. Failure retry/idempotency remains a separate non-blocking E2E hardening gate.
 
-## 7. Conversation Attachment
+## Memory / Knowledge / Experience / Journey
 
-Attachment adalah Message-owned resource/payload, bukan domain SH lifecycle baru.
+Latest owner-reported E2E testing confirms edited Project / Conversation / Message / Memory / Knowledge / Experience state remained correct through the tested full recovery flow.
 
-Semantics locked:
+This closes the previously stale positive edit/recovery claims for those tested paths. It does **not** by itself close every semantic lifecycle, model-derived persistence, retrieval, transfer, or policy transition.
 
-```text
-local file → UX/cache
-backend attachment → durable source of truth
-attachment_id → stable identity
-Message → Attachment[] → Storage Object
-```
+Journey persistence/retrieval/context/FE/account isolation remains VERIFIED for its established tested path.
 
-Current device + DEV evidence membuktikan:
+## Recovery / Lifecycle / Transfer Domains
 
-- preview;
-- composer/caption;
-- send;
-- Message persistence;
-- Attachment persistence;
-- Message ↔ Attachment linkage;
-- Storage object;
-- finalize → `PERSISTED`;
-- SH response;
-- navigation persistence;
-- account isolation.
-
-**Status:** HAPPY-PATH E2E VERIFIED.
-
-**OPEN RISK:** failure retry/idempotency belum diverifikasi. Retry harus mempertahankan logical `attachment_id` dan tidak membuat duplicate durable attachment. Ini non-blocking hardening, bukan alasan membuka kembali happy path.
-
-## 8. Memory / Knowledge / Experience / Journey
-
-Canonical distinctions:
+Latest recovery execution:
 
 ```text
-Memory ≠ Knowledge
-Context ≠ Memory
-Experience ≠ Conversation
-Experience ≠ Journey
+full snapshot
+    ↓
+Conversation deleted
+    ↓
+full restore
+    ↓
+Conversation + related state restored
+    ↓
+edited Project / Conversation / Message / Memory / Knowledge / Experience state remains correct
 ```
 
-### Memory
+**Recovery:** FULL SNAPSHOT/RESTORE E2E PASS — OWNER-REPORTED.
 
-Tested explicit Memory capture telah tersimpan di DEV dan menghasilkan Journey projection. Owner-private scope pada tested path terverifikasi.
+Older statements describing Recovery as `E2E OPEN` or blocked by an isolated fixture are stale and must not be used as current status.
 
-**Status:** TESTED PERSISTENCE / PROJECTION VERIFIED; full lifecycle/retrieval semantics belum global-closed.
+Lifecycle/Clone/Inheritance/Succession remain open until their own execution evidence exists. Existence of screen/RPC/source is not sufficient.
 
-### Knowledge
+## Security / Isolation
 
-Current DEV memiliki `knowledge` domain/source. Tidak ada positive Knowledge row pada current checkpoint.
+Established cross-actor Conversation negative access and Journey account isolation remain verified. Transfer/Succession and broader lifecycle security E2E remain open until execution evidence exists.
 
-**Status:** DOMAIN PRESENT / POSITIVE SEMANTIC E2E OPEN.
-
-### Experience
-
-Current DEV memiliki `experiences` domain/source. Tidak ada positive Experience row pada current checkpoint.
-
-**Status:** DOMAIN PRESENT / POSITIVE SEMANTIC E2E OPEN.
-
-### Journey
-
-Journey runtime retrieval dan Context Resolver integration sudah direconcile. `runtime_get_journey_context()` tetap menjadi Journey retrieval boundary.
-
-Current FE memuat backend Journey melalui trusted identity boundary dan local Journey storage sudah account-scoped.
-
-Device verification menunjukkan Account A data tidak muncul di Account B, dan kembali ke A memulihkan data A tanpa B.
-
-**Status:** VERIFIED untuk tested persistence/retrieval/FE/account-isolation path.
-
-## 9. Context Resolver
-
-Current contract dan implementation telah direconcile:
-
-```text
-runtime_get_context_package()
-        ↓
-assemble_context()
-        ↓
-actor
-conversation
-state
-memory
-knowledge
-experience
-journey
-```
-
-Ordering current:
-
-`actor → conversation → state → memory → knowledge → experience → journey`
-
-Domain boundary, ownership/visibility, dan relevance policy tetap berlaku.
-
-**Status:** IMPLEMENTED / RECONCILED / VERIFIED untuk current scope.
-
-Jangan reopen hanya karena dokumen historical masih menyebut PENDING/BLOCKED.
-
-## 10. Recovery / Lifecycle / Transfer Domains
-
-Current DEV memiliki Recovery lineage dan hubungan Conversation hierarchy. Full recovery restore E2E tetap open.
-
-Canonical boundaries tetap:
-
-- `DECOMMISSION ≠ Immediate Permanent Delete`;
-- `CLONE_SH ≠ SOURCE_SH`;
-- `CREATOR_SH` non-clonable;
-- `INHERITANCE ≠ CLONE`;
-- `INHERITANCE ≠ Identity Transfer`;
-- `EVOLUTION ≠ Ownership Transfer`;
-- Evolution / Migration / Recovery ≠ New SH Identity;
-- Privacy / Visibility ≠ Transfer Eligibility.
-
-Lifecycle/Clone/Inheritance/Succession tidak ditutup hanya berdasarkan keberadaan screen atau RPC.
-
-## 11. Frontend Inventory
-
-Current Flutter areas include auth, conversation, project/conversation management, journey, lifecycle, more/profile/navigation, and related storage/integration surfaces.
-
-FE surface existence tidak otomatis berarti semantic/backend/security/E2E complete.
-
-Attachment FE path saat ini:
-
-```text
-Composer
-  ↓
-recordUserWithAttachments
-  ↓
-ConversationService.recordWithAttachments
-  ↓
-Message
-  ↓
-Attachment
-  ↓
-Storage
-  ↓
-Finalize
-  ↓
-AI Runtime
-```
-
-## 12. Backend / Supabase Evidence Checkpoint
-
-Current DEV database domain counts pada reconciliation checkpoint:
-
-```text
-conversations              37
-conversation_threads         9
-conversation_attachments    5
-memories                     1
-knowledge                    0
-experiences                  0
-journey_events               1
-```
-
-Counts adalah state evidence, bukan capability proof.
-
-Current attachment storage bucket yang digunakan adalah private `second-head-conversation`.
-
-## 13. Security / Isolation
-
-Current tested security model mempertahankan:
-
-```text
-Authentication
- → Identity Resolution
- → Actor Classification
- → Authority Resolution
- → Runtime Context
- → Permission Policy
- → Enforcement
-```
-
-Cross-actor conversation negative access sudah teruji pada DB path. Journey account isolation sudah teruji pada device. Attachment happy-path account isolation juga terobservasi melalui account switching.
-
-Remaining security semantic harnesses untuk transfer/succession dan broader domains tetap open sampai execution evidence tersedia.
-
-## 14. Documentation Drift Register
-
-Reconciliation drift yang kini ditutup pada current checkpoint:
+## Documentation Drift Register
 
 | Area | Previous stale state | Current disposition |
 |---|---|---|
-| Conversation AI/runtime | masih ditulis belum complete | RECONCILED to current tested runtime |
-| Attachment FE E2E | masih ditulis deferred | HAPPY-PATH E2E VERIFIED; retry hardening OPEN |
-| Memory/Journey | masih ditulis backend integration open | TESTED persistence/retrieval/projection VERIFIED |
-| Journey Context Resolver | masih ditulis pending/blocked | IMPLEMENTED / RECONCILED / VERIFIED |
-| Knowledge | tidak boleh dinaikkan hanya karena domain exists | OPEN until positive evidence |
-| Experience | tidak boleh dinaikkan hanya karena domain exists | OPEN until positive evidence |
+| Conversation CRUD edit/delete | DEVICE E2E OPEN | RECONCILED → E2E PASS — OWNER-REPORTED |
+| Recovery full restore | E2E OPEN / fixture blocked | RECONCILED → FULL E2E PASS — OWNER-REPORTED |
+| Project/Memory/Knowledge/Experience edit | not represented as current E2E result | RECONCILED from latest owner-reported recovery execution |
+| Attachment happy path | deferred/stale in older docs | HAPPY-PATH E2E VERIFIED |
+| Knowledge / Experience broader lifecycle | cannot infer from edit test | remains separate E2E OPEN where not independently tested |
 
-Dokumen Canonical tidak diubah oleh reconciliation ini.
+Canonical documents are not changed by this reconciliation.
 
-## 15. Verification Discipline
+## Current Open E2E Queue
 
-Untuk setiap claim berikutnya:
+1. Conversation local serialization round-trip.
+2. Attachment failure/retry/idempotency.
+3. Model-derived persistence semantic path.
+4. Lifecycle candidate/transition E2E.
+5. Clone E2E.
+6. Inheritance E2E.
+7. Succession E2E.
+8. Transfer/security negative E2E.
+9. Other confirmed gaps discovered through evidence.
 
-```text
-Claim
- ↓
-Expected
- ↓
-Evidence
- ↓
-Actual
- ↓
-Result
-```
+`OPEN` here means **E2E verification gap**, not automatically implementation failure.
 
-Level verification dipilih sesuai kebutuhan:
-
-`Static → Unit → DB/Function → Integration → Runtime/HTTP → UI/E2E`
-
-`DB PASS ≠ HTTP E2E PASS`.
-
-## 16. Current Open Queue
-
-1. Conversation adapter update/delete message parameter audit.
-2. Knowledge positive semantic/runtime verification.
-3. Experience positive semantic/runtime verification.
-4. Security/succession semantic harness.
-5. Recovery restore E2E.
-6. Attachment failure/retry/idempotency hardening.
-7. Other confirmed gaps discovered through evidence.
-
-**Temuan ≠ perintah.** Item open tidak otomatis menjadi implementation request.
-
-## 17. Current Checkpoint Summary
+## Checkpoint Summary
 
 ```text
 Identity / Actor Resolution        → VALIDATED / CLOSED FOR TESTED SCOPE
 State                              → CURRENT / VERIFY BY CONTRACT
-Project / Conversation / Message  → CURRENT / TESTED RUNTIME PASS
-Conversation Attachment            → HAPPY-PATH E2E VERIFIED
-Memory                             → TESTED PERSISTENCE + JOURNEY PROJECTION VERIFIED
-Knowledge                          → OPEN POSITIVE E2E
-Experience                         → OPEN POSITIVE E2E
+Project                            → E2E PASS — OWNER-REPORTED
+Conversation / Message             → E2E PASS — OWNER-REPORTED
+Conversation Attachment            → HAPPY-PATH E2E VERIFIED; RETRY OPEN
+Memory                             → E2E PASS — OWNER-REPORTED TESTED PATH
+Knowledge                          → E2E PASS — OWNER-REPORTED TESTED PATH; broader lifecycle OPEN
+Experience                         → E2E PASS — OWNER-REPORTED TESTED PATH; broader lifecycle OPEN
 Journey                            → VERIFIED TESTED PATH
 Context Resolver                   → IMPLEMENTED / RECONCILED / VERIFIED
-Recovery                           → CURRENT BACKEND / E2E OPEN
-Security transfer/succession       → SEMANTIC E2E OPEN
-Attachment retry/idempotency       → OPEN NON-BLOCKING RISK
+Recovery                           → FULL SNAPSHOT/RESTORE E2E PASS — OWNER-REPORTED
+Lifecycle / Clone / Inheritance    → E2E OPEN
+Succession / Transfer Security     → E2E OPEN
+Model-derived persistence          → UNKNOWN / E2E GAP
 
-Next action: pilih confirmed open dependency; jangan reopen closed domain tanpa new evidence.
+System-wide 100% E2E               → OPEN
 ```
+
+**Next action:** execute only the remaining gates in `docs/working/verification/sh_e2e_master_verification_matrix.md`; do not reopen closed domains without new contradictory evidence. Migration cleanup remains downstream of verification reconciliation.
