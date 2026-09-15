@@ -2,287 +2,140 @@
 
 ## Status
 
-**WORKING AUDIT / DESIGN REVIEW — PARTIAL PASS — IMPLEMENTATION GATE CLOSED**
+**WORKING AUDIT / DESIGN REVIEW — NON-E2E GATES CLOSED / IMPLEMENTATION GATE OPEN**
 
-Dokumen ini mencatat evidence DEV saat ini untuk semantic lifecycle transition boundary. Dokumen ini tidak mengotorisasi runtime implementation, migration, atau perubahan Canonical.
-
-## Authority
-
-```text
-CANONICAL → APPROVED CONTRACT → ARCHITECTURE/DESIGN → THIS WORKING REVIEW → IMPLEMENTATION → RUNTIME/DB EVIDENCE → E2E VERIFICATION
-```
+This record is reconciled against current Supabase DEV implementation. Earlier statements that confirmation, operation ledger, atomicity design, exposure review, or SQLSTATE mapping were still blockers are stale.
 
 ## 1. Scope
 
-Review target:
-
-- `runtime_activate_memory_candidate`
-- `runtime_activate_knowledge_candidate`
-- authorization and ownership boundary;
-- Knowledge lifecycle vocabulary;
-- confirmation authority;
-- operation identity/idempotency;
-- transaction boundary with Journey;
-- provenance/audit;
-- SECURITY DEFINER/INVOKER and grants;
-- concurrency and error mapping.
-
-Tidak ada implementation changes yang dibuat oleh review ini.
-
-## 2. Current DEV Database Evidence
-
-### Knowledge
-
-Current `public.knowledge` columns include:
-
-- `knowledge_id`
-- `content`
-- `knowledge_class`
-- `scope`
-- `visibility`
-- `source`
-- `provenance`
-- `confidence`
-- `version`
-- `lifecycle`
-- `superseded_by`
-- `sh_id`
-- `transfer_policy`
-- timestamps
-
-Current database constraint permits lifecycle values:
+Current implemented Knowledge transition surface:
 
 ```text
-CANDIDATE
-ACCEPTED
-INDEXED
-ACTIVE
-UPDATED
-DEPRECATED
-ARCHIVED
+runtime_accept_knowledge
+runtime_index_knowledge
+runtime_activate_knowledge
+runtime_update_knowledge
+runtime_deprecate_knowledge
+runtime_archive_knowledge
 ```
 
-Current DEV data contains only `CANDIDATE` Knowledge rows at the time of review. Ini tidak membuktikan bahwa complete lifecycle transition chain sudah implemented.
-
-### Confirmation
-
-`public.runtime_high_risk_confirmations` exists with durable action identity and status fields. `action_id` is unique. Current confirmation mechanism is domain-limited: existing runtime confirmation execution is for `RECOVERY_RESTORE`; ini bukan evidence generic semantic lifecycle confirmation authority.
-
-### Audit
-
-`public.audit_events` exists with `account_id`, `sh_id`, `event_type`, `status`, `metadata`, and timestamps. Ini dapat digunakan sebagai audit boundary, tetapi current evidence belum menetapkan complete semantic transition operation ledger.
-
-## 3. Current Knowledge Runtime Functions
-
-DEV exposes:
-
-- `retrieve_knowledge_bounded` — SECURITY INVOKER;
-- `runtime_record_knowledge_candidate` — SECURITY DEFINER;
-- `runtime_record_knowledge_with_journey` — SECURITY DEFINER.
-
-Kedua candidate-write functions secara eksplisit memerlukan authenticated identity dan active SH ownership melalui `current_account_id()`, memvalidasi content/source/origin/scope/visibility/confidence, dan menyimpan lifecycle `CANDIDATE`.
-
-No current dedicated `runtime_activate_knowledge_candidate` function was evidenced.
-
-## 4. Critical Reconciliation — Knowledge Lifecycle
-
-Earlier transition contract specified:
+Central authority:
 
 ```text
-CANDIDATE → ACTIVE
+runtime_knowledge_transition
 ```
 
-Actual DEV schema permits intermediate states:
+## 2. Confirmation Authority — PASS
+
+Dedicated semantic lifecycle confirmation is implemented through:
 
 ```text
-CANDIDATE → ACCEPTED → INDEXED → ACTIVE
+knowledge_lifecycle_confirmations
+runtime_create_knowledge_lifecycle_confirmation
+runtime_confirm_knowledge_lifecycle
 ```
 
-Namun current runtime evidence belum menetapkan bahwa exact chain ini adalah authoritative operational path, dan belum membuktikan actor/function yang berwenang untuk setiap transition.
+It is bound to actor/account/SH/Knowledge/transition/operation_key/decision_ref and expiry. Recovery confirmation remains a separate domain boundary.
 
-Karena itu direct `CANDIDATE → ACTIVE` harus diperlakukan sebagai **CONTRACT CONFLICT / RECONCILIATION REQUIRED**, bukan diasumsikan legal secara diam-diam.
+## 3. Operation Ledger / Idempotency — PASS
 
-Tidak boleh membuat implementation sampai Knowledge lifecycle authority dan transition chain direkonsiliasi terhadap migration/history dan existing retrieval/indexing semantics.
-
-## 5. Confirmation Authority
-
-Correction terhadap prior working-contract wording:
-
-System memang memiliki durable confirmation mechanism.
-
-Current evidence establishes:
+`knowledge_lifecycle_operations` is implemented and has a unique idempotency index on:
 
 ```text
-runtime_high_risk_confirmations
-        ↓
-action_id UNIQUE
-        ↓
-PENDING → CONFIRMED → EXECUTED / CANCELLED / EXPIRED
+account_id + sh_id + operation_key
 ```
 
-Namun current mechanism scoped to high-risk recovery execution. Mekanisme ini tidak boleh digunakan kembali untuk semantic activation hanya dengan memberikan confirmation reference. Semantic lifecycle confirmation contract harus secara eksplisit mendefinisikan:
+The transition function resolves an existing operation before mutation and rejects a conflicting target/transition for the same operation key.
 
-- operation type;
-- target domain/record;
-- account + SH + actor binding;
-- expiry;
-- status transition;
-- confirmation authority;
-- execution authority;
-- idempotency;
-- audit/provenance linkage.
+## 4. Atomicity — PASS AT IMPLEMENTATION BOUNDARY
 
-## 6. Authorization Design
-
-Required transition order remains:
-
-```text
-auth.uid()
-→ current_account_id()
-→ active SH ownership
-→ record ownership
-→ domain
-→ expected lifecycle
-→ legal transition
-→ scope/visibility/transfer policy
-→ confirmation/decision authority
-→ operation identity
-→ mutation
-```
-
-Client-provided account IDs must not establish authority. Model output, confidence, Journey events, and record IDs are not authority sources.
-
-## 7. Database Transaction Boundary
-
-Preferred implementation boundary remains one PostgreSQL function transaction:
+The centralized transition function performs:
 
 ```text
 AUTH
-→ LOCK/RESOLVE RECORD
-→ VERIFY LIFECYCLE/POLICY/AUTHORITY
-→ RESOLVE OPERATION IDENTITY
-→ MUTATE DOMAIN
-→ WRITE PROVENANCE/AUDIT
-→ WRITE JOURNEY PROJECTION
-→ COMMIT
+→ resolve active SH
+→ resolve existing operation
+→ lock Knowledge row
+→ validate lifecycle/transition
+→ validate confirmation when required
+→ mutate Knowledge
+→ write operation ledger
+→ write Journey LIFECYCLE event
+→ update operation ledger with Journey reference
+→ return success
 ```
 
-Current semantic runtime contains separate domain and Journey RPC paths in existing capture flows; karena itu whole-path atomicity **NOT PROVEN**.
+These writes occur within one PostgreSQL function transaction boundary.
 
-Untuk activation, satu DB transaction merupakan preferred correctness boundary. Jika Journey tidak dapat dimasukkan secara atomic, contract harus mendefinisikan intermediate state dan reconciliation, bukan mengembalikan false success.
+Runtime concurrency behavior remains an E2E verification item.
 
-## 8. Concurrency
+## 5. Journey Contract — PASS AT IMPLEMENTATION LEVEL
 
-Candidate write path menggunakan `FOR UPDATE` ketika me-resolve existing candidate, yang menjadi useful precedent untuk row locking, tetapi ini bukan proof activation concurrency safety.
+Lifecycle transitions emit `LIFECYCLE` Journey events containing Knowledge identity, transition, operation identity, previous/resulting lifecycle, resulting record/version, and provenance reference.
 
-Activation harus lock target candidate dan menetapkan operation identity sebelum mutation sehingga concurrent requests tidak menghasilkan duplicate activation history.
+Journey remains projection/history, not lifecycle authority.
 
-Required verification:
+## 6. SECURITY DEFINER / Grants — VERIFIED
+
+Current DEV inspection confirms all public Knowledge lifecycle entry functions are:
 
 ```text
-A → SUCCESS
-B → ALREADY_APPLIED or REJECTED
+SECURITY DEFINER = true
+search_path       = public
+anon EXECUTE      = false
+authenticated     = true
 ```
 
-Tidak boleh ada duplicate unintended transition/Journey records.
+Direct semantic mutation is revoked for the relevant Knowledge/Journey lifecycle tables for `public`, `anon`, and `authenticated`.
 
-## 9. Operation Identity
+## 7. Error Mapping — IMPLEMENTED
 
-Existing confirmation infrastructure menyediakan unique `action_id` pattern. Ini merupakan useful precedent, tetapi belum menjadi semantic lifecycle operation ledger.
+Stable application error codes are present in the transition authority, including:
 
-Transition activation tetap membutuhkan stable logical operation key yang terikat pada actor/account + SH + domain + source record + transition.
+```text
+P2001 UNAUTHENTICATED
+P2003 SH_NOT_OWNED
+P2004 KNOWLEDGE_NOT_FOUND
+P2006 WRONG_LIFECYCLE
+P2007 INVALID_TRANSITION
+P2011 CONFIRMATION_REQUIRED
+P2012 OPERATION_KEY_INVALID
+P2013 OPERATION_CONFLICT
+```
 
-Content-based deduplication tidak cukup untuk retry safety.
-
-## 10. Provenance / Audit
-
-Knowledge already has mandatory `provenance` JSONB. Audit events menyediakan account/SH/event/status/metadata. Transition contract harus mengikatnya dengan:
-
-- source signal/ref;
-- model/provider when applicable;
-- semantic decision;
-- confirmation/authorization;
-- operation key;
-- transition;
-- resulting record;
-- Journey event;
-- timestamp.
-
-## 11. SECURITY DEFINER / Exposure
-
-Existing Knowledge write functions are SECURITY DEFINER with `search_path = public` and explicit authentication/ownership guards.
-
-Ini hanya reference pattern. Pattern tersebut tidak mengotorisasi copy tanpa review terhadap:
-
-- function owner;
-- exact `search_path`;
-- EXECUTE grants;
-- RLS interaction;
-- arbitrary SQL/table access;
-- identity resolution;
-- input validation;
-- error leakage.
-
-`SECURITY DEFINER` tidak boleh diperkenalkan hanya untuk bypass permission problem.
-
-## 12. Error Contract
-
-Exact SQLSTATE/error-code mapping remains open. Implementation harus membedakan rejected authorization/policy/lifecycle requests dari runtime/database failures dan tidak boleh mengembalikan false success.
-
-## 13. Decision Matrix
+## 8. Current Decision Matrix
 
 | Gate | Current status |
 |---|---|
-| Authorization model | DEFINED |
-| Knowledge schema inspection | PASS |
-| Knowledge lifecycle vocabulary | EXISTING / REQUIRES RECONCILIATION |
-| Knowledge CANDIDATE→ACTIVE legality | UNKNOWN / CONFLICT |
-| Confirmation infrastructure | EXISTING / DOMAIN-LIMITED |
-| Semantic confirmation authority | OPEN |
-| Operation identity pattern | PARTIAL — confirmation action_id precedent |
-| Semantic transition ledger | OPEN |
-| Provenance storage | EXISTING / PARTIAL |
-| Audit storage | EXISTING / PARTIAL |
-| Atomic domain + Journey | OPEN |
-| Concurrency proof | OPEN |
-| SECURITY DEFINER exposure review | OPEN |
-| SQLSTATE mapping | OPEN |
-| Positive E2E | OPEN |
-| Negative/cross-actor E2E | OPEN |
+| Authorization model | VERIFIED |
+| Knowledge lifecycle authority | VERIFIED |
+| Confirmation authority | IMPLEMENTED |
+| Operation ledger | IMPLEMENTED |
+| Idempotency boundary | IMPLEMENTED |
+| Atomic Knowledge + Journey | IMPLEMENTED |
+| Journey lifecycle projection | IMPLEMENTED |
+| SECURITY DEFINER / search_path | VERIFIED |
+| EXECUTE grants | VERIFIED |
+| Direct semantic mutation exposure | HARDENED / VERIFIED |
+| Stable error mapping | IMPLEMENTED |
+| Runtime concurrency E2E | **OPEN — E2E ONLY** |
+| Positive/negative lifecycle E2E | **OPEN — E2E ONLY** |
 
-## 14. Decision
-
-**SECURITY + DATABASE TRANSITION DESIGN REVIEW = PARTIAL PASS**
-
-Security boundary dan database primitives sudah cukup dipahami untuk mendefinisikan implementation constraints, tetapi implementation tetap blocked.
-
-Prioritas reconciliation tertinggi adalah Knowledge lifecycle authority. Existing confirmation mechanism juga harus secara eksplisit diperluas/dikontrakkan untuk semantic lifecycle jika confirmation memang diperlukan; recovery confirmation tidak boleh diperlakukan sebagai generic authorization.
-
-## 15. Required Next Gate
-
-**Knowledge Lifecycle Reconciliation + Confirmation Contract Integration**
-
-Required evidence before implementation:
-
-1. migration/history for every Knowledge lifecycle state;
-2. existing transition functions or verified absence;
-3. retrieval/indexing semantics and whether `INDEXED` is mandatory;
-4. exact authority for `ACCEPTED`, `INDEXED`, and `ACTIVE`;
-5. semantic confirmation operation contract;
-6. transition operation identity persistence;
-7. atomic domain + Journey strategy;
-8. SECURITY DEFINER exposure/grants;
-9. SQLSTATE/error contract;
-10. positive, negative, and concurrency E2E plan.
-
-## 16. Change Boundary
+## 9. Gate Result
 
 ```text
-GitHub DEV docs          = CHANGED
-Runtime code             = UNCHANGED
-Supabase schema          = UNCHANGED
-Supabase data            = UNCHANGED
-Migration                = UNCHANGED
+SECURITY / DB DESIGN REVIEW = PASS
+NON-E2E BLOCKERS            = CLOSED
+IMPLEMENTATION GATE         = OPEN / VERIFIED
+E2E VERIFICATION             = OPEN
+```
+
+## 10. Change Boundary
+
+```text
+GitHub DEV docs          = RECONCILED
+Supabase DEV schema      = EXISTING / VERIFIED
+Supabase DEV data        = UNCHANGED BY THIS DOC UPDATE
+Migration history        = EXISTING / VERIFIED
 Canonical                = UNCHANGED
-Runtime behavior         = UNCHANGED
 ```
