@@ -1,137 +1,120 @@
-# SECOND HEAD — Journey Manual `+` Local-First Reconciliation
+# SECOND HEAD — Journey Manual `+` Backend Sync Reconciliation
 
 ## Status
 
-**WORKING VERIFICATION RECORD — IMPLEMENTATION RECONCILED**
+**WORKING VERIFICATION RECORD — IMPLEMENTATION RECONCILED / BACKEND SYNC WIRED**
 
 ## Authority
 
 Supporting working document only.
 
-This document records the currently implemented UI/runtime boundary for the manual Journey `+` creation path. It does not redefine any Canonical contract or authorize backend Journey creation wiring.
+This document records the current UI/runtime boundary for the manual Journey `+` creation path. It does not redefine any Canonical contract.
 
-## Scope
+## 1. Finding
 
-In scope:
+The previous implementation created a local `JourneyItem` and persisted it only through `JourneyStore.persist()`. It did not call the canonical semantic creation runtime, so manual `+` records could exist locally without a corresponding Supabase semantic record/Journey event.
 
-- Journey screen manual `+` action
-- manual selection of Memory / Knowledge / Experience
-- Journey editor result
-- local `JourneyItem` creation
-- local persistence through `JourneyStore.persist()`
-- relationship to backend Journey retrieval/reconciliation
+## 2. Current Implementation
 
-Out of scope:
+The manual `+` path now:
 
-- changing the Journey `+` implementation
-- creating a backend Journey RPC
-- adding a database migration
-- changing semantic lifecycle contracts
-- inferring backend persistence from local persistence
+1. selects Memory / Knowledge / Experience;
+2. opens the Journey editor;
+3. resolves the active `sh_id` from `profileShId`;
+4. calls the existing `JourneyRuntimeService` canonical creation RPC for the selected domain;
+5. uses `PRIVATE` + `OWNER_ONLY` for private drafts and `GENERAL` + `SHARED` for shared drafts;
+6. reloads Journey from the backend after successful creation.
 
-## 1. Current Implementation Evidence
+Implementation source: `app/lib/features/journey/journey_view.dart`.
 
-The Journey screen exposes a floating action button whose action is `_create(context)`. The button is the manual Journey `+` entry point.
+The runtime adapter already delegates to:
 
-The `_create()` flow first asks the user to select one of three semantic types:
+- `runtime_record_memory_with_journey`
+- `runtime_record_knowledge_with_journey`
+- `runtime_record_experience_with_journey`
 
-- Memory
-- Knowledge
-- Experience
+These existing runtime boundaries create the semantic record and linked Journey event; no new Journey RPC is introduced by this fix.
 
-It then opens the Journey editor and, when a draft is returned, inserts a `JourneyItem` into the local `items` collection and calls `JourneyStore.persist()`.
+## 3. Synchronization Boundary
 
-Evidence: `app/lib/features/journey/journey_view.dart`.
+The corrected path is:
 
-## 2. Boundary Classification
-
-| Capability | Current state |
-|---|---|
-| Journey `+` UI | IMPLEMENTED |
-| Manual type selection | IMPLEMENTED |
-| Journey editor | IMPLEMENTED |
-| Local `JourneyItem` creation | IMPLEMENTED |
-| Local persistence | IMPLEMENTED |
-| Backend semantic create from manual `+` | NOT WIRED |
-| Backend Journey record creation from manual `+` | NOT EVIDENCED / OUT OF CURRENT PATH |
-
-## 3. Local-First Semantics
-
-The manual `+` path is **LOCAL-FIRST**.
-
-The source path is:
-
-`Journey +` → select semantic type → Journey editor → `JourneyItem` → `JourneyStore.persist()`
-
-There is no backend semantic create call in this `_create()` path.
-
-This is a current implementation boundary, not an implementation defect by itself.
-
-## 4. Backend Retrieval Is a Separate Path
-
-`_loadJourney()` first restores local Journey state with `JourneyStore.refreshFromDisk()`, then separately loads backend Journey records through `JourneyService().load(...)` and reconciles the resulting view state.
+`Journey +` → type → editor → canonical runtime RPC → semantic record + Journey event → `_loadJourney()` → local projection
 
 Therefore:
 
-**manual local creation ≠ backend Journey creation**
+**Supabase/backend = canonical mutation authority**
 
-and:
+**JourneyStore = local durable projection/cache**
 
-**backend Journey retrieval/reconciliation ≠ proof that manual `+` writes a backend Journey record.**
+A successful manual create is no longer reported as success merely because a local file was written.
 
-## 5. Security / Ownership Boundary
+## 4. Failure Behavior
 
-The local Journey store is account-scoped according to the existing Journey local-storage design. This document does not introduce a new authorization mechanism and does not infer backend ownership semantics for the manual `+` path.
+If active SH identity is unavailable, the create is rejected before local persistence.
 
-Any future backend wiring must separately verify authentication, ownership, authorization, failure behavior, idempotency, and persistence before being classified as implemented or verified.
+If the backend creation RPC fails, no local Journey item is inserted and the UI reports the backend failure.
 
-## 6. Decision
+After successful backend creation, `_loadJourney()` refreshes from the backend and persists the resulting canonical projection locally.
 
-**DECISION: KEEP CURRENT MANUAL `+` PATH LOCAL-FIRST.**
+## 5. Security / Ownership Evidence
 
-No backend wiring is authorized or required by this reconciliation record.
+The manual path resolves the active `sh_id` from the profile identity state before invoking the runtime boundary.
 
-Do not create a migration or backend RPC solely to make the manual `+` path appear backend-persistent.
+Supabase DEV currently exposes the Memory and Knowledge creation RPCs to `authenticated`, not `anon`. The Experience creation RPC also requires `auth.uid()` and verifies that the supplied `sh_id` belongs to the current active account before inserting the Experience and linked Journey event.
+
+Current direct privilege state therefore needs no new authorization mechanism for the manual path. The Experience RPC's `anon` EXECUTE privilege is an existing least-privilege hardening item because the function itself rejects unauthenticated callers; it is separate from the manual `+` synchronization fix.
+
+## 6. Database / Migration Boundary
+
+No schema change or new migration is required for the synchronization fix. Existing runtime RPCs already provide the required semantic record + Journey event creation boundary.
+
+Migration 218 remains unchanged and locked.
 
 ## 7. Verification Classification
 
 ### Non-E2E
 
-**PASS / RECONCILED** for the current implementation boundary:
+**IMPLEMENTATION FIX APPLIED / SOURCE RECONCILED**.
 
-- manual `+` exists
-- type selection exists
-- editor produces a draft
-- draft becomes a local `JourneyItem`
-- local state is persisted
-- backend create is not claimed
+Verified by source inspection that manual `+` now uses the canonical runtime creation adapter and reloads the canonical backend projection after success.
+
+Supabase DEV verification confirms the required creation RPCs exist and enforce authenticated/owned-SH behavior at runtime. This is not device E2E proof.
 
 ### E2E
 
-Runtime/device verification of the complete local flow remains subject to the applicable E2E verification matrix. This document does not convert source inspection into E2E proof.
+Still requires device/runtime execution of the manual `+` path to prove:
+
+`tap + → create → Supabase persistence → Journey reload → visible canonical item → reopen/edit/delete`
+
+This document does not convert source inspection into E2E PASS.
 
 ## 8. Traceability
 
-Implementation source:
+Changed source:
 
 `app/lib/features/journey/journey_view.dart`
 
-Primary method:
+Runtime adapter:
 
-`JourneyViewState._create(BuildContext context)`
+`app/lib/features/journey/journey_runtime_service.dart`
 
-Persistence call:
+Identity source:
 
-`JourneyStore.persist()`
+`app/lib/core/state/sh_profile_state.dart`
 
-Related retrieval path:
+Backend retrieval:
 
-`JourneyViewState._loadJourney()`
+`app/lib/features/journey/journey_service.dart`
 
 ## 9. Final State
 
-**MANUAL JOURNEY `+` = IMPLEMENTED / LOCAL-FIRST / NON-E2E RECONCILED**
+**MANUAL JOURNEY `+` = IMPLEMENTED / BACKEND-SYNCED / NON-E2E RECONCILED**
 
-**BACKEND CREATE FROM MANUAL `+` = NOT WIRED / NOT CLAIMED**
+**LOCAL-ONLY MANUAL CREATE = FIXED**
 
-**NO DATABASE CHANGE REQUIRED**
+**BACKEND CREATE FROM MANUAL `+` = WIRED THROUGH EXISTING CANONICAL RPCs**
+
+**NEW DATABASE MIGRATION = NOT REQUIRED**
+
+**DEVICE E2E = OPEN UNTIL EXECUTED**
