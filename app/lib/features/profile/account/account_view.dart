@@ -76,13 +76,7 @@ class _AccountViewState extends State<AccountView> {
           children: [
             Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
             const SizedBox(height: 14),
-            TextField(
-              controller: _editController,
-              autofocus: true,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()),
-              decoration: InputDecoration(filled: true, fillColor: shBackground, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: shBorder))),
-            ),
+            TextField(controller: _editController, autofocus: true, textInputAction: TextInputAction.done, onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()), decoration: InputDecoration(filled: true, fillColor: shBackground, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: shBorder)))),
             const SizedBox(height: 14),
             SizedBox(width: double.infinity, child: FilledButton(onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()), child: const Text('Save'))),
           ],
@@ -109,14 +103,7 @@ class _AccountViewState extends State<AccountView> {
           children: [
             const Text('Email', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
             const SizedBox(height: 14),
-            TextField(
-              controller: _editController,
-              autofocus: true,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()),
-              decoration: InputDecoration(filled: true, fillColor: shBackground, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: shBorder))),
-            ),
+            TextField(controller: _editController, autofocus: true, keyboardType: TextInputType.emailAddress, textInputAction: TextInputAction.done, onSubmitted: (_) => Navigator.pop(sheetContext, _editController.text.trim()), decoration: InputDecoration(filled: true, fillColor: shBackground, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: shBorder)))),
             const SizedBox(height: 14),
             SizedBox(width: double.infinity, child: FilledButton(onPressed: () => Navigator.pop(sheetContext, _editController.text.trim()), child: const Text('Save'))),
           ],
@@ -170,18 +157,21 @@ class _AccountViewState extends State<AccountView> {
                   builder: (context, _) {
                     final actor = AuthSession.identityContext.actorContext?.actor;
                     if (actor == null || actor.isEmpty) return const SizedBox(height: 24);
-                    return Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: shPurple.withValues(alpha: .9), width: 1.2),
-                          gradient: const LinearGradient(colors: [shPurple, shElectric]),
-                          boxShadow: [BoxShadow(color: shElectric.withValues(alpha: .18), blurRadius: 16, spreadRadius: 1)],
-                        ),
-                        child: Text(
-                          _actorLabel(actor),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: profileIsClone,
+                      builder: (context, isClone, _) => Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: shPurple.withValues(alpha: .9), width: 1.2),
+                            gradient: const LinearGradient(colors: [shPurple, shElectric]),
+                            boxShadow: [BoxShadow(color: shElectric.withValues(alpha: .18), blurRadius: 16, spreadRadius: 1)],
+                          ),
+                          child: Text(
+                            isClone ? '${_actorLabel(actor)} · CLONE' : _actorLabel(actor),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+                          ),
                         ),
                       ),
                     );
