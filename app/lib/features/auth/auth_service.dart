@@ -29,10 +29,14 @@ class AuthService {
                 final identity = identityContext.identity;
                 if (identity != null) refreshProfileIdentity(identity);
                 onChanged?.call();
-              } catch (_) {
-                clearProfileIdentity();
-                identityContext.clear();
-                onChanged?.call();
+              } catch (error) {
+                if (_isDeactivatedAccountError(error)) {
+                  await _forceSignOutForDeactivatedAccount();
+                } else {
+                  clearProfileIdentity();
+                  identityContext.clear();
+                  onChanged?.call();
+                }
               }
             }
             break;
@@ -65,6 +69,10 @@ class AuthService {
       await resolveIdentity();
       _refreshProfileState();
     } catch (error) {
+      if (_isDeactivatedAccountError(error)) {
+        await _forceSignOutForDeactivatedAccount();
+        throw const AuthBackendError('This account has reached end-of-life and cannot sign in.');
+      }
       throw _toError(error);
     }
   }
@@ -86,6 +94,10 @@ class AuthService {
       await resolveIdentity();
       _refreshProfileState();
     } catch (error) {
+      if (_isDeactivatedAccountError(error)) {
+        await _forceSignOutForDeactivatedAccount();
+        throw const AuthBackendError('This account has reached end-of-life and cannot establish an active session.');
+      }
       throw _toError(error);
     }
   }
@@ -125,8 +137,16 @@ class AuthService {
       identityContext.clear();
       return;
     }
-    await resolveIdentity();
-    _refreshProfileState();
+    try {
+      await resolveIdentity();
+      _refreshProfileState();
+    } catch (error) {
+      if (_isDeactivatedAccountError(error)) {
+        await _forceSignOutForDeactivatedAccount();
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<void> resolveIdentity() async {
@@ -165,6 +185,21 @@ class AuthService {
       identityContext.clear();
     }
   }
+
+  Future<void> _forceSignOutForDeactivatedAccount() async {
+    try {
+      await _backend.signOut();
+    } catch (_) {
+      // Local identity must still be cleared if the provider sign-out fails.
+    } finally {
+      _passwordRecoveryActive = false;
+      clearProfileIdentity();
+      identityContext.clear();
+    }
+  }
+
+  bool _isDeactivatedAccountError(Object error) =>
+      error.toString().contains('ACCOUNT_DEACTIVATED');
 
   Future<void> dispose() async {
     await _authSubscription?.cancel();
