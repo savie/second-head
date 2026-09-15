@@ -32,17 +32,17 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
     } catch (e) { if (mounted) setState(() => _loading = false); _show(e); }
   }
 
-  Future<void> _preserve() async {
+  Future<void> _prepare() async {
     if (_selected.isEmpty) { _show('Select at least one shared Journey item.'); return; }
     final shId = profileShId.value.trim();
-    if (shId.isEmpty) { _show('Legacy blocked: active SH identity is unavailable.'); return; }
+    if (shId.isEmpty) { _show('Legacy preparation blocked: active SH identity is unavailable.'); return; }
     setState(() => _busy = true);
     try {
-      await _runtime.preserveSelectedTransferAsLegacy(sourceShId: shId, scope: <String, dynamic>{'journey_event_ids': _selected.toList()});
+      await _runtime.prepareSelectedTransferAsLegacy(sourceShId: shId, scope: <String, dynamic>{'journey_event_ids': _selected.toList()});
       _selected.clear();
       await _load();
-      _show('Legacy preserved for all SH.');
-    } catch (e) { _show('Legacy preservation failed: $e'); }
+      _show('Legacy prepared. It will activate automatically when this SH reaches end-of-life.');
+    } catch (e) { _show('Legacy preparation failed: $e'); }
     finally { if (mounted) setState(() => _busy = false); }
   }
 
@@ -59,15 +59,15 @@ class _LegacyRuntimeViewState extends State<LegacyRuntimeView> {
       const SizedBox(height: 18),
       _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Journey Heritage', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18),
-        const Text('Select shared Journey context to preserve as Legacy. Legacy has no target actor and is distributed across all SH.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 15),
+        const Text('Prepare shared Journey context for Legacy before end-of-life. Legacy has no target actor and is activated automatically when the source SH reaches end-of-life.', style: TextStyle(fontSize: 13, color: shMuted, height: 1.45)), const SizedBox(height: 15),
         if (_loading || _sharedRecords.isEmpty) const Text('No shared Journey data available.', style: TextStyle(fontSize: 13, color: shMuted))
         else for (final r in _sharedRecords) CheckboxListTile(contentPadding: EdgeInsets.zero, value: _selected.contains(r.eventId), onChanged: _busy ? null : (v) => setState(() => v == true ? _selected.add(r.eventId) : _selected.remove(r.eventId)), title: Text(r.eventType.toUpperCase() == 'LEARNING' ? 'Knowledge' : r.eventType, style: const TextStyle(fontSize: 14)), subtitle: Text(_date(r.occurredAt), style: const TextStyle(fontSize: 11, color: shMuted)), controlAffinity: ListTileControlAffinity.leading),
         const SizedBox(height: 15), _summaryRow(), const SizedBox(height: 18),
-        SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _busy ? null : _preserve, icon: const Icon(Icons.auto_awesome_outlined, size: 18), label: Text(_busy ? 'Preserving…' : 'Preserve Legacy', style: const TextStyle(fontSize: 14)))),
-        const SizedBox(height: 12), const Text('Legacy is a shared heritage state, not a target-specific transfer request.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.4)),
+        SizedBox(width: double.infinity, height: 48, child: FilledButton.icon(onPressed: _busy ? null : _prepare, icon: const Icon(Icons.bookmark_add_outlined, size: 18), label: Text(_busy ? 'Preparing…' : 'Prepare Legacy', style: const TextStyle(fontSize: 14)))),
+        const SizedBox(height: 12), const Text('Preparation is allowed while the SH is active. Activation is a terminal EOL operation and does not require login after deactivation.', style: TextStyle(fontSize: 12, color: shMuted, height: 1.4)),
       ])),
       const SizedBox(height: 18),
-      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Legacy History', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18), if (_loading) const Center(child: CircularProgressIndicator()) else if (_records.isEmpty) const Text('No legacy history yet.', style: TextStyle(color: shMuted, fontSize: 13)) else for (final r in _records) Card(child: ListTile(title: Text(r['legacy_type']?.toString() ?? 'LEGACY', style: const TextStyle(fontSize: 14)), subtitle: Text('${r['status'] ?? 'ACTIVE'} · ${_date(r['created_at'])}', style: const TextStyle(fontSize: 11, color: shMuted))))])),
+      _card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Legacy History', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)), const SizedBox(height: 18), if (_loading) const Center(child: CircularProgressIndicator()) else if (_records.isEmpty) const Text('No legacy history yet.', style: TextStyle(color: shMuted, fontSize: 13)) else for (final r in _records) Card(child: ListTile(title: Text(r['legacy_type']?.toString() ?? 'LEGACY', style: const TextStyle(fontSize: 14)), subtitle: Text('${r['status'] ?? 'UNKNOWN'} · ${_date(r['created_at'])}', style: const TextStyle(fontSize: 11, color: shMuted))))])),
     ])),
   );
 
