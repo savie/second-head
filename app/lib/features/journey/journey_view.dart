@@ -124,7 +124,7 @@ class JourneyViewState extends State<JourneyView> {
   }
 
   Future<void> _create(BuildContext context) async {
-    final type = await showModalBottomSheet<String>(context: context, backgroundColor: shSurface, showDragHandle: true, isScrollControlled: true, builder: (sheet) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(18, 8, 18, 18), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [JourneyCreateAction(icon: Icons.psychology_outlined, label: 'Memory', onTap: () => Navigator.of(sheet).pop('Memory')), JourneyCreateAction(icon: Icons.menu_book_outlined, label: 'Knowledge', onTap: () => Navigator.of(sheet).pop('Knowledge')), JourneyCreateAction(icon: Icons.auto_awesome_outlined, label: 'Experience', onTap: () => Navigator.of(sheet).pop('Experience'))])));
+    final type = await showModalBottomSheet<String>(context: context, backgroundColor: shSurface, showDragHandle: true, isScrollControlled: true, builder: (sheet) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(18, 8, 18, 18), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [JourneyCreateAction(icon: Icons.psychology_outlined, label: 'Memory', onTap: () => Navigator.of(sheet).pop('Memory')), JourneyCreateAction(icon: Icons.menu_book_outlined, label: 'Knowledge', onTap: () => Navigator.of(sheet).pop('Knowledge')), JourneyCreateAction(icon: Icons.auto_awesome_outlined, label: 'Experience', onTap: () => Navigator.of(sheet).pop('Experience'))))));
     if (!mounted || type == null) return;
     final draft = await showJourneyEditor(context, title: 'Create $type');
     if (!mounted || draft == null) return;
