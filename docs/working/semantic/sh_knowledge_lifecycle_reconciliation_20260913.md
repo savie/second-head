@@ -2,169 +2,100 @@
 
 ## Status
 
-**WORKING RECONCILIATION RECORD — PARTIAL PASS — IMPLEMENTATION GATE CLOSED**
+**WORKING RECONCILIATION RECORD — IMPLEMENTATION RECONCILED / GATE OPEN**
 
-## 1. Objective
+This record has been reconciled against the current Supabase DEV state. Earlier statements that Knowledge lifecycle implementation was missing or blocked are stale and must not be used as current status.
 
-Mereconcile semantic transition contract dengan evidence lifecycle Knowledge yang aktual di DEV dan mengintegrasikan pola confirmation yang sudah ada tanpa memperlakukan recovery confirmation sebagai authority lifecycle generik.
+## 1. Current Authority
 
-Record ini tidak mengotorisasi perubahan runtime, migration, data, atau Canonical.
-
-## 2. Evidence Summary
-
-Constraint aktual `public.knowledge.lifecycle` di DEV mengizinkan:
+The selected Knowledge lifecycle authority is the staged path:
 
 ```text
-CANDIDATE
-ACCEPTED
-INDEXED
-ACTIVE
-UPDATED
-DEPRECATED
-ARCHIVED
+CANDIDATE → ACCEPTED → INDEXED → ACTIVE
+ACTIVE → UPDATED
+ACTIVE → DEPRECATED → ARCHIVED
 ```
 
-Data DEV yang diamati selama review ini hanya berisi row dengan lifecycle `CANDIDATE`.
+`VALIDATION` remains a process boundary, not a database lifecycle enum.
 
-Function runtime untuk candidate Knowledge saat ini melakukan persistence pada `CANDIDATE`; belum ada evidence untuk function activation khusus.
+## 2. Current DEV Evidence
 
-## 3. Retrieval Semantics
-
-`retrieve_knowledge_bounded` yang sudah ada menggunakan SECURITY INVOKER dan hanya mengambil Knowledge dengan:
+The current DEV database contains the Knowledge lifecycle vocabulary and the implemented lifecycle transition surface. The applied migrations include:
 
 ```text
-scope = GENERAL
-visibility = SHARED
-lifecycle IN ('INDEXED', 'ACTIVE')
+20260913092434_knowledge_lifecycle_authority_and_operations
+20260913092503_knowledge_lifecycle_authority_exposure_hardening
+20260913092952_revoke_direct_semantic_mutation_access
+20260913101106_knowledge_lifecycle_error_codes
 ```
 
-Karena itu `INDEXED` merupakan state eligibility retrieval yang eksplisit, tetapi semantics retrieval saja tidak membuktikan bahwa setiap record Knowledge wajib melewati `CANDIDATE → ACCEPTED → INDEXED → ACTIVE`.
-
-## 4. Historical Transition Evidence
-
-Migration verification untuk indexing mendemonstrasikan update SQL langsung yang bersifat synthetic:
+The current implementation provides:
 
 ```text
-ACCEPTED → INDEXED
+runtime_create_knowledge_lifecycle_confirmation
+runtime_confirm_knowledge_lifecycle
+runtime_accept_knowledge
+runtime_index_knowledge
+runtime_activate_knowledge
+runtime_update_knowledge
+runtime_deprecate_knowledge
+runtime_archive_knowledge
+runtime_knowledge_transition
 ```
 
-Ini hanya merupakan verification terhadap vocabulary storage/lifecycle, bukan bukti adanya production authorization API atau workflow transition yang lengkap.
+## 3. Confirmation
 
-Belum ada evidence saat ini yang menetapkan production transition function untuk:
+Semantic Knowledge confirmation is now a dedicated implementation boundary. It is separate from recovery confirmation and binds the confirmation to the Knowledge transition, operation key, actor/account/SH and expiry.
 
-- `CANDIDATE → ACCEPTED`;
-- `INDEXED → ACTIVE`;
-- `CANDIDATE → ACTIVE`;
-- `ACTIVE → UPDATED`;
-- `ACTIVE → DEPRECATED`;
-- `ACTIVE → ARCHIVED`.
-
-## 5. Reconciliation Decision
-
-Contract sebelumnya yang menetapkan direct:
+Confirmation is enforced for:
 
 ```text
-CANDIDATE → ACTIVE
+INDEXED → ACTIVE
+ACTIVE → DEPRECATED
+DEPRECATED → ARCHIVED
 ```
 
-TIDAK BOLEH diam-diam dianggap sebagai Knowledge transition yang sudah diimplementasikan atau canonical.
+## 4. Operation Identity / Atomicity
 
-Status saat ini:
+The implementation persists lifecycle operations in `knowledge_lifecycle_operations` with a unique operation identity boundary and resolves already-applied operations before mutation.
+
+The transition function locks the target Knowledge row, performs lifecycle mutation, writes the operation record, creates the `LIFECYCLE` Journey projection, then records the Journey event reference before returning success. These operations occur within the same PostgreSQL function transaction boundary.
+
+## 5. Security
+
+Current DEV verification confirms the lifecycle functions are `SECURITY DEFINER`, have `search_path = public`, deny anonymous EXECUTE, and grant EXECUTE to `authenticated`.
+
+Direct semantic mutation is revoked for `knowledge`, `journey_events`, `knowledge_lifecycle_confirmations`, and `knowledge_lifecycle_operations` for `public`, `anon`, and `authenticated` in the reconciled scope.
+
+## 6. Error Contract
+
+Stable implementation error codes are present in `runtime_knowledge_transition`, including authentication, ownership, not-found, lifecycle mismatch, invalid transition, confirmation, operation-key, and operation-conflict classes.
+
+## 7. Current Gate
 
 ```text
-Knowledge lifecycle vocabulary = EXISTING
-Knowledge retrieval gate       = INDEXED / ACTIVE
-Candidate capture              = EXISTING
-Candidate activation API       = MISSING
-Full transition authority      = UNKNOWN
-Direct CANDIDATE → ACTIVE      = NOT PROVEN
-Intermediate chain mandatory   = NOT PROVEN
+Lifecycle authority            = RECONCILED
+Confirmation authority         = IMPLEMENTED
+Operation ledger               = IMPLEMENTED
+Atomic Knowledge + Journey     = IMPLEMENTED
+Security exposure              = VERIFIED
+Error mapping                  = IMPLEMENTED
+Implementation gate            = OPEN / VERIFIED
+Runtime positive/negative/E2E   = OPEN — E2E ONLY
 ```
 
-Karena itu activation Knowledge tetap blocked sampai ada domain decision yang eksplisit dan reconciliation evidence yang mencakup transition authority serta indexing semantics.
+## 8. Remaining Verification
 
-## 6. Confirmation Integration
+Only runtime/E2E execution remains for this lifecycle implementation scope. E2E must prove positive transitions, rejection boundaries, idempotency/concurrency behavior, and cross-actor isolation as defined by the master E2E matrix.
 
-Sistem confirmation yang durable sudah ada di DEV melalui `runtime_high_risk_confirmations` dengan `action_id` yang unique dan status seperti `PENDING`, `CONFIRMED`, `EXECUTED`, `CANCELLED`, dan `EXPIRED`.
+No non-E2E implementation blocker remains for the implemented Knowledge lifecycle surface.
 
-Execution semantics saat ini terbatas pada domain `RECOVERY_RESTORE`.
-
-Decision:
+## 9. Change Boundary
 
 ```text
-Recovery confirmation = EXISTING
-Semantic lifecycle confirmation = NOT CONTRACTED
-```
-
-Transition lifecycle tidak boleh menerima reference recovery confirmation seolah-olah reference tersebut merupakan authorization generik.
-
-Jika semantic activation memerlukan `CONFIRM`, contract semantic confirmation yang terpisah harus mengikat minimal:
-
-- actor/account;
-- SH;
-- target record;
-- operation type;
-- decision reference;
-- expiration;
-- confirmation status;
-- operation identity;
-- audit/provenance;
-- execution authority.
-
-## 7. Security Boundary
-
-Transition contract tetap:
-
-```text
-auth.uid()
-→ current_account_id()
-→ active SH ownership
-→ record ownership
-→ domain
-→ expected lifecycle
-→ legal transition
-→ scope/visibility/transfer policy
-→ decision/confirmation authority
-→ operation identity
-→ atomic mutation
-```
-
-Model output dan confidence bukan authority. Journey adalah projection/history, bukan authority.
-
-## 8. Database Implementation Constraint
-
-Jika implementation nantinya diotorisasi, activation boundary yang dipilih adalah satu PostgreSQL transaction yang melakukan lock pada target record, memvalidasi authority dan expected lifecycle, menyelesaikan operation identity, mengubah lifecycle, mencatat provenance/audit, serta menghasilkan Journey projection yang diperlukan sebelum commit.
-
-Evidence saat ini tidak membuktikan bahwa activation transaction tersebut sudah ada.
-
-## 9. Required Evidence Before Implementation
-
-1. domain decision Knowledge yang eksplisit untuk transition path;
-2. mapping authoritative untuk `ACCEPTED`, `INDEXED`, dan `ACTIVE`;
-3. production transition function/API atau verification bahwa function tersebut memang tidak ada;
-4. confirmation semantics yang tepat untuk semantic lifecycle;
-5. persistence untuk operation identity;
-6. Journey event contract;
-7. exposure/grants SECURITY DEFINER;
-8. SQLSTATE/error mapping;
-9. desain positive/negative/concurrency E2E.
-
-## 10. Final Decision
-
-**KNOWLEDGE LIFECYCLE RECONCILIATION = PARTIAL PASS / BLOCKED**
-
-Vocabulary database dan retrieval boundary sudah dipahami, dan finding terkait confirmation sebelumnya sudah dikoreksi: infrastructure confirmation yang durable memang ada, tetapi khusus untuk recovery.
-
-Transition authority untuk Knowledge belum memiliki evidence yang cukup untuk mengotorisasi implementation.
-
-## 11. Change Boundary
-
-```text
-GitHub DEV docs          = CHANGED
-Runtime code             = UNCHANGED
-Supabase schema          = UNCHANGED
-Supabase data            = UNCHANGED
-Migration                = UNCHANGED
+GitHub DEV docs          = RECONCILED
+Supabase DEV schema      = EXISTING / VERIFIED
+Supabase DEV data        = NOT MUTATED BY THIS DOC UPDATE
+Migration history        = EXISTING / VERIFIED
 Canonical                = UNCHANGED
-Runtime behavior         = UNCHANGED
 ```
