@@ -110,7 +110,7 @@ class JourneyStore {
 
     final file = await StorageService.journeyItemsFile(accountId: accountId);
     await file.writeAsString(
-      jsonEncode([for (final item in shJourneyItems] item.toJson()]),
+      jsonEncode([for (final item in shJourneyItems) item.toJson()]),
       flush: true,
     );
     if (_accountId == accountId) {
