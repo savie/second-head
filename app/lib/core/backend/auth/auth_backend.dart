@@ -75,6 +75,13 @@ class AuthBackend {
     return Supabase.instance.client.rpc('resolve_identity');
   }
 
+  Future<String?> materializeRegisteredClone() async {
+    final result = await Supabase.instance.client.rpc('runtime_materialize_registered_clone');
+    if (result == null) return null;
+    if (result is String && result.trim().isNotEmpty) return result.trim();
+    throw const FormatException('Clone materialization returned an invalid SH identity.');
+  }
+
   Future<ResolvedActorContext?> resolveActorContext() async {
     final response = await Supabase.instance.client.rpc('resolve_actor_context');
     final rows = response as List<dynamic>;
