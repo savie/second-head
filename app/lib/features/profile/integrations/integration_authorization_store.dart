@@ -86,7 +86,7 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
           status: row['status']?.toString() ?? 'PENDING',
           scope: row['scope'],
           createdAt: row['created_at'],
-          incoming: row['source_account_id']?.toString() == currentAccount,
+          incoming: row['target_account_id']?.toString() == currentAccount,
         ));
       }
 
@@ -113,14 +113,17 @@ class IntegrationAuthorizationStore extends ChangeNotifier {
         ));
       }
 
-      final backendIds = backendItems.map((item) => item.id).where((id) => id.isNotEmpty).toSet();
-      _items.removeWhere((item) => backendIds.contains(item.id));
-      _items.insertAll(0, backendItems);
+      // Backend is canonical once reachable. Do not retain stale local-only
+      // authorization records that can make the source UI disagree with the
+      // target account's backend view.
+      _items
+        ..clear()
+        ..addAll(backendItems);
       await _persist();
       notifyListeners();
     } catch (_) {
-      // Backend refresh is additive; local authorization state remains usable
-      // if the backend is temporarily unreachable.
+      // Backend refresh is authoritative when successful; local state remains
+      // available only as an offline fallback when the backend is unreachable.
     }
   }
 
