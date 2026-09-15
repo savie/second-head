@@ -1,17 +1,10 @@
 # SECOND HEAD — Kontrak Capability Transition Siklus Hidup
 
 ## Status
-**KONTRAK KERJA — GATE DESAIN — BUKAN CANONICAL**
 
-## Tujuan
-
-Mendefinisikan kontrak capability runtime/database yang diperlukan sebelum mengimplementasikan transition siklus hidup semantik yang berasal dari model.
-
-Dokumen ini tidak mengubah Canonical, Approved Contracts, schema, perilaku runtime, grants, maupun migration.
+**KONTRAK KERJA — CURRENT RECONCILIATION — KNOWLEDGE IMPLEMENTATION GATE OPEN / VERIFIED**
 
 ## Otoritas
-
-Otoritas yang lebih tinggi selalu berlaku:
 
 ```text
 KEPUTUSAN OWNER / USER
@@ -24,9 +17,11 @@ KEPUTUSAN OWNER / USER
 → VERIFIKASI E2E
 ```
 
-## 1. Aturan Inti
+This is a supporting working contract and does not modify Canonical.
 
-Transition siklus hidup semantik adalah **state transition yang terotorisasi**, bukan sekadar perubahan field.
+## 1. Core Rule
+
+Lifecycle transition is an authorized state transition, not a raw field update.
 
 ```text
 REQUEST
@@ -35,208 +30,88 @@ REQUEST
 → RESOLVE RECORD
 → VERIFY OWNERSHIP
 → VERIFY CURRENT LIFECYCLE
-→ VERIFY POLICY
-→ VERIFY TRANSITION AUTHORITY
+→ VERIFY POLICY / CONFIRMATION
+→ VERIFY OPERATION IDENTITY
 → APPLY ATOMIC CHANGE
-→ PROJECT JOURNEY IF REQUIRED
+→ PROJECT JOURNEY
 → RETURN OBSERVABLE RESULT
 ```
 
-Output model tidak pernah menyediakan otoritas transition dengan sendirinya.
+Model output is never transition authority by itself.
 
-## 2. Matriks Transition
+## 2. Current Implemented Knowledge Surface
 
-| Domain | CANDIDATE→ACTIVE | ACTIVE→UPDATE | ACTIVE→SUPERSEDE | Bukti saat ini |
-|---|---|---|---|---|
-| Memory | transition khusus diperlukan | replacement spesifik domain tersedia | replacement tersedia melalui `superseded_by` | PARTIAL |
-| Knowledge | transition khusus diperlukan | belum ditetapkan | belum ditetapkan | OPEN |
-| Experience | state candidate belum ditetapkan | belum ditetapkan | belum ditetapkan | OPEN |
-
-`runtime_replace_memory` adalah operasi replacement Memory yang konkret, bukan generic lifecycle engine.
-
-## 3. CANDIDATE → ACTIVE
-
-### Prasyarat
-
-Semuanya harus berhasil:
-
-- actor terautentikasi;
-- account saat ini berhasil di-resolve;
-- target SH milik account saat ini dan aktif;
-- record milik target SH/account;
-- record saat ini berstatus `CANDIDATE`;
-- domain semantik sesuai dengan transition yang diminta;
-- otoritas source valid;
-- hasil decision mengizinkan aktivasi;
-- otoritas konfirmasi terpenuhi jika diwajibkan;
-- scope/visibility valid;
-- transfer policy valid;
-- provenance memadai;
-- semantics idempotency key/correlation terpenuhi.
-
-### Dilarang
-
-- aktivasi langsung dari output model;
-- aktivasi melalui replay Journey;
-- aktivasi menggunakan record ID actor lain yang ditebak;
-- aktivasi terhadap record yang sudah terminal/superseded;
-- aktivasi hanya karena confidence tinggi;
-- aktivasi tanpa confirmation yang diwajibkan.
-
-## 4. ACTIVE → UPDATE
-
-Update harus mempertahankan:
-
-- identity;
-- ownership account/SH;
-- tipe domain;
-- legalitas lifecycle;
-- provenance/history;
-- policy scope/visibility;
-- transfer policy kecuali approved policy secara eksplisit mengizinkan mutation;
-- linkage Journey jika diwajibkan.
-
-Mutation yang menghancurkan nilai historis state sebelumnya seharusnya menggunakan versioning/supersession, bukan silent overwrite, jika kontrak domain mewajibkan history.
-
-## 5. ACTIVE → SUPERSEDE
-
-Supersession harus:
-
-1. mengautentikasi dan mengotorisasi actor;
-2. me-resolve tepat satu source record current yang valid;
-3. membuat atau mengidentifikasi successor;
-4. mempertahankan record lama sebagai state historis;
-5. menetapkan `old.superseded_by = successor` atau hubungan ekuivalen pada domain;
-6. mempertahankan provenance;
-7. mencegah record lama tetap secara keliru dianggap active/current;
-8. memproyeksikan hubungan lifecycle ke Journey jika diwajibkan;
-9. bersifat atomic atau secara eksplisit observable sebagai incomplete.
-
-## 6. Aturan Spesifik Domain
-
-### Memory
-
-`runtime_replace_memory` adalah capability referensi saat ini:
+The current Knowledge lifecycle is:
 
 ```text
-current CANDIDATE/ACTIVE
-→ new CANDIDATE
-→ old UPDATED + superseded_by(new)
-→ MEMORY Journey event
+CANDIDATE → ACCEPTED → INDEXED → ACTIVE
+ACTIVE → UPDATED + successor
+ACTIVE → DEPRECATED → ARCHIVED
 ```
 
-Capability ini tidak boleh digeneralisasi menjadi aktivasi otomatis terhadap candidate baru.
-
-### Knowledge
-
-Capture candidate yang ada sudah didukung. Capability activation/update/supersession di masa depan harus didesain dan diotorisasi secara eksplisit, bukan diimplementasikan melalui direct table mutation.
-
-### Experience
-
-`runtime_record_experience` saat ini membuat `ACTIVE`. Workflow candidate di masa depan membutuhkan keputusan kontrak eksplisit terlebih dahulu; jangan mengasumsikan semantik candidate dari Memory/Knowledge.
-
-## 7. Kontrak Journey
-
-Journey adalah batas projection/history, bukan otoritas lifecycle.
-
-Journey event boleh mereferensikan record domain, tetapi replay atau edit event tidak boleh membuat otoritas lifecycle.
-
-Jika persistence domain dan proyeksi Journey harus merepresentasikan satu operasi logis, transaction boundary harus eksplisit dan diverifikasi.
-
-## 8. Kontrak Security
-
-Setiap transition harus menerapkan:
+Implemented functions:
 
 ```text
-auth.uid()
-→ current_account_id()
-→ SH ownership
-→ record ownership
-→ lifecycle guard
-→ policy guard
-→ operation authority
+runtime_accept_knowledge
+runtime_index_knowledge
+runtime_activate_knowledge
+runtime_update_knowledge
+runtime_deprecate_knowledge
+runtime_archive_knowledge
 ```
 
-Test negatif yang diwajibkan:
+The central implementation is `runtime_knowledge_transition`.
 
-- actor unauthenticated ditolak;
-- SH lintas account ditolak;
-- record ID lintas actor ditolak;
-- lifecycle yang salah ditolak;
-- record superseded ditolak;
-- SH terminal ditolak jika berlaku;
-- scope/visibility tidak valid ditolak;
-- transfer policy tidak valid ditolak;
-- authority model-only ditolak;
-- replay Journey-only ditolak.
+## 3. Security / Ownership
 
-## 9. Kontrak Idempotency
+The current transition authority resolves authentication, current account, active SH ownership, Knowledge ownership, expected lifecycle, legal transition, and operation identity server-side.
 
-Sebelum transition yang berasal dari model diaktifkan, setiap transition yang dapat di-retry dari luar harus mendefinisikan stable logical operation key.
+Anonymous execution is denied; authenticated execution is explicitly granted for the public transition entry functions.
 
-Identity konseptual minimum:
+## 4. Confirmation
+
+Dedicated Knowledge lifecycle confirmation is implemented and is separate from recovery confirmation.
+
+Confirmation is required for:
 
 ```text
-actor/account + SH + domain + source_record + transition + decision/request correlation
+INDEXED → ACTIVE
+ACTIVE → DEPRECATED
+DEPRECATED → ARCHIVED
 ```
 
-Eksekusi berulang atas logical operation yang sama tidak boleh membuat duplicate successor record atau duplicate lifecycle Journey event ketika kontrak mensyaratkan satu operasi.
+## 5. Operation / Atomicity
 
-Content matching saja bukan bukti idempotency request-level.
+`knowledge_lifecycle_operations` persists transition operations and has a unique idempotency index on `account_id + sh_id + operation_key`.
 
-## 10. Kontrak Provenance
+The central transition function locks the Knowledge row and performs domain mutation, operation persistence, Journey projection, and Journey reference update within one PostgreSQL function transaction boundary.
 
-Sebuah transition harus dapat diaudit sampai ke:
+## 6. Journey
 
-- actor/account;
-- SH;
-- source record;
-- source signal;
-- model/provider jika berlaku;
-- decision;
-- confirmation/authorization;
-- transition;
-- timestamp;
-- resulting record;
-- Journey event jika berlaku.
+Journey is projection/history, not lifecycle authority.
 
-## 11. Kontrak Failure
+Lifecycle events use `LIFECYCLE` and include transition and operation identity plus resulting lifecycle/record metadata.
 
-Tidak boleh ada false success.
+## 7. Error / Security Contract
 
-```text
-DB mutation gagal
-→ operasi gagal
-→ keberhasilan Journey yang diwajibkan tidak boleh diklaim
-```
+Stable application SQLSTATE-style codes are implemented for authentication, ownership, not-found, lifecycle mismatch, invalid transition, confirmation, operation-key, and operation-conflict classes.
 
-Jika domain write dan Journey write tidak atomic secara transaksional, sistem harus mengekspos intermediate state serta jalur recovery/reconciliation.
+Current DB state verifies `SECURITY DEFINER`, `search_path = public`, anonymous EXECUTE denied, and authenticated EXECUTE granted for the lifecycle entry functions.
 
-## 12. Gate Implementasi
-
-Implementasi runtime/database tetap **CLOSED** sampai hal berikut memiliki evidence di DEV:
-
-1. otoritas confirmation;
-2. semantik retrieval candidate;
-3. API/function transition per domain;
-4. mekanisme idempotency/correlation;
-5. kontrak provenance;
-6. transaction boundary Journey;
-7. authenticated positive E2E;
-8. authenticated negative/cross-actor E2E;
-9. transfer E2E jika transition berinteraksi dengan transfer policy.
-
-## 13. Audit Berikutnya
-
-Langkah engineering berikutnya adalah **Transition Capability Evidence Audit**, dengan fokus pada perilaku callable aktual dan grants untuk mekanisme transition yang diusulkan. Tidak boleh dibuat migration atau implementasi runtime spekulatif sampai audit ini menutup capability contract.
-
-## 14. Keputusan
-
-Hasil saat ini:
+## 8. Gate
 
 ```text
 POLICY CONTRACT       = RECONCILED
-RUNTIME CAPABILITY    = PARTIAL
-TRANSITION CONTRACT   = DEFINED
-IMPLEMENTATION GATE   = CLOSED
+RUNTIME CAPABILITY    = IMPLEMENTED
+TRANSITION CONTRACT   = IMPLEMENTED / VERIFIED
+IMPLEMENTATION GATE   = OPEN / VERIFIED
+E2E VERIFICATION      = OPEN — E2E ONLY
 ```
+
+## 9. Scope Boundary
+
+Memory candidate activation and Experience candidate lifecycle remain separate domain scope and are not inferred from the Knowledge implementation.
+
+## 10. Current Next Step
+
+Proceed to the remaining E2E lifecycle/security verification. Do not reopen the non-E2E implementation gate without contradictory evidence.
