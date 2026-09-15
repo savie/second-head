@@ -1,8 +1,10 @@
 import '../../journey/journey_data.dart';
 import '../../journey/journey_runtime_service.dart';
 import '../../profile/integrations/integration_authorization_store.dart';
+../../../core/state/sh_profile_state.dart';
 import '../../../core/state/sh_profile_state.dart';
 import '../../../core/storage/recovery_snapshot_store.dart';
+import '../../auth/auth_screens.dart';
 import 'eol_state.dart';
 
 abstract interface class EolService {
@@ -53,5 +55,17 @@ class LocalEolService implements EolService {
       shId: shId,
       reason: 'Explicit user-confirmed EOL request',
     );
+
+    // EOL is terminal for the current runtime session. The database account
+    // and primary SH are deactivated by the runtime authority; terminate the
+    // provider session as well so the user cannot remain inside the app after
+    // successful EOL.
+    try {
+      await AuthSession.service.signOut();
+    } catch (_) {
+      // The EOL operation already succeeded. AuthSession.signOut() clears the
+      // local identity in its finally block; a provider sign-out failure must
+      // not turn a successful terminal operation into a false failure state.
+    }
   }
 }
