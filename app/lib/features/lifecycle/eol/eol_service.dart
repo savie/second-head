@@ -1,7 +1,6 @@
 import '../../journey/journey_data.dart';
 import '../../journey/journey_runtime_service.dart';
 import '../../profile/integrations/integration_authorization_store.dart';
-../../../core/state/sh_profile_state.dart';
 import '../../../core/state/sh_profile_state.dart';
 import '../../../core/storage/recovery_snapshot_store.dart';
 import '../../auth/auth_screens.dart';
