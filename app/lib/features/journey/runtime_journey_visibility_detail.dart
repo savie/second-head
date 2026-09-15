@@ -4,12 +4,13 @@ import '../../core/theme/sh_theme.dart';
 import 'journey_runtime_service.dart';
 
 class RuntimeJourneyVisibilityDetail extends StatefulWidget {
-  const RuntimeJourneyVisibilityDetail({super.key, required this.domain, required this.recordId, required this.title, required this.content, required this.isPrivate, required this.onChanged});
+  const RuntimeJourneyVisibilityDetail({super.key, required this.domain, required this.recordId, required this.title, required this.content, required this.isPrivate, required this.readOnly, required this.onChanged});
   final String domain;
   final String recordId;
   final String title;
   final String content;
   final bool isPrivate;
+  final bool readOnly;
   final VoidCallback onChanged;
   @override State<RuntimeJourneyVisibilityDetail> createState() => _RuntimeJourneyVisibilityDetailState();
 }
@@ -20,7 +21,7 @@ class _RuntimeJourneyVisibilityDetailState extends State<RuntimeJourneyVisibilit
   bool _busy = false;
   @override void initState() { super.initState(); _isPrivate = widget.isPrivate; }
   Future<void> _setVisibility(bool privateOnly) async {
-    if (_busy || _isPrivate == privateOnly) return;
+    if (widget.readOnly || _busy || _isPrivate == privateOnly) return;
     setState(() => _busy = true);
     try {
       final scope = privateOnly ? 'PRIVATE' : 'GENERAL';
@@ -39,7 +40,7 @@ class _RuntimeJourneyVisibilityDetailState extends State<RuntimeJourneyVisibilit
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Visibility update failed: $error')));
     } finally { if (mounted) setState(() => _busy = false); }
   }
-  @override Widget build(BuildContext context) => Scaffold(backgroundColor: shBackground, body: Column(children: [AppBar(leading: const BackButton(), title: Text(widget.domain == 'LEARNING' ? 'Knowledge' : widget.domain.substring(0, 1) + widget.domain.substring(1).toLowerCase())), Expanded(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(16, 14, 16, 24), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(widget.title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)), const SizedBox(height: 14), Container(width: double.infinity, padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(16), border: Border.all(color: shBorder)), child: Text(widget.content, style: const TextStyle(fontSize: 12, height: 1.5))), const SizedBox(height: 20), const Text('Visibility', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)), const SizedBox(height: 8), Row(children: [Expanded(child: _PolicyOption(label: 'Owner Only', icon: Icons.lock_outline, selected: _isPrivate, enabled: !_busy, onTap: () => _setVisibility(true))), const SizedBox(width: 10), Expanded(child: _PolicyOption(label: 'Shared', icon: Icons.public, selected: !_isPrivate, enabled: !_busy, onTap: () => _setVisibility(false)))]), const SizedBox(height: 10), const Text('Transfer policy is decided in Lifecycle. Journey only controls visibility: Owner Only or Shared.', style: TextStyle(fontSize: 11, color: shMuted, height: 1.4))])))]));
+  @override Widget build(BuildContext context) => Scaffold(backgroundColor: shBackground, body: Column(children: [AppBar(leading: const BackButton(), title: Text(widget.domain == 'LEARNING' ? 'Knowledge' : widget.domain.substring(0, 1) + widget.domain.substring(1).toLowerCase())), Expanded(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(16, 14, 16, 24), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(widget.title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)), const SizedBox(height: 14), Container(width: double.infinity, padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: shSurface, borderRadius: BorderRadius.circular(16), border: Border.all(color: shBorder)), child: Text(widget.content, style: const TextStyle(fontSize: 12, height: 1.5))), const SizedBox(height: 20), if (widget.readOnly) ...[const Text('Read only', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)), const SizedBox(height: 8), const Text('This Journey item is a lifecycle-derived projection. It remains readable here but cannot be changed from the target account.', style: TextStyle(fontSize: 11, color: shMuted, height: 1.4))] else ...[const Text('Visibility', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)), const SizedBox(height: 8), Row(children: [Expanded(child: _PolicyOption(label: 'Owner Only', icon: Icons.lock_outline, selected: _isPrivate, enabled: !_busy, onTap: () => _setVisibility(true))), const SizedBox(width: 10), Expanded(child: _PolicyOption(label: 'Shared', icon: Icons.public, selected: !_isPrivate, enabled: !_busy, onTap: () => _setVisibility(false)))]), const SizedBox(height: 10), const Text('Transfer policy is decided in Lifecycle. Journey only controls visibility: Owner Only or Shared.', style: TextStyle(fontSize: 11, color: shMuted, height: 1.4))]])))]));
 }
 class _PolicyOption extends StatelessWidget { const _PolicyOption({required this.label, required this.icon, required this.selected, required this.enabled, required this.onTap}); final String label; final IconData icon; final bool selected; final bool enabled; final VoidCallback onTap; @override Widget build(BuildContext context) => InkWell(onTap: enabled ? onTap : null, borderRadius: BorderRadius.circular(14), child: Container(padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12), decoration: BoxDecoration(color: selected ? shPurple.withValues(alpha: .13) : shSurface, borderRadius: BorderRadius.circular(14), border: Border.all(color: selected ? shPurple : shBorder)), child: Row(children: [Icon(icon, size: 19), const SizedBox(width: 8), Expanded(child: Text(label, style: const TextStyle(fontSize: 12))), if (selected) const Icon(Icons.check_rounded, size: 17)])));
 }
